@@ -17,12 +17,16 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
+import frc.robot.subsystems.drive.ClimberTW;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOSpark;
+
+import static edu.wpi.first.units.Units.Meters;
+
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -31,12 +35,16 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
  * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
  * subsystems, commands, and button mappings) should be declared here.
  */
+
+
+
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
+  private final ClimberTW climberSub = new ClimberTW();
 
   // Controller
-  private final CommandXboxController controller = new CommandXboxController(0);
+  private final CommandXboxController controller = new CommandXboxController(Hardware.DriverStation.driverXboxPort);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -96,9 +104,17 @@ public class RobotContainer {
         "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-
+ 
     // Configure the button bindings
     configureButtonBindings();
+    // Schedule `setHeight` when the Xbox controller's B button is pressed,
+    // cancelling on release.
+    controller.a().whileTrue(climberSub.setHeight(Meters.of(0.5)));
+    controller.b().whileTrue(climberSub.setHeight(Meters.of(1)));
+    // Schedule `set` when the Xbox controller's B button is pressed,
+    // cancelling on release.
+    controller.x().whileTrue(climberSub.set(0.3));
+    controller.y().whileTrue(climberSub.set(-0.3));
   }
 
   /**
