@@ -48,6 +48,7 @@ public class Drive extends SubsystemBase {
   static final Lock odometryLock = new ReentrantLock();
   private final GyroIO gyroIO;
   private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
+  private Rotation2d latestYaw = new Rotation2d();
   private final Module[] modules = new Module[4]; // FL, FR, BL, BR
   private final SysIdRoutine sysId;
   private final Alert gyroDisconnectedAlert =
@@ -161,10 +162,12 @@ public class Drive extends SubsystemBase {
       if (gyroInputs.connected) {
         // Use the real gyro angle
         rawGyroRotation = gyroInputs.odometryYawPositions[i];
+        latestYaw = rawGyroRotation;
       } else {
         // Use the angle delta from the kinematics and module deltas
         Twist2d twist = kinematics.toTwist2d(moduleDeltas);
         rawGyroRotation = rawGyroRotation.plus(new Rotation2d(twist.dtheta));
+        latestYaw = rawGyroRotation;
       }
 
       // Apply update
@@ -312,5 +315,39 @@ public class Drive extends SubsystemBase {
   /** Returns the maximum angular speed in radians per sec. */
   public double getMaxAngularSpeedRadPerSec() {
     return maxSpeedMetersPerSec / driveBaseRadius;
+  }
+
+    /**
+   * Gets the current yaw angle of the robot from the gyro.
+   *
+   * @return The yaw as a {@link Rotation2d} angle
+   */
+  public Rotation2d getYaw() {
+    return latestYaw;
+  }
+
+  public Command recalibrateDrivetrain() {
+    return run(() -> {
+      boolean isBlueAlliance = DriverStation.getAlliance().orElseGet(() -> Alliance.Blue) == Alliance.Blue;
+      
+      Pose2d currentPose = this.getPose();
+      Pose2d targetPose = new Pose2d();
+      if (isBlueAlliance) {
+        targetPose = new Pose2d(
+            currentPose.getX(),
+            currentPose.getY(),
+            Rotation2d.fromDegrees(0));
+      } else {
+        targetPose = new Pose2d(
+            currentPose.getX(),
+            currentPose.getY(),
+            Rotation2d.fromDegrees(180));
+
+      }
+      poseEstimator.resetPosition(getYaw(), getModulePositions(), targetPose);
+      ChassisSpeeds robotRelativeSpeeds =
+        ChassisSpeeds.fromRobotRelativeSpeeds(new ChassisSpeeds(0, 0, 0), getYaw());
+      kinematics.toSwerveModuleStates(robotRelativeSpeeds);
+    });
   }
 }
