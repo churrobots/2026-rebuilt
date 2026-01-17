@@ -109,12 +109,12 @@ public class RobotContainer {
     configureButtonBindings();
     // Schedule `setHeight` when the Xbox controller's B button is pressed,
     // cancelling on release.
-    controller.a().whileTrue(climberSub.setHeight(Meters.of(0.5)));
-    controller.b().whileTrue(climberSub.setHeight(Meters.of(1)));
+    controller.a().whileTrue(climberSub.setHeight(Meters.of(0.25)));
+    controller.b().whileTrue(climberSub.setHeight(Meters.of(2.5)));
     // Schedule `set` when the Xbox controller's B button is pressed,
     // cancelling on release.
-    controller.x().whileTrue(climberSub.set(0.3));
-    controller.y().whileTrue(climberSub.set(-0.3));
+    controller.x().whileTrue(climberSub.set(0.5));
+    controller.y().whileTrue(climberSub.set(-0.5));
   }
 
   /**
