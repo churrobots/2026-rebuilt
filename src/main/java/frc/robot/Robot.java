@@ -185,7 +185,6 @@ public class Robot extends LoggedRobot {
   public void simulationInit() {
     field = new Field2d();
     SmartDashboard.putData(field);
-
   }
 
   /** This function is called periodically whilst in simulation. */
