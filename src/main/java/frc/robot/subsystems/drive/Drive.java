@@ -48,7 +48,6 @@ public class Drive extends SubsystemBase {
   static final Lock odometryLock = new ReentrantLock();
   private final GyroIO gyroIO;
   private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
-  private Rotation2d latestYaw = new Rotation2d();
   private final Module[] modules = new Module[4]; // FL, FR, BL, BR
   private final SysIdRoutine sysId;
   private final Alert gyroDisconnectedAlert =
@@ -162,12 +161,10 @@ public class Drive extends SubsystemBase {
       if (gyroInputs.connected) {
         // Use the real gyro angle
         rawGyroRotation = gyroInputs.odometryYawPositions[i];
-        latestYaw = rawGyroRotation;
       } else {
         // Use the angle delta from the kinematics and module deltas
         Twist2d twist = kinematics.toTwist2d(moduleDeltas);
         rawGyroRotation = rawGyroRotation.plus(new Rotation2d(twist.dtheta));
-        latestYaw = rawGyroRotation;
       }
 
       // Apply update
@@ -323,7 +320,7 @@ public class Drive extends SubsystemBase {
    * @return The yaw as a {@link Rotation2d} angle
    */
   public Rotation2d getYaw() {
-    return latestYaw;
+    return rawGyroRotation;
   }
 
   public Command recalibrateDrivetrain() {

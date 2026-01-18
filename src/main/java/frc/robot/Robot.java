@@ -36,8 +36,8 @@ import org.littletonrobotics.urcl.URCL;
 public class Robot extends LoggedRobot {
   private Command autonomousCommand;
   private RobotContainer robotContainer;
-  private Field2d m_field;
-  private Supplier<Command> m_autoCommandSupplier;
+  private Field2d field;
+  private Supplier<Command> autoCommandSupplier;
 
   public Robot() {
     // Record metadata
@@ -101,7 +101,7 @@ public class Robot extends LoggedRobot {
     robotContainer.bindCommandsForTeleop();
     
     // TODO: do we need this?
-    // m_autoCommandSupplier = robotContainer.bindCommandsForAutonomous();
+    // autoCommandSupplier = robotContainer.bindCommandsForAutonomous();
   }
 
   /** This function is called periodically during all modes. */
@@ -183,13 +183,14 @@ public class Robot extends LoggedRobot {
   /** This function is called once when the robot is first started up. */
   @Override
   public void simulationInit() {
-    m_field = new Field2d();
-    SmartDashboard.putData(m_field);
+    field = new Field2d();
+    SmartDashboard.putData(field);
 
   }
 
   /** This function is called periodically whilst in simulation. */
   @Override
   public void simulationPeriodic() {
+    field.setRobotPose(robotContainer.getPose());
   }
 }
