@@ -100,8 +100,7 @@ public class Robot extends LoggedRobot {
     // autonomous chooser on the dashboard.
     robotContainer.bindCommandsForTeleop();
     
-    // TODO: do we need this?
-    // m_autoCommandSupplier = robotContainer.bindCommandsForAutonomous();
+    m_autoCommandSupplier = robotContainer.bindCommandsForAutonomous();
   }
 
   /** This function is called periodically during all modes. */
