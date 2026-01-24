@@ -18,9 +18,11 @@
     {
       "name": "WPIlibUnitTests",
       "workingDirectory": "${workspaceFolder}/build/jni/release",
-      "vmargs": [ "-Djava.library.path=${workspaceFolder}/build/jni/release" ],
+      "vmargs": [
+        "-Djava.library.path=${workspaceFolder}/build/jni/release"
+      ],
       "env": {
-        "LD_LIBRARY_PATH": "${workspaceFolder}/build/jni/release" ,
+        "LD_LIBRARY_PATH": "${workspaceFolder}/build/jni/release",
         "DYLD_LIBRARY_PATH": "${workspaceFolder}/build/jni/release"
       }
     },
@@ -57,5 +59,84 @@
     "edu.wpi.first.math.**.proto.*",
     "edu.wpi.first.math.**.struct.*",
   ],
-  "java.dependency.enableDependencyCheckup": false
+  "java.dependency.enableDependencyCheckup": false,
+  // Churrobots customizations below
+  "java.configuration.updateBuildConfiguration": "automatic",
+  "java.server.launchMode": "Standard",
+  "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/CVS": true,
+    "**/.DS_Store": true,
+    "bin/": true,
+    "**/.classpath": true,
+    "**/.project": true,
+    "**/.settings": true,
+    "**/.factorypath": true,
+    "**/*~": true,
+    // Churrobots: Prevent editing of typical hidden files for Java
+    // projects under source control.
+    "**/.gitignore": true,
+    "**/.gitattributes": true,
+    ".classpath": true,
+    ".project": true,
+    // Churrobots: Hide development environment settings to keep workspace clear
+    // of files that FRC students should not typically update.
+    "**/.vscode": true,
+    // Churrobots: Hide build products and build settings to keep workspace clear
+    // of files that FRC students should not typically update.
+    "**/.wpilib": true,
+    "**/.gradle": true,
+    "**/gradle": true,
+    "ctre_sim": true,
+    "*.log": true,
+    "gradlew": true,
+    "gradlew.bat": true,
+    "build.gradle": true,
+    "settings.gradle": true,
+    "**/vendordeps": true,
+    "**/build": true,
+    "**/Main.java": true,
+    "**/WPILib-License.md": true,
+    "simgui*": true,
+    "networktables.json": true,
+    // Churrobots: Robot.java used to be important to edit, but the new
+    // command-based robot architecture has a RobotContainer
+    // that looks like a better abstraction to work with.
+    // "**/Robot.java": true,
+    // Churrobots: hide any library patches, which should
+    // be anything starting with com/net/org.*
+    "src/main/java/com/": true,
+    "src/main/java/net/": true,
+    "src/main/java/org/": true,
+    // Churrobots: hide pathplanner files, those are edited by pathplanner
+    "**/deploy/pathplanner/": true,
+    // Churrobots: hide elastic dashboard files, those are edited by elastic
+    "**/deploy/elastic-layout.json": true,
+    // Churrobots: hide junk files
+    "**/deploy/example.txt": true,
+  },
+  // Churrobots: Keep workspace clean. Don't show git branch since we want to generally
+  // keep workflow in Github Desktop for consistency.
+  "wpilib.autoStartRioLog": false,
+  // Churrobots: Don't show Extension recommendations, it confuses things. Also make
+  // the editor help us keep things formatted and clean.
+  "extensions.ignoreRecommendations": true,
+  "editor.detectIndentation": false,
+  "editor.tabSize": 2,
+  "workbench.editor.highlightModifiedTabs": true,
+  "editor.formatOnType": true,
+  // Churrobots: don't autofill arguments with potentially bogus params.
+  "java.completion.guessMethodArguments": "insertParameterNames",
+  // Churrobots: general consistent DX
+  "editor.formatOnSave": true,
+  "files.autoSave": "afterDelay",
+  "editor.inlayHints.enabled": "offUnlessPressed",
+  "redhat.telemetry.enabled": false,
+  "workbench.startupEditor": "none",
+  "editor.minimap.size": "fit",
+  "terminal.integrated.tabs.enabled": false,
+  "editor.wordBasedSuggestions": "off",
+  "wpilib.skipSelectSimulateExtension": true
 }
