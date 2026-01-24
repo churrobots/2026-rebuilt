@@ -21,12 +21,6 @@
           "data": {
             "pathName": "neutral zone back out to hub"
           }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "hub to tower"
-          }
         }
       ]
     }

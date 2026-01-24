@@ -15,6 +15,8 @@ import static frc.robot.subsystems.vision.VisionConstants.*;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -31,7 +33,6 @@ import java.util.function.Supplier;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
-import frc.robot.subsystems.drive.DemoDrive;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
@@ -58,7 +59,7 @@ public class RobotContainer {
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
 
-  private final DemoDrive demoDrive = new DemoDrive(); // Demo drive subsystem, sim only
+  // sim only
   private final CommandGenericHID keyboard = new CommandGenericHID(1); // Keyboard 0 on port 1
 
   /**
@@ -76,10 +77,10 @@ public class RobotContainer {
             new ModuleIOSpark(3));
 
         vision = new Vision(
-            demoDrive::addVisionMeasurement,
-            new VisionIOPhotonVision(camera0Name, robotToCamera0),
-            new VisionIOPhotonVision(camera1Name, robotToCamera1),
-                new VisionIOPhotonVision(camera2Name, robotToCamera2));
+            drive::addVisionMeasurement,
+            new VisionIOPhotonVision(cameraFrontName, robotToCameraFront),
+            new VisionIOPhotonVision(cameraBackName, robotToCameraBack),
+            new VisionIOPhotonVision(cameraRightName, robotToCameraRight));
         break;
 
       case SIM:
@@ -92,12 +93,11 @@ public class RobotContainer {
             new ModuleIOSim(),
             new ModuleIOSim());
 
-        vision =
-            new Vision(
-                drive::addVisionMeasurement,
-                new VisionIOPhotonVisionSim(camera0Name, robotToCamera0, drive::getPose),
-                new VisionIOPhotonVisionSim(camera1Name, robotToCamera1, drive::getPose),
-                new VisionIOPhotonVisionSim(camera2Name, robotToCamera2, drive::getPose));
+        vision = new Vision(
+            drive::addVisionMeasurement,
+            new VisionIOPhotonVisionSim(cameraFrontName, robotToCameraFront, drive::getPose),
+            new VisionIOPhotonVisionSim(cameraBackName, robotToCameraBack, drive::getPose),
+            new VisionIOPhotonVisionSim(cameraRightName, robotToCameraRight, drive::getPose));
 
         break;
 
@@ -142,8 +142,7 @@ public class RobotContainer {
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
     bindCommandsForTeleop();
-    // TODO: clean this up, not needed after getting demo to work
-    bindCommandsForDemoDrive();
+    // bindCommandsForAutonomous();
   }
 
   /**
@@ -189,44 +188,11 @@ public class RobotContainer {
     controller.back().whileTrue(drive.recalibrateDrivetrain());
   }
 
-  /**
-   * Use this method to define your button->command mappings. Buttons can be
-   * created by
-   * instantiating a {@link GenericHID} or one of its subclasses ({@link
-   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing
-   * it to a {@link
-   * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
-   */
-  private void bindCommandsForDemoDrive() {
-    // Joystick drive command
-    demoDrive.setDefaultCommand(
-        Commands.run(
-            () -> {
-              demoDrive.run(-keyboard.getRawAxis(1), -keyboard.getRawAxis(0));
-            },
-            demoDrive));
-
-    // Auto aim command example
-    @SuppressWarnings("resource")
-    PIDController aimController = new PIDController(0.2, 0.0, 0.0);
-    aimController.enableContinuousInput(-Math.PI, Math.PI);
-    keyboard
-        .button(1)
-        .whileTrue(
-            Commands.startRun(
-                () -> {
-                  aimController.reset();
-                },
-                () -> {
-                  demoDrive.run(0.0, aimController.calculate(vision.getTargetX(0).getRadians()));
-                },
-                demoDrive));
-  }
-
-  Supplier<Command> bindCommandsForAutonomous() {
-    // TODO: implement real command
-    return () -> Commands.none();
-  }
+  // Supplier<Command> bindCommandsForAutonomous() {
+  // SendableChooser<Command> autoChooser = drive.createPathPlannerDropdown();
+  // SmartDashboard.putData("Auto Chooser", autoChooser);
+  // return autoChooser::getSelected;
+  // }
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
