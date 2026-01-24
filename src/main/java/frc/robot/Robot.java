@@ -14,8 +14,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
-import java.util.function.Supplier;
-
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -37,7 +35,6 @@ public class Robot extends LoggedRobot {
   private Command autonomousCommand;
   private RobotContainer robotContainer;
   private Field2d field;
-  private Supplier<Command> autoCommandSupplier;
 
   public Robot() {
     // Record metadata
@@ -86,22 +83,6 @@ public class Robot extends LoggedRobot {
     // Instantiate our RobotContainer. This will perform all our button bindings,
     // and put our autonomous chooser on the dashboard.
     robotContainer = new RobotContainer();
-  }
-
-  /**
-   * This function is run when the robot is first started up and should be used
-   * for any
-   * initialization code.
-   */
-  @Override
-  public void robotInit() {
-    // Instantiate our RobotContainer. This will perform all our button bindings,
-    // and put our
-    // autonomous chooser on the dashboard.
-    robotContainer.bindCommandsForTeleop();
-    
-    // TODO: do we need this?
-    // autoCommandSupplier = robotContainer.bindCommandsForAutonomous();
   }
 
   /** This function is called periodically during all modes. */

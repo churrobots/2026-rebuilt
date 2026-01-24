@@ -38,9 +38,12 @@ import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 
 /**
- * This class is where the bulk of the robot should be declared. Since Command-based is a
- * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
- * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
+ * This class is where the bulk of the robot should be declared. Since
+ * Command-based is a
+ * "declarative" paradigm, very little robot logic should actually be handled in
+ * the {@link Robot}
+ * periodic methods (other than the scheduler calls). Instead, the structure of
+ * the robot (including
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
@@ -48,7 +51,7 @@ public class RobotContainer {
   private final Drive drive;
 
   private final Vision vision;
-  
+
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
 
@@ -58,36 +61,36 @@ public class RobotContainer {
   private final DemoDrive demoDrive = new DemoDrive(); // Demo drive subsystem, sim only
   private final CommandGenericHID keyboard = new CommandGenericHID(1); // Keyboard 0 on port 1
 
-  /** The container for the robot. Contains subsystems, OI devices, and commands. */
+  /**
+   * The container for the robot. Contains subsystems, OI devices, and commands.
+   */
   public RobotContainer() {
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
-        drive =
-            new Drive(
-                new GyroIOPigeon2(),
-                new ModuleIOSpark(0),
-                new ModuleIOSpark(1),
-                new ModuleIOSpark(2),
-                new ModuleIOSpark(3));
+        drive = new Drive(
+            new GyroIOPigeon2(),
+            new ModuleIOSpark(0),
+            new ModuleIOSpark(1),
+            new ModuleIOSpark(2),
+            new ModuleIOSpark(3));
 
-        vision =
-            new Vision(
-                demoDrive::addVisionMeasurement,
-                new VisionIOPhotonVision(camera0Name, robotToCamera0),
-                new VisionIOPhotonVision(camera1Name, robotToCamera1),
+        vision = new Vision(
+            demoDrive::addVisionMeasurement,
+            new VisionIOPhotonVision(camera0Name, robotToCamera0),
+            new VisionIOPhotonVision(camera1Name, robotToCamera1),
                 new VisionIOPhotonVision(camera2Name, robotToCamera2));
         break;
 
       case SIM:
         // Sim robot, instantiate physics sim IO implementations
-        drive =
-            new Drive(
-                new GyroIO() {},
-                new ModuleIOSim(),
-                new ModuleIOSim(),
-                new ModuleIOSim(),
-                new ModuleIOSim());
+        drive = new Drive(
+            new GyroIO() {
+            },
+            new ModuleIOSim(),
+            new ModuleIOSim(),
+            new ModuleIOSim(),
+            new ModuleIOSim());
 
         vision =
             new Vision(
@@ -100,16 +103,22 @@ public class RobotContainer {
 
       default:
         // Replayed robot, disable IO implementations
-        drive =
-            new Drive(
-                new GyroIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {});
+        drive = new Drive(
+            new GyroIO() {
+            },
+            new ModuleIO() {
+            },
+            new ModuleIO() {
+            },
+            new ModuleIO() {
+            },
+            new ModuleIO() {
+            });
 
         // (Use same number of dummy implementations as the real robot)
-        vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
+        vision = new Vision(drive::addVisionMeasurement, new VisionIO() {
+        }, new VisionIO() {
+        });
         break;
     }
 
@@ -132,14 +141,17 @@ public class RobotContainer {
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
+    bindCommandsForTeleop();
     // TODO: clean this up, not needed after getting demo to work
-    configureButtonBindingsForDemoDrive();
+    bindCommandsForDemoDrive();
   }
 
   /**
-   * Use this method to define your button->command mappings. Buttons can be created by
+   * Use this method to define your button->command mappings. Buttons can be
+   * created by
    * instantiating a {@link GenericHID} or one of its subclasses ({@link
-   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
+   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing
+   * it to a {@link
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   void bindCommandsForTeleop() {
@@ -169,22 +181,23 @@ public class RobotContainer {
         .b()
         .onTrue(
             Commands.runOnce(
-                    () ->
-                        drive.setPose(
-                            new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
-                    drive)
+                () -> drive.setPose(
+                    new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
+                drive)
                 .ignoringDisable(true));
 
-      controller.back().whileTrue(drive.recalibrateDrivetrain());
+    controller.back().whileTrue(drive.recalibrateDrivetrain());
   }
 
   /**
-   * Use this method to define your button->command mappings. Buttons can be created by
+   * Use this method to define your button->command mappings. Buttons can be
+   * created by
    * instantiating a {@link GenericHID} or one of its subclasses ({@link
-   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
+   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing
+   * it to a {@link
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
-  private void configureButtonBindingsForDemoDrive() {
+  private void bindCommandsForDemoDrive() {
     // Joystick drive command
     demoDrive.setDefaultCommand(
         Commands.run(
@@ -214,7 +227,6 @@ public class RobotContainer {
     // TODO: implement real command
     return () -> Commands.none();
   }
-
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.

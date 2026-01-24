@@ -188,3 +188,8 @@ compile_commands.json
 
 # For AdvantageKit
 src/main/java/frc/robot/BuildConstants.java
+
+# For ChurroBots
+# We actually want to share our Sim GUI for now, since it takes
+# some time to setup and we usually want a common view of simulation
+!sim*
