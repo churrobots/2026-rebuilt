@@ -2,7 +2,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.subsystems.drive;
+package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Inches;
@@ -20,11 +20,13 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;
 import yams.mechanisms.config.ElevatorConfig;
+import yams.mechanisms.config.SensorConfig;
 import yams.mechanisms.positional.Elevator;
 import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
@@ -32,6 +34,7 @@ import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.motorcontrollers.local.SparkWrapper;
+import yams.motorcontrollers.simulation.Sensor;
 
 public class ClimberTW extends SubsystemBase {
 
@@ -61,9 +64,15 @@ public class ClimberTW extends SubsystemBase {
   .withOpenLoopRampRate(Seconds.of(0.25));
 
 
+  private DigitalInput dio = new DigitalInput(0); // Standard DIO
+private final Sensor climbSensor = new SensorConfig("switchgoclickclick") // Name of the sensor 
+  .withField("Beam", dio::get, false) // Add a Field to the sensor named "Beam" whose value is dio.get() and defaults to false
+  .getSensor(); // Get the sensor.
+
+
   
   // Vendor motor controller object
-  private SparkMax spark = new SparkMax(4,MotorType.kBrushless);
+  private SparkMax spark = new SparkMax(67,MotorType.kBrushless);
 
   // Create our SmartMotorController from our Spark and config with the NEO.
   private SmartMotorController sparkSmartMotorController = new SparkWrapper(spark, DCMotor.getNEO(1), smcConfig);
@@ -76,8 +85,11 @@ public class ClimberTW extends SubsystemBase {
 
   // Elevator Mechanism
   private Elevator elevator = new Elevator(elevconfig);
-  
-  
+
+  // TODO: figure out how to do Limit Switches
+  // TODO: https://yagsl.gitbook.io/yams/documentation/details/sensors#what-is-a-sensor
+  // TODO: https://yagsl.gitbook.io/yams/documentation/details/elevators#hard-limits-and-soft-limits
+
     /**
      * Set the height of the elevator.
      * 
