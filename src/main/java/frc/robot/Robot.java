@@ -9,6 +9,7 @@ package frc.robot;
 
 import com.revrobotics.util.StatusLogger;
 
+import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -165,7 +166,10 @@ public class Robot extends LoggedRobot {
   public void simulationInit() {
     m_field = new Field2d();
     SmartDashboard.putData(m_field);
-
+    // DriverStationSim.setAutonomous(false);
+    // DriverStationSim.setTest(false);
+    // DriverStationSim.setDsAttached(true);
+    // DriverStationSim.setEnabled(true);
   }
 
   /** This function is called periodically whilst in simulation. */

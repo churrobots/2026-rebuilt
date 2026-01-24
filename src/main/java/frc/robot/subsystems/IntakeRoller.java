@@ -25,7 +25,6 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;
@@ -40,53 +39,7 @@ import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.motorcontrollers.local.SparkWrapper;
 
-public class Ballpicker extends SubsystemBase {
-private SmartMotorControllerConfig armSmcConfig = new SmartMotorControllerConfig(this)
-  .withControlMode(ControlMode.CLOSED_LOOP)
-  // Feedback Constants (PID Constants)
-  .withClosedLoopController(50, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(45))
-  .withSimClosedLoopController(50, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(45))
-  // Feedforward Constants
-  .withFeedforward(new ArmFeedforward(0, 0, 0))
-  .withSimFeedforward(new ArmFeedforward(0, 0, 0))
-  // Telemetry name and verbosity level
-  .withTelemetry("ArmMotor", TelemetryVerbosity.HIGH)
-  // Gearing from the motor rotor to final shaft.
-  // In this example GearBox.fromReductionStages(3,4) is the same as GearBox.fromStages("3:1","4:1") which corresponds to the gearbox attached to your motor.
-  // You could also use .withGearing(12) which does the same thing.
-  .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
-  // Motor properties to prevent over currenting.
-  .withMotorInverted(false)
-  .withIdleMode(MotorMode.BRAKE)
-  .withStatorCurrentLimit(Amps.of(40))
-  .withClosedLoopRampRate(Seconds.of(0.25))
-  .withOpenLoopRampRate(Seconds.of(0.25));
-
- // Vendor motor controller object
-  private SparkMax armSpark = new SparkMax(4, MotorType.kBrushless);
-
- 
-
-   // Create our SmartMotorController from our Spark and config with the NEO.
-  private SmartMotorController armSparkSmartMotorController = new SparkWrapper(armSpark, DCMotor.getNEO(1), armSmcConfig);
-
-   private ArmConfig armCfg = new ArmConfig(armSparkSmartMotorController)
-  // Soft limit is applied to the SmartMotorControllers PID
-  .withSoftLimits(Degrees.of(-20), Degrees.of(10))
-  // Hard limit is applied to the simulation.
-  .withHardLimit(Degrees.of(-30), Degrees.of(40))
-  // Starting position is where your arm starts
-  .withStartingPosition(Degrees.of(-5))
-  // Length and mass of your arm for sim.
-  .withLength(Feet.of(1))
-  .withMass(Pounds.of(.5))
-  // Telemetry name and verbosity for the arm.
-  .withTelemetry("Arm", TelemetryVerbosity.HIGH);
-
-
-  // Arm Mechanism
-  private Arm arm = new Arm(armCfg);
-
+public class IntakeRoller extends SubsystemBase {
   // Intake mechanism
   private SmartMotorControllerConfig intakeSmcConfig = new SmartMotorControllerConfig(this)
   .withControlMode(ControlMode.CLOSED_LOOP)
@@ -121,7 +74,7 @@ private SmartMotorControllerConfig armSmcConfig = new SmartMotorControllerConfig
   // Maximum speed of the intake.
   .withUpperSoftLimit(RPM.of(1000))
   // Telemetry name and verbosity for the arm.
-  .withTelemetry("ShooterMech", TelemetryVerbosity.HIGH);
+  .withTelemetry("Intake", TelemetryVerbosity.HIGH);
 
   // Shooter Mechanism
   private FlyWheel intake = new FlyWheel(intakeConfig);
@@ -149,39 +102,13 @@ private SmartMotorControllerConfig armSmcConfig = new SmartMotorControllerConfig
    */
   public Command setIntakeDutyCycle(double dutyCycle) {return intake.set(dutyCycle);}
 
-/**
-   * Set the angle of the arm.
-   * @param angle Angle to go to.
-   */
-  public Command setAngle(Angle angle) { return arm.setAngle(angle);}
-
-  /**
-   * Move the arm up and down.
-   * @param dutycycle [-1, 1] speed to set the arm too.
-   */
-  public Command setArmDutyCycle(double dutycycle) { return arm.set(dutycycle);}
-
-  /**
-   * Run sysId on the {@link Arm}
-   */
-  public Command sysId() { return arm.sysId(Volts.of(7), Volts.of(2).per(Second), Seconds.of(4));}
-
-  // public Command getDefaultCommand(Angle armAngle, double intakeDutycycle) {
-  //   return Commands.parallel(
-  //     Commands.run(() -> intake.set(intakeDutycycle), this),
-  //     Commands.run(() -> arm.setAngle(armAngle), this)
-  //   );
-  // }
-
-
   /** Creates a new Ballpicker. */
 
-  public Ballpicker() {}
+  public IntakeRoller() {}
 
   @Override
   public void periodic() {
         // This method will be called once per scheduler run
-    arm.updateTelemetry();
     intake.updateTelemetry();
     // This method will be called once per scheduler run
   }
@@ -189,8 +116,6 @@ private SmartMotorControllerConfig armSmcConfig = new SmartMotorControllerConfig
   @Override
   public void simulationPeriodic() {
     // This method will be called once per scheduler run during simulation
-    arm.simIterate();
     intake.simIterate();
   }
-
 }
