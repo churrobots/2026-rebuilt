@@ -221,4 +221,8 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     return autoChooser.get();
   }
+
+  public Pose2d getPose() {
+    return drive.getPose();
+  }
 }
