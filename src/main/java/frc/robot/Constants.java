@@ -31,5 +31,16 @@ public final class Constants {
     REPLAY
   }
 
+  public static final CalibrationMode calibrationMode = CalibrationMode.DISABLED;
+
+  /** Calibrating AdvantageKit Constants **/
+  public static enum CalibrationMode {
+    /** Not in calibration mode. */
+    DISABLED,
+
+    /** In calibration mode. */
+    ENABLED
+  }
+
   public static final double INCHES_TO_METERS = 0.0254;
 }

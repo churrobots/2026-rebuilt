@@ -51,7 +51,6 @@ public class Drive extends SubsystemBase {
   private final GyroIO gyroIO;
   private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
   private final Module[] modules = new Module[4]; // FL, FR, BL, BR
-  private final SysIdRoutine sysId;
   private final Alert gyroDisconnectedAlert = new Alert("Disconnected gyro, using kinematics as fallback.",
       AlertType.kError);
 
@@ -66,6 +65,7 @@ public class Drive extends SubsystemBase {
       };
   private SwerveDrivePoseEstimator poseEstimator = new SwerveDrivePoseEstimator(kinematics, rawGyroRotation,
       lastModulePositions, Pose2d.kZero);
+  private SysIdRoutine sysId;
 
   public Drive(
       GyroIO gyroIO,
@@ -85,36 +85,38 @@ public class Drive extends SubsystemBase {
     // Start odometry thread
     SparkOdometryThread.getInstance().start();
 
-    // Configure AutoBuilder for PathPlanner
-    AutoBuilder.configure(
-        this::getPose,
-        this::setPose,
-        this::getChassisSpeeds,
-        this::runVelocity,
-        new PPHolonomicDriveController(
-            new PIDConstants(5.0, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
-        ppConfig,
-        () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
-        this);
-    Pathfinding.setPathfinder(new LocalADStarAK());
-    PathPlannerLogging.setLogActivePathCallback(
-        (activePath) -> {
-          Logger.recordOutput("Odometry/Trajectory", activePath.toArray(new Pose2d[0]));
-        });
-    PathPlannerLogging.setLogTargetPoseCallback(
-        (targetPose) -> {
-          Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose);
-        });
+    if (Constants.calibrationMode == Constants.CalibrationMode.ENABLED) {
+      // Configure AutoBuilder for PathPlanner
+      AutoBuilder.configure(
+          this::getPose,
+          this::setPose,
+          this::getChassisSpeeds,
+          this::runVelocity,
+          new PPHolonomicDriveController(
+              new PIDConstants(5.0, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
+          ppConfig,
+          () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
+          this);
+      Pathfinding.setPathfinder(new LocalADStarAK());
+      PathPlannerLogging.setLogActivePathCallback(
+          (activePath) -> {
+            Logger.recordOutput("Odometry/Trajectory", activePath.toArray(new Pose2d[0]));
+          });
+      PathPlannerLogging.setLogTargetPoseCallback(
+          (targetPose) -> {
+            Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose);
+          });
 
-    // Configure SysId
-    sysId = new SysIdRoutine(
-        new SysIdRoutine.Config(
-            null,
-            null,
-            null,
-            (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
-        new SysIdRoutine.Mechanism(
-            (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
+      // Configure SysId
+      sysId = new SysIdRoutine(
+          new SysIdRoutine.Config(
+              null,
+              null,
+              null,
+              (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
+          new SysIdRoutine.Mechanism(
+              (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
+    }
   }
 
   @Override
@@ -332,35 +334,16 @@ public class Drive extends SubsystemBase {
     return rawGyroRotation;
   }
 
-  // public SendableChooser<Command> createPathPlannerDropdown() {
-  // try {
-  // RobotConfig config;
-  // try {
-  // config = RobotConfig.fromGUISettings();
-  // } catch (Exception e) {
-  // // Handle exception as needed
-  // e.printStackTrace();
-  // }
+  public SendableChooser<Command> setupPathPlanner() {
+    // TODO #1 (Start Here):
+    // Read https://pathplanner.dev/pplib-build-an-auto.html#holonomic-swerve
+    // and follow it to setup the robot config and build the autoChooser
 
-  // // If using GUI setttings:
-  // // config = RobotConfig.fromGUISettings();
+    // [REPLACE ME: add some code here to load RobotConfig and configure the
+    // AutoBuilder]
 
-  // AutoBuilder.configure(
-  // this::getPose,
-  // this::setPose,
-  // this::getChassisSpeeds,
-  // this::runVelocity,
-  // new PPHolonomicDriveController(
-  // new PIDConstants(5.0, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
-  // ppConfig,
-  // () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
-  // this);
-  // } catch (Exception e) {
-  // // Handle exception as needed
-  // e.printStackTrace();
-  // }
-  // return AutoBuilder.buildAutoChooser();
-  // }
+    return AutoBuilder.buildAutoChooser();
+  }
 
   public Command recalibrateDrivetrain() {
     return run(() -> {

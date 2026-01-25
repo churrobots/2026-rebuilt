@@ -56,11 +56,13 @@ public class RobotContainer {
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
 
-  // Dashboard inputs
-  private final LoggedDashboardChooser<Command> autoChooser;
+  // Dashboard inputs, for calibration only
+  private LoggedDashboardChooser<Command> calibrationAutoChooser;
 
   // sim only
   private final CommandGenericHID keyboard = new CommandGenericHID(1); // Keyboard 0 on port 1
+
+  public SendableChooser<Command> autoChooser;
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -122,27 +124,41 @@ public class RobotContainer {
         break;
     }
 
-    // Set up auto routines
-    autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
+    switch (Constants.calibrationMode) {
+      case ENABLED:
+        // Set up auto routines
+        calibrationAutoChooser = new LoggedDashboardChooser<>("Auto Choices",
+            AutoBuilder.buildAutoChooser());
 
-    // Set up SysId routines
-    autoChooser.addOption(
-        "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
-    autoChooser.addOption(
-        "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
-    autoChooser.addOption(
-        "Drive SysId (Quasistatic Forward)",
-        drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Drive SysId (Quasistatic Reverse)",
-        drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-    autoChooser.addOption(
-        "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+        // Set up SysId routines
+        calibrationAutoChooser.addOption(
+            "Drive Wheel Radius Characterization",
+            DriveCommands.wheelRadiusCharacterization(drive));
+        calibrationAutoChooser.addOption(
+            "Drive Simple FF Characterization",
+            DriveCommands.feedforwardCharacterization(drive));
+        calibrationAutoChooser.addOption(
+            "Drive SysId (Quasistatic Forward)",
+            drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+        calibrationAutoChooser.addOption(
+            "Drive SysId (Quasistatic Reverse)",
+            drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+        calibrationAutoChooser.addOption(
+            "Drive SysId (Dynamic Forward)",
+            drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
+        calibrationAutoChooser.addOption(
+            "Drive SysId (Dynamic Reverse)",
+            drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+      default:
+        // TODO #2:
+        // Take a look at
+        // https://pathplanner.dev/pplib-build-an-auto.html#create-a-sendablechooser-with-all-autos-in-project.
+        // Add a line below this one to put the autoChooser data on SmartDashboard.
+        autoChooser = drive.setupPathPlanner();
+        // [REPLACE ME: put the autoChooser data on SmartDashboard]
+    }
 
     bindCommandsForTeleop();
-    // bindCommandsForAutonomous();
   }
 
   /**
@@ -188,19 +204,22 @@ public class RobotContainer {
     controller.back().whileTrue(drive.recalibrateDrivetrain());
   }
 
-  // Supplier<Command> bindCommandsForAutonomous() {
-  // SendableChooser<Command> autoChooser = drive.createPathPlannerDropdown();
-  // SmartDashboard.putData("Auto Chooser", autoChooser);
-  // return autoChooser::getSelected;
-  // }
-
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return autoChooser.get();
+    switch (Constants.calibrationMode) {
+      case ENABLED:
+        return calibrationAutoChooser.get();
+      default:
+        // TODO #3:
+        // Modify the return statement below to return the selected auto command.
+        // Refer to
+        // https://pathplanner.dev/pplib-build-an-auto.html#create-a-sendablechooser-with-all-autos-in-project.
+        return calibrationAutoChooser.get(); // [FIX ME: return the selected command from autoChooser]
+    }
   }
 
   public Pose2d getPose() {
