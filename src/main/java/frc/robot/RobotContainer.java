@@ -19,7 +19,6 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
@@ -34,7 +33,6 @@ import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOSpark;
 
 import java.util.function.Supplier;
-
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
@@ -57,8 +55,6 @@ import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
  * the robot (including
  * subsystems, commands, and button mappings) should be declared here.
  */
-
-
 
 public class RobotContainer {
   // Subsystems
@@ -155,10 +151,11 @@ public class RobotContainer {
         "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
- 
+
     bindCommandsForTeleop();
     // TODO: clean this up, not needed after getting demo to work
     bindCommandsForDemoDrive();
+
     // Set the default command to force the arm to go to 0.
     // inNout.setDefaultCommand(inNout.setAngle(Degrees.of(0)));
     climberSub.setDefaultCommand(climberSub.setHeight(Meters.of(0)));
@@ -173,7 +170,7 @@ public class RobotContainer {
     controller.x().whileTrue(climberSub.set(0.5));
     controller.y().whileTrue(climberSub.set(-0.5));
 
-        // Schedule `setVelocity` when the Xbox controller's B button is pressed,
+    // Schedule `setVelocity` when the Xbox controller's B button is pressed,
     // cancelling on release.
     controller.a().whileTrue(intakeRoller.setVelocity(RPM.of(60)));
     controller.b().whileTrue(intakeRoller.setVelocity(RPM.of(300)));
@@ -181,7 +178,6 @@ public class RobotContainer {
     // cancelling on release.
     controller.x().whileTrue(intakeRoller.setIntakeDutyCycle(0.3));
     controller.y().whileTrue(intakeRoller.setIntakeDutyCycle(-0.3));
-
 
     // Schedule `setAngle` when the Xbox controller's B button is pressed,
     // cancelling on release.
@@ -192,6 +188,7 @@ public class RobotContainer {
     controller.x().whileTrue(intakeArm.set(0.3));
     controller.y().whileTrue(intakeArm.set(-0.3));
   }
+
   /**
    * Use this method to define your button->command mappings. Buttons can be
    * created by
