@@ -150,12 +150,9 @@ public class RobotContainer {
             "Drive SysId (Dynamic Reverse)",
             drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
       default:
-        // TODO #2:
-        // Take a look at
-        // https://pathplanner.dev/pplib-build-an-auto.html#create-a-sendablechooser-with-all-autos-in-project.
-        // Add a line below this one to put the autoChooser data on SmartDashboard.
+
         autoChooser = drive.setupPathPlanner();
-        // [REPLACE ME: put the autoChooser data on SmartDashboard]
+        SmartDashboard.putData("Auto Chooser", autoChooser);
     }
 
     bindCommandsForTeleop();
@@ -214,11 +211,8 @@ public class RobotContainer {
       case ENABLED:
         return calibrationAutoChooser.get();
       default:
-        // TODO #3:
-        // Modify the return statement below to return the selected auto command.
-        // Refer to
-        // https://pathplanner.dev/pplib-build-an-auto.html#create-a-sendablechooser-with-all-autos-in-project.
-        return calibrationAutoChooser.get(); // [FIX ME: return the selected command from autoChooser]
+
+        return autoChooser.getSelected();
     }
   }
 

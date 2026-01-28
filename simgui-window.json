@@ -31,7 +31,12 @@
     },
     "###/SmartDashboard/Auto Choices": {
       "Collapsed": "0",
-      "Pos": "6,143",
+      "Pos": "6,188",
+      "Size": "254,54"
+    },
+    "###/SmartDashboard/Auto Chooser": {
+      "Collapsed": "0",
+      "Pos": "10,134",
       "Size": "254,54"
     },
     "###/SmartDashboard/Field": {
@@ -91,7 +96,7 @@
     },
     "###Timing": {
       "Collapsed": "0",
-      "Pos": "8,210",
+      "Pos": "8,275",
       "Size": "160,150"
     },
     "Debug##Default": {

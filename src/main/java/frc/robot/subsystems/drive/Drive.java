@@ -11,10 +11,12 @@ import static edu.wpi.first.units.Units.*;
 import static frc.robot.subsystems.drive.DriveConstants.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.pathfinding.Pathfinding;
+import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.hal.FRCNetComm.tInstances;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
@@ -30,6 +32,14 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.units.DistanceUnit;
+import edu.wpi.first.units.measure.Acceleration;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.measure.Mass;
+import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -334,14 +344,50 @@ public class Drive extends SubsystemBase {
     return rawGyroRotation;
   }
 
+  private void runVelocityWithFeedforwards(ChassisSpeeds speeds, DriveFeedforwards feedforwards) {
+    // TODO: consider using feedforwards, is it helpful?
+    runVelocity(speeds);
+  }
+
   public SendableChooser<Command> setupPathPlanner() {
-    // TODO #1 (Start Here):
-    // Read https://pathplanner.dev/pplib-build-an-auto.html#holonomic-swerve
-    // and follow it to setup the robot config and build the autoChooser
 
-    // [REPLACE ME: add some code here to load RobotConfig and configure the
-    // AutoBuilder]
+    ModuleConfig moduleConfig = new ModuleConfig(Distance.ofBaseUnits(0.048, Meters),
+        LinearVelocity.ofBaseUnits(5.450, MetersPerSecond), wheelCOF, DCMotor.getNeoVortex(1),
+        Current.ofBaseUnits(60, Amps), 1);
+    RobotConfig config = new RobotConfig(
+        Mass.ofBaseUnits(74.088, Kilograms),
+        MomentOfInertia.ofBaseUnits(6.883, KilogramSquareMeters),
+        moduleConfig,
+        Distance.ofBaseUnits(27.5, Inches));
+    // Configure AutoBuilder last
+    AutoBuilder.configure(
+        this::getPose, // Robot pose supplier
+        this::setPose, // Method to reset odometry (will be called if your auto has a starting pose)
+        this::getChassisSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+        this::runVelocityWithFeedforwards, // Method that will drive the robot given ROBOT RELATIVE
+                                           // ChassisSpeeds. Also optionally outputs individual module
+                                           // feedforwards
+        new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for
+                                        // holonomic
+                                        // drive trains
+            new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
+            new PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants
+        ),
+        config, // The robot configuration
+        () -> {
+          // Boolean supplier that controls when the path will be mirrored for the red
+          // alliance
+          // This will flip the path being followed to the red side of the field.
+          // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
 
+          var alliance = DriverStation.getAlliance();
+          if (alliance.isPresent()) {
+            return alliance.get() == DriverStation.Alliance.Red;
+          }
+          return false;
+        },
+        this // Reference to this subsystem to set requirements
+    );
     return AutoBuilder.buildAutoChooser();
   }
 
