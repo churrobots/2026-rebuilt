@@ -41,12 +41,12 @@
       "/SmartDashboard/VisionSystemSim-main/Sim Field": "Field2d"
     },
     "windows": {
-      "/SmartDashboard/Auto Choices": {
+      "/SmartDashboard/Auto Chooser": {
         "window": {
           "visible": true
         }
       },
-      "/SmartDashboard/Auto Chooser": {
+      "/SmartDashboard/Elevator/mechanism": {
         "window": {
           "visible": true
         }
@@ -58,6 +58,16 @@
         "right": 3942,
         "top": 118,
         "width": 16.54119300842285
+      },
+      "/SmartDashboard/IntakeArm/mechanism": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/IntakeRoller/mechanism": {
+        "window": {
+          "visible": true
+        }
       },
       "/SmartDashboard/VisionSystemSim-main/Sim Field": {
         "apriltag": {
