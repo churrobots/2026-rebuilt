@@ -289,4 +289,9 @@ public class DriveCommands {
     Rotation2d lastAngle = Rotation2d.kZero;
     double gyroDelta = 0.0;
   }
+
+public static Command XboxController(Drive drive, Object object, Object object2, Object object3) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'XboxController'");
+}
 }

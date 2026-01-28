@@ -8,6 +8,8 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import static frc.robot.subsystems.vision.VisionConstants.*;
@@ -17,9 +19,13 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
+import frc.robot.subsystems.ClimberTW;
+import frc.robot.subsystems.IntakeArm;
+import frc.robot.subsystems.IntakeRoller;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -28,6 +34,11 @@ import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOSpark;
 
 import java.util.function.Supplier;
+
+
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.RPM;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
@@ -46,14 +57,20 @@ import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
  * the robot (including
  * subsystems, commands, and button mappings) should be declared here.
  */
+
+
+
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
 
   private final Vision vision;
+  private final ClimberTW climberSub = new ClimberTW();
+  private final IntakeRoller intakeRoller = new IntakeRoller();
+  private final IntakeArm intakeArm = new IntakeArm();
 
   // Controller
-  private final CommandXboxController controller = new CommandXboxController(0);
+  private final CommandXboxController controller = new CommandXboxController(Hardware.DriverStation.driverXboxPort);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -121,7 +138,9 @@ public class RobotContainer {
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
+    NamedCommands.registerCommand("wheee", climberSub.setHeight(Meters.of(.75)));
     // Set up SysId routines
+
     autoChooser.addOption(
         "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
     autoChooser.addOption(
@@ -136,12 +155,43 @@ public class RobotContainer {
         "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-
+ 
     bindCommandsForTeleop();
     // TODO: clean this up, not needed after getting demo to work
     bindCommandsForDemoDrive();
-  }
+    // Set the default command to force the arm to go to 0.
+    // inNout.setDefaultCommand(inNout.setAngle(Degrees.of(0)));
+    climberSub.setDefaultCommand(climberSub.setHeight(Meters.of(0)));
+    intakeArm.setDefaultCommand(intakeArm.setAngle(Degrees.of(0)));
+    intakeRoller.setDefaultCommand(intakeRoller.setIntakeDutyCycle(0));
+    // Schedule `setHeight` when the Xbox controller's B button is pressed,
+    // cancelling on release.
+    controller.a().whileTrue(climberSub.setHeight(Meters.of(0.25)));
+    controller.b().whileTrue(climberSub.setHeight(Meters.of(2.5)));
+    // Schedule `set` when the Xbox controller's B button is pressed,
+    // cancelling on release.
+    controller.x().whileTrue(climberSub.set(0.5));
+    controller.y().whileTrue(climberSub.set(-0.5));
 
+        // Schedule `setVelocity` when the Xbox controller's B button is pressed,
+    // cancelling on release.
+    controller.a().whileTrue(intakeRoller.setVelocity(RPM.of(60)));
+    controller.b().whileTrue(intakeRoller.setVelocity(RPM.of(300)));
+    // Schedule `set` when the Xbox controller's B button is pressed,
+    // cancelling on release.
+    controller.x().whileTrue(intakeRoller.setIntakeDutyCycle(0.3));
+    controller.y().whileTrue(intakeRoller.setIntakeDutyCycle(-0.3));
+
+
+    // Schedule `setAngle` when the Xbox controller's B button is pressed,
+    // cancelling on release.
+    controller.a().whileTrue(intakeArm.setAngle(Degrees.of(-5)));
+    controller.b().whileTrue(intakeArm.setAngle(Degrees.of(15)));
+    // Schedule `set` when the Xbox controller's B button is pressed,
+    // cancelling on release.
+    controller.x().whileTrue(intakeArm.set(0.3));
+    controller.y().whileTrue(intakeArm.set(-0.3));
+  }
   /**
    * Use this method to define your button->command mappings. Buttons can be
    * created by
