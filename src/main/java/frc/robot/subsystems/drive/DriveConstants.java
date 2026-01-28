@@ -7,12 +7,23 @@
 
 package frc.robot.subsystems.drive;
 
+import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.KilogramSquareMeters;
+import static edu.wpi.first.units.Units.Kilograms;
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.RobotConfig;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.measure.Mass;
+import edu.wpi.first.units.measure.MomentOfInertia;
 
 public class DriveConstants {
   public static final double maxSpeedMetersPerSec = 4.8;
@@ -92,16 +103,15 @@ public class DriveConstants {
   public static final double robotMassKg = 74.088;
   public static final double robotMOI = 6.883;
   public static final double wheelCOF = 1.2;
-  // TODO: we should use this instead of our hardcoded config in Drive
   public static final RobotConfig ppConfig = new RobotConfig(
-      robotMassKg,
-      robotMOI,
+      Mass.ofBaseUnits(robotMassKg, Kilograms),
+      MomentOfInertia.ofBaseUnits(robotMOI, KilogramSquareMeters),
       new ModuleConfig(
-          wheelRadiusMeters,
-          maxSpeedMetersPerSec,
+          Distance.ofBaseUnits(wheelRadiusMeters, Meters),
+          LinearVelocity.ofBaseUnits(maxSpeedMetersPerSec, MetersPerSecond),
           wheelCOF,
           driveGearbox.withReduction(driveMotorReduction),
-          driveMotorCurrentLimit,
+          Current.ofBaseUnits(driveMotorCurrentLimit, Amps),
           1),
       moduleTranslations);
 }

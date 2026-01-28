@@ -93,38 +93,36 @@ public class Drive extends SubsystemBase {
     // Start odometry thread
     SparkOdometryThread.getInstance().start();
 
-    if (Constants.calibrationMode == Constants.CalibrationMode.ENABLED) {
-      // Configure AutoBuilder for PathPlanner
-      AutoBuilder.configure(
-          this::getPose,
-          this::setPose,
-          this::getChassisSpeeds,
-          this::runVelocity,
-          new PPHolonomicDriveController(
-              new PIDConstants(5.0, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
-          ppConfig,
-          () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
-          this);
-      Pathfinding.setPathfinder(new LocalADStarAK());
-      PathPlannerLogging.setLogActivePathCallback(
-          (activePath) -> {
-            Logger.recordOutput("Odometry/Trajectory", activePath.toArray(new Pose2d[0]));
-          });
-      PathPlannerLogging.setLogTargetPoseCallback(
-          (targetPose) -> {
-            Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose);
-          });
+    // Configure AutoBuilder for PathPlanner
+    AutoBuilder.configure(
+        this::getPose,
+        this::setPose,
+        this::getChassisSpeeds,
+        this::runVelocity,
+        new PPHolonomicDriveController(
+            new PIDConstants(5.0, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
+        ppConfig,
+        () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
+        this);
+    Pathfinding.setPathfinder(new LocalADStarAK());
+    PathPlannerLogging.setLogActivePathCallback(
+        (activePath) -> {
+          Logger.recordOutput("Odometry/Trajectory", activePath.toArray(new Pose2d[0]));
+        });
+    PathPlannerLogging.setLogTargetPoseCallback(
+        (targetPose) -> {
+          Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose);
+        });
 
-      // Configure SysId
-      sysId = new SysIdRoutine(
-          new SysIdRoutine.Config(
-              null,
-              null,
-              null,
-              (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
-          new SysIdRoutine.Mechanism(
-              (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
-    }
+    // Configure SysId
+    sysId = new SysIdRoutine(
+        new SysIdRoutine.Config(
+            null,
+            null,
+            null,
+            (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
+        new SysIdRoutine.Mechanism(
+            (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
   }
 
   @Override
@@ -340,53 +338,6 @@ public class Drive extends SubsystemBase {
    */
   public Rotation2d getYaw() {
     return rawGyroRotation;
-  }
-
-  private void runVelocityWithFeedforwards(ChassisSpeeds speeds, DriveFeedforwards feedforwards) {
-    // TODO: consider using feedforwards, is it helpful?
-    runVelocity(speeds);
-  }
-
-  public SendableChooser<Command> setupPathPlanner() {
-
-    ModuleConfig moduleConfig = new ModuleConfig(Distance.ofBaseUnits(0.048, Meters),
-        LinearVelocity.ofBaseUnits(5.450, MetersPerSecond), wheelCOF, DCMotor.getNeoVortex(1),
-        Current.ofBaseUnits(60, Amps), 1);
-    RobotConfig config = new RobotConfig(
-        Mass.ofBaseUnits(74.088, Kilograms),
-        MomentOfInertia.ofBaseUnits(6.883, KilogramSquareMeters),
-        moduleConfig,
-        Distance.ofBaseUnits(27.5, Inches));
-    // Configure AutoBuilder last
-    AutoBuilder.configure(
-        this::getPose, // Robot pose supplier
-        this::setPose, // Method to reset odometry (will be called if your auto has a starting pose)
-        this::getChassisSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-        this::runVelocityWithFeedforwards, // Method that will drive the robot given ROBOT RELATIVE
-                                           // ChassisSpeeds. Also optionally outputs individual module
-                                           // feedforwards
-        new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for
-                                        // holonomic
-                                        // drive trains
-            new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
-            new PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants
-        ),
-        config, // The robot configuration
-        () -> {
-          // Boolean supplier that controls when the path will be mirrored for the red
-          // alliance
-          // This will flip the path being followed to the red side of the field.
-          // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
-
-          var alliance = DriverStation.getAlliance();
-          if (alliance.isPresent()) {
-            return alliance.get() == DriverStation.Alliance.Red;
-          }
-          return false;
-        },
-        this // Reference to this subsystem to set requirements
-    );
-    return AutoBuilder.buildAutoChooser();
   }
 
   public Command recalibrateDrivetrain() {

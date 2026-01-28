@@ -31,7 +31,7 @@ public final class Constants {
     REPLAY
   }
 
-  public static final CalibrationMode calibrationMode = CalibrationMode.DISABLED;
+  public static final CalibrationMode calibrationMode = CalibrationMode.ENABLED;
 
   /** Calibrating AdvantageKit Constants **/
   public static enum CalibrationMode {

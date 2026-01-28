@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.Constants.CalibrationMode;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.ClimberTW;
 import frc.robot.subsystems.IntakeArm;
@@ -66,9 +67,7 @@ public class RobotContainer {
   private final CommandXboxController controller = new CommandXboxController(Hardware.DriverStation.driverXboxPort);
 
   // Dashboard inputs, for calibration only
-  private LoggedDashboardChooser<Command> calibrationAutoChooser;
-
-  public SendableChooser<Command> realAutoChooser;
+  private LoggedDashboardChooser<Command> autoChooser;
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -130,40 +129,42 @@ public class RobotContainer {
         break;
     }
 
-    switch (Constants.calibrationMode) {
-      case ENABLED:
-        // Set up auto routines
-        calibrationAutoChooser = new LoggedDashboardChooser<>("Calibration Autos",
-            AutoBuilder.buildAutoChooser());
-
-        NamedCommands.registerCommand("wheee", climberSub.setHeight(Meters.of(.75)));
-        // Set up SysId routines
-
-        calibrationAutoChooser.addOption(
-            "Drive Wheel Radius Characterization",
-            DriveCommands.wheelRadiusCharacterization(drive));
-        calibrationAutoChooser.addOption(
-            "Drive Simple FF Characterization",
-            DriveCommands.feedforwardCharacterization(drive));
-        calibrationAutoChooser.addOption(
-            "Drive SysId (Quasistatic Forward)",
-            drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-        calibrationAutoChooser.addOption(
-            "Drive SysId (Quasistatic Reverse)",
-            drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-        calibrationAutoChooser.addOption(
-            "Drive SysId (Dynamic Forward)",
-            drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
-        calibrationAutoChooser.addOption(
-            "Drive SysId (Dynamic Reverse)",
-            drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-      default:
-
-        realAutoChooser = drive.setupPathPlanner();
-        SmartDashboard.putData("Auto Chooser", realAutoChooser);
-    }
-
     bindCommandsForTeleop();
+    bindCommandsForAuto();
+  }
+
+  /**
+   * Separate the auto command binding to ensure we don't accidentally
+   * share commands between teleop and auto.
+   */
+  void bindCommandsForAuto() {
+    // Set up auto routines
+    NamedCommands.registerCommand("wheee", climberSub.setHeight(Meters.of(.75)));
+    autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
+
+    // Add SysId routines if we are in Calibration mode
+    // TODO: we might want the Wheel Radius characterization more accessible so we
+    // can recharacterize in the pit as wheels wear down and get changed
+    if (Constants.calibrationMode == CalibrationMode.ENABLED) {
+      autoChooser.addOption(
+          "Drive Wheel Radius Characterization",
+          DriveCommands.wheelRadiusCharacterization(drive));
+      autoChooser.addOption(
+          "Drive Simple FF Characterization",
+          DriveCommands.feedforwardCharacterization(drive));
+      autoChooser.addOption(
+          "Drive SysId (Quasistatic Forward)",
+          drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+      autoChooser.addOption(
+          "Drive SysId (Quasistatic Reverse)",
+          drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+      autoChooser.addOption(
+          "Drive SysId (Dynamic Forward)",
+          drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
+      autoChooser.addOption(
+          "Drive SysId (Dynamic Reverse)",
+          drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+    }
 
     // Set the default command to force the arm to go to 0.
     // inNout.setDefaultCommand(inNout.setAngle(Degrees.of(0)));
@@ -196,6 +197,7 @@ public class RobotContainer {
     // cancelling on release.
     controller.x().whileTrue(intakeArm.set(0.3));
     controller.y().whileTrue(intakeArm.set(-0.3));
+
   }
 
   /**
@@ -247,13 +249,7 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    switch (Constants.calibrationMode) {
-      case ENABLED:
-        return calibrationAutoChooser.get();
-      default:
-
-        return realAutoChooser.getSelected();
-    }
+    return autoChooser.get();
   }
 
   public Pose2d getPose() {
