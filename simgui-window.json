@@ -31,7 +31,7 @@
     },
     "###/SmartDashboard/Auto Choices": {
       "Collapsed": "0",
-      "Pos": "6,188",
+      "Pos": "7,187",
       "Size": "254,54"
     },
     "###/SmartDashboard/Auto Chooser": {
@@ -41,13 +41,13 @@
     },
     "###/SmartDashboard/Field": {
       "Collapsed": "0",
-      "Pos": "214,20",
+      "Pos": "514,208",
       "Size": "873,429"
     },
     "###/SmartDashboard/VisionSystemSim-main/Sim Field": {
       "Collapsed": "0",
-      "Pos": "210,19",
-      "Size": "1232,754"
+      "Pos": "276,22",
+      "Size": "780,400"
     },
     "###FMS": {
       "Collapsed": "0",

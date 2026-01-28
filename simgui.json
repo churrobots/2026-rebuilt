@@ -20,7 +20,22 @@
       "/SmartDashboard/Alerts": "Alerts",
       "/SmartDashboard/Auto Choices": "String Chooser",
       "/SmartDashboard/Auto Chooser": "String Chooser",
+      "/SmartDashboard/Elevator/mechanism": "Mechanism2d",
       "/SmartDashboard/Field": "Field2d",
+      "/SmartDashboard/IntakeArm/mechanism": "Mechanism2d",
+      "/SmartDashboard/IntakeRoller/mechanism": "Mechanism2d",
+      "/SmartDashboard/Mechanisms/Commands/ClimberTW/Live Tuning": "Command",
+      "/SmartDashboard/Mechanisms/Commands/ElevatorMotor/Down": "Command",
+      "/SmartDashboard/Mechanisms/Commands/ElevatorMotor/Up": "Command",
+      "/SmartDashboard/Mechanisms/Commands/ElevatorMotor/ZeroEncoder": "Command",
+      "/SmartDashboard/Mechanisms/Commands/IntakeArm/Down": "Command",
+      "/SmartDashboard/Mechanisms/Commands/IntakeArm/Live Tuning": "Command",
+      "/SmartDashboard/Mechanisms/Commands/IntakeArm/Up": "Command",
+      "/SmartDashboard/Mechanisms/Commands/IntakeArm/ZeroEncoder": "Command",
+      "/SmartDashboard/Mechanisms/Commands/IntakeRoller/Down": "Command",
+      "/SmartDashboard/Mechanisms/Commands/IntakeRoller/Live Tuning": "Command",
+      "/SmartDashboard/Mechanisms/Commands/IntakeRoller/Up": "Command",
+      "/SmartDashboard/Mechanisms/Commands/IntakeRoller/ZeroEncoder": "Command",
       "/SmartDashboard/PathPlanner": "Alerts",
       "/SmartDashboard/PhotonAlerts": "Alerts",
       "/SmartDashboard/VisionSystemSim-main/Sim Field": "Field2d"
@@ -42,10 +57,7 @@
         "left": 245,
         "right": 3942,
         "top": 118,
-        "width": 16.54119300842285,
-        "window": {
-          "visible": true
-        }
+        "width": 16.54119300842285
       },
       "/SmartDashboard/VisionSystemSim-main/Sim Field": {
         "apriltag": {
@@ -99,7 +111,7 @@
         },
         "width": 16.54119300842285,
         "window": {
-          "name": "EDIT",
+          "name": "Field With Vision Targets",
           "visible": true
         }
       }
@@ -114,13 +126,9 @@
     "Clients": {
       "open": true
     },
-    "Connections": {
-      "open": true
-    },
     "Server": {
       "open": true
-    },
-    "visible": true
+    }
   },
   "NetworkTables View": {
     "visible": false

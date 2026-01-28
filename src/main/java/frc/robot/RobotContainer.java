@@ -133,7 +133,7 @@ public class RobotContainer {
     switch (Constants.calibrationMode) {
       case ENABLED:
         // Set up auto routines
-        calibrationAutoChooser = new LoggedDashboardChooser<>("Auto Choices",
+        calibrationAutoChooser = new LoggedDashboardChooser<>("Calibration Autos",
             AutoBuilder.buildAutoChooser());
 
         NamedCommands.registerCommand("wheee", climberSub.setHeight(Meters.of(.75)));
