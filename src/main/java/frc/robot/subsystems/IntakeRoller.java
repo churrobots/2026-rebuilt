@@ -50,7 +50,7 @@ public class IntakeRoller extends SubsystemBase {
   .withFeedforward(new SimpleMotorFeedforward(0, 0, 0))
   .withSimFeedforward(new SimpleMotorFeedforward(0, 0, 0))
   // Telemetry name and verbosity level
-  .withTelemetry("ShooterMotor", TelemetryVerbosity.HIGH)
+  .withTelemetry("IntakeRoller", TelemetryVerbosity.HIGH)
   // Gearing from the motor rotor to final shaft.
   // In this example GearBox.fromReductionStages(3,4) is the same as GearBox.fromStages("3:1","4:1") which corresponds to the gearbox attached to your motor.
   // You could also use .withGearing(12) which does the same thing.
@@ -74,7 +74,7 @@ public class IntakeRoller extends SubsystemBase {
   // Maximum speed of the intake.
   .withUpperSoftLimit(RPM.of(1000))
   // Telemetry name and verbosity for the arm.
-  .withTelemetry("Intake", TelemetryVerbosity.HIGH);
+  .withTelemetry("IntakeRoller", TelemetryVerbosity.HIGH);
 
   // Shooter Mechanism
   private FlyWheel intake = new FlyWheel(intakeConfig);

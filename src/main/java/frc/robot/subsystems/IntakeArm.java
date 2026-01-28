@@ -20,7 +20,9 @@ import com.revrobotics.spark.SparkMax;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import yams.gearing.GearBox;
@@ -39,10 +41,10 @@ public class IntakeArm extends SubsystemBase {
   .withControlMode(ControlMode.CLOSED_LOOP)
   // Feedback Constants (PID Constants)
   .withClosedLoopController(50, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(45))
-  .withSimClosedLoopController(50, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(45))
+  .withSimClosedLoopController(0, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(45))
   // Feedforward Constants
   .withFeedforward(new ArmFeedforward(0, 0, 0))
-  .withSimFeedforward(new ArmFeedforward(0, 0, 0))
+  .withSimFeedforward(new ArmFeedforward(0, 1.32, 0.05))
   // Telemetry name and verbosity level
   .withTelemetry("IntakeArm", TelemetryVerbosity.HIGH)
   // Gearing from the motor rotor to final shaft.
@@ -63,14 +65,14 @@ public class IntakeArm extends SubsystemBase {
 
   private ArmConfig armCfg = new ArmConfig(sparkSmartMotorController)
   // Soft limit is applied to the SmartMotorControllers PID
-  .withSoftLimits(Degrees.of(-20), Degrees.of(10))
+  .withSoftLimits(Degrees.of(-90), Degrees.of(90))
   // Hard limit is applied to the simulation.
-  .withHardLimit(Degrees.of(-30), Degrees.of(40))
+  .withHardLimit(Degrees.of(-100), Degrees.of(100))
   // Starting position is where your arm starts
-  .withStartingPosition(Degrees.of(-5))
+  .withStartingPosition(Degrees.of(0))
   // Length and mass of your arm for sim.
-  .withLength(Feet.of(3))
-  .withMass(Pounds.of(1))
+  .withLength(Feet.of(1))
+  .withMass(Pounds.of(5))
   // Telemetry name and verbosity for the arm.
   .withTelemetry("IntakeArm", TelemetryVerbosity.HIGH);
 
@@ -128,8 +130,20 @@ public class IntakeArm extends SubsystemBase {
   }
 
   @Override
-  public void simulationPeriodic() {
-    // This method will be called once per scheduler run during simulation
-    arm.simIterate();
-  }
+public void simulationPeriodic() {
+  // Capture the values being used for the calculation
+  double currentAngleRad = Units.degreesToRadians(sparkSmartMotorController.getRotorPosition().in(Degrees));
+  double velocityRadPerSec = Units.degreesToRadians(sparkSmartMotorController.getMechanismVelocity().in(DegreesPerSecond));
+  
+  // Calculate the feedforward
+  double ffVolts = smcConfig.getArmFeedforward().get().calculate(currentAngleRad, velocityRadPerSec);
+  
+  // Log to SmartDashboard to view in Glass
+  SmartDashboard.putNumber("Arm/Sim/Angle_Rad", currentAngleRad);
+  SmartDashboard.putNumber("Arm/Sim/Velocity_RadPerSec", velocityRadPerSec);
+  SmartDashboard.putNumber("Arm/Sim/FF_Output_Volts", ffVolts);
+  
+  // Update the simulation
+  arm.simIterate();
+}
 }
