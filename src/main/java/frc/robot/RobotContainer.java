@@ -14,7 +14,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -34,14 +33,12 @@ import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOSpark;
 
-import java.util.function.Supplier;
-
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.RPM;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
-import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
+
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
@@ -61,7 +58,6 @@ public class RobotContainer {
   // Subsystems
   private final Drive drive;
 
-  private final Vision vision;
   private final ClimberTW climberSub = new ClimberTW();
   private final IntakeRoller intakeRoller = new IntakeRoller();
   private final IntakeArm intakeArm = new IntakeArm();
@@ -72,10 +68,7 @@ public class RobotContainer {
   // Dashboard inputs, for calibration only
   private LoggedDashboardChooser<Command> calibrationAutoChooser;
 
-  // sim only
-  private final CommandGenericHID keyboard = new CommandGenericHID(1); // Keyboard 0 on port 1
-
-  public SendableChooser<Command> autoChooser;
+  public SendableChooser<Command> realAutoChooser;
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -91,7 +84,7 @@ public class RobotContainer {
             new ModuleIOSpark(2),
             new ModuleIOSpark(3));
 
-        vision = new Vision(
+        new Vision(
             drive::addVisionMeasurement,
             new VisionIOPhotonVision(cameraFrontName, robotToCameraFront),
             new VisionIOPhotonVision(cameraBackName, robotToCameraBack),
@@ -108,7 +101,7 @@ public class RobotContainer {
             new ModuleIOSim(),
             new ModuleIOSim());
 
-        vision = new Vision(
+        new Vision(
             drive::addVisionMeasurement,
             new VisionIOPhotonVisionSim(cameraFrontName, robotToCameraFront, drive::getPose),
             new VisionIOPhotonVisionSim(cameraBackName, robotToCameraBack, drive::getPose),
@@ -131,7 +124,7 @@ public class RobotContainer {
             });
 
         // (Use same number of dummy implementations as the real robot)
-        vision = new Vision(drive::addVisionMeasurement, new VisionIO() {
+        new Vision(drive::addVisionMeasurement, new VisionIO() {
         }, new VisionIO() {
         });
         break;
@@ -144,7 +137,7 @@ public class RobotContainer {
             AutoBuilder.buildAutoChooser());
 
         NamedCommands.registerCommand("wheee", climberSub.setHeight(Meters.of(.75)));
-    // Set up SysId routines
+        // Set up SysId routines
 
         calibrationAutoChooser.addOption(
             "Drive Wheel Radius Characterization",
@@ -166,8 +159,8 @@ public class RobotContainer {
             drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
       default:
 
-        autoChooser = drive.setupPathPlanner();
-        SmartDashboard.putData("Auto Chooser", autoChooser);
+        realAutoChooser = drive.setupPathPlanner();
+        SmartDashboard.putData("Auto Chooser", realAutoChooser);
     }
 
     bindCommandsForTeleop();
@@ -259,7 +252,7 @@ public class RobotContainer {
         return calibrationAutoChooser.get();
       default:
 
-        return autoChooser.getSelected();
+        return realAutoChooser.getSelected();
     }
   }
 
