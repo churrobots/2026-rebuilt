@@ -51,18 +51,23 @@
     },
     "###/SmartDashboard/IntakeArm/mechanism": {
       "Collapsed": "0",
-      "Pos": "807,426",
-      "Size": "307,189"
+      "Pos": "18,583",
+      "Size": "283,176"
     },
     "###/SmartDashboard/IntakeRoller/mechanism": {
       "Collapsed": "0",
-      "Pos": "174,426",
-      "Size": "327,189"
+      "Pos": "21,389",
+      "Size": "291,187"
     },
     "###/SmartDashboard/PhotonAlerts": {
       "Collapsed": "0",
       "Pos": "134,190",
       "Size": "300,150"
+    },
+    "###/SmartDashboard/Shooter/mechanism": {
+      "Collapsed": "0",
+      "Pos": "27,185",
+      "Size": "270,200"
     },
     "###/SmartDashboard/VisionSystemSim-main/Sim Field": {
       "Collapsed": "0",
@@ -131,7 +136,7 @@
     },
     "Robot State": {
       "Collapsed": "0",
-      "Pos": "11,87",
+      "Pos": "13,81",
       "Size": "94,122"
     }
   }

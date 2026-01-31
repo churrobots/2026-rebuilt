@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.CalibrationMode;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.ClimberTW;
+import frc.robot.subsystems.GAU12Equalizer;
 import frc.robot.subsystems.IntakeArm;
 import frc.robot.subsystems.IntakeRoller;
 import frc.robot.subsystems.drive.Drive;
@@ -62,6 +63,7 @@ public class RobotContainer {
   private final ClimberTW climberSub = new ClimberTW();
   private final IntakeRoller intakeRoller = new IntakeRoller();
   private final IntakeArm intakeArm = new IntakeArm();
+  private final GAU12Equalizer shootsumballs = new GAU12Equalizer();
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(Hardware.DriverStation.driverXboxPort);
@@ -173,12 +175,12 @@ public class RobotContainer {
     intakeRoller.setDefaultCommand(intakeRoller.setIntakeDutyCycle(0));
     // Schedule `setHeight` when the Xbox controller's B button is pressed,
     // cancelling on release.
-    controller.a().whileTrue(climberSub.setHeight(Meters.of(0.25)));
-    controller.b().whileTrue(climberSub.setHeight(Meters.of(2.5)));
+    controller.a().onTrue(climberSub.setHeight(Meters.of(0.25)));
+    controller.b().onTrue(climberSub.setHeight(Meters.of(2.5)));
     // Schedule `set` when the Xbox controller's B button is pressed,
     // cancelling on release.
-    controller.x().whileTrue(climberSub.set(0.5));
-    controller.y().whileTrue(climberSub.set(-0.5));
+    controller.x().onTrue(climberSub.set(0.5));
+    controller.y().onTrue(climberSub.set(-0.5));
 
     // Schedule `setVelocity` when the Xbox controller's B button is pressed,
     // cancelling on release.
@@ -197,6 +199,15 @@ public class RobotContainer {
     // cancelling on release.
     controller.x().whileTrue(intakeArm.set(0.3));
     controller.y().whileTrue(intakeArm.set(-0.3));
+
+    // // Schedule `setVelocity` when the Xbox controller's B button is pressed,
+    // // cancelling on release.
+    // controller.a().whileTrue(m_exampleSubsystem.setVelocity(RPM.of(60)));
+    // controller.b().whileTrue(m_exampleSubsystem.setVelocity(RPM.of(300)));
+    // // Schedule `set` when the Xbox controller's B button is pressed,
+    // // cancelling on release.
+    // controller.x().whileTrue(m_exampleSubsystem.set(0.3));
+    // controller.y().whileTrue(m_exampleSubsystem.set(-0.3));
 
   }
 
