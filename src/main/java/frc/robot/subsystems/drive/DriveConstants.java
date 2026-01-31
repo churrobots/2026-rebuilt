@@ -63,6 +63,9 @@ public class DriveConstants {
   public static final double driveMotorReduction = 5.143; // (45.0 * 20.0) / (16.0 * 15.0); // MAXSwerve with 14 pinion
                                                           // teeth and
                                                           // 22 spur teeth
+                                                          // we think the 15 teeth is the bevel
+                                                          // drive shaft, and the 45 is the
+                                                          // wheel bevel
   public static final DCMotor driveGearbox = DCMotor.getNeoVortex(1);
 
   // Drive encoder configuration
