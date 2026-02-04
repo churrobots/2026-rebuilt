@@ -58,6 +58,8 @@ public class DriveConstants {
   public static final int backRightTurnCanId = 4;
 
   // Drive motor configuration
+  // This is how to tune all the values here
+  // https://docs.advantagekit.org/getting-started/template-projects/spark-swerve-template/#tuning
   public static final int driveMotorCurrentLimit = 50;
   public static final double wheelRadiusMeters = Units.inchesToMeters(1.479);
   public static final double driveMotorReduction = 5.143; // (45.0 * 20.0) / (16.0 * 15.0); // MAXSwerve with 14 pinion
