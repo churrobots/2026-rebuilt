@@ -26,7 +26,9 @@ import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.MomentOfInertia;
 
 public class DriveConstants {
-  public static final double maxSpeedMetersPerSec = 4.8;
+  // Extra High 4 is 7.22 m/s free speed theoretical max ratio, from:
+  // https://www.revrobotics.com/rev-21-3005/
+  public static final double maxSpeedMetersPerSec = 7.22;
   public static final double odometryFrequency = 100.0; // Hz
   public static final double trackWidth = Units.inchesToMeters(26.5);
   public static final double wheelBase = Units.inchesToMeters(26.5);
@@ -62,12 +64,14 @@ public class DriveConstants {
   // https://docs.advantagekit.org/getting-started/template-projects/spark-swerve-template/#tuning
   public static final int driveMotorCurrentLimit = 50;
   public static final double wheelRadiusMeters = Units.inchesToMeters(1.479);
-  public static final double driveMotorReduction = 5.143; // (45.0 * 20.0) / (16.0 * 15.0); // MAXSwerve with 14 pinion
-                                                          // teeth and
-                                                          // 22 spur teeth
-                                                          // we think the 15 teeth is the bevel
-                                                          // drive shaft, and the 45 is the
-                                                          // wheel bevel
+  // Extra High 4 is 3.75:1 ratio, from:
+  // https://www.revrobotics.com/rev-21-3005/
+  public static final double driveMotorReduction = 3.75; // (45.0 * 20.0) / (16.0 * 15.0); // MAXSwerve with 14 pinion
+                                                         // teeth and
+                                                         // 22 spur teeth
+                                                         // we think the 15 teeth is the bevel
+                                                         // drive shaft, and the 45 is the
+                                                         // wheel bevel
   public static final DCMotor driveGearbox = DCMotor.getNeoVortex(1);
 
   // Drive encoder configuration
