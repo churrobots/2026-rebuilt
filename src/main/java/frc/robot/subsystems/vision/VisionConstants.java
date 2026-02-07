@@ -27,17 +27,22 @@ public class VisionConstants {
   public static String cameraFrontName = "camera_front";
   public static String cameraBackName = "camera_back";
   public static String cameraRightName = "camera_right";
+  public static String cameraRearLeftName = "camera_rear_left";
 
   // Robot to camera transforms
   // (Not used by Limelight, configure in web UI instead)
 
-  public static Transform3d robotToCameraFront = new Transform3d(-10.25 * Constants.INCHES_TO_METERS,
-      -8.5 * Constants.INCHES_TO_METERS, 18.5 * Constants.INCHES_TO_METERS, new Rotation3d(-1 * Math.PI / 2, 0, 0.0));
-  public static Transform3d robotToCameraBack = new Transform3d(-15 * Constants.INCHES_TO_METERS,
-      8.5 * Constants.INCHES_TO_METERS, 19 * Constants.INCHES_TO_METERS, new Rotation3d(1 * Math.PI / 2, 0, Math.PI));
-  public static Transform3d robotToCameraRight = new Transform3d(-14 * Constants.INCHES_TO_METERS,
-      -9.5 * Constants.INCHES_TO_METERS, 15 * Constants.INCHES_TO_METERS,
-      new Rotation3d(-1 * Math.PI / 2, 0, -1 * Math.PI / 2));
+  public static Transform3d robotToCameraFront = new Transform3d(13.75 * Constants.INCHES_TO_METERS,
+      -12 * Constants.INCHES_TO_METERS, 9 * Constants.INCHES_TO_METERS,
+      new Rotation3d(0, -Math.PI / 10, -1 * Math.PI / 6));
+  public static Transform3d robotToCameraBack = new Transform3d(-13.75 * Constants.INCHES_TO_METERS,
+      -12. * Constants.INCHES_TO_METERS, 9 * Constants.INCHES_TO_METERS, new Rotation3d(0, 0, -1 * Math.PI / 2));
+  public static Transform3d robotToCameraRight = new Transform3d(13.75 * Constants.INCHES_TO_METERS,
+      12 * Constants.INCHES_TO_METERS, 9 * Constants.INCHES_TO_METERS,
+      new Rotation3d(0, -Math.PI / 10, Math.PI / 6));
+  public static Transform3d robotToCameraRearLeft = new Transform3d(-13.75 * Constants.INCHES_TO_METERS,
+      13.75 * Constants.INCHES_TO_METERS, 9 * Constants.INCHES_TO_METERS,
+      new Rotation3d(0, 0, Math.PI));
 
   // Basic filtering thresholds
   public static double maxAmbiguity = 0.3;
