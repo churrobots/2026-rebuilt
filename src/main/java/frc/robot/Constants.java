@@ -7,6 +7,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.RobotBase;
 
 /**
@@ -30,6 +31,18 @@ public final class Constants {
     /** Replaying from a log file. */
     REPLAY
   }
+
+  // This helps us differentiate multiple robots. Each robot stores
+  // a persisted string in NetworkTables, so that we know which
+  // robot we got deployed to, in case there are specific constants
+  // that have different values between those robots.
+  public static final String ROBOT_SIMULATION = "simulation";
+  public static final String ROBOT_ALPHA = "alpha";
+  public static final String ROBOT_BETA = "beta";
+  public static final String robotName = NetworkTableInstance
+      .getDefault()
+      .getEntry("robotName")
+      .getString(RobotBase.isSimulation() ? ROBOT_SIMULATION : ROBOT_BETA);
 
   public static final CalibrationMode calibrationMode = CalibrationMode.ENABLED;
 

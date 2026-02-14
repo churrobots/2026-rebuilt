@@ -26,7 +26,7 @@ import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.MomentOfInertia;
 
 public class DriveConstants {
-  public static final double maxSpeedMetersPerSec = 5.0;
+  public static final double maxSpeedMetersPerSec = 6.2;
   public static final double odometryFrequency = 100.0; // Hz
   public static final double trackWidth = Units.inchesToMeters(24);
   public static final double wheelBase = Units.inchesToMeters(24);
@@ -38,11 +38,24 @@ public class DriveConstants {
       new Translation2d(-trackWidth / 2.0, -wheelBase / 2.0)
   };
 
+  // // Zeroed rotation values for each module, see setup instructions
+  // // module 0
+  // public static final Rotation2d frontLeftZeroRotation = new Rotation2d(0.0);
+  // // module 1
+  // public static final Rotation2d frontRightZeroRotation = new Rotation2d(0.0);
+  // // module 2
+  // public static final Rotation2d backLeftZeroRotation = new Rotation2d(0.0);
+  // // module 3
+  // public static final Rotation2d backRightZeroRotation = new Rotation2d(0.0);
   // Zeroed rotation values for each module, see setup instructions
-  public static final Rotation2d frontLeftZeroRotation = new Rotation2d(0.0);
-  public static final Rotation2d frontRightZeroRotation = new Rotation2d(0.0);
-  public static final Rotation2d backLeftZeroRotation = new Rotation2d(0.0);
-  public static final Rotation2d backRightZeroRotation = new Rotation2d(0.0);
+  // module 0
+  public static final Rotation2d frontLeftZeroRotation = new Rotation2d(3.133492);
+  // module 1
+  public static final Rotation2d frontRightZeroRotation = new Rotation2d(3.133492);
+  // module 2
+  public static final Rotation2d backLeftZeroRotation = new Rotation2d(-3.053332);
+  // module 3
+  public static final Rotation2d backRightZeroRotation = new Rotation2d(-3.125994);
 
   // Device CAN IDs
   public static final int pigeonCanId = 9;
@@ -60,8 +73,8 @@ public class DriveConstants {
   // Drive motor configuration
   // This is how to tune all the values here
   // https://docs.advantagekit.org/getting-started/template-projects/spark-swerve-template/#tuning
-  public static final int driveMotorCurrentLimit = 50;
-  public static final double wheelRadiusMeters = Units.inchesToMeters(1.479);
+  public static final int driveMotorCurrentLimit = 40;
+  public static final double wheelRadiusMeters = Units.inchesToMeters(1.470);
   // MAXSwerve with 16 pinion teeth and 20 spur teeth
   // We think the 15 teeth is the bevel drive shaft, and the 45 is the wheel bevel
   public static final double driveMotorReduction = (45.0 * 20.0) / (16.0 * 15.0);
@@ -77,8 +90,8 @@ public class DriveConstants {
   // Drive PID configuration
   public static final double driveKp = 0.0;
   public static final double driveKd = 0.0;
-  public static final double driveKs = 0.17859;
-  public static final double driveKv = 0.06385;
+  public static final double driveKs = 0.14945;
+  public static final double driveKv = 0.06761;
   public static final double driveSimP = 0.05;
   public static final double driveSimD = 0.0;
   public static final double driveSimKs = 0.0;

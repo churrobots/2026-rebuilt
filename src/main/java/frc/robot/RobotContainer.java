@@ -59,9 +59,9 @@ public class RobotContainer {
   // Subsystems
   private final Drive drive;
 
-  private final ClimberTW climberSub = new ClimberTW();
-  private final IntakeRoller intakeRoller = new IntakeRoller();
-  private final IntakeArm intakeArm = new IntakeArm();
+  private ClimberTW climberSub;
+  private IntakeRoller intakeRoller;
+  private IntakeArm intakeArm;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(Hardware.DriverStation.driverXboxPort);
@@ -85,10 +85,10 @@ public class RobotContainer {
 
         new Vision(
             drive::addVisionMeasurement,
-            new VisionIOPhotonVisionSim(cameraFrontRight, robotToCameraFrontRight, drive::getPose),
-            new VisionIOPhotonVisionSim(cameraBackRight, robotToCameraBackRight, drive::getPose),
-            new VisionIOPhotonVisionSim(cameraFrontLeft, robotToCameraFrontLeft, drive::getPose),
-            new VisionIOPhotonVisionSim(cameraBackLeft, robotToCameraBackLeft, drive::getPose));
+            new VisionIOPhotonVision(cameraFrontRight, robotToCameraFrontRight),
+            new VisionIOPhotonVision(cameraBackRight, robotToCameraBackRight),
+            new VisionIOPhotonVision(cameraFrontLeft, robotToCameraFrontLeft),
+            new VisionIOPhotonVision(cameraBackLeft, robotToCameraBackLeft));
 
         break;
 
@@ -109,6 +109,9 @@ public class RobotContainer {
             new VisionIOPhotonVisionSim(cameraFrontLeft, robotToCameraFrontLeft, drive::getPose),
             new VisionIOPhotonVisionSim(cameraBackLeft, robotToCameraBackLeft, drive::getPose));
 
+        climberSub = new ClimberTW();
+        intakeRoller = new IntakeRoller();
+        intakeArm = new IntakeArm();
         break;
 
       default:
@@ -142,66 +145,68 @@ public class RobotContainer {
    */
   void bindCommandsForAuto() {
     // Set up auto routines
-    NamedCommands.registerCommand("wheee", climberSub.setHeight(Meters.of(.75)));
     autoChooser = new LoggedDashboardChooser<>("Auto Choices",
-    AutoBuilder.buildAutoChooser());
+        AutoBuilder.buildAutoChooser());
 
     // Add SysId routines if we are in Calibration mode
     // TODO: we might want the Wheel Radius characterization more accessible so we
     // can recharacterize in the pit as wheels wear down and get changed
     if (Constants.calibrationMode == CalibrationMode.ENABLED) {
-    autoChooser.addOption(
-    "Drive Wheel Radius Characterization",
-    DriveCommands.wheelRadiusCharacterization(drive));
-    autoChooser.addOption(
-    "Drive Simple FF Characterization",
-    DriveCommands.feedforwardCharacterization(drive));
-    autoChooser.addOption(
-    "Drive SysId (Quasistatic Forward)",
-    drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-    "Drive SysId (Quasistatic Reverse)",
-    drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-    autoChooser.addOption(
-    "Drive SysId (Dynamic Forward)",
-    drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-    "Drive SysId (Dynamic Reverse)",
-    drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+      autoChooser.addOption(
+          "Drive Wheel Radius Characterization",
+          DriveCommands.wheelRadiusCharacterization(drive));
+      autoChooser.addOption(
+          "Drive Simple FF Characterization",
+          DriveCommands.feedforwardCharacterization(drive));
+      autoChooser.addOption(
+          "Drive SysId (Quasistatic Forward)",
+          drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+      autoChooser.addOption(
+          "Drive SysId (Quasistatic Reverse)",
+          drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+      autoChooser.addOption(
+          "Drive SysId (Dynamic Forward)",
+          drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
+      autoChooser.addOption(
+          "Drive SysId (Dynamic Reverse)",
+          drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
     }
 
-    // Set the default command to force the arm to go to 0.
-    // inNout.setDefaultCommand(inNout.setAngle(Degrees.of(0)));
-    climberSub.setDefaultCommand(climberSub.setHeight(Meters.of(0)));
-    intakeArm.setDefaultCommand(intakeArm.setAngle(Degrees.of(0)));
-    intakeRoller.setDefaultCommand(intakeRoller.setIntakeDutyCycle(0));
-    // Schedule `setHeight` when the Xbox controller's B button is pressed,
-    // cancelling on release.
-    controller.a().whileTrue(climberSub.setHeight(Meters.of(0.25)));
-    controller.b().whileTrue(climberSub.setHeight(Meters.of(2.5)));
-    // Schedule `set` when the Xbox controller's B button is pressed,
-    // cancelling on release.
-    controller.x().whileTrue(climberSub.set(0.5));
-    controller.y().whileTrue(climberSub.set(-0.5));
+    if (Constants.currentMode == Constants.simMode) {
+      NamedCommands.registerCommand("wheee", climberSub.setHeight(Meters.of(.75)));
 
-    // Schedule `setVelocity` when the Xbox controller's B button is pressed,
-    // cancelling on release.
-    controller.a().whileTrue(intakeRoller.setVelocity(RPM.of(60)));
-    controller.b().whileTrue(intakeRoller.setVelocity(RPM.of(300)));
-    // Schedule `set` when the Xbox controller's B button is pressed,
-    // cancelling on release.
-    controller.x().whileTrue(intakeRoller.setIntakeDutyCycle(0.3));
-    controller.y().whileTrue(intakeRoller.setIntakeDutyCycle(-0.3));
+      // Set the default command to force the arm to go to 0.
+      // inNout.setDefaultCommand(inNout.setAngle(Degrees.of(0)));
+      climberSub.setDefaultCommand(climberSub.setHeight(Meters.of(0)));
+      intakeArm.setDefaultCommand(intakeArm.setAngle(Degrees.of(0)));
+      intakeRoller.setDefaultCommand(intakeRoller.setIntakeDutyCycle(0));
+      // Schedule `setHeight` when the Xbox controller's B button is pressed,
+      // cancelling on release.
+      controller.a().whileTrue(climberSub.setHeight(Meters.of(0.25)));
+      controller.b().whileTrue(climberSub.setHeight(Meters.of(2.5)));
+      // Schedule `set` when the Xbox controller's B button is pressed,
+      // cancelling on release.
+      controller.x().whileTrue(climberSub.set(0.5));
+      controller.y().whileTrue(climberSub.set(-0.5));
 
-    // Schedule `setAngle` when the Xbox controller's B button is pressed,
-    // cancelling on release.
-    controller.a().whileTrue(intakeArm.setAngle(Degrees.of(-5)));
-    controller.b().whileTrue(intakeArm.setAngle(Degrees.of(15)));
-    // Schedule `set` when the Xbox controller's B button is pressed,
-    // cancelling on release.
-    controller.x().whileTrue(intakeArm.set(0.3));
-    controller.y().whileTrue(intakeArm.set(-0.3));
+      // Schedule `setVelocity` when the Xbox controller's B button is pressed,
+      // cancelling on release.
+      controller.a().whileTrue(intakeRoller.setVelocity(RPM.of(60)));
+      controller.b().whileTrue(intakeRoller.setVelocity(RPM.of(300)));
+      // Schedule `set` when the Xbox controller's B button is pressed,
+      // cancelling on release.
+      controller.x().whileTrue(intakeRoller.setIntakeDutyCycle(0.3));
+      controller.y().whileTrue(intakeRoller.setIntakeDutyCycle(-0.3));
 
+      // Schedule `setAngle` when the Xbox controller's B button is pressed,
+      // cancelling on release.
+      controller.a().whileTrue(intakeArm.setAngle(Degrees.of(-5)));
+      controller.b().whileTrue(intakeArm.setAngle(Degrees.of(15)));
+      // Schedule `set` when the Xbox controller's B button is pressed,
+      // cancelling on release.
+      controller.x().whileTrue(intakeArm.set(0.3));
+      controller.y().whileTrue(intakeArm.set(-0.3));
+    }
   }
 
   /**

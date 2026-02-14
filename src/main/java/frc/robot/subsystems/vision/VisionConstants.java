@@ -33,16 +33,18 @@ public class VisionConstants {
   // Robot to camera transforms
   // (Not used by Limelight, configure in web UI instead)
 
-  public static Transform3d robotToCameraFrontRight = new Transform3d(Units.inchesToMeters(13.75),
-      Units.inchesToMeters(-12), Units.inchesToMeters(9),
+  // Yaw only works right when it is inverted?
+  public static Transform3d robotToCameraFrontRight = new Transform3d(
+      Units.inchesToMeters(13.75), Units.inchesToMeters(-12), Units.inchesToMeters(9),
+      new Rotation3d(Math.PI, -Math.PI / 10, 1 * Math.PI / 6));
+  public static Transform3d robotToCameraBackRight = new Transform3d(
+      Units.inchesToMeters(-13.75), Units.inchesToMeters(-12.), Units.inchesToMeters(9),
+      new Rotation3d(Math.PI, 0, 1 * Math.PI / 2));
+  public static Transform3d robotToCameraFrontLeft = new Transform3d(
+      Units.inchesToMeters(13.75), Units.inchesToMeters(12), Units.inchesToMeters(9),
       new Rotation3d(Math.PI, -Math.PI / 10, -1 * Math.PI / 6));
-  public static Transform3d robotToCameraBackRight = new Transform3d(Units.inchesToMeters(-13.75),
-      Units.inchesToMeters(-12.), Units.inchesToMeters(9), new Rotation3d(Math.PI, 0, -1 * Math.PI / 2));
-  public static Transform3d robotToCameraFrontLeft = new Transform3d(Units.inchesToMeters(13.75),
-      Units.inchesToMeters(12), Units.inchesToMeters(9),
-      new Rotation3d(Math.PI, -Math.PI / 10, Math.PI / 6));
-  public static Transform3d robotToCameraBackLeft = new Transform3d(Units.inchesToMeters(-13.75),
-      Units.inchesToMeters(13.75), Units.inchesToMeters(9),
+  public static Transform3d robotToCameraBackLeft = new Transform3d(
+      Units.inchesToMeters(-13.75), Units.inchesToMeters(13.75), Units.inchesToMeters(9),
       new Rotation3d(Math.PI, 0, Math.PI));
 
   // Basic filtering thresholds

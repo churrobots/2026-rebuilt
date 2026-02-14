@@ -97,7 +97,6 @@ public class ModuleIOSpark implements ModuleIO {
         .smartCurrentLimit(driveMotorCurrentLimit)
         .voltageCompensation(12.0);
     driveConfig.encoder
-        .inverted(driveEncoderInverted)
         .positionConversionFactor(driveEncoderPositionFactor)
         .velocityConversionFactor(driveEncoderVelocityFactor)
         .uvwMeasurementPeriod(10)
