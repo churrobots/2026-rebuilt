@@ -24,23 +24,23 @@ public class VisionConstants {
   public static AprilTagFieldLayout aprilTagLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
 
   // Camera names, must match names configured on coprocessor
-  public static String cameraFrontName = "camera_front";
-  public static String cameraBackName = "camera_back";
-  public static String cameraRightName = "camera_right";
-  public static String cameraRearLeftName = "camera_rear_left";
+  public static String cameraFrontRight = "camera_frontright";
+  public static String cameraBackRight = "camera_right";
+  public static String cameraFrontLeft = "camera_frontright";
+  public static String cameraBackLeft = "camera_back";
 
   // Robot to camera transforms
   // (Not used by Limelight, configure in web UI instead)
 
-  public static Transform3d robotToCameraFront = new Transform3d(13.75 * Constants.INCHES_TO_METERS,
+  public static Transform3d robotToCameraFrontRight = new Transform3d(13.75 * Constants.INCHES_TO_METERS,
       -12 * Constants.INCHES_TO_METERS, 9 * Constants.INCHES_TO_METERS,
       new Rotation3d(0, -Math.PI / 10, -1 * Math.PI / 6));
-  public static Transform3d robotToCameraBack = new Transform3d(-13.75 * Constants.INCHES_TO_METERS,
+  public static Transform3d robotToCameraBackRight = new Transform3d(-13.75 * Constants.INCHES_TO_METERS,
       -12. * Constants.INCHES_TO_METERS, 9 * Constants.INCHES_TO_METERS, new Rotation3d(0, 0, -1 * Math.PI / 2));
-  public static Transform3d robotToCameraRight = new Transform3d(13.75 * Constants.INCHES_TO_METERS,
+  public static Transform3d robotToCameraFrontLeft = new Transform3d(13.75 * Constants.INCHES_TO_METERS,
       12 * Constants.INCHES_TO_METERS, 9 * Constants.INCHES_TO_METERS,
       new Rotation3d(0, -Math.PI / 10, Math.PI / 6));
-  public static Transform3d robotToCameraRearLeft = new Transform3d(-13.75 * Constants.INCHES_TO_METERS,
+  public static Transform3d robotToCameraBackLeft = new Transform3d(-13.75 * Constants.INCHES_TO_METERS,
       13.75 * Constants.INCHES_TO_METERS, 9 * Constants.INCHES_TO_METERS,
       new Rotation3d(0, 0, Math.PI));
 

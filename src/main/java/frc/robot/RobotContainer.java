@@ -85,10 +85,11 @@ public class RobotContainer {
 
         new Vision(
             drive::addVisionMeasurement,
-            new VisionIOPhotonVision(cameraFrontName, robotToCameraFront),
-            new VisionIOPhotonVision(cameraBackName, robotToCameraBack),
-            new VisionIOPhotonVision(cameraRightName, robotToCameraRight),
-            new VisionIOPhotonVision(cameraRearLeftName, robotToCameraRearLeft));
+            new VisionIOPhotonVisionSim(cameraFrontRight, robotToCameraFrontRight, drive::getPose),
+            new VisionIOPhotonVisionSim(cameraBackRight, robotToCameraBackRight, drive::getPose),
+            new VisionIOPhotonVisionSim(cameraFrontLeft, robotToCameraFrontLeft, drive::getPose),
+            new VisionIOPhotonVisionSim(cameraBackLeft, robotToCameraBackLeft, drive::getPose));
+
         break;
 
       case SIM:
@@ -103,10 +104,10 @@ public class RobotContainer {
 
         new Vision(
             drive::addVisionMeasurement,
-            new VisionIOPhotonVisionSim(cameraFrontName, robotToCameraFront, drive::getPose),
-            new VisionIOPhotonVisionSim(cameraBackName, robotToCameraBack, drive::getPose),
-            new VisionIOPhotonVisionSim(cameraRightName, robotToCameraRight, drive::getPose),
-            new VisionIOPhotonVisionSim(cameraRearLeftName, robotToCameraRearLeft, drive::getPose));
+            new VisionIOPhotonVisionSim(cameraFrontRight, robotToCameraFrontRight, drive::getPose),
+            new VisionIOPhotonVisionSim(cameraBackRight, robotToCameraBackRight, drive::getPose),
+            new VisionIOPhotonVisionSim(cameraFrontLeft, robotToCameraFrontLeft, drive::getPose),
+            new VisionIOPhotonVisionSim(cameraBackLeft, robotToCameraBackLeft, drive::getPose));
 
         break;
 
@@ -142,30 +143,31 @@ public class RobotContainer {
   void bindCommandsForAuto() {
     // Set up auto routines
     NamedCommands.registerCommand("wheee", climberSub.setHeight(Meters.of(.75)));
-    autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
+    autoChooser = new LoggedDashboardChooser<>("Auto Choices",
+    AutoBuilder.buildAutoChooser());
 
     // Add SysId routines if we are in Calibration mode
     // TODO: we might want the Wheel Radius characterization more accessible so we
     // can recharacterize in the pit as wheels wear down and get changed
     if (Constants.calibrationMode == CalibrationMode.ENABLED) {
-      autoChooser.addOption(
-          "Drive Wheel Radius Characterization",
-          DriveCommands.wheelRadiusCharacterization(drive));
-      autoChooser.addOption(
-          "Drive Simple FF Characterization",
-          DriveCommands.feedforwardCharacterization(drive));
-      autoChooser.addOption(
-          "Drive SysId (Quasistatic Forward)",
-          drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-      autoChooser.addOption(
-          "Drive SysId (Quasistatic Reverse)",
-          drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-      autoChooser.addOption(
-          "Drive SysId (Dynamic Forward)",
-          drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
-      autoChooser.addOption(
-          "Drive SysId (Dynamic Reverse)",
-          drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+    autoChooser.addOption(
+    "Drive Wheel Radius Characterization",
+    DriveCommands.wheelRadiusCharacterization(drive));
+    autoChooser.addOption(
+    "Drive Simple FF Characterization",
+    DriveCommands.feedforwardCharacterization(drive));
+    autoChooser.addOption(
+    "Drive SysId (Quasistatic Forward)",
+    drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+    autoChooser.addOption(
+    "Drive SysId (Quasistatic Reverse)",
+    drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+    autoChooser.addOption(
+    "Drive SysId (Dynamic Forward)",
+    drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
+    autoChooser.addOption(
+    "Drive SysId (Dynamic Reverse)",
+    drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
     }
 
     // Set the default command to force the arm to go to 0.
