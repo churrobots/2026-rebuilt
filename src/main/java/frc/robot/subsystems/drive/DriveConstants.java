@@ -26,7 +26,7 @@ import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.MomentOfInertia;
 
 public class DriveConstants {
-  public static final double maxSpeedMetersPerSec = 4.8;
+  public static final double maxSpeedMetersPerSec = 5.0;
   public static final double odometryFrequency = 100.0; // Hz
   public static final double trackWidth = Units.inchesToMeters(24);
   public static final double wheelBase = Units.inchesToMeters(24);
@@ -62,15 +62,13 @@ public class DriveConstants {
   // https://docs.advantagekit.org/getting-started/template-projects/spark-swerve-template/#tuning
   public static final int driveMotorCurrentLimit = 50;
   public static final double wheelRadiusMeters = Units.inchesToMeters(1.479);
-  public static final double driveMotorReduction = 5.143; // (45.0 * 20.0) / (16.0 * 15.0); // MAXSwerve with 14 pinion
-                                                          // teeth and
-                                                          // 22 spur teeth
-                                                          // we think the 15 teeth is the bevel
-                                                          // drive shaft, and the 45 is the
-                                                          // wheel bevel
+  // MAXSwerve with 16 pinion teeth and 20 spur teeth
+  // We think the 15 teeth is the bevel drive shaft, and the 45 is the wheel bevel
+  public static final double driveMotorReduction = (45.0 * 20.0) / (16.0 * 15.0);
   public static final DCMotor driveGearbox = DCMotor.getNeoVortex(1);
 
   // Drive encoder configuration
+  public static final boolean driveEncoderInverted = true;
   public static final double driveEncoderPositionFactor = 2 * Math.PI / driveMotorReduction; // Rotor Rotations -> Wheel
                                                                                              // Radians
   public static final double driveEncoderVelocityFactor = (2 * Math.PI) / 60.0 / driveMotorReduction; // Rotor RPM ->

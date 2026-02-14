@@ -26,7 +26,7 @@ public class VisionConstants {
   // Camera names, must match names configured on coprocessor
   public static String cameraFrontRight = "camera_frontright";
   public static String cameraBackRight = "camera_right";
-  public static String cameraFrontLeft = "camera_frontright";
+  public static String cameraFrontLeft = "camera_frontleft";
   public static String cameraBackLeft = "camera_back";
 
   // Robot to camera transforms
@@ -34,15 +34,15 @@ public class VisionConstants {
 
   public static Transform3d robotToCameraFrontRight = new Transform3d(13.75 * Constants.INCHES_TO_METERS,
       -12 * Constants.INCHES_TO_METERS, 9 * Constants.INCHES_TO_METERS,
-      new Rotation3d(0, -Math.PI / 10, -1 * Math.PI / 6));
+      new Rotation3d(Math.PI, -Math.PI / 10, -1 * Math.PI / 6));
   public static Transform3d robotToCameraBackRight = new Transform3d(-13.75 * Constants.INCHES_TO_METERS,
-      -12. * Constants.INCHES_TO_METERS, 9 * Constants.INCHES_TO_METERS, new Rotation3d(0, 0, -1 * Math.PI / 2));
+      -12. * Constants.INCHES_TO_METERS, 9 * Constants.INCHES_TO_METERS, new Rotation3d(Math.PI, 0, -1 * Math.PI / 2));
   public static Transform3d robotToCameraFrontLeft = new Transform3d(13.75 * Constants.INCHES_TO_METERS,
       12 * Constants.INCHES_TO_METERS, 9 * Constants.INCHES_TO_METERS,
-      new Rotation3d(0, -Math.PI / 10, Math.PI / 6));
+      new Rotation3d(Math.PI, -Math.PI / 10, Math.PI / 6));
   public static Transform3d robotToCameraBackLeft = new Transform3d(-13.75 * Constants.INCHES_TO_METERS,
       13.75 * Constants.INCHES_TO_METERS, 9 * Constants.INCHES_TO_METERS,
-      new Rotation3d(0, 0, Math.PI));
+      new Rotation3d(Math.PI, 0, Math.PI));
 
   // Basic filtering thresholds
   public static double maxAmbiguity = 0.3;
