@@ -41,6 +41,4 @@ public final class Constants {
     /** In calibration mode. */
     ENABLED
   }
-
-  public static final double INCHES_TO_METERS = 0.0254;
 }

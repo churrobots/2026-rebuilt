@@ -17,6 +17,7 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.util.Units;
 import frc.robot.Constants;
 
 public class VisionConstants {
@@ -32,16 +33,16 @@ public class VisionConstants {
   // Robot to camera transforms
   // (Not used by Limelight, configure in web UI instead)
 
-  public static Transform3d robotToCameraFrontRight = new Transform3d(13.75 * Constants.INCHES_TO_METERS,
-      -12 * Constants.INCHES_TO_METERS, 9 * Constants.INCHES_TO_METERS,
+  public static Transform3d robotToCameraFrontRight = new Transform3d(Units.inchesToMeters(13.75),
+      Units.inchesToMeters(-12), Units.inchesToMeters(9),
       new Rotation3d(Math.PI, -Math.PI / 10, -1 * Math.PI / 6));
-  public static Transform3d robotToCameraBackRight = new Transform3d(-13.75 * Constants.INCHES_TO_METERS,
-      -12. * Constants.INCHES_TO_METERS, 9 * Constants.INCHES_TO_METERS, new Rotation3d(Math.PI, 0, -1 * Math.PI / 2));
-  public static Transform3d robotToCameraFrontLeft = new Transform3d(13.75 * Constants.INCHES_TO_METERS,
-      12 * Constants.INCHES_TO_METERS, 9 * Constants.INCHES_TO_METERS,
+  public static Transform3d robotToCameraBackRight = new Transform3d(Units.inchesToMeters(-13.75),
+      Units.inchesToMeters(-12.), Units.inchesToMeters(9), new Rotation3d(Math.PI, 0, -1 * Math.PI / 2));
+  public static Transform3d robotToCameraFrontLeft = new Transform3d(Units.inchesToMeters(13.75),
+      Units.inchesToMeters(12), Units.inchesToMeters(9),
       new Rotation3d(Math.PI, -Math.PI / 10, Math.PI / 6));
-  public static Transform3d robotToCameraBackLeft = new Transform3d(-13.75 * Constants.INCHES_TO_METERS,
-      13.75 * Constants.INCHES_TO_METERS, 9 * Constants.INCHES_TO_METERS,
+  public static Transform3d robotToCameraBackLeft = new Transform3d(Units.inchesToMeters(-13.75),
+      Units.inchesToMeters(13.75), Units.inchesToMeters(9),
       new Rotation3d(Math.PI, 0, Math.PI));
 
   // Basic filtering thresholds
