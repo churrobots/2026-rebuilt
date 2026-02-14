@@ -175,7 +175,7 @@ public class RobotContainer {
     //climberSub.setDefaultCommand(climberSub.set(0));
     // intakeArm.setDefaultCommand(intakeArm.setAngle(Degrees.of(0)));
     intakeRoller.setDefaultCommand(intakeRoller.setIntakeDutyCycle(0));
-    intakeArm.setDefaultCommand(intakeArm.setAngle(Degrees.of(10)));
+    intakeArm.setDefaultCommand(intakeArm.setAngle(Degrees.of(0)));
     // Schedule `setHeight` when the Xbox controller's B button is pressed,
     // cancelling on release.
     controller.a().whileTrue(climberSub.setHeight(Meters.of(0.25)));
@@ -187,6 +187,10 @@ public class RobotContainer {
     // controller.back().whileTrue(intakeRoller.setVelocity(RPM.of(60)));
     // controller.y().whileTrue(intakeRoller.setVelocity(RPM.of(300)));
 
+    controller.a().onTrue(intakeArm.setAngle(Degrees.of(15)));
+    controller.b().onTrue(intakeArm.setAngle(Degrees.of(30)));
+    controller.x().onTrue(intakeArm.setAngle(Degrees.of(45)));
+    controller.y().onTrue(intakeArm.setAngle(Degrees.of(60)));
     // Schedule `setAngle` when the Xbox controller's B button is pressed,
     // cancelling on release.
     // controller.a().whileTrue(intakeArm.setAngle(Degrees.of(-5)));

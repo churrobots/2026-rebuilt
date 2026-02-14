@@ -31,7 +31,7 @@
     },
     "###/SmartDashboard/Auto Choices": {
       "Collapsed": "0",
-      "Pos": "11,26",
+      "Pos": "171,37",
       "Size": "262,50"
     },
     "###/SmartDashboard/Auto Chooser": {
@@ -39,20 +39,30 @@
       "Pos": "10,26",
       "Size": "262,50"
     },
+    "###/SmartDashboard/DoubleJointedArm_LowerArm_UpperArm/mechanism": {
+      "Collapsed": "0",
+      "Pos": "400,400",
+      "Size": "523,357"
+    },
     "###/SmartDashboard/Elevator/mechanism": {
       "Collapsed": "0",
-      "Pos": "40,461",
-      "Size": "311,295"
+      "Pos": "364,170",
+      "Size": "271,247"
+    },
+    "###/SmartDashboard/ExponentiallyProfiledArm/mechanism": {
+      "Collapsed": "0",
+      "Pos": "398,539",
+      "Size": "624,305"
     },
     "###/SmartDashboard/Field": {
       "Collapsed": "0",
-      "Pos": "383,22",
+      "Pos": "384,23",
       "Size": "915,465"
     },
     "###/SmartDashboard/IntakeArm/mechanism": {
       "Collapsed": "0",
-      "Pos": "30,178",
-      "Size": "283,279"
+      "Pos": "169,458",
+      "Size": "755,518"
     },
     "###/SmartDashboard/IntakeRoller/mechanism": {
       "Collapsed": "0",
@@ -76,12 +86,12 @@
     },
     "###/SmartDashboard/Spindexer/mechanism": {
       "Collapsed": "0",
-      "Pos": "408,502",
-      "Size": "281,180"
+      "Pos": "76,112",
+      "Size": "281,264"
     },
     "###/SmartDashboard/VisionSystemSim-main/Sim Field": {
       "Collapsed": "0",
-      "Pos": "337,272",
+      "Pos": "1006,288",
       "Size": "780,400"
     },
     "###DIO": {
@@ -101,7 +111,7 @@
     },
     "###Keyboard 0 Settings": {
       "Collapsed": "0",
-      "Pos": "1126,242",
+      "Pos": "992,98",
       "Size": "300,560"
     },
     "###Keyboard 1 Settings": {
@@ -111,13 +121,13 @@
     },
     "###NetworkTables": {
       "Collapsed": "0",
-      "Pos": "404,211",
-      "Size": "750,185"
+      "Pos": "955,50",
+      "Size": "750,566"
     },
     "###NetworkTables Info": {
       "Collapsed": "0",
-      "Pos": "449,744",
-      "Size": "750,145"
+      "Pos": "1012,714",
+      "Size": "749,145"
     },
     "###Other Devices": {
       "Collapsed": "0",
@@ -126,8 +136,8 @@
     },
     "###Plot <0>": {
       "Collapsed": "0",
-      "Pos": "60,60",
-      "Size": "700,400"
+      "Pos": "394,95",
+      "Size": "898,367"
     },
     "###System Joysticks": {
       "Collapsed": "0",
@@ -146,7 +156,7 @@
     },
     "Robot State": {
       "Collapsed": "0",
-      "Pos": "281,49",
+      "Pos": "531,27",
       "Size": "94,122"
     }
   }

@@ -20,14 +20,21 @@
       "/SmartDashboard/Alerts": "Alerts",
       "/SmartDashboard/Auto Choices": "String Chooser",
       "/SmartDashboard/Auto Chooser": "String Chooser",
+      "/SmartDashboard/DoubleJointedArm_LowerArm_UpperArm/mechanism": "Mechanism2d",
       "/SmartDashboard/Elevator/mechanism": "Mechanism2d",
+      "/SmartDashboard/ExponentiallyProfiledArm/mechanism": "Mechanism2d",
       "/SmartDashboard/Field": "Field2d",
       "/SmartDashboard/IntakeArm/mechanism": "Mechanism2d",
       "/SmartDashboard/IntakeRoller/mechanism": "Mechanism2d",
       "/SmartDashboard/Mechanisms/Commands/ClimberTW/Live Tuning": "Command",
+      "/SmartDashboard/Mechanisms/Commands/DoubleJointedArmSubsystem/Live Tuning": "Command",
       "/SmartDashboard/Mechanisms/Commands/ElevatorMotor/Down": "Command",
       "/SmartDashboard/Mechanisms/Commands/ElevatorMotor/Up": "Command",
       "/SmartDashboard/Mechanisms/Commands/ElevatorMotor/ZeroEncoder": "Command",
+      "/SmartDashboard/Mechanisms/Commands/ExponentiallyProfiledArmMotor/Down": "Command",
+      "/SmartDashboard/Mechanisms/Commands/ExponentiallyProfiledArmMotor/Up": "Command",
+      "/SmartDashboard/Mechanisms/Commands/ExponentiallyProfiledArmMotor/ZeroEncoder": "Command",
+      "/SmartDashboard/Mechanisms/Commands/ExponentiallyProfiledArmSubsystem/Live Tuning": "Command",
       "/SmartDashboard/Mechanisms/Commands/GAU12Equalizer/Live Tuning": "Command",
       "/SmartDashboard/Mechanisms/Commands/IntakeArm/Down": "Command",
       "/SmartDashboard/Mechanisms/Commands/IntakeArm/Live Tuning": "Command",
@@ -37,6 +44,9 @@
       "/SmartDashboard/Mechanisms/Commands/IntakeRoller/Live Tuning": "Command",
       "/SmartDashboard/Mechanisms/Commands/IntakeRoller/Up": "Command",
       "/SmartDashboard/Mechanisms/Commands/IntakeRoller/ZeroEncoder": "Command",
+      "/SmartDashboard/Mechanisms/Commands/LowerMotor/Down": "Command",
+      "/SmartDashboard/Mechanisms/Commands/LowerMotor/Up": "Command",
+      "/SmartDashboard/Mechanisms/Commands/LowerMotor/ZeroEncoder": "Command",
       "/SmartDashboard/Mechanisms/Commands/SamsungWashingMachine/Live Tuning": "Command",
       "/SmartDashboard/Mechanisms/Commands/ShooterMotor/Down": "Command",
       "/SmartDashboard/Mechanisms/Commands/ShooterMotor/Up": "Command",
@@ -44,6 +54,9 @@
       "/SmartDashboard/Mechanisms/Commands/Spindexer/Down": "Command",
       "/SmartDashboard/Mechanisms/Commands/Spindexer/Up": "Command",
       "/SmartDashboard/Mechanisms/Commands/Spindexer/ZeroEncoder": "Command",
+      "/SmartDashboard/Mechanisms/Commands/UpperMotor/Down": "Command",
+      "/SmartDashboard/Mechanisms/Commands/UpperMotor/Up": "Command",
+      "/SmartDashboard/Mechanisms/Commands/UpperMotor/ZeroEncoder": "Command",
       "/SmartDashboard/PathPlanner": "Alerts",
       "/SmartDashboard/PhotonAlerts": "Alerts",
       "/SmartDashboard/Shooter/mechanism": "Mechanism2d",
@@ -68,10 +81,7 @@
         "left": 245,
         "right": 3942,
         "top": 118,
-        "width": 16.54119300842285,
-        "window": {
-          "visible": true
-        }
+        "width": 16.54119300842285
       },
       "/SmartDashboard/IntakeArm/mechanism": {
         "window": {
@@ -144,6 +154,50 @@
   "NetworkTables": {
     "Persistent Values": {
       "open": false
+    },
+    "Retained Values": {
+      "open": false
+    },
+    "transitory": {
+      "AdvantageKit": {
+        "open": true
+      },
+      "LiveWindow": {
+        "open": true
+      },
+      "Mechanisms": {
+        "open": true
+      },
+      "PathPlanner": {
+        "open": true
+      },
+      "Shuffleboard": {
+        "open": true
+      },
+      "SmartDashboard": {
+        "Arm": {
+          "open": true
+        },
+        "IntakeArm": {
+          "mechanism": {
+            "IntakeArmRoot": {
+              "IntakeArm": {
+                "open": true
+              },
+              "open": true
+            },
+            "open": true
+          }
+        },
+        "open": true
+      },
+      "Tuning": {
+        "IntakeArm": {
+          "IntakeArm": {
+            "open": true
+          }
+        }
+      }
     }
   },
   "NetworkTables Info": {
@@ -168,7 +222,27 @@
             0.0,
             0.8500000238418579
           ],
-          "height": 338
+          "height": 305,
+          "series": [
+            {
+              "color": [
+                0.8666667342185974,
+                0.5176470875740051,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/Arm/ExpectedFF"
+            },
+            {
+              "color": [
+                0.3333333432674408,
+                0.658823549747467,
+                0.4078431725502014,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/Arm/MotorVolts"
+            }
+          ]
         }
       ],
       "window": {
