@@ -44,7 +44,7 @@ public class ClimberTW extends SubsystemBase {
       // converting rotations to meters.
       .withMechanismCircumference(Meters.of(Inches.of(0.25).in(Meters) * 22))
       // Feedback Constants (PID Constants)
-      .withClosedLoopController(4, 0, 0, MetersPerSecond.of(0.5), MetersPerSecondPerSecond.of(0.5))
+      .withClosedLoopController(4, 0, 0, MetersPerSecond.of(0.1), MetersPerSecondPerSecond.of(0.1))
       .withSimClosedLoopController(4, 0, 0, MetersPerSecond.of(0.5), MetersPerSecondPerSecond.of(0.5))
       // Feedforward Constants
       .withFeedforward(new ElevatorFeedforward(0, 0, 0))
@@ -79,7 +79,7 @@ public class ClimberTW extends SubsystemBase {
 
   private ElevatorConfig elevconfig = new ElevatorConfig(sparkSmartMotorController)
       .withStartingHeight(Meters.of(0.5))
-      .withHardLimits(Meters.of(0), Meters.of(3))
+      .withHardLimits(Meters.of(0), Meters.of(1))
       .withTelemetry("Elevator", TelemetryVerbosity.HIGH)
       .withMass(Pounds.of(16));
 

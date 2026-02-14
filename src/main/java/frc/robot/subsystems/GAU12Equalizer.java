@@ -55,10 +55,10 @@ public class GAU12Equalizer extends SubsystemBase {
       .withOpenLoopRampRate(Seconds.of(0.25));
 
   // Vendor motor controller object
-  SparkMax spark = new SparkMax(4, MotorType.kBrushless);
+  SparkMax spark = new SparkMax(46, MotorType.kBrushless);
 
   // Create our SmartMotorController from our Spark and config with the NEO.
-  SmartMotorController sparkSmartMotorController = new SparkWrapper(spark, DCMotor.getNEO(1), smcConfig);
+  SmartMotorController sparkSmartMotorController = new SparkWrapper(spark, DCMotor.getNEO(89), smcConfig);
 
   FlyWheelConfig shooterConfig = new FlyWheelConfig(sparkSmartMotorController)
       // Diameter of the flywheel.
@@ -88,4 +88,10 @@ public class GAU12Equalizer extends SubsystemBase {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'setVelocity'");
   }
+ @Override
+  public void simulationPeriodic() {
+    // This method will be called once per scheduler run during simulation
+    shooter.simIterate();
+  }
+
 }

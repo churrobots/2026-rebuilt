@@ -37,12 +37,18 @@
       "/SmartDashboard/Mechanisms/Commands/IntakeRoller/Live Tuning": "Command",
       "/SmartDashboard/Mechanisms/Commands/IntakeRoller/Up": "Command",
       "/SmartDashboard/Mechanisms/Commands/IntakeRoller/ZeroEncoder": "Command",
+      "/SmartDashboard/Mechanisms/Commands/SamsungWashingMachine/Live Tuning": "Command",
       "/SmartDashboard/Mechanisms/Commands/ShooterMotor/Down": "Command",
       "/SmartDashboard/Mechanisms/Commands/ShooterMotor/Up": "Command",
       "/SmartDashboard/Mechanisms/Commands/ShooterMotor/ZeroEncoder": "Command",
+      "/SmartDashboard/Mechanisms/Commands/Spindexer/Down": "Command",
+      "/SmartDashboard/Mechanisms/Commands/Spindexer/Up": "Command",
+      "/SmartDashboard/Mechanisms/Commands/Spindexer/ZeroEncoder": "Command",
       "/SmartDashboard/PathPlanner": "Alerts",
       "/SmartDashboard/PhotonAlerts": "Alerts",
       "/SmartDashboard/Shooter/mechanism": "Mechanism2d",
+      "/SmartDashboard/ShooterMech/mechanism": "Mechanism2d",
+      "/SmartDashboard/Spindexer/mechanism": "Mechanism2d",
       "/SmartDashboard/VisionSystemSim-main/Sim Field": "Field2d"
     },
     "windows": {
@@ -62,19 +68,17 @@
         "left": 245,
         "right": 3942,
         "top": 118,
-        "width": 16.54119300842285
+        "width": 16.54119300842285,
+        "window": {
+          "visible": true
+        }
       },
       "/SmartDashboard/IntakeArm/mechanism": {
         "window": {
           "visible": true
         }
       },
-      "/SmartDashboard/IntakeRoller/mechanism": {
-        "window": {
-          "visible": true
-        }
-      },
-      "/SmartDashboard/Shooter/mechanism": {
+      "/SmartDashboard/Spindexer/mechanism": {
         "window": {
           "visible": true
         }
@@ -148,7 +152,8 @@
     },
     "Server": {
       "open": true
-    }
+    },
+    "visible": true
   },
   "NetworkTables View": {
     "visible": false
