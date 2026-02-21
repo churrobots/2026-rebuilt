@@ -65,10 +65,12 @@ public class ClimberTW extends SubsystemBase {
       .withOpenLoopRampRate(Seconds.of(0.25));
 
   // private DigitalInput dio = new DigitalInput(0); // Standard DIO
-  // private final Sensor climbSensor = new SensorConfig("switchgoclickclick") // Name of the sensor
-  //     .withField("Beam", dio::get, false) // Add a Field to the sensor named "Beam" whose value is dio.get() and
-  //                                         // defaults to false
-  //     .getSensor(); // Get the sensor.
+  // private final Sensor climbSensor = new SensorConfig("switchgoclickclick") //
+  // Name of the sensor
+  // .withField("Beam", dio::get, false) // Add a Field to the sensor named "Beam"
+  // whose value is dio.get() and
+  // // defaults to false
+  // .getSensor(); // Get the sensor.
 
   // Vendor motor controller object
   private TalonFX talonFx = new TalonFX(10);
