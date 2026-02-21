@@ -79,6 +79,10 @@ public class Feeder extends SubsystemBase {
       // Mass of the flywheel.
       .withMass(Pounds.of(1));
 
+  public Feeder() {
+    setDefaultCommand(setVelocity(RPM.of(0)));
+  }
+
   /**
    * Gets the current velocity of the intake.
    *

@@ -120,6 +120,7 @@ public class ClimberTW extends SubsystemBase {
 
   /** Creates a new ClimberTW. */
   public ClimberTW() {
+    setDefaultCommand(setHeight(Meters.of(0)));
   }
 
   @Override

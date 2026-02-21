@@ -101,6 +101,7 @@ public class IntakeArm extends SubsystemBase {
 
   /** Creates a new ExampleSubsystem. */
   public IntakeArm() {
+    setDefaultCommand(setAngle(Degrees.of(90)));
   }
 
   /**

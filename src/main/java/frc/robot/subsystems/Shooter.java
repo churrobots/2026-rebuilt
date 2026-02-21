@@ -79,6 +79,10 @@ public class Shooter extends SubsystemBase {
       // Mass of the flywheel.
       .withMass(Pounds.of(1));
 
+  public Shooter() {
+    setDefaultCommand(setVelocity(RPM.of(0)));
+  }
+
   /**
    * Gets the current velocity of the intake.
    *

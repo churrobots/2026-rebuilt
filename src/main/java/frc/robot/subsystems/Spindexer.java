@@ -31,6 +31,7 @@ public class Spindexer extends SubsystemBase {
 
   /** Creates a new Spinnymabobthing. */
   public Spindexer() {
+    setDefaultCommand(set(0));
   }
 
   private SmartMotorControllerConfig smcConfig = new SmartMotorControllerConfig(this)

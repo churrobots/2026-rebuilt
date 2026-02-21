@@ -102,6 +102,7 @@ public class IntakeRoller extends SubsystemBase {
 
   /** Creates a new IntakeRoller. */
   public IntakeRoller() {
+    setDefaultCommand(set(0));
   }
 
   @Override
