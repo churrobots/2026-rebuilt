@@ -12,10 +12,15 @@ import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.units.measure.Distance;
+
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -37,6 +42,9 @@ import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOSpark;
 
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Inch;
+import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Meter;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.RPM;
 
@@ -143,7 +151,6 @@ public class RobotContainer {
    */
   void bindCommandsForAuto() {
     // Set up auto routines
-    NamedCommands.registerCommand("wheee", climberSub.setHeight(Meters.of(.75)));
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
     // Add SysId routines if we are in Calibration mode
@@ -241,7 +248,7 @@ public class RobotContainer {
                 drive,
                 () -> -controller.getLeftY(),
                 () -> -controller.getLeftX(),
-                () -> Rotation2d.kZero));
+                this::getAngleToHub));
 
     // Switch to X pattern when X button is pressed
     controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
@@ -270,5 +277,20 @@ public class RobotContainer {
 
   public Pose2d getPose() {
     return drive.getPose();
+  }
+
+  private Rotation2d getAngleToHub() {
+    boolean isRedAlliance = DriverStation.getAlliance().orElseGet(() -> Alliance.Blue) == Alliance.Red;
+    Distance blueHubX = Distance.ofBaseUnits(4.63, Meters);
+    Distance redHubX = Distance.ofBaseUnits(aprilTagLayout.getFieldLength(), Meters).minus(blueHubX);
+    Distance hubY = Distance.ofBaseUnits(4.035, Meters);
+    Distance hubX = isRedAlliance ? redHubX : blueHubX;
+    Pose2d robotPose = drive.getPose();
+    Distance robotX = Distance.ofBaseUnits(robotPose.getX(), Meters);
+    Distance robotY = Distance.ofBaseUnits(robotPose.getY(), Meters);
+    double targetAngleInRadians = Math.atan2(
+        hubY.minus(robotY).in(Meters),
+        hubX.minus(robotX).in(Meters));
+    return Rotation2d.fromRadians(targetAngleInRadians);
   }
 }
