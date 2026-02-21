@@ -22,6 +22,7 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.util.PatchedTalonFXWrapper;
 import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;
 import yams.mechanisms.config.ElevatorConfig;
@@ -73,7 +74,7 @@ public class ClimberTW extends SubsystemBase {
   private TalonFX talonFx = new TalonFX(10);
 
   // Create our SmartMotorController from our Spark and config with the NEO.
-  private SmartMotorController sparkSmartMotorController = new TalonFXWrapper(talonFx, DCMotor.getFalcon500(1),
+  private SmartMotorController sparkSmartMotorController = new PatchedTalonFXWrapper(talonFx, DCMotor.getFalcon500(1),
       smcConfig);
 
   private ElevatorConfig elevconfig = new ElevatorConfig(sparkSmartMotorController)
