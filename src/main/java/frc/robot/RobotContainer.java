@@ -210,7 +210,9 @@ public class RobotContainer {
     controller.x().onTrue(anchorInPlace);
     controller.b().onTrue(resetGyro);
     controller.back().whileTrue(resetPoseFacingAway);
-    controller.a().whileTrue(new DriveToTower(drive)).onFalse(new InstantCommand(() -> drive.stop(), drive));
+    // TODO: which button do we want DriveToTower on?
+    // controller.a().whileTrue(new DriveToTower(drive)).onFalse(new
+    // InstantCommand(() -> drive.stop(), drive));
 
     // Spindexer controls.
     Command runSpindexer = spindexer.setVelocity(RPM.of(12 * 60));
