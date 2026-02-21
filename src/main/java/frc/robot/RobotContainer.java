@@ -8,11 +8,9 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
@@ -28,8 +26,10 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.CalibrationMode;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.ClimberTW;
+import frc.robot.subsystems.Feeder;
 import frc.robot.subsystems.IntakeArm;
 import frc.robot.subsystems.IntakeRoller;
+import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.commands.DriveToTower;
 import frc.robot.subsystems.Spindexer;
 import frc.robot.subsystems.drive.Drive;
@@ -117,10 +117,6 @@ public class RobotContainer {
             new VisionIOPhotonVisionSim(cameraBackRight, robotToCameraBackRight, drive::getPose),
             new VisionIOPhotonVisionSim(cameraFrontLeft, robotToCameraFrontLeft, drive::getPose),
             new VisionIOPhotonVisionSim(cameraBackLeft, robotToCameraBackLeft, drive::getPose));
-
-        climberSub = new ClimberTW();
-        intakeRoller = new IntakeRoller();
-        intakeArm = new IntakeArm();
         break;
 
       default:
@@ -190,20 +186,35 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   void bindCommandsForTeleop() {
-    // Default command, normal field-relative drive
-    drive.setDefaultCommand(
-        DriveCommands.joystickDrive(
-            drive,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> -controller.getRightX()));
+    // Driving controls.
+    Command driveWithJoysticks = DriveCommands.joystickDrive(
+        drive,
+        () -> -controller.getLeftY(),
+        () -> -controller.getLeftX(),
+        () -> -controller.getRightX());
+    Command driveWithAutoAim = DriveCommands.joystickDriveAtAngle(
+        drive,
+        () -> -controller.getLeftY(),
+        () -> -controller.getLeftX(),
+        this::getAngleToHub);
+    Command resetGyro = Commands.runOnce(
+        () -> drive.setPose(
+            new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
+        drive)
+        .ignoringDisable(true);
+    Command resetPoseFacingAway = drive.recalibrateDrivetrain();
+    Command anchorInPlace = Commands.runOnce(drive::stopWithX, drive);
+    drive.setDefaultCommand(driveWithJoysticks);
 
+    controller.a().whileTrue(driveWithAutoAim);
+    controller.x().onTrue(anchorInPlace);
+    controller.b().onTrue(resetGyro);
+    controller.back().whileTrue(resetPoseFacingAway);
     controller.a().whileTrue(new DriveToTower(drive)).onFalse(new InstantCommand(() -> drive.stop(), drive));
 
-    // Switch to X pattern when X button is pressed
-    controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
-
-    controller.back().whileTrue(drive.recalibrateDrivetrain());
+    // Spindexer controls.
+    Command runSpindexer = spindexer.setVelocity(RPM.of(12 * 60));
+    controller.rightBumper().whileTrue(runSpindexer);
   }
 
   /**
@@ -217,5 +228,20 @@ public class RobotContainer {
 
   public Pose2d getPose() {
     return drive.getPose();
+  }
+
+  private Rotation2d getAngleToHub() {
+    boolean isRedAlliance = DriverStation.getAlliance().orElseGet(() -> Alliance.Blue) == Alliance.Red;
+    Distance blueHubX = Distance.ofBaseUnits(4.63, Meters);
+    Distance redHubX = Distance.ofBaseUnits(aprilTagLayout.getFieldLength(), Meters).minus(blueHubX);
+    Distance hubY = Distance.ofBaseUnits(4.035, Meters);
+    Distance hubX = isRedAlliance ? redHubX : blueHubX;
+    Pose2d robotPose = drive.getPose();
+    Distance robotX = Distance.ofBaseUnits(robotPose.getX(), Meters);
+    Distance robotY = Distance.ofBaseUnits(robotPose.getY(), Meters);
+    double targetAngleInRadians = Math.atan2(
+        hubY.minus(robotY).in(Meters),
+        hubX.minus(robotX).in(Meters));
+    return Rotation2d.fromRadians(targetAngleInRadians);
   }
 }
