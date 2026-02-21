@@ -8,11 +8,9 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.Distance;
 
 import static frc.robot.subsystems.vision.VisionConstants.*;
@@ -21,8 +19,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -42,10 +38,6 @@ import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOSpark;
 
-import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Inch;
-import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Meter;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.RPM;
 
@@ -69,12 +61,12 @@ import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 public class RobotContainer {
   private final Drive drive;
 
-  private final ClimberTW climber = new ClimberTW();
+  private final ClimberTW climber = null;
   private final Spindexer spindexer = new Spindexer();
-  private final IntakeRoller intakeRoller = new IntakeRoller();
-  private final IntakeArm intakeArm = new IntakeArm();
-  private final Shooter shooter = new Shooter();
-  private final Feeder feeder = new Feeder();
+  private final IntakeRoller intakeRoller = null;
+  private final IntakeArm intakeArm = null;
+  private final Shooter shooter = null;
+  private final Feeder feeder = null;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(Hardware.DriverStation.driverXboxPort);
@@ -188,88 +180,39 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   void bindCommandsForTeleop() {
-    // Default command, normal field-relative drive
-    drive.setDefaultCommand(
-        DriveCommands.joystickDrive(
-            drive,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> -controller.getRightX()));
 
-    // Lock to 0° when A button is held
-    controller
-        .a()
-        .whileTrue(
-            DriveCommands.joystickDriveAtAngle(
-                drive,
-                () -> -controller.getLeftY(),
-                () -> -controller.getLeftX(),
-                this::getAngleToHub));
+    // Driving controls.
+    Command driveWithJoysticks = DriveCommands.joystickDrive(
+        drive,
+        () -> -controller.getLeftY(),
+        () -> -controller.getLeftX(),
+        () -> -controller.getRightX());
 
-    // Switch to X pattern when X button is pressed
-    controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+    Command driveWithAutoAim = DriveCommands.joystickDriveAtAngle(
+        drive,
+        () -> -controller.getLeftY(),
+        () -> -controller.getLeftX(),
+        this::getAngleToHub);
 
-    // Reset gyro to 0° when B button is pressed
-    controller
-        .b()
-        .onTrue(
-            Commands.runOnce(
-                () -> drive.setPose(
-                    new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
-                drive)
-                .ignoringDisable(true));
+    Command resetGyro = Commands.runOnce(
+        () -> drive.setPose(
+            new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
+        drive)
+        .ignoringDisable(true);
 
-    controller.back().whileTrue(drive.recalibrateDrivetrain());
-    // Set the default command to force the arm to go to 0.
-    spindexer.setDefaultCommand(spindexer.set(0));
-    climber.setDefaultCommand(climber.setHeight(Meters.of(0)));
-    intakeArm.setDefaultCommand(intakeArm.setAngle(Degrees.of(90)));
-    intakeRoller.setDefaultCommand(intakeRoller.set(0));
-    intakeArm.setDefaultCommand(intakeArm.setAngle(Degrees.of(0)));
-    shooter.setDefaultCommand(shooter.setVelocity(RPM.of(0)));
-    feeder.setDefaultCommand(feeder.setVelocity(RPM.of(0)));
+    Command resetPoseFacingAway = drive.recalibrateDrivetrain();
 
-    // Intak Arm/Rollers Command
-    controller.leftBumper()
-        .whileTrue(Commands.parallel(intakeArm.setAngle(Degrees.of(0)), intakeRoller.setVelocity(RPM.of(40))));
-    // Spindexer and feeder
-    controller.rightBumper()
-        .whileTrue(Commands.parallel(spindexer.setVelocity(RPM.of(50)), feeder.setVelocity(RPM.of(35))));
+    Command anchorInPlace = Commands.runOnce(drive::stopWithX, drive);
 
-    controller.a().whileTrue(climber.setHeight(Meters.of(0.25)));
-    controller.b().whileTrue(climber.setHeight(Meters.of(1)));
-    controller.x().whileTrue(climber.set(0.3));
-    controller.y().whileTrue(climber.set(-0.3));
-    // Schedule `setVelocity` when the Xbox controller's B button is pressed,
-    // cancelling on releas
+    drive.setDefaultCommand(driveWithJoysticks);
+    controller.a().whileTrue(driveWithAutoAim);
+    controller.x().onTrue(anchorInPlace);
+    controller.b().onTrue(resetGyro);
+    controller.back().whileTrue(resetPoseFacingAway);
 
-    controller.rightBumper().whileTrue(intakeRoller.setVelocity(RPM.of(60)));
-    controller.leftBumper().whileTrue(intakeRoller.setVelocity(RPM.of(300)));
-
-    controller.a().onTrue(intakeArm.setAngle(Degrees.of(15)));
-    controller.b().onTrue(intakeArm.setAngle(Degrees.of(30)));
-
-    // Schedule `setAngle` when the Xbox controller's B button is pressed,
-    // cancelling on release.
-    controller.a().whileTrue(intakeArm.setAngle(Degrees.of(-5)));
-    controller.b().whileTrue(intakeArm.setAngle(Degrees.of(15)));
-    // Schedule `set` when the Xbox controller's B button is pressed,
-    // cancelling on release.
-
-    // // Schedule `setVelocity` when the Xbox controller's B button is pressed,
-    // // cancelling on release.
-    controller.leftBumper().whileTrue(spindexer.setVelocity(RPM.of(60)));
-    controller.leftTrigger().whileTrue(spindexer.setVelocity(RPM.of(300)));
-    // // Schedule `set` when the Xbox controller's B button is pressed,
-    // // cancelling on release.
-    controller.rightTrigger().whileTrue(spindexer.set(0.3));
-    controller.a().whileTrue(spindexer.set(-0.3));
-
-    // Example parallel command
-    // controller.rightBumper().whileTrue(Commands.parallel(
-    // washsum.set(0.3),
-    // intakeRoller.setIntakeDutyCycle(-0.3)
-    // ));
+    // Spindexer controls.
+    Command runSpindexer = spindexer.setVelocity(RPM.of(12 * 60));
+    controller.rightBumper().whileTrue(runSpindexer);
   }
 
   /**
