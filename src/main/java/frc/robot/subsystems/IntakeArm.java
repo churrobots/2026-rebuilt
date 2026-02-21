@@ -20,9 +20,7 @@ import com.revrobotics.spark.SparkMax;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import yams.gearing.GearBox;
@@ -40,23 +38,18 @@ public class IntakeArm extends SubsystemBase {
   private SmartMotorControllerConfig smcConfig = new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.CLOSED_LOOP)
       // Feedback Constants (PID Constants)
-      .withClosedLoopController(50, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(45))
-      .withSimClosedLoopController(0, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(45))
+      .withClosedLoopController(4, 0, 0, DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(90))
+      .withSimClosedLoopController(4, 0, 0.2, DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(90))
       // Feedforward Constants
       .withFeedforward(new ArmFeedforward(0, 0, 0))
-      .withSimFeedforward(new ArmFeedforward(0, 1.32, 0.05))
+      .withSimFeedforward(new ArmFeedforward(0, 1.302, 0, 0))
       // Telemetry name and verbosity level
-      .withTelemetry("IntakeArm", TelemetryVerbosity.HIGH)
-      // Gearing from the motor rotor to final shaft.
-      // In this example GearBox.fromReductionStages(3,4) is the same as
-      // GearBox.fromStages("3:1","4:1") which corresponds to the gearbox attached to
-      // your motor.
+      .withTelemetry("IntakeArmMotor", TelemetryVerbosity.HIGH)
       .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
-      // Motor properties to prevent over currenting.
       .withMotorInverted(false)
       .withIdleMode(MotorMode.BRAKE)
       .withStatorCurrentLimit(Amps.of(40))
-      .withClosedLoopRampRate(Seconds.of(0.25))
+      .withClosedLoopRampRate(Seconds.of(0.1))
       .withOpenLoopRampRate(Seconds.of(0.25));
 
   // Vendor motor controller object
@@ -83,7 +76,7 @@ public class IntakeArm extends SubsystemBase {
 
   /**
    * Set the angle of the arm.
-   * 
+   *
    * @param angle Angle to go to.
    */
   public Command setAngle(Angle angle) {
@@ -92,7 +85,7 @@ public class IntakeArm extends SubsystemBase {
 
   /**
    * Move the arm up and down.
-   * 
+   *
    * @param dutycycle [-1, 1] speed to set the arm too.
    */
   public Command set(double dutycycle) {
@@ -108,6 +101,7 @@ public class IntakeArm extends SubsystemBase {
 
   /** Creates a new ExampleSubsystem. */
   public IntakeArm() {
+    setDefaultCommand(setAngle(Degrees.of(90)));
   }
 
   /**
@@ -143,20 +137,8 @@ public class IntakeArm extends SubsystemBase {
 
   @Override
   public void simulationPeriodic() {
-    // Capture the values being used for the calculation
-    double currentAngleRad = Units.degreesToRadians(sparkSmartMotorController.getRotorPosition().in(Degrees));
-    double velocityRadPerSec = Units
-        .degreesToRadians(sparkSmartMotorController.getMechanismVelocity().in(DegreesPerSecond));
-
-    // Calculate the feedforward
-    double ffVolts = smcConfig.getArmFeedforward().get().calculate(currentAngleRad, velocityRadPerSec);
-
-    // Log to SmartDashboard to view in Glass
-    SmartDashboard.putNumber("Arm/Sim/Angle_Rad", currentAngleRad);
-    SmartDashboard.putNumber("Arm/Sim/Velocity_RadPerSec", velocityRadPerSec);
-    SmartDashboard.putNumber("Arm/Sim/FF_Output_Volts", ffVolts);
-
-    // Update the simulation
+    // YAMS automatically applies the sim feedforward (including kG * cos(angle))
+    // when computing motor voltage in closed-loop mode. No manual FF needed.
     arm.simIterate();
   }
 }

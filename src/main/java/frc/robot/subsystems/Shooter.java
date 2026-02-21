@@ -10,6 +10,8 @@ import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.Seconds;
+
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 
@@ -29,8 +31,9 @@ import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.motorcontrollers.local.SparkWrapper;
 
-public class IntakeRoller extends SubsystemBase {
-  private SmartMotorControllerConfig intakeSmcConfig = new SmartMotorControllerConfig(this)
+public class Shooter extends SubsystemBase {
+
+  SmartMotorControllerConfig smcConfig = new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.CLOSED_LOOP)
       // Feedback Constants (PID Constants)
       .withClosedLoopController(50, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(45))
@@ -39,37 +42,46 @@ public class IntakeRoller extends SubsystemBase {
       .withFeedforward(new SimpleMotorFeedforward(0, 0, 0))
       .withSimFeedforward(new SimpleMotorFeedforward(0, 0, 0))
       // Telemetry name and verbosity level
-      .withTelemetry("IntakeRollerMotor", TelemetryVerbosity.HIGH)
+      .withTelemetry("ShooterMotor", TelemetryVerbosity.HIGH)
       // Gearing from the motor rotor to final shaft.
-      // In this example GearBox.fromReductionStages(3,4) is the same as
-      // GearBox.fromStages("3:1","4:1") which corresponds to the gearbox attached to
-      // your motor.
-      // You could also use .withGearing(12) which does the same thing.
+      // In this example gearbox(3,4) is the same as gearbox("3:1","4:1") which
+      // corresponds to the gearbox attached to your motor.
       .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
       // Motor properties to prevent over currenting.
       .withMotorInverted(false)
       .withIdleMode(MotorMode.COAST)
-      .withStatorCurrentLimit(Amps.of(40));
+      .withStatorCurrentLimit(Amps.of(40))
+      .withClosedLoopRampRate(Seconds.of(0.25))
+      .withOpenLoopRampRate(Seconds.of(0.25));
 
   // Vendor motor controller object
-  private SparkMax intakeSpark = new SparkMax(20, MotorType.kBrushless);
+  SparkMax spark = new SparkMax(46, MotorType.kBrushless);
 
   // Create our SmartMotorController from our Spark and config with the NEO.
-  private SmartMotorController intakeSparkSmartMotorController = new SparkWrapper(intakeSpark, DCMotor.getNEO(1),
-      intakeSmcConfig);
+  SmartMotorController sparkSmartMotorController = new SparkWrapper(spark, DCMotor.getNEO(89), smcConfig);
 
-  private final FlyWheelConfig intakeConfig = new FlyWheelConfig(intakeSparkSmartMotorController)
+  FlyWheelConfig shooterConfig = new FlyWheelConfig(sparkSmartMotorController)
       // Diameter of the flywheel.
       .withDiameter(Inches.of(4))
       // Mass of the flywheel.
       .withMass(Pounds.of(1))
-      // Maximum speed of the intake.
+      // Maximum speed of the shooter.
       .withUpperSoftLimit(RPM.of(1000))
       // Telemetry name and verbosity for the arm.
-      .withTelemetry("IntakeRoller", TelemetryVerbosity.HIGH);
+      .withTelemetry("Shooter", TelemetryVerbosity.HIGH);
 
   // Shooter Mechanism
-  private FlyWheel intake = new FlyWheel(intakeConfig);
+  private FlyWheel shooter = new FlyWheel(shooterConfig);
+
+  FlyWheelConfig GAU12EqualizerConfig = new FlyWheelConfig(sparkSmartMotorController)
+      // Diameter of the flywheel.
+      .withDiameter(Inches.of(4))
+      // Mass of the flywheel.
+      .withMass(Pounds.of(1));
+
+  public Shooter() {
+    setDefaultCommand(setVelocity(RPM.of(0)));
+  }
 
   /**
    * Gets the current velocity of the intake.
@@ -77,7 +89,7 @@ public class IntakeRoller extends SubsystemBase {
    * @return Shooter velocity.
    */
   public AngularVelocity getVelocity() {
-    return intake.getSpeed();
+    return shooter.getSpeed();
   }
 
   /**
@@ -87,31 +99,16 @@ public class IntakeRoller extends SubsystemBase {
    * @return {@link edu.wpi.first.wpilibj2.command.RunCommand}
    */
   public Command setVelocity(AngularVelocity speed) {
-    return intake.setSpeed(speed);
-  }
-
-  /**
-   * Set the dutycycle of the intake.
-   *
-   * @param dutyCycle DutyCycle to set.
-   * @return {@link edu.wpi.first.wpilibj2.command.RunCommand}
-   */
-  public Command set(double dutyCycle) {
-    return intake.set(dutyCycle);
-  }
-
-  /** Creates a new IntakeRoller. */
-  public IntakeRoller() {
-    setDefaultCommand(set(0));
+    return shooter.setSpeed(speed);
   }
 
   @Override
   public void periodic() {
-    intake.updateTelemetry();
+    shooter.updateTelemetry();
   }
 
   @Override
   public void simulationPeriodic() {
-    intake.simIterate();
+    shooter.simIterate();
   }
 }
