@@ -38,11 +38,11 @@ public final class Constants {
   // that have different values between those robots.
   public static final String ROBOT_SIMULATION = "simulation";
   public static final String ROBOT_ALPHA = "alpha";
-  public static final String ROBOT_BETA = "beta";
+  public static final String ROBOT_COMP = "comp";
   public static final String robotName = NetworkTableInstance
       .getDefault()
       .getEntry("robotName")
-      .getString(RobotBase.isSimulation() ? ROBOT_SIMULATION : ROBOT_BETA);
+      .getString(RobotBase.isSimulation() ? ROBOT_SIMULATION : ROBOT_COMP);
 
   public static final CalibrationMode calibrationMode = CalibrationMode.ENABLED;
 

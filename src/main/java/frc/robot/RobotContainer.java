@@ -12,14 +12,14 @@ import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.CalibrationMode;
@@ -27,6 +27,7 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.ClimberTW;
 import frc.robot.subsystems.IntakeArm;
 import frc.robot.subsystems.IntakeRoller;
+import frc.robot.subsystems.commands.DriveToTower;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -35,6 +36,7 @@ import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOSpark;
 
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.RPM;
 
@@ -227,27 +229,33 @@ public class RobotContainer {
             () -> -controller.getRightX()));
 
     // Lock to 0° when A button is held
-    controller
-        .a()
-        .whileTrue(
-            DriveCommands.joystickDriveAtAngle(
-                drive,
-                () -> -controller.getLeftY(),
-                () -> -controller.getLeftX(),
-                () -> Rotation2d.kZero));
+    // controller
+    // .a()
+    // .whileTrue(
+    // DriveCommands.joystickDriveAtAngle(
+    // drive,
+    // () -> -controller.getLeftY(),
+    // () -> -controller.getLeftX(),
+    // () -> Rotation2d.kZero));
+    // controller.a().whileTrue(
+    // drive.driveToPose(new Pose2d(
+    // Distance.ofBaseUnits(15, Meters),
+    // Distance.ofBaseUnits(2.2, Meters),
+    // Rotation2d.fromDegrees(119))));
+    controller.a().whileTrue(new DriveToTower(drive)).onFalse(new InstantCommand(() -> drive.stop(), drive));
 
     // Switch to X pattern when X button is pressed
     controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
-    // Reset gyro to 0° when B button is pressed
-    controller
-        .b()
-        .onTrue(
-            Commands.runOnce(
-                () -> drive.setPose(
-                    new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
-                drive)
-                .ignoringDisable(true));
+    // // Reset gyro to 0° when B button is pressed
+    // controller
+    // .b()
+    // .onTrue(
+    // Commands.runOnce(
+    // () -> drive.setPose(
+    // new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
+    // drive)
+    // .ignoringDisable(true));
 
     controller.back().whileTrue(drive.recalibrateDrivetrain());
   }

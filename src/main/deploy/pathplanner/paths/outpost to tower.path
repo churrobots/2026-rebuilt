@@ -3,29 +3,45 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.085540971486583,
-        "y": 5.288313360699153
+        "x": 1.8809066651144626,
+        "y": 1.50931484671823
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.591222027277542,
-        "y": 4.937170782574153
+        "x": 1.4775174150350923,
+        "y": 1.5611876535448848
       },
       "isLocked": false,
-      "linkedName": "HiMark"
+      "linkedName": "out post"
     },
     {
       "anchor": {
-        "x": 2.224560602048023,
-        "y": 6.149258640095339
+        "x": 0.9700511507500118,
+        "y": 1.8121757389747097
       },
       "prevControl": {
-        "x": 1.9609980248057912,
-        "y": 5.50194082141596
+        "x": 0.9700511507500118,
+        "y": 1.4979246295318245
+      },
+      "nextControl": {
+        "x": 0.9700511507500118,
+        "y": 2.0621757389747097
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 1.1262922461123341,
+        "y": 2.8209025363960016
+      },
+      "prevControl": {
+        "x": 1.1262922461123341,
+        "y": 2.4133365215074805
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "HiHello"
+      "linkedName": null
     }
   ],
   "rotationTargets": [],
@@ -42,13 +58,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -14.759370312622496
+    "rotation": -90.0
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 2.5810545663089957
+    "rotation": -6.785882320757608
   },
   "useDefaultConstraints": true
 }

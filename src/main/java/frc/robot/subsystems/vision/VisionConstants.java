@@ -35,16 +35,16 @@ public class VisionConstants {
 
   // Yaw only works right when it is inverted?
   public static Transform3d robotToCameraFrontRight = new Transform3d(
-      Units.inchesToMeters(13.75), Units.inchesToMeters(-12), Units.inchesToMeters(9),
+      Units.inchesToMeters(10), Units.inchesToMeters(-10), Units.inchesToMeters(9),
       new Rotation3d(Math.PI, -Math.PI / 10, 1 * Math.PI / 6));
   public static Transform3d robotToCameraBackRight = new Transform3d(
-      Units.inchesToMeters(-13.75), Units.inchesToMeters(-12.), Units.inchesToMeters(9),
+      Units.inchesToMeters(-10), Units.inchesToMeters(-10.), Units.inchesToMeters(9),
       new Rotation3d(Math.PI, 0, 1 * Math.PI / 2));
   public static Transform3d robotToCameraFrontLeft = new Transform3d(
-      Units.inchesToMeters(13.75), Units.inchesToMeters(12), Units.inchesToMeters(9),
+      Units.inchesToMeters(10), Units.inchesToMeters(10), Units.inchesToMeters(9),
       new Rotation3d(Math.PI, -Math.PI / 10, -1 * Math.PI / 6));
   public static Transform3d robotToCameraBackLeft = new Transform3d(
-      Units.inchesToMeters(-13.75), Units.inchesToMeters(13.75), Units.inchesToMeters(9),
+      Units.inchesToMeters(-10), Units.inchesToMeters(10), Units.inchesToMeters(9),
       new Rotation3d(Math.PI, 0, Math.PI));
 
   // Basic filtering thresholds
@@ -59,8 +59,10 @@ public class VisionConstants {
   // Standard deviation multipliers for each camera
   // (Adjust to trust some cameras more than others)
   public static double[] cameraStdDevFactors = new double[] {
-      1.0, // Camera 0
-      1.0 // Camera 1
+      0.6, // Camera 0
+      0.4, // Camera 1
+      0.6, // Camera 2
+      0.8, // Camera 3
   };
 
   // Multipliers to apply for MegaTag 2 observations

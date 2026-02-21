@@ -7,13 +7,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "New Path"
+            "pathName": "O trench to neutral"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "New New Path"
+            "pathName": "Neutral to out post"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "outpost to tower"
           }
         }
       ]

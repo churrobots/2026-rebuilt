@@ -24,6 +24,7 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.MomentOfInertia;
+import frc.robot.Constants;
 
 public class DriveConstants {
   public static final double maxSpeedMetersPerSec = 6.2;
@@ -39,23 +40,13 @@ public class DriveConstants {
   };
 
   // // Zeroed rotation values for each module, see setup instructions
-  // // module 0
-  // public static final Rotation2d frontLeftZeroRotation = new Rotation2d(0.0);
-  // // module 1
-  // public static final Rotation2d frontRightZeroRotation = new Rotation2d(0.0);
-  // // module 2
-  // public static final Rotation2d backLeftZeroRotation = new Rotation2d(0.0);
-  // // module 3
-  // public static final Rotation2d backRightZeroRotation = new Rotation2d(0.0);
-  // Zeroed rotation values for each module, see setup instructions
-  // module 0
-  public static final Rotation2d frontLeftZeroRotation = new Rotation2d(3.133492);
+  public static final Rotation2d frontLeftZeroRotation = new Rotation2d(0);
   // module 1
-  public static final Rotation2d frontRightZeroRotation = new Rotation2d(3.133492);
+  public static final Rotation2d frontRightZeroRotation = new Rotation2d(0);
   // module 2
-  public static final Rotation2d backLeftZeroRotation = new Rotation2d(-3.053332);
+  public static final Rotation2d backLeftZeroRotation = new Rotation2d(0);
   // module 3
-  public static final Rotation2d backRightZeroRotation = new Rotation2d(-3.125994);
+  public static final Rotation2d backRightZeroRotation = new Rotation2d(0);
 
   // Device CAN IDs
   public static final int pigeonCanId = 9;
@@ -90,7 +81,11 @@ public class DriveConstants {
   // Drive PID configuration
   public static final double driveKp = 0.0;
   public static final double driveKd = 0.0;
-  public static final double driveKs = 0.14945;
+  public static final double driveKs = switch (Constants.robotName) {
+    case Constants.ROBOT_ALPHA -> 0.14945;
+    case Constants.ROBOT_COMP -> 0.14945;
+    default -> 0.14945;
+  };
   public static final double driveKv = 0.06761;
   public static final double driveSimP = 0.05;
   public static final double driveSimD = 0.0;

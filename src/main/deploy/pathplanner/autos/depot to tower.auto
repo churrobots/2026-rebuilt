@@ -7,13 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "under trench to neutral"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "neutral to depot"
+            "pathName": "depot to tower"
           }
         }
       ]

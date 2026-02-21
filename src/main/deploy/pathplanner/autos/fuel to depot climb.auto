@@ -7,19 +7,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "start to neutral zone"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 10.0
+            "pathName": "under trench to neutral"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "neutral zone back out to hub"
+            "pathName": "neutral to depot"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "depot to tower"
           }
         }
       ]
