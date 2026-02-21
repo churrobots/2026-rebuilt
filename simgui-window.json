@@ -31,7 +31,7 @@
     },
     "###/SmartDashboard/Auto Choices": {
       "Collapsed": "0",
-      "Pos": "171,37",
+      "Pos": "8,22",
       "Size": "262,50"
     },
     "###/SmartDashboard/Auto Chooser": {
@@ -46,7 +46,7 @@
     },
     "###/SmartDashboard/Elevator/mechanism": {
       "Collapsed": "0",
-      "Pos": "262,376",
+      "Pos": "5,341",
       "Size": "271,247"
     },
     "###/SmartDashboard/ExponentiallyProfiledArm/mechanism": {
@@ -61,8 +61,8 @@
     },
     "###/SmartDashboard/IntakeArm/mechanism": {
       "Collapsed": "0",
-      "Pos": "169,458",
-      "Size": "755,518"
+      "Pos": "295,427",
+      "Size": "283,243"
     },
     "###/SmartDashboard/IntakeRoller/mechanism": {
       "Collapsed": "0",
@@ -86,12 +86,12 @@
     },
     "###/SmartDashboard/Spindexer/mechanism": {
       "Collapsed": "0",
-      "Pos": "76,112",
+      "Pos": "-8,74",
       "Size": "281,264"
     },
     "###/SmartDashboard/VisionSystemSim-main/Sim Field": {
       "Collapsed": "0",
-      "Pos": "1006,288",
+      "Pos": "375,18",
       "Size": "780,400"
     },
     "###DIO": {
@@ -126,7 +126,7 @@
     },
     "###NetworkTables Info": {
       "Collapsed": "0",
-      "Pos": "1012,714",
+      "Pos": "599,716",
       "Size": "749,145"
     },
     "###Other Devices": {
@@ -156,7 +156,7 @@
     },
     "Robot State": {
       "Collapsed": "0",
-      "Pos": "57,504",
+      "Pos": "272,21",
       "Size": "94,122"
     }
   }
