@@ -9,9 +9,9 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.RPM;
 
-import com.ctre.phoenix6.hardware.TalonFX;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
 
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -25,7 +25,7 @@ import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
-import yams.motorcontrollers.remote.TalonFXWrapper;
+import yams.motorcontrollers.local.SparkWrapper;
 
 public class Spindexer extends SubsystemBase {
 
@@ -37,11 +37,12 @@ public class Spindexer extends SubsystemBase {
   private SmartMotorControllerConfig smcConfig = new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.CLOSED_LOOP)
       // Feedback Constants (PID Constants)
-      .withClosedLoopController(1, 0, 0)
-      .withSimClosedLoopController(1, 0, 0)
+      .withClosedLoopController(0.5, 0, 0)
+      .withSimClosedLoopController(0.5, 0, 0)
+      // TODO: figure out why SparkBase doesn't like feedforward values?
       // Feedforward Constants
-      .withFeedforward(new SimpleMotorFeedforward(0, 0, 0))
-      .withSimFeedforward(new SimpleMotorFeedforward(0, 0, 0))
+      // .withFeedforward(new SimpleMotorFeedforward(0, 9.17, 0))
+      // .withSimFeedforward(new SimpleMotorFeedforward(0, 9.17, 0))
       // Telemetry name and verbosity level
       .withTelemetry("SpindexerMotor", TelemetryVerbosity.HIGH)
       // Gearing from the motor rotor to final shaft.
@@ -49,24 +50,24 @@ public class Spindexer extends SubsystemBase {
       // GearBox.fromStages("3:1","4:1") which corresponds to the gearbox attached to
       // your motor.
       // You could also use .withGearing(12) which does the same thing.
-      .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
+      .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 3, 4)))
       // Motor properties to prevent over currenting.
-      .withMotorInverted(false)
+      .withMotorInverted(true)
       .withIdleMode(MotorMode.COAST)
       .withStatorCurrentLimit(Amps.of(40));
 
   // Vendor motor controller object
-  private TalonFX talonFX = new TalonFX(14);
-  private SmartMotorController sparkSmartMotorController = new TalonFXWrapper(talonFX, DCMotor.getFalcon500(1),
+  private SparkMax motorcontroller = new SparkMax(14, MotorType.kBrushless);
+  private SmartMotorController sparkSmartMotorController = new SparkWrapper(motorcontroller, DCMotor.getNEO(1),
       smcConfig);
 
   private final FlyWheelConfig spindexerConfig = new FlyWheelConfig(sparkSmartMotorController)
       // Diameter of the flywheel.
-      .withDiameter(Inches.of(4))
+      .withDiameter(Inches.of(17.5))
       // Mass of the flywheel.
       .withMass(Pounds.of(1))
       // Maximum speed of the spindexer.
-      .withUpperSoftLimit(RPM.of(1000))
+      .withUpperSoftLimit(RPM.of(150))
       // Telemetry name and verbosity for the arm.
       .withTelemetry("Spindexer", TelemetryVerbosity.HIGH);
 
