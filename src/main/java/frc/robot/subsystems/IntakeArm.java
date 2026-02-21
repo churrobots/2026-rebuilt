@@ -21,7 +21,6 @@ import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import yams.gearing.GearBox;
@@ -45,7 +44,7 @@ public class IntakeArm extends SubsystemBase {
       .withFeedforward(new ArmFeedforward(0, 0, 0))
       .withSimFeedforward(new ArmFeedforward(0, 1.302, 0, 0))
       // Telemetry name and verbosity level
-      .withTelemetry("IntakeArm", TelemetryVerbosity.HIGH)
+      .withTelemetry("IntakeArmMotor", TelemetryVerbosity.HIGH)
       .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
       .withMotorInverted(false)
       .withIdleMode(MotorMode.BRAKE)

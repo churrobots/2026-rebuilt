@@ -31,7 +31,7 @@ import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.motorcontrollers.local.SparkWrapper;
 
-public class GAU12Equalizer extends SubsystemBase {
+public class Shooter extends SubsystemBase {
 
   SmartMotorControllerConfig smcConfig = new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.CLOSED_LOOP)
@@ -79,19 +79,32 @@ public class GAU12Equalizer extends SubsystemBase {
       // Mass of the flywheel.
       .withMass(Pounds.of(1));
 
+  /**
+   * Gets the current velocity of the intake.
+   *
+   * @return Shooter velocity.
+   */
+  public AngularVelocity getVelocity() {
+    return shooter.getSpeed();
+  }
+
+  /**
+   * Set the intake velocity.
+   *
+   * @param speed Speed to set.
+   * @return {@link edu.wpi.first.wpilibj2.command.RunCommand}
+   */
+  public Command setVelocity(AngularVelocity speed) {
+    return shooter.setSpeed(speed);
+  }
+
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
+    shooter.updateTelemetry();
   }
 
-  public Command setVelocity(AngularVelocity of) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'setVelocity'");
-  }
- @Override
+  @Override
   public void simulationPeriodic() {
-    // This method will be called once per scheduler run during simulation
     shooter.simIterate();
   }
-
 }

@@ -30,10 +30,11 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.CalibrationMode;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.ClimberTW;
-import frc.robot.subsystems.GAU12Equalizer;
+import frc.robot.subsystems.Feeder;
+import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.IntakeArm;
 import frc.robot.subsystems.IntakeRoller;
-import frc.robot.subsystems.SamsungWashingMachine;
+import frc.robot.subsystems.Spindexer;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -66,14 +67,14 @@ import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
  */
 
 public class RobotContainer {
-  // Subsystems
   private final Drive drive;
 
-  private final ClimberTW climberSub = new ClimberTW();
-  private final SamsungWashingMachine washsum = new SamsungWashingMachine();
+  private final ClimberTW climber = new ClimberTW();
+  private final Spindexer spindexer = new Spindexer();
   private final IntakeRoller intakeRoller = new IntakeRoller();
   private final IntakeArm intakeArm = new IntakeArm();
-  private final GAU12Equalizer shootsumballs = new GAU12Equalizer();
+  private final Shooter shooter = new Shooter();
+  private final Feeder feeder = new Feeder();
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(Hardware.DriverStation.driverXboxPort);
@@ -176,51 +177,6 @@ public class RobotContainer {
           "Drive SysId (Dynamic Reverse)",
           drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
     }
-
-    // Set the default command to force the arm to go to 0.
-    washsum.setDefaultCommand(washsum.set(0));
-    //climberSub.setDefaultCommand(climberSub.set(0));
-    // intakeArm.setDefaultCommand(intakeArm.setAngle(Degrees.of(0)));
-    intakeRoller.setDefaultCommand(intakeRoller.setIntakeDutyCycle(0));
-    intakeArm.setDefaultCommand(intakeArm.setAngle(Degrees.of(0)));
-    // Schedule `setHeight` when the Xbox controller's B button is pressed,
-    // cancelling on release.
-    controller.a().whileTrue(climberSub.setHeight(Meters.of(0.25)));
-    controller.b().whileTrue(climberSub.setHeight(Meters.of(1)));
-    controller.x().whileTrue(climberSub.set(0.3));
-    controller.y().whileTrue(climberSub.set(-0.3));
-    // Schedule `setVelocity` when the Xbox controller's B button is pressed,
-    // cancelling on release.
-    // controller.back().whileTrue(intakeRoller.setVelocity(RPM.of(60)));
-    // controller.y().whileTrue(intakeRoller.setVelocity(RPM.of(300)));
-
-    controller.a().onTrue(intakeArm.setAngle(Degrees.of(15)));
-    controller.b().onTrue(intakeArm.setAngle(Degrees.of(30)));
-    controller.x().onTrue(intakeArm.setAngle(Degrees.of(45)));
-    controller.y().onTrue(intakeArm.setAngle(Degrees.of(60)));
-    // Schedule `setAngle` when the Xbox controller's B button is pressed,
-    // cancelling on release.
-    // controller.a().whileTrue(intakeArm.setAngle(Degrees.of(-5)));
-    // controller.b().whileTrue(intakeArm.setAngle(Degrees.of(15)));
-    // Schedule `set` when the Xbox controller's B button is pressed,
-    // cancelling on release.
-
-    // // Schedule `setVelocity` when the Xbox controller's B button is pressed,
-    // // cancelling on release.
-    // controller.leftBumper().whileTrue(washsum.setVelocity(RPM.of(60)));
-    // controller.leftTrigger().whileTrue(washsum.setVelocity(RPM.of(300)));
-    // // Schedule `set` when the Xbox controller's B button is pressed,
-    // // cancelling on release.
-    // controller.rightTrigger().whileTrue(washsum.set(0.3));
-    // controller.backButton().whileTrue(washsum.set(-0.3));
-
-    controller.rightBumper().whileTrue(Commands.parallel(
-      washsum.set(0.3),
-      intakeRoller.setIntakeDutyCycle(-0.3)
-    ));
-
-
-
   }
 
   /**
@@ -264,6 +220,56 @@ public class RobotContainer {
                 .ignoringDisable(true));
 
     controller.back().whileTrue(drive.recalibrateDrivetrain());
+    // Set the default command to force the arm to go to 0.
+    spindexer.setDefaultCommand(spindexer.set(0));
+    climber.setDefaultCommand(climber.setHeight(Meters.of(0)));
+    intakeArm.setDefaultCommand(intakeArm.setAngle(Degrees.of(90)));
+    intakeRoller.setDefaultCommand(intakeRoller.set(0));
+    intakeArm.setDefaultCommand(intakeArm.setAngle(Degrees.of(0)));
+    shooter.setDefaultCommand(shooter.setVelocity(RPM.of(0)));
+    feeder.setDefaultCommand(feeder.setVelocity(RPM.of(0)));
+
+    // Intak Arm/Rollers Command
+    controller.leftBumper()
+        .whileTrue(Commands.parallel(intakeArm.setAngle(Degrees.of(0)), intakeRoller.setVelocity(RPM.of(40))));
+    // Spindexer and feeder
+    controller.rightBumper()
+        .whileTrue(Commands.parallel(spindexer.setVelocity(RPM.of(50)), feeder.setVelocity(RPM.of(35))));
+
+    controller.a().whileTrue(climber.setHeight(Meters.of(0.25)));
+    controller.b().whileTrue(climber.setHeight(Meters.of(1)));
+    controller.x().whileTrue(climber.set(0.3));
+    controller.y().whileTrue(climber.set(-0.3));
+    // Schedule `setVelocity` when the Xbox controller's B button is pressed,
+    // cancelling on releas
+
+    controller.rightBumper().whileTrue(intakeRoller.setVelocity(RPM.of(60)));
+    controller.leftBumper().whileTrue(intakeRoller.setVelocity(RPM.of(300)));
+
+    controller.a().onTrue(intakeArm.setAngle(Degrees.of(15)));
+    controller.b().onTrue(intakeArm.setAngle(Degrees.of(30)));
+
+    // Schedule `setAngle` when the Xbox controller's B button is pressed,
+    // cancelling on release.
+    controller.a().whileTrue(intakeArm.setAngle(Degrees.of(-5)));
+    controller.b().whileTrue(intakeArm.setAngle(Degrees.of(15)));
+    // Schedule `set` when the Xbox controller's B button is pressed,
+    // cancelling on release.
+
+    // // Schedule `setVelocity` when the Xbox controller's B button is pressed,
+    // // cancelling on release.
+    controller.leftBumper().whileTrue(spindexer.setVelocity(RPM.of(60)));
+    controller.leftTrigger().whileTrue(spindexer.setVelocity(RPM.of(300)));
+    // // Schedule `set` when the Xbox controller's B button is pressed,
+    // // cancelling on release.
+    controller.rightTrigger().whileTrue(spindexer.set(0.3));
+    controller.a().whileTrue(spindexer.set(-0.3));
+
+    // Example parallel command
+    // controller.rightBumper().whileTrue(Commands.parallel(
+    // washsum.set(0.3),
+    // intakeRoller.setIntakeDutyCycle(-0.3)
+    // ));
   }
 
   /**
