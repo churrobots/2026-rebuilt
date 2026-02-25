@@ -7,18 +7,26 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Meters;
+import static frc.robot.subsystems.vision.VisionConstants.aprilTagLayout;
+import static frc.robot.subsystems.vision.VisionConstants.cameraBackName;
+import static frc.robot.subsystems.vision.VisionConstants.cameraFrontName;
+import static frc.robot.subsystems.vision.VisionConstants.cameraRightName;
+import static frc.robot.subsystems.vision.VisionConstants.robotToCameraBack;
+import static frc.robot.subsystems.vision.VisionConstants.robotToCameraFront;
+import static frc.robot.subsystems.vision.VisionConstants.robotToCameraRight;
+
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.Distance;
-
-import static frc.robot.subsystems.vision.VisionConstants.*;
-
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -28,9 +36,9 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.ClimberTW;
 import frc.robot.subsystems.ControlsConstants;
 import frc.robot.subsystems.Feeder;
-import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.IntakeArm;
 import frc.robot.subsystems.IntakeRoller;
+import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Spindexer;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
@@ -38,12 +46,6 @@ import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOSpark;
-
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.RPM;
-
-import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
-
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;

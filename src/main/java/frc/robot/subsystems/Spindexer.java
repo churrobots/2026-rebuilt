@@ -31,6 +31,8 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.motorcontrollers.local.SparkWrapper;
 
 public class Spindexer extends SubsystemBase {
+  private static final String MOTOR_TELEMETRY = "SpindexerMotor";
+  private static final String MECHANISM_TELEMETRY = "Spindexer";
 
   // Stable physical constants
   private static final int GEAR_STAGE_1 = 3;
@@ -46,12 +48,7 @@ public class Spindexer extends SubsystemBase {
   private static final double SIM_KI = 0;
   private static final double SIM_KD = 0;
 
-  /** Creates a new Spinnymabobthing. */
-  public Spindexer() {
-    setDefaultCommand(set(0));
-  }
-
-  private SmartMotorControllerConfig smcConfig = new SmartMotorControllerConfig(this)
+  private SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.CLOSED_LOOP)
       // Feedback Constants (PID Constants)
       .withClosedLoopController(ControlsConstants.SPINDEXER_KP, ControlsConstants.SPINDEXER_KI,
@@ -62,7 +59,7 @@ public class Spindexer extends SubsystemBase {
       // .withFeedforward(new SimpleMotorFeedforward(0, 9.17, 0))
       // .withSimFeedforward(new SimpleMotorFeedforward(0, 9.17, 0))
       // Telemetry name and verbosity level
-      .withTelemetry("SpindexerMotor", TelemetryVerbosity.HIGH)
+      .withTelemetry(MOTOR_TELEMETRY, TelemetryVerbosity.HIGH)
       // Gearing from the motor rotor to final shaft.
       // In this example GearBox.fromReductionStages(3,4) is the same as
       // GearBox.fromStages("3:1","4:1") which corresponds to the gearbox attached to
@@ -75,22 +72,27 @@ public class Spindexer extends SubsystemBase {
       .withStatorCurrentLimit(STATOR_CURRENT_LIMIT);
 
   // Vendor motor controller object
-  private SparkMax motorcontroller = new SparkMax(HardwareConstants.SPINDEXER_MOTOR_ID, MotorType.kBrushless);
-  private SmartMotorController sparkSmartMotorController = new SparkWrapper(motorcontroller, DCMotor.getNEO(1),
-      smcConfig);
+  private SparkMax motor = new SparkMax(HardwareConstants.SPINDEXER_MOTOR_ID, MotorType.kBrushless);
+  private SmartMotorController controller = new SparkWrapper(motor, DCMotor.getNEO(1),
+      motorConfig);
 
-  private final FlyWheelConfig spindexerConfig = new FlyWheelConfig(sparkSmartMotorController)
+  private final FlyWheelConfig spindexerConfig = new FlyWheelConfig(controller)
       // Diameter of the flywheel.
       .withDiameter(DIAMETER)
       // Mass of the flywheel.
       .withMass(MASS)
       // Maximum speed of the spindexer.
       .withUpperSoftLimit(UPPER_SOFT_LIMIT)
-      // Telemetry name and verbosity for the arm.
-      .withTelemetry("Spindexer", TelemetryVerbosity.HIGH);
+      // Telemetry name and verbosity for the mechanism.
+      .withTelemetry(MECHANISM_TELEMETRY, TelemetryVerbosity.HIGH);
 
   // Spindexer Mechanism
   private FlyWheel spindexer = new FlyWheel(spindexerConfig);
+
+  /** Creates a new Spindexer. */
+  public Spindexer() {
+    setDefaultCommand(set(ControlsConstants.SPINDEXER_DEFAULT_DUTY_CYCLE));
+  }
 
   /**
    * Gets the current velocity of the spindexer.

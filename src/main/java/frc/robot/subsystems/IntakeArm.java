@@ -1,4 +1,3 @@
-
 // Copyright (c) FIRST and other WPILib contributors.
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
@@ -41,6 +40,8 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.motorcontrollers.local.SparkWrapper;
 
 public class IntakeArm extends SubsystemBase {
+  private static final String MOTOR_TELEMETRY = "IntakeArmMotor";
+  private static final String MECHANISM_TELEMETRY = "IntakeArm";
 
   // Stable physical constants
   private static final int GEAR_STAGE_1 = 3;
@@ -67,7 +68,7 @@ public class IntakeArm extends SubsystemBase {
   private static final double SIM_KV = 0;
   private static final double SIM_KA = 0;
 
-  private SmartMotorControllerConfig smcConfig = new SmartMotorControllerConfig(this)
+  private SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.CLOSED_LOOP)
       // Feedback Constants (PID Constants)
       .withClosedLoopController(
@@ -81,7 +82,7 @@ public class IntakeArm extends SubsystemBase {
           ControlsConstants.INTAKE_ARM_KS, ControlsConstants.INTAKE_ARM_KG, ControlsConstants.INTAKE_ARM_KV))
       .withSimFeedforward(new ArmFeedforward(SIM_KS, SIM_KG, SIM_KV, SIM_KA))
       // Telemetry name and verbosity level
-      .withTelemetry("IntakeArmMotor", TelemetryVerbosity.HIGH)
+      .withTelemetry(MOTOR_TELEMETRY, TelemetryVerbosity.HIGH)
       .withGearing(new MechanismGearing(GearBox.fromReductionStages(GEAR_STAGE_1, GEAR_STAGE_2)))
       .withMotorInverted(false)
       .withIdleMode(MotorMode.BRAKE)
@@ -90,12 +91,12 @@ public class IntakeArm extends SubsystemBase {
       .withOpenLoopRampRate(OPEN_LOOP_RAMP_RATE);
 
   // Vendor motor controller object
-  private SparkMax spark = new SparkMax(HardwareConstants.INTAKE_ARM_MOTOR_ID, MotorType.kBrushless);
+  private SparkMax motor = new SparkMax(HardwareConstants.INTAKE_ARM_MOTOR_ID, MotorType.kBrushless);
 
   // Create our SmartMotorController from our Spark and config with the NEO.
-  private SmartMotorController sparkSmartMotorController = new SparkWrapper(spark, DCMotor.getNEO(1), smcConfig);
+  private SmartMotorController controller = new SparkWrapper(motor, DCMotor.getNEO(1), motorConfig);
 
-  private ArmConfig armCfg = new ArmConfig(sparkSmartMotorController)
+  private ArmConfig armConfig = new ArmConfig(controller)
       // Soft limit is applied to the SmartMotorControllers PID
       .withSoftLimits(SOFT_LIMIT_LOW, SOFT_LIMIT_HIGH)
       // Hard limit is applied to the simulation.
@@ -106,10 +107,15 @@ public class IntakeArm extends SubsystemBase {
       .withLength(LENGTH)
       .withMass(MASS)
       // Telemetry name and verbosity for the arm.
-      .withTelemetry("IntakeArm", TelemetryVerbosity.HIGH);
+      .withTelemetry(MECHANISM_TELEMETRY, TelemetryVerbosity.HIGH);
 
   // Arm Mechanism
-  private Arm arm = new Arm(armCfg);
+  private Arm arm = new Arm(armConfig);
+
+  /** Creates a new IntakeArm. */
+  public IntakeArm() {
+    setDefaultCommand(setAngle(ControlsConstants.INTAKE_ARM_DEFAULT_ANGLE));
+  }
 
   /**
    * Set the angle of the arm.
@@ -134,36 +140,6 @@ public class IntakeArm extends SubsystemBase {
    */
   public Command sysId() {
     return arm.sysId(Volts.of(7), Volts.of(2).per(Second), Seconds.of(4));
-  }
-
-  /** Creates a new ExampleSubsystem. */
-  public IntakeArm() {
-    setDefaultCommand(setAngle(Degrees.of(90)));
-  }
-
-  /**
-   * Example command factory method.
-   *
-   * @return a command
-   */
-  public Command exampleMethodCommand() {
-    // Inline construction of command goes here.
-    // Subsystem::RunOnce implicitly requires `this` subsystem.
-    return runOnce(
-        () -> {
-          /* one-time action goes here */
-        });
-  }
-
-  /**
-   * An example method querying a boolean state of the subsystem (for example, a
-   * digital sensor).
-   *
-   * @return value of some boolean subsystem state, such as a digital sensor.
-   */
-  public boolean exampleCondition() {
-    // Query some boolean state, such as a digital sensor.
-    return false;
   }
 
   @Override

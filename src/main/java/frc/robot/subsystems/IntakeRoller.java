@@ -34,6 +34,8 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.motorcontrollers.local.SparkWrapper;
 
 public class IntakeRoller extends SubsystemBase {
+  private static final String MOTOR_TELEMETRY = "IntakeRollerMotor";
+  private static final String MECHANISM_TELEMETRY = "IntakeRoller";
 
   // Stable physical constants
   private static final int GEAR_STAGE_1 = 3;
@@ -53,7 +55,7 @@ public class IntakeRoller extends SubsystemBase {
   private static final double SIM_KV = 0;
   private static final double SIM_KA = 0;
 
-  private SmartMotorControllerConfig intakeSmcConfig = new SmartMotorControllerConfig(this)
+  private SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.CLOSED_LOOP)
       // Feedback Constants (PID Constants)
       .withClosedLoopController(
@@ -67,7 +69,7 @@ public class IntakeRoller extends SubsystemBase {
           ControlsConstants.INTAKE_ROLLER_KS, ControlsConstants.INTAKE_ROLLER_KV, ControlsConstants.INTAKE_ROLLER_KA))
       .withSimFeedforward(new SimpleMotorFeedforward(SIM_KS, SIM_KV, SIM_KA))
       // Telemetry name and verbosity level
-      .withTelemetry("IntakeRollerMotor", TelemetryVerbosity.HIGH)
+      .withTelemetry(MOTOR_TELEMETRY, TelemetryVerbosity.HIGH)
       // Gearing from the motor rotor to final shaft.
       // In this example GearBox.fromReductionStages(3,4) is the same as
       // GearBox.fromStages("3:1","4:1") which corresponds to the gearbox attached to
@@ -80,32 +82,37 @@ public class IntakeRoller extends SubsystemBase {
       .withStatorCurrentLimit(STATOR_CURRENT_LIMIT);
 
   // Vendor motor controller object
-  private SparkMax intakeSpark = new SparkMax(HardwareConstants.INTAKE_ROLLERS_MOTOR_ID, MotorType.kBrushless);
+  private SparkMax motor = new SparkMax(HardwareConstants.INTAKE_ROLLERS_MOTOR_ID, MotorType.kBrushless);
 
   // Create our SmartMotorController from our Spark and config with the NEO.
-  private SmartMotorController intakeSparkSmartMotorController = new SparkWrapper(intakeSpark, DCMotor.getNEO(1),
-      intakeSmcConfig);
+  private SmartMotorController controller = new SparkWrapper(motor, DCMotor.getNEO(1),
+      motorConfig);
 
-  private final FlyWheelConfig intakeConfig = new FlyWheelConfig(intakeSparkSmartMotorController)
+  private final FlyWheelConfig rollerConfig = new FlyWheelConfig(controller)
       // Diameter of the flywheel.
       .withDiameter(DIAMETER)
       // Mass of the flywheel.
       .withMass(MASS)
       // Maximum speed of the intake.
       .withUpperSoftLimit(UPPER_SOFT_LIMIT)
-      // Telemetry name and verbosity for the arm.
-      .withTelemetry("IntakeRoller", TelemetryVerbosity.HIGH);
+      // Telemetry name and verbosity for the mechanism.
+      .withTelemetry(MECHANISM_TELEMETRY, TelemetryVerbosity.HIGH);
 
-  // Shooter Mechanism
-  private FlyWheel intake = new FlyWheel(intakeConfig);
+  // Intake Roller Mechanism
+  private FlyWheel roller = new FlyWheel(rollerConfig);
+
+  /** Creates a new IntakeRoller. */
+  public IntakeRoller() {
+    setDefaultCommand(set(ControlsConstants.INTAKE_ROLLER_DEFAULT_DUTY_CYCLE));
+  }
 
   /**
    * Gets the current velocity of the intake.
    *
-   * @return Shooter velocity.
+   * @return IntakeRoller velocity.
    */
   public AngularVelocity getVelocity() {
-    return intake.getSpeed();
+    return roller.getSpeed();
   }
 
   /**
@@ -115,7 +122,7 @@ public class IntakeRoller extends SubsystemBase {
    * @return {@link edu.wpi.first.wpilibj2.command.RunCommand}
    */
   public Command setVelocity(AngularVelocity speed) {
-    return intake.setSpeed(speed);
+    return roller.setSpeed(speed);
   }
 
   /**
@@ -125,21 +132,16 @@ public class IntakeRoller extends SubsystemBase {
    * @return {@link edu.wpi.first.wpilibj2.command.RunCommand}
    */
   public Command set(double dutyCycle) {
-    return intake.set(dutyCycle);
-  }
-
-  /** Creates a new IntakeRoller. */
-  public IntakeRoller() {
-    setDefaultCommand(set(0));
+    return roller.set(dutyCycle);
   }
 
   @Override
   public void periodic() {
-    intake.updateTelemetry();
+    roller.updateTelemetry();
   }
 
   @Override
   public void simulationPeriodic() {
-    intake.simIterate();
+    roller.simIterate();
   }
 }

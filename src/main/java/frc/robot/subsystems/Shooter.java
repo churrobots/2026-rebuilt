@@ -36,6 +36,8 @@ import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 
 public class Shooter extends SubsystemBase {
+  private static final String MOTOR_TELEMETRY = "ShooterMotor";
+  private static final String MECHANISM_TELEMETRY = "Shooter";
 
   // Stable physical constants
   private static final int GEAR_STAGE_1 = 3;
@@ -57,7 +59,7 @@ public class Shooter extends SubsystemBase {
   private static final double SIM_KV = 0;
   private static final double SIM_KA = 0;
 
-  SmartMotorControllerConfig smcConfig = new SmartMotorControllerConfig(this)
+  private SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.CLOSED_LOOP)
       // Feedback Constants (PID Constants)
       .withClosedLoopController(
@@ -71,7 +73,7 @@ public class Shooter extends SubsystemBase {
           ControlsConstants.SHOOTER_KS, ControlsConstants.SHOOTER_KV, ControlsConstants.SHOOTER_KA))
       .withSimFeedforward(new SimpleMotorFeedforward(SIM_KS, SIM_KV, SIM_KA))
       // Telemetry name and verbosity level
-      .withTelemetry("ShooterMotor", TelemetryVerbosity.HIGH)
+      .withTelemetry(MOTOR_TELEMETRY, TelemetryVerbosity.HIGH)
       // Gearing from the motor rotor to final shaft.
       // In this example gearbox(3,4) is the same as gearbox("3:1","4:1") which
       // corresponds to the gearbox attached to your motor.
@@ -84,37 +86,32 @@ public class Shooter extends SubsystemBase {
       .withOpenLoopRampRate(OPEN_LOOP_RAMP_RATE);
 
   // Vendor motor controller object
-  TalonFX talonFX = new TalonFX(HardwareConstants.SHOOTER_MOTOR_ID);
+  private TalonFX motor = new TalonFX(HardwareConstants.SHOOTER_MOTOR_ID);
 
-  // Create our SmartMotorController from our Spark and config with the NEO.
-  private SmartMotorController talonFXMotorController = new PatchedTalonFXWrapper(talonFX, DCMotor.getFalcon500(1),
-      smcConfig);
+  // Create our SmartMotorController wrapping the TalonFX.
+  private SmartMotorController controller = new PatchedTalonFXWrapper(motor, DCMotor.getFalcon500(1),
+      motorConfig);
 
-  FlyWheelConfig shooterConfig = new FlyWheelConfig(talonFXMotorController)
+  private FlyWheelConfig shooterConfig = new FlyWheelConfig(controller)
       // Diameter of the flywheel.
       .withDiameter(DIAMETER)
       // Mass of the flywheel.
       .withMass(MASS)
       // Maximum speed of the shooter.
       .withUpperSoftLimit(UPPER_SOFT_LIMIT)
-      // Telemetry name and verbosity for the arm.
-      .withTelemetry("Shooter", TelemetryVerbosity.HIGH);
+      // Telemetry name and verbosity for the mechanism.
+      .withTelemetry(MECHANISM_TELEMETRY, TelemetryVerbosity.HIGH);
 
   // Shooter Mechanism
   private FlyWheel shooter = new FlyWheel(shooterConfig);
 
-  FlyWheelConfig GAU12EqualizerConfig = new FlyWheelConfig(talonFXMotorController)
-      // Diameter of the flywheel.
-      .withDiameter(DIAMETER)
-      // Mass of the flywheel.
-      .withMass(MASS);
-
+  /** Creates a new Shooter. */
   public Shooter() {
-    setDefaultCommand(setVelocity(RPM.of(0)));
+    setDefaultCommand(setVelocity(ControlsConstants.SHOOTER_DEFAULT_VELOCITY));
   }
 
   /**
-   * Gets the current velocity of the intake.
+   * Gets the current velocity of the shooter.
    *
    * @return Shooter velocity.
    */
@@ -123,7 +120,7 @@ public class Shooter extends SubsystemBase {
   }
 
   /**
-   * Set the intake velocity.
+   * Set the shooter velocity.
    *
    * @param speed Speed to set.
    * @return {@link edu.wpi.first.wpilibj2.command.RunCommand}

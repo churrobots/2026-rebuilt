@@ -38,6 +38,8 @@ import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 
 public class ClimberTW extends SubsystemBase {
+  private static final String MOTOR_TELEMETRY = "ElevatorMotor";
+  private static final String MECHANISM_TELEMETRY = "Elevator";
 
   // Stable physical constants
   private static final Distance MECHANISM_CIRCUMFERENCE = Meters.of(Inches.of(0.25).in(Meters) * 22);
@@ -60,7 +62,7 @@ public class ClimberTW extends SubsystemBase {
   private static final double SIM_KG = 0;
   private static final double SIM_KV = 0;
 
-  private SmartMotorControllerConfig smcConfig = new SmartMotorControllerConfig(this)
+  private SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.CLOSED_LOOP)
       // Mechanism Circumference is the distance traveled by each mechanism rotation
       // converting rotations to meters.
@@ -77,7 +79,7 @@ public class ClimberTW extends SubsystemBase {
           ControlsConstants.CLIMBER_KS, ControlsConstants.CLIMBER_KG, ControlsConstants.CLIMBER_KV))
       .withSimFeedforward(new ElevatorFeedforward(SIM_KS, SIM_KG, SIM_KV))
       // Telemetry name and verbosity level
-      .withTelemetry("ElevatorMotor", TelemetryVerbosity.HIGH)
+      .withTelemetry(MOTOR_TELEMETRY, TelemetryVerbosity.HIGH)
       // Gearing from the motor rotor to final shaft.
       // In this example GearBox.fromReductionStages(3,4) is the same as
       // GearBox.fromStages("3:1","4:1") which corresponds to the gearbox attached to
@@ -100,25 +102,30 @@ public class ClimberTW extends SubsystemBase {
   // .getSensor(); // Get the sensor.
 
   // Vendor motor controller object
-  private TalonFX talonFx = new TalonFX(HardwareConstants.CLIMBER_MOTOR_ID);
+  private TalonFX motor = new TalonFX(HardwareConstants.CLIMBER_MOTOR_ID);
 
-  // Create our SmartMotorController from our Spark and config with the NEO.
-  private SmartMotorController talonFxSmartMotorController = new PatchedTalonFXWrapper(talonFx, DCMotor.getFalcon500(1),
-      smcConfig);
+  // Create our SmartMotorController wrapping the TalonFX.
+  private SmartMotorController controller = new PatchedTalonFXWrapper(motor, DCMotor.getFalcon500(1),
+      motorConfig);
 
-  private ElevatorConfig elevconfig = new ElevatorConfig(talonFxSmartMotorController)
+  private ElevatorConfig elevatorConfig = new ElevatorConfig(controller)
       .withStartingHeight(STARTING_HEIGHT)
       .withHardLimits(HARD_LIMIT_LOW, HARD_LIMIT_HIGH)
-      .withTelemetry("Elevator", TelemetryVerbosity.HIGH)
+      .withTelemetry(MECHANISM_TELEMETRY, TelemetryVerbosity.HIGH)
       .withMass(MASS);
 
   // Elevator Mechanism
-  private Elevator elevator = new Elevator(elevconfig);
+  private Elevator elevator = new Elevator(elevatorConfig);
+
+  /** Creates a new ClimberTW. */
+  public ClimberTW() {
+    setDefaultCommand(setHeight(ControlsConstants.CLIMBER_DEFAULT_HEIGHT));
+  }
 
   /**
    * Set the height of the elevator.
    *
-   * @param angle Distance to go to.
+   * @param height Distance to go to.
    */
   public Command setHeight(Distance height) {
     return elevator.setHeight(height);
@@ -145,16 +152,10 @@ public class ClimberTW extends SubsystemBase {
     // This method will be called once per scheduler run during simulation
     elevator.simIterate();
   }
-  // This method will be called once per scheduler run
-
-  /** Creates a new ClimberTW. */
-  public ClimberTW() {
-    setDefaultCommand(setHeight(Meters.of(0)));
-  }
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run [//
+    // This method will be called once per scheduler run
     elevator.updateTelemetry();
   }
 }
