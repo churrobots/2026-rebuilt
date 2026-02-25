@@ -14,6 +14,9 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import yams.gearing.GearBox;
@@ -29,6 +32,20 @@ import yams.motorcontrollers.local.SparkWrapper;
 
 public class Spindexer extends SubsystemBase {
 
+  // Stable physical constants
+  private static final int GEAR_STAGE_1 = 3;
+  private static final int GEAR_STAGE_2 = 3;
+  private static final int GEAR_STAGE_3 = 4;
+  private static final Current STATOR_CURRENT_LIMIT = Amps.of(40);
+  private static final Distance DIAMETER = Inches.of(17.5);
+  private static final Mass MASS = Pounds.of(1);
+  private static final AngularVelocity UPPER_SOFT_LIMIT = RPM.of(150);
+
+  // Sim constants
+  private static final double SIM_KP = 0.5;
+  private static final double SIM_KI = 0;
+  private static final double SIM_KD = 0;
+
   /** Creates a new Spinnymabobthing. */
   public Spindexer() {
     setDefaultCommand(set(0));
@@ -37,8 +54,9 @@ public class Spindexer extends SubsystemBase {
   private SmartMotorControllerConfig smcConfig = new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.CLOSED_LOOP)
       // Feedback Constants (PID Constants)
-      .withClosedLoopController(0.5, 0, 0)
-      .withSimClosedLoopController(0.5, 0, 0)
+      .withClosedLoopController(ControlsConstants.SPINDEXER_KP, ControlsConstants.SPINDEXER_KI,
+          ControlsConstants.SPINDEXER_KD)
+      .withSimClosedLoopController(SIM_KP, SIM_KI, SIM_KD)
       // TODO: figure out why SparkBase doesn't like feedforward values?
       // Feedforward Constants
       // .withFeedforward(new SimpleMotorFeedforward(0, 9.17, 0))
@@ -50,11 +68,11 @@ public class Spindexer extends SubsystemBase {
       // GearBox.fromStages("3:1","4:1") which corresponds to the gearbox attached to
       // your motor.
       // You could also use .withGearing(12) which does the same thing.
-      .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 3, 4)))
+      .withGearing(new MechanismGearing(GearBox.fromReductionStages(GEAR_STAGE_1, GEAR_STAGE_2, GEAR_STAGE_3)))
       // Motor properties to prevent over currenting.
       .withMotorInverted(true)
       .withIdleMode(MotorMode.COAST)
-      .withStatorCurrentLimit(Amps.of(40));
+      .withStatorCurrentLimit(STATOR_CURRENT_LIMIT);
 
   // Vendor motor controller object
   private SparkMax motorcontroller = new SparkMax(HardwareConstants.SPINDEXER_MOTOR_ID, MotorType.kBrushless);
@@ -63,11 +81,11 @@ public class Spindexer extends SubsystemBase {
 
   private final FlyWheelConfig spindexerConfig = new FlyWheelConfig(sparkSmartMotorController)
       // Diameter of the flywheel.
-      .withDiameter(Inches.of(17.5))
+      .withDiameter(DIAMETER)
       // Mass of the flywheel.
-      .withMass(Pounds.of(1))
+      .withMass(MASS)
       // Maximum speed of the spindexer.
-      .withUpperSoftLimit(RPM.of(150))
+      .withUpperSoftLimit(UPPER_SOFT_LIMIT)
       // Telemetry name and verbosity for the arm.
       .withTelemetry("Spindexer", TelemetryVerbosity.HIGH);
 

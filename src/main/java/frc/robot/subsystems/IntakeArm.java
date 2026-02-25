@@ -21,6 +21,12 @@ import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularAcceleration;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.Mass;
+import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import yams.gearing.GearBox;
@@ -35,22 +41,53 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.motorcontrollers.local.SparkWrapper;
 
 public class IntakeArm extends SubsystemBase {
+
+  // Stable physical constants
+  private static final int GEAR_STAGE_1 = 3;
+  private static final int GEAR_STAGE_2 = 4;
+  private static final Current STATOR_CURRENT_LIMIT = Amps.of(40);
+  private static final Time CLOSED_LOOP_RAMP_RATE = Seconds.of(0.1);
+  private static final Time OPEN_LOOP_RAMP_RATE = Seconds.of(0.25);
+  private static final Angle SOFT_LIMIT_LOW = Degrees.of(-90);
+  private static final Angle SOFT_LIMIT_HIGH = Degrees.of(90);
+  private static final Angle HARD_LIMIT_LOW = Degrees.of(-100);
+  private static final Angle HARD_LIMIT_HIGH = Degrees.of(100);
+  private static final Angle STARTING_POSITION = Degrees.of(0);
+  private static final Distance LENGTH = Feet.of(1);
+  private static final Mass MASS = Pounds.of(5);
+
+  // Sim constants
+  private static final double SIM_KP = 4;
+  private static final double SIM_KI = 0;
+  private static final double SIM_KD = 0.2;
+  private static final AngularVelocity SIM_MAX_VEL = DegreesPerSecond.of(180);
+  private static final AngularAcceleration SIM_MAX_ACCEL = DegreesPerSecondPerSecond.of(90);
+  private static final double SIM_KS = 0;
+  private static final double SIM_KG = 1.302;
+  private static final double SIM_KV = 0;
+  private static final double SIM_KA = 0;
+
   private SmartMotorControllerConfig smcConfig = new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.CLOSED_LOOP)
       // Feedback Constants (PID Constants)
-      .withClosedLoopController(4, 0, 0, DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(90))
-      .withSimClosedLoopController(4, 0, 0.2, DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(90))
+      .withClosedLoopController(
+          ControlsConstants.INTAKE_ARM_KP, ControlsConstants.INTAKE_ARM_KI, ControlsConstants.INTAKE_ARM_KD,
+          ControlsConstants.INTAKE_ARM_MAX_VEL, ControlsConstants.INTAKE_ARM_MAX_ACCEL)
+      .withSimClosedLoopController(
+          SIM_KP, SIM_KI, SIM_KD,
+          SIM_MAX_VEL, SIM_MAX_ACCEL)
       // Feedforward Constants
-      .withFeedforward(new ArmFeedforward(0, 0, 0))
-      .withSimFeedforward(new ArmFeedforward(0, 1.302, 0, 0))
+      .withFeedforward(new ArmFeedforward(
+          ControlsConstants.INTAKE_ARM_KS, ControlsConstants.INTAKE_ARM_KG, ControlsConstants.INTAKE_ARM_KV))
+      .withSimFeedforward(new ArmFeedforward(SIM_KS, SIM_KG, SIM_KV, SIM_KA))
       // Telemetry name and verbosity level
       .withTelemetry("IntakeArmMotor", TelemetryVerbosity.HIGH)
-      .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
+      .withGearing(new MechanismGearing(GearBox.fromReductionStages(GEAR_STAGE_1, GEAR_STAGE_2)))
       .withMotorInverted(false)
       .withIdleMode(MotorMode.BRAKE)
-      .withStatorCurrentLimit(Amps.of(40))
-      .withClosedLoopRampRate(Seconds.of(0.1))
-      .withOpenLoopRampRate(Seconds.of(0.25));
+      .withStatorCurrentLimit(STATOR_CURRENT_LIMIT)
+      .withClosedLoopRampRate(CLOSED_LOOP_RAMP_RATE)
+      .withOpenLoopRampRate(OPEN_LOOP_RAMP_RATE);
 
   // Vendor motor controller object
   private SparkMax spark = new SparkMax(HardwareConstants.INTAKE_ARM_MOTOR_ID, MotorType.kBrushless);
@@ -60,14 +97,14 @@ public class IntakeArm extends SubsystemBase {
 
   private ArmConfig armCfg = new ArmConfig(sparkSmartMotorController)
       // Soft limit is applied to the SmartMotorControllers PID
-      .withSoftLimits(Degrees.of(-90), Degrees.of(90))
+      .withSoftLimits(SOFT_LIMIT_LOW, SOFT_LIMIT_HIGH)
       // Hard limit is applied to the simulation.
-      .withHardLimit(Degrees.of(-100), Degrees.of(100))
+      .withHardLimit(HARD_LIMIT_LOW, HARD_LIMIT_HIGH)
       // Starting position is where your arm starts
-      .withStartingPosition(Degrees.of(0))
+      .withStartingPosition(STARTING_POSITION)
       // Length and mass of your arm for sim.
-      .withLength(Feet.of(1))
-      .withMass(Pounds.of(5))
+      .withLength(LENGTH)
+      .withMass(MASS)
       // Telemetry name and verbosity for the arm.
       .withTelemetry("IntakeArm", TelemetryVerbosity.HIGH);
 

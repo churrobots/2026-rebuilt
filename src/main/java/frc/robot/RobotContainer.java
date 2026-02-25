@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.CalibrationMode;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.ClimberTW;
+import frc.robot.subsystems.ControlsConstants;
 import frc.robot.subsystems.Feeder;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.IntakeArm;
@@ -211,7 +212,7 @@ public class RobotContainer {
     controller.back().whileTrue(resetPoseFacingAway);
 
     // Spindexer controls.
-    Command runSpindexer = spindexer.setVelocity(RPM.of(12 * 60));
+    Command runSpindexer = spindexer.setVelocity(ControlsConstants.SPINDEXER_VELOCITY);
     controller.rightBumper().whileTrue(runSpindexer);
   }
 

@@ -18,7 +18,12 @@ import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearAcceleration;
+import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.measure.Mass;
+import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.PatchedTalonFXWrapper;
@@ -34,17 +39,43 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 
 public class ClimberTW extends SubsystemBase {
 
+  // Stable physical constants
+  private static final Distance MECHANISM_CIRCUMFERENCE = Meters.of(Inches.of(0.25).in(Meters) * 22);
+  private static final double GEAR_REDUCTION = 10; // 10:1
+  private static final Current STATOR_CURRENT_LIMIT = Amps.of(40);
+  private static final Time CLOSED_LOOP_RAMP_RATE = Seconds.of(0.25);
+  private static final Time OPEN_LOOP_RAMP_RATE = Seconds.of(0.25);
+  private static final Distance STARTING_HEIGHT = Meters.of(0.5);
+  private static final Distance HARD_LIMIT_LOW = Meters.of(0);
+  private static final Distance HARD_LIMIT_HIGH = Meters.of(1);
+  private static final Mass MASS = Pounds.of(16);
+
+  // Sim constants
+  private static final double SIM_KP = 4;
+  private static final double SIM_KI = 0;
+  private static final double SIM_KD = 0;
+  private static final LinearVelocity SIM_MAX_VEL = MetersPerSecond.of(0.5);
+  private static final LinearAcceleration SIM_MAX_ACCEL = MetersPerSecondPerSecond.of(0.5);
+  private static final double SIM_KS = 0;
+  private static final double SIM_KG = 0;
+  private static final double SIM_KV = 0;
+
   private SmartMotorControllerConfig smcConfig = new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.CLOSED_LOOP)
       // Mechanism Circumference is the distance traveled by each mechanism rotation
       // converting rotations to meters.
-      .withMechanismCircumference(Meters.of(Inches.of(0.25).in(Meters) * 22))
+      .withMechanismCircumference(MECHANISM_CIRCUMFERENCE)
       // Feedback Constants (PID Constants)
-      .withClosedLoopController(4, 0, 0, MetersPerSecond.of(0.1), MetersPerSecondPerSecond.of(0.1))
-      .withSimClosedLoopController(4, 0, 0, MetersPerSecond.of(0.5), MetersPerSecondPerSecond.of(0.5))
+      .withClosedLoopController(
+          ControlsConstants.CLIMBER_KP, ControlsConstants.CLIMBER_KI, ControlsConstants.CLIMBER_KD,
+          ControlsConstants.CLIMBER_MAX_VEL, ControlsConstants.CLIMBER_MAX_ACCEL)
+      .withSimClosedLoopController(
+          SIM_KP, SIM_KI, SIM_KD,
+          SIM_MAX_VEL, SIM_MAX_ACCEL)
       // Feedforward Constants
-      .withFeedforward(new ElevatorFeedforward(0, 0, 0))
-      .withSimFeedforward(new ElevatorFeedforward(0, 0, 0))
+      .withFeedforward(new ElevatorFeedforward(
+          ControlsConstants.CLIMBER_KS, ControlsConstants.CLIMBER_KG, ControlsConstants.CLIMBER_KV))
+      .withSimFeedforward(new ElevatorFeedforward(SIM_KS, SIM_KG, SIM_KV))
       // Telemetry name and verbosity level
       .withTelemetry("ElevatorMotor", TelemetryVerbosity.HIGH)
       // Gearing from the motor rotor to final shaft.
@@ -52,13 +83,13 @@ public class ClimberTW extends SubsystemBase {
       // GearBox.fromStages("3:1","4:1") which corresponds to the gearbox attached to
       // your motor.
       // You could also use .withGearing(12) which does the same thing.
-      .withGearing(new MechanismGearing(GearBox.fromReductionStages(10, 1)))
+      .withGearing(new MechanismGearing(GearBox.fromReductionStages(GEAR_REDUCTION, 1)))
       // Motor properties to prevent over currenting.
       .withMotorInverted(false)
       .withIdleMode(MotorMode.BRAKE)
-      .withStatorCurrentLimit(Amps.of(40))
-      .withClosedLoopRampRate(Seconds.of(0.25))
-      .withOpenLoopRampRate(Seconds.of(0.25));
+      .withStatorCurrentLimit(STATOR_CURRENT_LIMIT)
+      .withClosedLoopRampRate(CLOSED_LOOP_RAMP_RATE)
+      .withOpenLoopRampRate(OPEN_LOOP_RAMP_RATE);
 
   // private DigitalInput dio = new DigitalInput(0); // Standard DIO
   // private final Sensor climbSensor = new SensorConfig("switchgoclickclick") //
@@ -69,24 +100,24 @@ public class ClimberTW extends SubsystemBase {
   // .getSensor(); // Get the sensor.
 
   // Vendor motor controller object
-  private TalonFX talonFx = new TalonFX(10);
+  private TalonFX talonFx = new TalonFX(HardwareConstants.CLIMBER_MOTOR_ID);
 
   // Create our SmartMotorController from our Spark and config with the NEO.
   private SmartMotorController talonFxSmartMotorController = new PatchedTalonFXWrapper(talonFx, DCMotor.getFalcon500(1),
       smcConfig);
 
   private ElevatorConfig elevconfig = new ElevatorConfig(talonFxSmartMotorController)
-      .withStartingHeight(Meters.of(0.5))
-      .withHardLimits(Meters.of(0), Meters.of(1))
+      .withStartingHeight(STARTING_HEIGHT)
+      .withHardLimits(HARD_LIMIT_LOW, HARD_LIMIT_HIGH)
       .withTelemetry("Elevator", TelemetryVerbosity.HIGH)
-      .withMass(Pounds.of(16));
+      .withMass(MASS);
 
   // Elevator Mechanism
   private Elevator elevator = new Elevator(elevconfig);
 
   /**
    * Set the height of the elevator.
-   * 
+   *
    * @param angle Distance to go to.
    */
   public Command setHeight(Distance height) {
@@ -95,7 +126,7 @@ public class ClimberTW extends SubsystemBase {
 
   /**
    * Move the elevator up and down.
-   * 
+   *
    * @param dutycycle [-1, 1] speed to set the elevator too.
    */
   public Command set(double dutycycle) {

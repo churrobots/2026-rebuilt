@@ -4,5 +4,73 @@
 
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.DegreesPerSecond;
+import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
+import static edu.wpi.first.units.Units.RPM;
+
+import edu.wpi.first.units.measure.AngularAcceleration;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.LinearAcceleration;
+import edu.wpi.first.units.measure.LinearVelocity;
+
 public class ControlsConstants {
+  // ========== ClimberTW ==========
+  public static final double CLIMBER_KP = 4;
+  public static final double CLIMBER_KI = 0;
+  public static final double CLIMBER_KD = 0;
+  public static final LinearVelocity CLIMBER_MAX_VEL = MetersPerSecond.of(0.1);
+  public static final LinearAcceleration CLIMBER_MAX_ACCEL = MetersPerSecondPerSecond.of(0.1);
+  public static final double CLIMBER_KS = 0;
+  public static final double CLIMBER_KG = 0;
+  public static final double CLIMBER_KV = 0;
+
+  // ========== Feeder ==========
+  public static final double FEEDER_KP = 50;
+  public static final double FEEDER_KI = 0;
+  public static final double FEEDER_KD = 0;
+  public static final AngularVelocity FEEDER_MAX_VEL = DegreesPerSecond.of(90);
+  public static final AngularAcceleration FEEDER_MAX_ACCEL = DegreesPerSecondPerSecond.of(45);
+  public static final double FEEDER_KS = 0;
+  public static final double FEEDER_KV = 0;
+  public static final double FEEDER_KA = 0;
+
+  // ========== IntakeArm ==========
+  public static final double INTAKE_ARM_KP = 4;
+  public static final double INTAKE_ARM_KI = 0;
+  public static final double INTAKE_ARM_KD = 0;
+  public static final AngularVelocity INTAKE_ARM_MAX_VEL = DegreesPerSecond.of(180);
+  public static final AngularAcceleration INTAKE_ARM_MAX_ACCEL = DegreesPerSecondPerSecond.of(90);
+  public static final double INTAKE_ARM_KS = 0;
+  public static final double INTAKE_ARM_KG = 0;
+  public static final double INTAKE_ARM_KV = 0;
+
+  // ========== IntakeRoller ==========
+  public static final double INTAKE_ROLLER_KP = 50;
+  public static final double INTAKE_ROLLER_KI = 0;
+  public static final double INTAKE_ROLLER_KD = 0;
+  public static final AngularVelocity INTAKE_ROLLER_MAX_VEL = DegreesPerSecond.of(90);
+  public static final AngularAcceleration INTAKE_ROLLER_MAX_ACCEL = DegreesPerSecondPerSecond.of(45);
+  public static final double INTAKE_ROLLER_KS = 0;
+  public static final double INTAKE_ROLLER_KV = 0;
+  public static final double INTAKE_ROLLER_KA = 0;
+
+  // ========== Shooter ==========
+  public static final double SHOOTER_KP = 50;
+  public static final double SHOOTER_KI = 0;
+  public static final double SHOOTER_KD = 0;
+  public static final AngularVelocity SHOOTER_MAX_VEL = DegreesPerSecond.of(90);
+  public static final AngularAcceleration SHOOTER_MAX_ACCEL = DegreesPerSecondPerSecond.of(45);
+  public static final double SHOOTER_KS = 0;
+  public static final double SHOOTER_KV = 0;
+  public static final double SHOOTER_KA = 0;
+
+  // ========== Spindexer ==========
+  public static final double SPINDEXER_KP = 0.5;
+  public static final double SPINDEXER_KI = 0;
+  public static final double SPINDEXER_KD = 0;
+
+  // ========== Controller Binding Constants ==========
+  public static final AngularVelocity SPINDEXER_VELOCITY = RPM.of(12 * 60);
 }
