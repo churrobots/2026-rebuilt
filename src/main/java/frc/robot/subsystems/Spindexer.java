@@ -57,7 +57,7 @@ public class Spindexer extends SubsystemBase {
       .withStatorCurrentLimit(Amps.of(40));
 
   // Vendor motor controller object
-  private SparkMax motorcontroller = new SparkMax(14, MotorType.kBrushless);
+  private SparkMax motorcontroller = new SparkMax(HardwareConstants.SPINDEXER_MOTOR_ID, MotorType.kBrushless);
   private SmartMotorController sparkSmartMotorController = new SparkWrapper(motorcontroller, DCMotor.getNEO(1),
       smcConfig);
 

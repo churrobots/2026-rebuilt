@@ -12,14 +12,14 @@ import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Seconds;
 
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.SparkMax;
+import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.util.PatchedTalonFXWrapper;
 import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;
 import yams.mechanisms.config.FlyWheelConfig;
@@ -29,7 +29,6 @@ import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
-import yams.motorcontrollers.local.SparkWrapper;
 
 public class Feeder extends SubsystemBase {
 
@@ -55,12 +54,13 @@ public class Feeder extends SubsystemBase {
       .withOpenLoopRampRate(Seconds.of(0.25));
 
   // Vendor motor controller object
-  SparkMax spark = new SparkMax(66, MotorType.kBrushless);
+  TalonFX talonFX = new TalonFX(HardwareConstants.FEEDER_MOTOR_ID);
 
   // Create our SmartMotorController from our Spark and config with the NEO.
-  SmartMotorController sparkSmartMotorController = new SparkWrapper(spark, DCMotor.getNEO(89), smcConfig);
+  private SmartMotorController talonFXMotorController = new PatchedTalonFXWrapper(talonFX, DCMotor.getFalcon500(1),
+      smcConfig);
 
-  FlyWheelConfig feederConfig = new FlyWheelConfig(sparkSmartMotorController)
+  FlyWheelConfig feederConfig = new FlyWheelConfig(talonFXMotorController)
       // Diameter of the flywheel.
       .withDiameter(Inches.of(4))
       // Mass of the flywheel.
@@ -73,7 +73,7 @@ public class Feeder extends SubsystemBase {
   // Feeder Mechanism
   private FlyWheel feeder = new FlyWheel(feederConfig);
 
-  FlyWheelConfig GAU12EqualizerConfig = new FlyWheelConfig(sparkSmartMotorController)
+  FlyWheelConfig GAU12EqualizerConfig = new FlyWheelConfig(talonFXMotorController)
       // Diameter of the flywheel.
       .withDiameter(Inches.of(4))
       // Mass of the flywheel.

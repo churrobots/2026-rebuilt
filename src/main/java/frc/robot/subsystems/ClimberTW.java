@@ -19,22 +19,18 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.PatchedTalonFXWrapper;
 import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;
 import yams.mechanisms.config.ElevatorConfig;
-import yams.mechanisms.config.SensorConfig;
 import yams.mechanisms.positional.Elevator;
 import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
-import yams.motorcontrollers.remote.TalonFXWrapper;
-import yams.motorcontrollers.simulation.Sensor;
 
 public class ClimberTW extends SubsystemBase {
 
@@ -76,10 +72,10 @@ public class ClimberTW extends SubsystemBase {
   private TalonFX talonFx = new TalonFX(10);
 
   // Create our SmartMotorController from our Spark and config with the NEO.
-  private SmartMotorController sparkSmartMotorController = new PatchedTalonFXWrapper(talonFx, DCMotor.getFalcon500(1),
+  private SmartMotorController talonFxSmartMotorController = new PatchedTalonFXWrapper(talonFx, DCMotor.getFalcon500(1),
       smcConfig);
 
-  private ElevatorConfig elevconfig = new ElevatorConfig(sparkSmartMotorController)
+  private ElevatorConfig elevconfig = new ElevatorConfig(talonFxSmartMotorController)
       .withStartingHeight(Meters.of(0.5))
       .withHardLimits(Meters.of(0), Meters.of(1))
       .withTelemetry("Elevator", TelemetryVerbosity.HIGH)
