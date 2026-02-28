@@ -31,7 +31,7 @@
     },
     "###/SmartDashboard/Auto Choices": {
       "Collapsed": "0",
-      "Pos": "11,26",
+      "Pos": "8,22",
       "Size": "262,50"
     },
     "###/SmartDashboard/Auto Chooser": {
@@ -39,34 +39,59 @@
       "Pos": "10,26",
       "Size": "262,50"
     },
+    "###/SmartDashboard/DoubleJointedArm_LowerArm_UpperArm/mechanism": {
+      "Collapsed": "0",
+      "Pos": "400,400",
+      "Size": "523,357"
+    },
     "###/SmartDashboard/Elevator/mechanism": {
       "Collapsed": "0",
-      "Pos": "503,426",
-      "Size": "301,190"
+      "Pos": "5,341",
+      "Size": "271,247"
+    },
+    "###/SmartDashboard/ExponentiallyProfiledArm/mechanism": {
+      "Collapsed": "0",
+      "Pos": "398,539",
+      "Size": "624,305"
     },
     "###/SmartDashboard/Field": {
       "Collapsed": "0",
-      "Pos": "514,208",
-      "Size": "873,429"
+      "Pos": "384,23",
+      "Size": "915,465"
     },
     "###/SmartDashboard/IntakeArm/mechanism": {
       "Collapsed": "0",
-      "Pos": "807,426",
-      "Size": "307,189"
+      "Pos": "295,427",
+      "Size": "283,243"
     },
     "###/SmartDashboard/IntakeRoller/mechanism": {
       "Collapsed": "0",
-      "Pos": "174,426",
-      "Size": "327,189"
+      "Pos": "21,389",
+      "Size": "291,187"
     },
     "###/SmartDashboard/PhotonAlerts": {
       "Collapsed": "0",
       "Pos": "134,190",
       "Size": "300,150"
     },
+    "###/SmartDashboard/Shooter/mechanism": {
+      "Collapsed": "0",
+      "Pos": "30,183",
+      "Size": "270,200"
+    },
+    "###/SmartDashboard/ShooterMech/mechanism": {
+      "Collapsed": "0",
+      "Pos": "637,514",
+      "Size": "297,221"
+    },
+    "###/SmartDashboard/Spindexer/mechanism": {
+      "Collapsed": "0",
+      "Pos": "-8,74",
+      "Size": "281,264"
+    },
     "###/SmartDashboard/VisionSystemSim-main/Sim Field": {
       "Collapsed": "0",
-      "Pos": "276,22",
+      "Pos": "375,18",
       "Size": "780,400"
     },
     "###DIO": {
@@ -86,7 +111,7 @@
     },
     "###Keyboard 0 Settings": {
       "Collapsed": "0",
-      "Pos": "1091,5",
+      "Pos": "992,98",
       "Size": "300,560"
     },
     "###Keyboard 1 Settings": {
@@ -96,13 +121,13 @@
     },
     "###NetworkTables": {
       "Collapsed": "0",
-      "Pos": "404,211",
-      "Size": "750,185"
+      "Pos": "955,50",
+      "Size": "750,566"
     },
     "###NetworkTables Info": {
       "Collapsed": "0",
-      "Pos": "449,744",
-      "Size": "750,145"
+      "Pos": "599,716",
+      "Size": "749,145"
     },
     "###Other Devices": {
       "Collapsed": "0",
@@ -111,13 +136,13 @@
     },
     "###Plot <0>": {
       "Collapsed": "0",
-      "Pos": "60,60",
-      "Size": "700,400"
+      "Pos": "394,95",
+      "Size": "898,367"
     },
     "###System Joysticks": {
       "Collapsed": "0",
-      "Pos": "8,372",
-      "Size": "192,218"
+      "Pos": "9,372",
+      "Size": "154,236"
     },
     "###Timing": {
       "Collapsed": "0",
@@ -131,7 +156,7 @@
     },
     "Robot State": {
       "Collapsed": "0",
-      "Pos": "11,87",
+      "Pos": "272,21",
       "Size": "94,122"
     }
   }

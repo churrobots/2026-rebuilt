@@ -17,6 +17,7 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.util.Units;
 import frc.robot.Constants;
 
 public class VisionConstants {
@@ -24,20 +25,27 @@ public class VisionConstants {
   public static AprilTagFieldLayout aprilTagLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
 
   // Camera names, must match names configured on coprocessor
-  public static String cameraFrontName = "camera_front";
-  public static String cameraBackName = "camera_back";
-  public static String cameraRightName = "camera_right";
+  public static String cameraFrontRight = "camera_frontright";
+  public static String cameraBackRight = "camera_right";
+  public static String cameraFrontLeft = "camera_frontleft";
+  public static String cameraBackLeft = "camera_back";
 
   // Robot to camera transforms
   // (Not used by Limelight, configure in web UI instead)
 
-  public static Transform3d robotToCameraFront = new Transform3d(-10.25 * Constants.INCHES_TO_METERS,
-      -8.5 * Constants.INCHES_TO_METERS, 18.5 * Constants.INCHES_TO_METERS, new Rotation3d(-1 * Math.PI / 2, 0, 0.0));
-  public static Transform3d robotToCameraBack = new Transform3d(-15 * Constants.INCHES_TO_METERS,
-      8.5 * Constants.INCHES_TO_METERS, 19 * Constants.INCHES_TO_METERS, new Rotation3d(1 * Math.PI / 2, 0, Math.PI));
-  public static Transform3d robotToCameraRight = new Transform3d(-14 * Constants.INCHES_TO_METERS,
-      -9.5 * Constants.INCHES_TO_METERS, 15 * Constants.INCHES_TO_METERS,
-      new Rotation3d(-1 * Math.PI / 2, 0, -1 * Math.PI / 2));
+  // Yaw only works right when it is inverted?
+  public static Transform3d robotToCameraFrontRight = new Transform3d(
+      Units.inchesToMeters(10), Units.inchesToMeters(-10), Units.inchesToMeters(9),
+      new Rotation3d(Math.PI, -Math.PI / 10, 1 * Math.PI / 6));
+  public static Transform3d robotToCameraBackRight = new Transform3d(
+      Units.inchesToMeters(-10), Units.inchesToMeters(-10.), Units.inchesToMeters(9),
+      new Rotation3d(Math.PI, 0, 1 * Math.PI / 2));
+  public static Transform3d robotToCameraFrontLeft = new Transform3d(
+      Units.inchesToMeters(10), Units.inchesToMeters(10), Units.inchesToMeters(9),
+      new Rotation3d(Math.PI, -Math.PI / 10, -1 * Math.PI / 6));
+  public static Transform3d robotToCameraBackLeft = new Transform3d(
+      Units.inchesToMeters(-10), Units.inchesToMeters(10), Units.inchesToMeters(9),
+      new Rotation3d(Math.PI, 0, Math.PI));
 
   // Basic filtering thresholds
   public static double maxAmbiguity = 0.3;
@@ -51,8 +59,10 @@ public class VisionConstants {
   // Standard deviation multipliers for each camera
   // (Adjust to trust some cameras more than others)
   public static double[] cameraStdDevFactors = new double[] {
-      1.0, // Camera 0
-      1.0 // Camera 1
+      0.6, // Camera 0
+      0.4, // Camera 1
+      0.6, // Camera 2
+      0.8, // Camera 3
   };
 
   // Multipliers to apply for MegaTag 2 observations

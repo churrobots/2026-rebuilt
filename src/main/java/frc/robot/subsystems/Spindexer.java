@@ -5,15 +5,13 @@
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.DegreesPerSecond;
-import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.RPM;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.SparkMax;
 
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -29,89 +27,92 @@ import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.motorcontrollers.local.SparkWrapper;
 
-public class IntakeRoller extends SubsystemBase {
-  private SmartMotorControllerConfig intakeSmcConfig = new SmartMotorControllerConfig(this)
+public class Spindexer extends SubsystemBase {
+
+  /** Creates a new Spinnymabobthing. */
+  public Spindexer() {
+    setDefaultCommand(set(0));
+  }
+
+  private SmartMotorControllerConfig smcConfig = new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.CLOSED_LOOP)
       // Feedback Constants (PID Constants)
-      .withClosedLoopController(50, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(45))
-      .withSimClosedLoopController(50, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(45))
+      .withClosedLoopController(0.5, 0, 0)
+      .withSimClosedLoopController(0.5, 0, 0)
+      // TODO: figure out why SparkBase doesn't like feedforward values?
       // Feedforward Constants
-      .withFeedforward(new SimpleMotorFeedforward(0, 0, 0))
-      .withSimFeedforward(new SimpleMotorFeedforward(0, 0, 0))
+      // .withFeedforward(new SimpleMotorFeedforward(0, 9.17, 0))
+      // .withSimFeedforward(new SimpleMotorFeedforward(0, 9.17, 0))
       // Telemetry name and verbosity level
-      .withTelemetry("IntakeRollerMotor", TelemetryVerbosity.HIGH)
+      .withTelemetry("SpindexerMotor", TelemetryVerbosity.HIGH)
       // Gearing from the motor rotor to final shaft.
       // In this example GearBox.fromReductionStages(3,4) is the same as
       // GearBox.fromStages("3:1","4:1") which corresponds to the gearbox attached to
       // your motor.
       // You could also use .withGearing(12) which does the same thing.
-      .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
+      .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 3, 4)))
       // Motor properties to prevent over currenting.
-      .withMotorInverted(false)
+      .withMotorInverted(true)
       .withIdleMode(MotorMode.COAST)
       .withStatorCurrentLimit(Amps.of(40));
 
   // Vendor motor controller object
-  private SparkMax intakeSpark = new SparkMax(20, MotorType.kBrushless);
+  private SparkMax motorcontroller = new SparkMax(14, MotorType.kBrushless);
+  private SmartMotorController sparkSmartMotorController = new SparkWrapper(motorcontroller, DCMotor.getNEO(1),
+      smcConfig);
 
-  // Create our SmartMotorController from our Spark and config with the NEO.
-  private SmartMotorController intakeSparkSmartMotorController = new SparkWrapper(intakeSpark, DCMotor.getNEO(1),
-      intakeSmcConfig);
-
-  private final FlyWheelConfig intakeConfig = new FlyWheelConfig(intakeSparkSmartMotorController)
+  private final FlyWheelConfig spindexerConfig = new FlyWheelConfig(sparkSmartMotorController)
       // Diameter of the flywheel.
-      .withDiameter(Inches.of(4))
+      .withDiameter(Inches.of(17.5))
       // Mass of the flywheel.
       .withMass(Pounds.of(1))
-      // Maximum speed of the intake.
-      .withUpperSoftLimit(RPM.of(1000))
+      // Maximum speed of the spindexer.
+      .withUpperSoftLimit(RPM.of(150))
       // Telemetry name and verbosity for the arm.
-      .withTelemetry("IntakeRoller", TelemetryVerbosity.HIGH);
+      .withTelemetry("Spindexer", TelemetryVerbosity.HIGH);
 
-  // Shooter Mechanism
-  private FlyWheel intake = new FlyWheel(intakeConfig);
+  // Spindexer Mechanism
+  private FlyWheel spindexer = new FlyWheel(spindexerConfig);
 
   /**
-   * Gets the current velocity of the intake.
+   * Gets the current velocity of the spindexer.
    *
-   * @return Shooter velocity.
+   * @return spindexer velocity.
    */
   public AngularVelocity getVelocity() {
-    return intake.getSpeed();
+    return spindexer.getSpeed();
   }
 
   /**
-   * Set the intake velocity.
+   * Set the spindexer velocity.
    *
    * @param speed Speed to set.
    * @return {@link edu.wpi.first.wpilibj2.command.RunCommand}
    */
   public Command setVelocity(AngularVelocity speed) {
-    return intake.setSpeed(speed);
+    return spindexer.setSpeed(speed);
   }
 
   /**
-   * Set the dutycycle of the intake.
+   * Set the dutycycle of the spindexer.
    *
    * @param dutyCycle DutyCycle to set.
    * @return {@link edu.wpi.first.wpilibj2.command.RunCommand}
    */
   public Command set(double dutyCycle) {
-    return intake.set(dutyCycle);
-  }
-
-  /** Creates a new IntakeRoller. */
-  public IntakeRoller() {
-    setDefaultCommand(set(0));
+    return spindexer.set(dutyCycle);
   }
 
   @Override
   public void periodic() {
-    intake.updateTelemetry();
+    // This method will be called once per scheduler run
+    spindexer.updateTelemetry();
   }
 
   @Override
   public void simulationPeriodic() {
-    intake.simIterate();
+    // This method will be called once per scheduler run during simulation
+    spindexer.simIterate();
   }
+
 }
