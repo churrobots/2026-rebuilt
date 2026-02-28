@@ -5,7 +5,7 @@
 package frc.robot.subsystems;
 
 public class HardwareConstants {
-  public static final int FEEDER_MOTOR_ID = 66;
+  public static final int FEEDER_MOTOR_ID = 60;
   public static final int SPINDEXER_MOTOR_ID = 14;
   public static final int SHOOTER_MOTOR_ID = 46;
   public static final int INTAKE_ARM_MOTOR_ID = 11;

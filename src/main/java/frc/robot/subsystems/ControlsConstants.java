@@ -35,12 +35,7 @@ public class ControlsConstants {
   public static final double FEEDER_KP = 50;
   public static final double FEEDER_KI = 0;
   public static final double FEEDER_KD = 0;
-  public static final AngularVelocity FEEDER_MAX_VEL = DegreesPerSecond.of(90);
-  public static final AngularAcceleration FEEDER_MAX_ACCEL = DegreesPerSecondPerSecond.of(45);
-  public static final double FEEDER_KS = 0;
-  public static final double FEEDER_KV = 0;
-  public static final double FEEDER_KA = 0;
-  public static final AngularVelocity FEEDER_DEFAULT_VELOCITY = RPM.of(0);
+  public static final double FEEDER_DEFAULT_DUTY_CYCLE = 0;
 
   // ========== IntakeArm ==========
   public static final double INTAKE_ARM_KP = 4;
@@ -54,7 +49,7 @@ public class ControlsConstants {
   public static final Angle INTAKE_ARM_DEFAULT_ANGLE = Degrees.of(90);
 
   // ========== IntakeRoller ==========
-  public static final double INTAKE_ROLLER_KP = 0.5;
+  public static final double INTAKE_ROLLER_KP = 50;
   public static final double INTAKE_ROLLER_KI = 0;
   public static final double INTAKE_ROLLER_KD = 0;
   public static final double INTAKE_ROLLER_DEFAULT_DUTY_CYCLE = 0;
@@ -63,12 +58,7 @@ public class ControlsConstants {
   public static final double SHOOTER_KP = 50;
   public static final double SHOOTER_KI = 0;
   public static final double SHOOTER_KD = 0;
-  public static final AngularVelocity SHOOTER_MAX_VEL = DegreesPerSecond.of(90);
-  public static final AngularAcceleration SHOOTER_MAX_ACCEL = DegreesPerSecondPerSecond.of(45);
-  public static final double SHOOTER_KS = 0;
-  public static final double SHOOTER_KV = 0;
-  public static final double SHOOTER_KA = 0;
-  public static final AngularVelocity SHOOTER_DEFAULT_VELOCITY = RPM.of(0);
+  public static final double SHOOTER_DEFAULT_DUTY_CYCLE = 0;
 
   // ========== Spindexer ==========
   public static final double SPINDEXER_KP = 0.5;
@@ -77,7 +67,9 @@ public class ControlsConstants {
   public static final double SPINDEXER_DEFAULT_DUTY_CYCLE = 0;
 
   // ========== Controller Binding Constants ==========
-  public static final AngularVelocity SPINDEXER_VELOCITY = RPM.of(12 * 60);
-  public static final AngularVelocity INTAKE_ROLLER_VELOCITY = RPM.of(12 * 60);
+  public static final AngularVelocity SPINDEXER_VELOCITY = RPM.of(500);
+  public static final AngularVelocity INTAKE_ROLLER_VELOCITY = RPM.of(500);
   public static final Angle INTAKE_ARM_EXTENDED_ANGLE = Degrees.of(0);
+  public static final AngularVelocity FEEDER_VELOCITY = RPM.of(500);
+  public static final AngularVelocity SHOOTER_VELOCITY = RPM.of(500);
 }

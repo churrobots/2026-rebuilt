@@ -5,23 +5,17 @@
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.DegreesPerSecond;
-import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.RPM;
-import static edu.wpi.first.units.Units.Seconds;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Mass;
-import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -45,8 +39,6 @@ public class Feeder extends SubsystemBase {
   private static final int GEAR_STAGE_1 = 3;
   private static final int GEAR_STAGE_2 = 4;
   private static final Current STATOR_CURRENT_LIMIT = Amps.of(40);
-  private static final Time CLOSED_LOOP_RAMP_RATE = Seconds.of(0.25);
-  private static final Time OPEN_LOOP_RAMP_RATE = Seconds.of(0.25);
   private static final Distance DIAMETER = Inches.of(4);
   private static final Mass MASS = Pounds.of(1);
   private static final AngularVelocity UPPER_SOFT_LIMIT = RPM.of(1000);
@@ -55,25 +47,12 @@ public class Feeder extends SubsystemBase {
   private static final double SIM_KP = 50;
   private static final double SIM_KI = 0;
   private static final double SIM_KD = 0;
-  private static final AngularVelocity SIM_MAX_VEL = DegreesPerSecond.of(90);
-  private static final AngularAcceleration SIM_MAX_ACCEL = DegreesPerSecondPerSecond.of(45);
-  private static final double SIM_KS = 0;
-  private static final double SIM_KV = 0;
-  private static final double SIM_KA = 0;
 
   private SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.CLOSED_LOOP)
       // Feedback Constants (PID Constants)
-      .withClosedLoopController(
-          ControlsConstants.FEEDER_KP, ControlsConstants.FEEDER_KI, ControlsConstants.FEEDER_KD,
-          ControlsConstants.FEEDER_MAX_VEL, ControlsConstants.FEEDER_MAX_ACCEL)
-      .withSimClosedLoopController(
-          SIM_KP, SIM_KI, SIM_KD,
-          SIM_MAX_VEL, SIM_MAX_ACCEL)
-      // Feedforward Constants
-      .withFeedforward(new SimpleMotorFeedforward(
-          ControlsConstants.FEEDER_KS, ControlsConstants.FEEDER_KV, ControlsConstants.FEEDER_KA))
-      .withSimFeedforward(new SimpleMotorFeedforward(SIM_KS, SIM_KV, SIM_KA))
+      .withClosedLoopController(ControlsConstants.FEEDER_KP, ControlsConstants.FEEDER_KI, ControlsConstants.FEEDER_KD)
+      .withSimClosedLoopController(SIM_KP, SIM_KI, SIM_KD)
       // Telemetry name and verbosity level
       .withTelemetry(MOTOR_TELEMETRY, TelemetryVerbosity.HIGH)
       // Gearing from the motor rotor to final shaft.
@@ -83,9 +62,7 @@ public class Feeder extends SubsystemBase {
       // Motor properties to prevent over currenting.
       .withMotorInverted(false)
       .withIdleMode(MotorMode.COAST)
-      .withStatorCurrentLimit(STATOR_CURRENT_LIMIT)
-      .withClosedLoopRampRate(CLOSED_LOOP_RAMP_RATE)
-      .withOpenLoopRampRate(OPEN_LOOP_RAMP_RATE);
+      .withStatorCurrentLimit(STATOR_CURRENT_LIMIT);
 
   // Vendor motor controller object
   private TalonFX motor = new TalonFX(HardwareConstants.FEEDER_MOTOR_ID);
@@ -109,7 +86,7 @@ public class Feeder extends SubsystemBase {
 
   /** Creates a new Feeder. */
   public Feeder() {
-    setDefaultCommand(setVelocity(ControlsConstants.FEEDER_DEFAULT_VELOCITY));
+    setDefaultCommand(set(ControlsConstants.FEEDER_DEFAULT_DUTY_CYCLE));
   }
 
   /**
@@ -129,6 +106,16 @@ public class Feeder extends SubsystemBase {
    */
   public Command setVelocity(AngularVelocity speed) {
     return feeder.setSpeed(speed);
+  }
+
+  /**
+   * Set the dutycycle of the feeder.
+   *
+   * @param dutyCycle DutyCycle to set.
+   * @return {@link edu.wpi.first.wpilibj2.command.RunCommand}
+   */
+  public Command set(double dutyCycle) {
+    return feeder.set(dutyCycle);
   }
 
   @Override

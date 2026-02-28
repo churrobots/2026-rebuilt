@@ -7,7 +7,6 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.RPM;
 import static frc.robot.subsystems.vision.VisionConstants.aprilTagLayout;
@@ -24,6 +23,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -216,14 +216,25 @@ public class RobotContainer {
     controller.back().whileTrue(resetPoseFacingAway);
 
     // Spindexer controls
-    Command runSpindexer = spindexer.setVelocity(ControlsConstants.SPINDEXER_VELOCITY);
-    controller.rightBumper().whileTrue(runSpindexer);
+    if (spindexer != null) {
+      Command runSpindexer = spindexer.setVelocity(ControlsConstants.SPINDEXER_VELOCITY);
+      controller.rightBumper().whileTrue(runSpindexer);
+    }
 
     // Intake controls
-    Command runIntake = Commands.parallel(
-        intakeArm.setAngle(ControlsConstants.INTAKE_ARM_EXTENDED_ANGLE),
-        intakeRoller.setVelocity(ControlsConstants.INTAKE_ROLLER_VELOCITY));
-    controller.leftBumper().toggleOnTrue(runIntake);
+    if (intakeArm != null && intakeRoller != null) {
+      Command runIntake = Commands.parallel(
+          intakeArm.setAngle(ControlsConstants.INTAKE_ARM_EXTENDED_ANGLE),
+          intakeRoller.setVelocity(ControlsConstants.INTAKE_ROLLER_VELOCITY));
+      controller.leftBumper().toggleOnTrue(runIntake);
+    }
+    // Shooter controls
+    if (shooter != null && feeder != null) {
+      Command runShooter = Commands.parallel(
+          feeder.setVelocity(ControlsConstants.FEEDER_VELOCITY),
+          shooter.setVelocity(ControlsConstants.SHOOTER_VELOCITY));
+      controller.rightBumper().toggleOnTrue(runShooter);
+    }
   }
 
   /**
