@@ -6,6 +6,7 @@ import com.pathplanner.lib.path.PathPlannerPath;
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants;
 import frc.robot.subsystems.drive.Drive;
 
 public class DriveToTower extends Command {
@@ -32,7 +33,9 @@ public class DriveToTower extends Command {
       } else {
         path = PathPlannerPath.fromPathFile("depot to tower");
       }
-      if (drive.isByBlueAlliance()) {
+      // TOOD: figure out if we need to flip the path for blue alliance on a real
+      // field.
+      if (drive.isByBlueAlliance() && Constants.currentMode == Constants.simMode) {
         path = path.flipPath();
       }
       pathCommand = AutoBuilder.pathfindThenFollowPath(path, constraints);
