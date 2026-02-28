@@ -27,6 +27,9 @@ import edu.wpi.first.units.measure.MomentOfInertia;
 import frc.robot.Constants;
 
 public class DriveConstants {
+  // TODO: Extra High 4 is 7.22 m/s free speed theoretical max ratio, from:
+  // https://www.revrobotics.com/rev-21-3005/
+  // ...so we might want to change this to 7.22?
   public static final double maxSpeedMetersPerSec = 6.2;
   public static final double odometryFrequency = 100.0; // Hz
   public static final double trackWidth = Units.inchesToMeters(24);
@@ -68,6 +71,8 @@ public class DriveConstants {
   public static final double wheelRadiusMeters = Units.inchesToMeters(1.470);
   // MAXSwerve with 16 pinion teeth and 20 spur teeth
   // We think the 15 teeth is the bevel drive shaft, and the 45 is the wheel bevel
+  // NOTE: this must CHANGE if you change our gear kit. Today we use Extra High 4
+  // https://www.revrobotics.com/rev-21-3005/
   public static final double driveMotorReduction = (45.0 * 20.0) / (16.0 * 15.0);
   public static final DCMotor driveGearbox = DCMotor.getNeoVortex(1);
 
