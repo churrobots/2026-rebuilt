@@ -26,25 +26,25 @@ public class VisionConstants {
 
   // Camera names, must match names configured on coprocessor
   public static String cameraFrontRight = "camera_frontright";
-  public static String cameraBackRight = "camera_right";
+  public static String cameraBackRight = "camera_backright";
   public static String cameraFrontLeft = "camera_frontleft";
-  public static String cameraBackLeft = "camera_back";
+  public static String cameraBackLeft = "camera_backleft";
 
   // Robot to camera transforms
   // (Not used by Limelight, configure in web UI instead)
 
   // Yaw only works right when it is inverted?
   public static Transform3d robotToCameraFrontRight = new Transform3d(
-      Units.inchesToMeters(10), Units.inchesToMeters(-10), Units.inchesToMeters(9),
-      new Rotation3d(Math.PI, -Math.PI / 10, 1 * Math.PI / 6));
+      Units.inchesToMeters(12), Units.inchesToMeters(-12), Units.inchesToMeters(10),
+      new Rotation3d(Math.PI, -Math.PI / 6, -Math.PI / 6));
   public static Transform3d robotToCameraBackRight = new Transform3d(
-      Units.inchesToMeters(-10), Units.inchesToMeters(-10.), Units.inchesToMeters(9),
-      new Rotation3d(Math.PI, 0, 1 * Math.PI / 2));
+      Units.inchesToMeters(-12), Units.inchesToMeters(-12.), Units.inchesToMeters(10),
+      new Rotation3d(Math.PI, 0, -Math.PI / 2));
   public static Transform3d robotToCameraFrontLeft = new Transform3d(
-      Units.inchesToMeters(10), Units.inchesToMeters(10), Units.inchesToMeters(9),
-      new Rotation3d(Math.PI, -Math.PI / 10, -1 * Math.PI / 6));
+      Units.inchesToMeters(12), Units.inchesToMeters(12), Units.inchesToMeters(10),
+      new Rotation3d(Math.PI, -Math.PI / 6, Math.PI / 6));
   public static Transform3d robotToCameraBackLeft = new Transform3d(
-      Units.inchesToMeters(-10), Units.inchesToMeters(10), Units.inchesToMeters(9),
+      Units.inchesToMeters(-12), Units.inchesToMeters(12), Units.inchesToMeters(10),
       new Rotation3d(Math.PI, 0, Math.PI));
 
   // Basic filtering thresholds
