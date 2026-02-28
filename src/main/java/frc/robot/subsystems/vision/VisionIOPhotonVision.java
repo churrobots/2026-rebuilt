@@ -18,7 +18,7 @@ import static frc.robot.subsystems.vision.VisionConstants.*;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
-import frc.robot.util.FaultMonitor;
+import frc.robot.util.HardwareMonitor;
 
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -39,7 +39,7 @@ public class VisionIOPhotonVision implements VisionIO {
    */
   public VisionIOPhotonVision(String name, Transform3d robotToCamera) {
     camera = new PhotonCamera(name);
-    FaultMonitor.registerHardware("PhotonCamera_" + name, camera);
+    HardwareMonitor.registerHardware("PhotonCamera_" + name, camera);
     this.robotToCamera = robotToCamera;
   }
 
