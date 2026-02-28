@@ -54,14 +54,9 @@ public class ControlsConstants {
   public static final Angle INTAKE_ARM_DEFAULT_ANGLE = Degrees.of(90);
 
   // ========== IntakeRoller ==========
-  public static final double INTAKE_ROLLER_KP = 50;
+  public static final double INTAKE_ROLLER_KP = 0.5;
   public static final double INTAKE_ROLLER_KI = 0;
   public static final double INTAKE_ROLLER_KD = 0;
-  public static final AngularVelocity INTAKE_ROLLER_MAX_VEL = DegreesPerSecond.of(90);
-  public static final AngularAcceleration INTAKE_ROLLER_MAX_ACCEL = DegreesPerSecondPerSecond.of(45);
-  public static final double INTAKE_ROLLER_KS = 0;
-  public static final double INTAKE_ROLLER_KV = 0;
-  public static final double INTAKE_ROLLER_KA = 0;
   public static final double INTAKE_ROLLER_DEFAULT_DUTY_CYCLE = 0;
 
   // ========== Shooter ==========
@@ -83,4 +78,6 @@ public class ControlsConstants {
 
   // ========== Controller Binding Constants ==========
   public static final AngularVelocity SPINDEXER_VELOCITY = RPM.of(12 * 60);
+  public static final AngularVelocity INTAKE_ROLLER_VELOCITY = RPM.of(12 * 60);
+  public static final Angle INTAKE_ARM_EXTENDED_ANGLE = Degrees.of(0);
 }

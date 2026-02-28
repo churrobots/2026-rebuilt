@@ -22,8 +22,10 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.Time;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.util.FaultMonitor;
 import frc.robot.util.PatchedTalonFXWrapper;
 import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;
@@ -132,6 +134,8 @@ public class Feeder extends SubsystemBase {
   @Override
   public void periodic() {
     feeder.updateTelemetry();
+    boolean hasFaults = FaultMonitor.hasAnyDisconnectsOrFaults(motor);
+    SmartDashboard.putBoolean("feederfaults", hasFaults);
   }
 
   @Override

@@ -7,7 +7,9 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.RPM;
 import static frc.robot.subsystems.vision.VisionConstants.aprilTagLayout;
 import static frc.robot.subsystems.vision.VisionConstants.cameraBackName;
 import static frc.robot.subsystems.vision.VisionConstants.cameraFrontName;
@@ -64,12 +66,12 @@ import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 public class RobotContainer {
   private final Drive drive;
 
-  private final ClimberTW climber = null;
+  private final ClimberTW climber = new ClimberTW();
   private final Spindexer spindexer = new Spindexer();
-  private final IntakeRoller intakeRoller = null;
-  private final IntakeArm intakeArm = null;
-  private final Shooter shooter = null;
-  private final Feeder feeder = null;
+  private final IntakeRoller intakeRoller = new IntakeRoller();
+  private final IntakeArm intakeArm = new IntakeArm();
+  private final Shooter shooter = new Shooter();
+  private final Feeder feeder = new Feeder();
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(Hardware.DriverStation.driverXboxPort);
@@ -213,9 +215,15 @@ public class RobotContainer {
     controller.b().onTrue(resetGyro);
     controller.back().whileTrue(resetPoseFacingAway);
 
-    // Spindexer controls.
+    // Spindexer controls
     Command runSpindexer = spindexer.setVelocity(ControlsConstants.SPINDEXER_VELOCITY);
     controller.rightBumper().whileTrue(runSpindexer);
+
+    // Intake controls
+    Command runIntake = Commands.parallel(
+        intakeArm.setAngle(ControlsConstants.INTAKE_ARM_EXTENDED_ANGLE),
+        intakeRoller.setVelocity(ControlsConstants.INTAKE_ROLLER_VELOCITY));
+    controller.leftBumper().toggleOnTrue(runIntake);
   }
 
   /**

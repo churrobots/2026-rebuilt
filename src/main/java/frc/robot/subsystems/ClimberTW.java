@@ -24,8 +24,10 @@ import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.Time;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.util.FaultMonitor;
 import frc.robot.util.PatchedTalonFXWrapper;
 import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;
@@ -157,5 +159,7 @@ public class ClimberTW extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     elevator.updateTelemetry();
+    boolean hasFaults = FaultMonitor.hasAnyDisconnectsOrFaults(motor);
+    SmartDashboard.putBoolean("climberfaults", hasFaults);
   }
 }
