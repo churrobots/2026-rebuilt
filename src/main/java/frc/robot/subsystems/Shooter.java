@@ -36,9 +36,8 @@ public class Shooter extends SubsystemBase {
   private static final String MECHANISM_TELEMETRY = "Shooter";
 
   // Stable physical constants
-  private static final int GEAR_STAGE_1 = 3;
-  private static final int GEAR_STAGE_2 = 4;
-  private static final Current STATOR_CURRENT_LIMIT = Amps.of(40);
+  private static final double GEARING = 1.0;
+  private static final Current STATOR_CURRENT_LIMIT = Amps.of(80);
   private static final Distance DIAMETER = Inches.of(4);
   private static final Mass MASS = Pounds.of(1);
   private static final AngularVelocity UPPER_SOFT_LIMIT = RPM.of(1000);
@@ -56,10 +55,7 @@ public class Shooter extends SubsystemBase {
       .withSimClosedLoopController(SIM_KP, SIM_KI, SIM_KD)
       // Telemetry name and verbosity level
       .withTelemetry(MOTOR_TELEMETRY, TelemetryVerbosity.HIGH)
-      // Gearing from the motor rotor to final shaft.
-      // In this example gearbox(3,4) is the same as gearbox("3:1","4:1") which
-      // corresponds to the gearbox attached to your motor.
-      .withGearing(new MechanismGearing(GearBox.fromReductionStages(GEAR_STAGE_1, GEAR_STAGE_2)))
+      .withGearing(GEARING)
       // Motor properties to prevent over currenting.
       .withMotorInverted(true)
       .withIdleMode(MotorMode.COAST)

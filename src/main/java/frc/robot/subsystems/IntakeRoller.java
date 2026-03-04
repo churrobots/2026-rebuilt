@@ -55,7 +55,7 @@ public class IntakeRoller extends SubsystemBase {
           ControlsConstants.INTAKE_ROLLER_KP, ControlsConstants.INTAKE_ROLLER_KI, ControlsConstants.INTAKE_ROLLER_KD)
       .withSimClosedLoopController(SIM_KP, SIM_KI, SIM_KD)
       // Telemetry name and verbosity level
-      .withTelemetry(MOTOR_TELEMETRY, TelemetryVerbosity.HIGH)
+      .withTelemetry(MOTOR_TELEMETRY, TelemetryVerbosity.HIGH) 
       // Gearing from the motor rotor to final shaft.
       // In this example GearBox.fromReductionStages(3,4) is the same as
       // GearBox.fromStages("3:1","4:1") which corresponds to the gearbox attached to

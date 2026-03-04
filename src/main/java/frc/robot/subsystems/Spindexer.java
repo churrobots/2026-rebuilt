@@ -37,9 +37,7 @@ public class Spindexer extends SubsystemBase {
   private static final String MECHANISM_TELEMETRY = "Spindexer";
 
   // Stable physical constants
-  private static final int GEAR_STAGE_1 = 3;
-  private static final int GEAR_STAGE_2 = 3;
-  private static final int GEAR_STAGE_3 = 4;
+  private static final double GEARING = 36.0;
   private static final Current STATOR_CURRENT_LIMIT = Amps.of(40);
   private static final Distance DIAMETER = Inches.of(17.5);
   private static final Mass MASS = Pounds.of(1);
@@ -62,12 +60,7 @@ public class Spindexer extends SubsystemBase {
       // .withSimFeedforward(new SimpleMotorFeedforward(0, 9.17, 0))
       // Telemetry name and verbosity level
       .withTelemetry(MOTOR_TELEMETRY, TelemetryVerbosity.HIGH)
-      // Gearing from the motor rotor to final shaft.
-      // In this example GearBox.fromReductionStages(3,4) is the same as
-      // GearBox.fromStages("3:1","4:1") which corresponds to the gearbox attached to
-      // your motor.
-      // You could also use .withGearing(12) which does the same thing.
-      .withGearing(new MechanismGearing(GearBox.fromReductionStages(GEAR_STAGE_1, GEAR_STAGE_2, GEAR_STAGE_3)))
+      .withGearing(GEARING)
       // Motor properties to prevent over currenting.
       .withMotorInverted(true)
       .withIdleMode(MotorMode.COAST)

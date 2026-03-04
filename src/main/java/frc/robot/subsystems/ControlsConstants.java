@@ -21,7 +21,7 @@ import edu.wpi.first.units.measure.LinearVelocity;
 
 public class ControlsConstants {
   // ========== ClimberTW ==========
-  public static final double CLIMBER_KP = 4;
+  public static final double CLIMBER_KP = 50;
   public static final double CLIMBER_KI = 0;
   public static final double CLIMBER_KD = 0;
   public static final LinearVelocity CLIMBER_MAX_VEL = MetersPerSecond.of(0.1);
@@ -38,7 +38,7 @@ public class ControlsConstants {
   public static final double FEEDER_DEFAULT_DUTY_CYCLE = 0;
 
   // ========== IntakeArm ==========
-  public static final double INTAKE_ARM_KP = 4;
+  public static final double INTAKE_ARM_KP = 50;
   public static final double INTAKE_ARM_KI = 0;
   public static final double INTAKE_ARM_KD = 0;
   public static final AngularVelocity INTAKE_ARM_MAX_VEL = DegreesPerSecond.of(180);
@@ -61,15 +61,15 @@ public class ControlsConstants {
   public static final double SHOOTER_DEFAULT_DUTY_CYCLE = 0;
 
   // ========== Spindexer ==========
-  public static final double SPINDEXER_KP = 0.5;
+  public static final double SPINDEXER_KP = 50;
   public static final double SPINDEXER_KI = 0;
   public static final double SPINDEXER_KD = 0;
   public static final double SPINDEXER_DEFAULT_DUTY_CYCLE = 0;
 
   // ========== Controller Binding Constants ==========
-  public static final AngularVelocity SPINDEXER_VELOCITY = RPM.of(500);
-  public static final AngularVelocity INTAKE_ROLLER_VELOCITY = RPM.of(500);
+  public static final AngularVelocity SPINDEXER_VELOCITY = RPM.of(300);
+  public static final AngularVelocity INTAKE_ROLLER_VELOCITY = RPM.of(100);
   public static final Angle INTAKE_ARM_EXTENDED_ANGLE = Degrees.of(0);
-  public static final AngularVelocity FEEDER_VELOCITY = RPM.of(500);
-  public static final AngularVelocity SHOOTER_VELOCITY = RPM.of(500);
+  public static final AngularVelocity FEEDER_VELOCITY = RPM.of(5000);
+  public static final AngularVelocity SHOOTER_VELOCITY = RPM.of(4550);
 }

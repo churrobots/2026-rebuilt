@@ -27,6 +27,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -66,10 +67,10 @@ import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 public class RobotContainer {
   private final Drive drive;
 
-  private final ClimberTW climber = new ClimberTW();
+  private final ClimberTW climber = null;
   private final Spindexer spindexer = new Spindexer();
-  private final IntakeRoller intakeRoller = new IntakeRoller();
-  private final IntakeArm intakeArm = new IntakeArm();
+  private final IntakeRoller intakeRoller = null;
+  private final IntakeArm intakeArm = null;
   private final Shooter shooter = new Shooter();
   private final Feeder feeder = new Feeder();
 
@@ -83,6 +84,8 @@ public class RobotContainer {
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
+    SmartDashboard.putNumber("shooterspeed", 100.0);
+    SmartDashboard.putNumber("feederspeed", 100.0);
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
@@ -218,7 +221,7 @@ public class RobotContainer {
     // Spindexer controls
     if (spindexer != null) {
       Command runSpindexer = spindexer.setVelocity(ControlsConstants.SPINDEXER_VELOCITY);
-      controller.rightBumper().whileTrue(runSpindexer);
+      controller.leftBumper().whileTrue(runSpindexer);
     }
 
     // Intake controls
@@ -228,6 +231,7 @@ public class RobotContainer {
           intakeRoller.setVelocity(ControlsConstants.INTAKE_ROLLER_VELOCITY));
       controller.leftBumper().toggleOnTrue(runIntake);
     }
+
     // Shooter controls
     if (shooter != null && feeder != null) {
       Command runShooter = Commands.parallel(
