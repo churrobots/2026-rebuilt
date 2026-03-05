@@ -16,6 +16,11 @@
     }
   },
   "Table": {
+    "0x965B9C9E,2": {
+      "Column 0  Width": "130",
+      "Column 1  Weight": "1.0000",
+      "RefScale": "13"
+    },
     "0xE56EC1C2,4": {
       "Column 0  Weight": "1.0000",
       "Column 1  Weight": "1.0000",
@@ -54,6 +59,11 @@
       "Pos": "398,539",
       "Size": "624,305"
     },
+    "###/SmartDashboard/Feeder/mechanism": {
+      "Collapsed": "0",
+      "Pos": "352,681",
+      "Size": "265,200"
+    },
     "###/SmartDashboard/Field": {
       "Collapsed": "0",
       "Pos": "384,23",
@@ -66,7 +76,7 @@
     },
     "###/SmartDashboard/IntakeRoller/mechanism": {
       "Collapsed": "0",
-      "Pos": "21,389",
+      "Pos": "47,615",
       "Size": "291,187"
     },
     "###/SmartDashboard/PhotonAlerts": {
@@ -76,7 +86,7 @@
     },
     "###/SmartDashboard/Shooter/mechanism": {
       "Collapsed": "0",
-      "Pos": "30,183",
+      "Pos": "639,681",
       "Size": "270,200"
     },
     "###/SmartDashboard/ShooterMech/mechanism": {
@@ -111,7 +121,7 @@
     },
     "###Keyboard 0 Settings": {
       "Collapsed": "0",
-      "Pos": "992,98",
+      "Pos": "992,97",
       "Size": "300,560"
     },
     "###Keyboard 1 Settings": {
@@ -126,8 +136,8 @@
     },
     "###NetworkTables Info": {
       "Collapsed": "0",
-      "Pos": "599,716",
-      "Size": "749,145"
+      "Pos": "622,332",
+      "Size": "749,335"
     },
     "###Other Devices": {
       "Collapsed": "0",

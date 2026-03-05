@@ -92,6 +92,11 @@
           "visible": true
         }
       },
+      "/SmartDashboard/Feeder/mechanism": {
+        "window": {
+          "visible": true
+        }
+      },
       "/SmartDashboard/Field": {
         "bottom": 1914,
         "height": 8.069275856018066,
@@ -104,6 +109,16 @@
         }
       },
       "/SmartDashboard/IntakeArm/mechanism": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/IntakeRoller/mechanism": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Shooter/mechanism": {
         "window": {
           "visible": true
         }
@@ -179,21 +194,6 @@
       "open": false
     },
     "transitory": {
-      "AdvantageKit": {
-        "open": true
-      },
-      "LiveWindow": {
-        "open": true
-      },
-      "Mechanisms": {
-        "open": true
-      },
-      "PathPlanner": {
-        "open": true
-      },
-      "Shuffleboard": {
-        "open": true
-      },
       "SmartDashboard": {
         "Arm": {
           "open": true
@@ -221,16 +221,15 @@
     }
   },
   "NetworkTables Info": {
-    "Clients": {
-      "open": true
-    },
     "Server": {
-      "open": true
+      "Publishers": {
+        "open": true
+      },
+      "Subscribers": {
+        "open": true
+      }
     },
     "visible": true
-  },
-  "NetworkTables View": {
-    "visible": false
   },
   "Plot": {
     "Plot <0>": {
