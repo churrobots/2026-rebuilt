@@ -65,6 +65,8 @@ import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
  */
 
 public class RobotContainer {
+  private static final String SHOOTER_SPEED_KEY = "SHOOTER_SPEED";
+  private static final String FEEDER_SPEED_KEY = "FEEDER_SPEED";
   private final Drive drive;
 
   private final ClimberTW climber = null;
@@ -84,8 +86,10 @@ public class RobotContainer {
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
-    SmartDashboard.putNumber("shooterspeed", 100.0);
-    SmartDashboard.putNumber("feederspeed", 100.0);
+    // SmartDashboard values
+    SmartDashboard.putNumber(SHOOTER_SPEED_KEY, ControlsConstants.SHOOTER_VELOCITY.in(RPM));
+    SmartDashboard.putNumber(FEEDER_SPEED_KEY, ControlsConstants.FEEDER_VELOCITY.in(RPM));
+
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
@@ -235,8 +239,10 @@ public class RobotContainer {
     // Shooter controls
     if (shooter != null && feeder != null) {
       Command runShooter = Commands.parallel(
-          feeder.setVelocity(ControlsConstants.FEEDER_VELOCITY),
-          shooter.setVelocity(ControlsConstants.SHOOTER_VELOCITY));
+          feeder.setVelocity(
+              () -> RPM.of(SmartDashboard.getNumber(FEEDER_SPEED_KEY, ControlsConstants.FEEDER_VELOCITY.in(RPM)))),
+          shooter.setVelocity(
+              () -> RPM.of(SmartDashboard.getNumber(SHOOTER_SPEED_KEY, ControlsConstants.SHOOTER_VELOCITY.in(RPM)))));
       controller.rightBumper().toggleOnTrue(runShooter);
     }
   }

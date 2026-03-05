@@ -12,6 +12,8 @@ import static edu.wpi.first.units.Units.RPM;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.math.system.plant.DCMotor;
+import java.util.function.Supplier;
+
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
@@ -99,6 +101,10 @@ public class Feeder extends SubsystemBase {
    * @return {@link edu.wpi.first.wpilibj2.command.RunCommand}
    */
   public Command setVelocity(AngularVelocity speed) {
+    return feeder.setSpeed(speed);
+  }
+
+  public Command setVelocity(Supplier<AngularVelocity> speed) {
     return feeder.setSpeed(speed);
   }
 
