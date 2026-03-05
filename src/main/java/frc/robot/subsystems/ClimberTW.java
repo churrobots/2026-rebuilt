@@ -76,10 +76,10 @@ public class ClimberTW extends SubsystemBase {
   private TalonFX talonFx = new TalonFX(10);
 
   // Create our SmartMotorController from our Spark and config with the NEO.
-  private SmartMotorController sparkSmartMotorController = new PatchedTalonFXWrapper(talonFx, DCMotor.getFalcon500(1),
+  private SmartMotorController smartMotorController = new PatchedTalonFXWrapper(talonFx, DCMotor.getFalcon500(1),
       smcConfig);
 
-  private ElevatorConfig elevconfig = new ElevatorConfig(sparkSmartMotorController)
+  private ElevatorConfig elevconfig = new ElevatorConfig(smartMotorController)
       .withStartingHeight(Meters.of(0.5))
       .withHardLimits(Meters.of(0), Meters.of(1))
       .withTelemetry("Elevator", TelemetryVerbosity.HIGH)
@@ -122,7 +122,8 @@ public class ClimberTW extends SubsystemBase {
 
   /** Creates a new ClimberTW. */
   public ClimberTW() {
-    setDefaultCommand(setHeight(Meters.of(0)));
+    // setDefaultCommand(setHeight(Meters.of(0)));
+    setDefaultCommand(set(0));
   }
 
   @Override

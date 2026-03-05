@@ -14,6 +14,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.Distance;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
+import java.util.function.Supplier;
+
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -21,6 +23,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.CalibrationMode;
@@ -207,19 +210,21 @@ public class RobotContainer {
         .ignoringDisable(true);
     Command resetPoseFacingAway = drive.recalibrateDrivetrain();
     Command anchorInPlace = Commands.runOnce(drive::stopWithX, drive);
+    Command runSpindexer = spindexer != null ? spindexer.setVelocity(RPM.of(12 * 60)) : warningNoSubsystem("spindexer");
+    Command autoGoToClimb = new DriveToTower(drive).andThen(new InstantCommand(drive::stop, drive));
+    Command climberUp = climber != null ? climber.set(0.5) : warningNoSubsystem("climber");
+    Command climberDown = climber != null ? climber.set(-0.5) : warningNoSubsystem("climber");
+
     drive.setDefaultCommand(driveWithJoysticks);
 
     controller.a().whileTrue(driveWithAutoAim);
-    controller.x().onTrue(anchorInPlace);
+    controller.rightBumper().whileTrue(anchorInPlace.alongWith(runSpindexer));
     controller.b().onTrue(resetGyro);
     controller.back().whileTrue(resetPoseFacingAway);
-    // TODO: which button do we want DriveToTower on?
-    // controller.a().whileTrue(new DriveToTower(drive)).onFalse(new
-    // InstantCommand(() -> drive.stop(), drive));
-
-    // Spindexer controls.
-    Command runSpindexer = spindexer.setVelocity(RPM.of(12 * 60));
     controller.rightBumper().whileTrue(runSpindexer);
+    controller.povUp().whileTrue(climberUp);
+    controller.povDown().whileTrue(climberDown);
+    controller.y().whileTrue(autoGoToClimb);
   }
 
   /**
@@ -235,6 +240,12 @@ public class RobotContainer {
     return drive.getPose();
   }
 
+  private Command warningNoSubsystem(String subsystemName) {
+    return new InstantCommand(() -> {
+      System.out.println("WARNING WARNING WARNING - subsystem disconnected - " + subsystemName);
+    });
+  }
+
   private Rotation2d getAngleToHub() {
     boolean isRedAlliance = DriverStation.getAlliance().orElseGet(() -> Alliance.Blue) == Alliance.Red;
     Distance blueHubX = Distance.ofBaseUnits(4.63, Meters);
@@ -248,5 +259,6 @@ public class RobotContainer {
         hubY.minus(robotY).in(Meters),
         hubX.minus(robotX).in(Meters));
     return Rotation2d.fromRadians(targetAngleInRadians);
+
   }
 }
