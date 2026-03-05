@@ -1,0 +1,366 @@
+{
+  "version": 1.0,
+  "grid_size": 5,
+  "tabs": [
+    {
+      "name": "Dashboard",
+      "grid_layout": {
+        "layouts": [
+          {
+            "title": "camera_backleft",
+            "x": 10.0,
+            "y": 10.0,
+            "width": 260.0,
+            "height": 130.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "hasFaults",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Boolean Box",
+                "properties": {
+                  "topic": "/SmartDashboard/HardwareMonitor/camera_backleft/hasFaults",
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "true_color": 4283215696,
+                  "false_color": 4294198070,
+                  "true_icon": "None",
+                  "false_icon": "None"
+                }
+              }
+            ]
+          },
+          {
+            "title": "camera_backright",
+            "x": 275.0,
+            "y": 10.0,
+            "width": 260.0,
+            "height": 130.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "hasFaults",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Boolean Box",
+                "properties": {
+                  "topic": "/SmartDashboard/HardwareMonitor/camera_backright/hasFaults",
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "true_color": 4283215696,
+                  "false_color": 4294198070,
+                  "true_icon": "None",
+                  "false_icon": "None"
+                }
+              }
+            ]
+          },
+          {
+            "title": "camera_frontleft",
+            "x": 5.0,
+            "y": 140.0,
+            "width": 260.0,
+            "height": 130.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "hasFaults",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Boolean Box",
+                "properties": {
+                  "topic": "/SmartDashboard/HardwareMonitor/camera_frontleft/hasFaults",
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "true_color": 4283215696,
+                  "false_color": 4294198070,
+                  "true_icon": "None",
+                  "false_icon": "None"
+                }
+              }
+            ]
+          },
+          {
+            "title": "camera_frontright",
+            "x": 270.0,
+            "y": 145.0,
+            "width": 260.0,
+            "height": 130.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "hasFaults",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Boolean Box",
+                "properties": {
+                  "topic": "/SmartDashboard/HardwareMonitor/camera_frontright/hasFaults",
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "true_color": 4283215696,
+                  "false_color": 4294198070,
+                  "true_icon": "None",
+                  "false_icon": "None"
+                }
+              }
+            ]
+          },
+          {
+            "title": "feederMotor",
+            "x": 10.0,
+            "y": 280.0,
+            "width": 260.0,
+            "height": 130.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "hasFaults",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Boolean Box",
+                "properties": {
+                  "topic": "/SmartDashboard/HardwareMonitor/feederMotor/hasFaults",
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "true_color": 4283215696,
+                  "false_color": 4294198070,
+                  "true_icon": "None",
+                  "false_icon": "None"
+                }
+              }
+            ]
+          },
+          {
+            "title": "shooterMotor",
+            "x": 275.0,
+            "y": 285.0,
+            "width": 260.0,
+            "height": 130.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "hasFaults",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Boolean Box",
+                "properties": {
+                  "topic": "/SmartDashboard/HardwareMonitor/shooterMotor/hasFaults",
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "true_color": 4283215696,
+                  "false_color": 4294198070,
+                  "true_icon": "None",
+                  "false_icon": "None"
+                }
+              }
+            ]
+          },
+          {
+            "title": "spindexerMotor",
+            "x": 15.0,
+            "y": 415.0,
+            "width": 260.0,
+            "height": 130.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "hasFaults",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Boolean Box",
+                "properties": {
+                  "topic": "/SmartDashboard/HardwareMonitor/spindexerMotor/hasFaults",
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "true_color": 4283215696,
+                  "false_color": 4294198070,
+                  "true_icon": "None",
+                  "false_icon": "None"
+                }
+              }
+            ]
+          }
+        ],
+        "containers": [
+          {
+            "title": "Alliance",
+            "x": 1410.0,
+            "y": 5.0,
+            "width": 100.0,
+            "height": 100.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/FMSInfo/IsRedAlliance",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4294901760,
+              "false_color": 4282600941,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "Auto Chooser",
+            "x": 860.0,
+            "y": 5.0,
+            "width": 550.0,
+            "height": 130.0,
+            "type": "ComboBox Chooser",
+            "properties": {
+              "topic": "/SmartDashboard/Auto Chooser",
+              "period": 0.06,
+              "sort_options": false
+            }
+          },
+          {
+            "title": "kV",
+            "x": 570.0,
+            "y": 625.0,
+            "width": 260.0,
+            "height": 90.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/Tuning/Shooter/ShooterMotor/closedloop/feedforward/kV",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "kP",
+            "x": 390.0,
+            "y": 485.0,
+            "width": 130.0,
+            "height": 130.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/Tuning/Shooter/ShooterMotor/closedloop/feedback/kP",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "kI",
+            "x": 570.0,
+            "y": 470.0,
+            "width": 130.0,
+            "height": 130.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/Tuning/Shooter/ShooterMotor/closedloop/feedback/kI",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "kD",
+            "x": 740.0,
+            "y": 460.0,
+            "width": 130.0,
+            "height": 130.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/Tuning/Shooter/ShooterMotor/closedloop/feedback/kD",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "Live Tuning",
+            "x": 120.0,
+            "y": 570.0,
+            "width": 260.0,
+            "height": 130.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Mechanisms/Commands/Shooter/Live Tuning",
+              "period": 0.06,
+              "show_type": true
+            }
+          },
+          {
+            "title": "kA",
+            "x": 415.0,
+            "y": 665.0,
+            "width": 130.0,
+            "height": 130.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/Tuning/Shooter/ShooterMotor/closedloop/feedforward/kA",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "SHOOTER_SPEED",
+            "x": 605.0,
+            "y": 290.0,
+            "width": 130.0,
+            "height": 130.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/SHOOTER_SPEED",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "FEEDER_SPEED",
+            "x": 600.0,
+            "y": 140.0,
+            "width": 130.0,
+            "height": 130.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/FEEDER_SPEED",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
