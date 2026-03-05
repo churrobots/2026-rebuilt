@@ -24,12 +24,16 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.MomentOfInertia;
+import frc.robot.Constants;
 
 public class DriveConstants {
-  public static final double maxSpeedMetersPerSec = 4.8;
+  // TODO: Extra High 4 is 7.22 m/s free speed theoretical max ratio, from:
+  // https://www.revrobotics.com/rev-21-3005/
+  // ...so we might want to change this to 7.22?
+  public static final double maxSpeedMetersPerSec = 6.2;
   public static final double odometryFrequency = 100.0; // Hz
-  public static final double trackWidth = Units.inchesToMeters(26.5);
-  public static final double wheelBase = Units.inchesToMeters(26.5);
+  public static final double trackWidth = Units.inchesToMeters(24);
+  public static final double wheelBase = Units.inchesToMeters(24);
   public static final double driveBaseRadius = Math.hypot(trackWidth / 2.0, wheelBase / 2.0);
   public static final Translation2d[] moduleTranslations = new Translation2d[] {
       new Translation2d(trackWidth / 2.0, wheelBase / 2.0),
@@ -38,33 +42,42 @@ public class DriveConstants {
       new Translation2d(-trackWidth / 2.0, -wheelBase / 2.0)
   };
 
-  // Zeroed rotation values for each module, see setup instructions
-  public static final Rotation2d frontLeftZeroRotation = new Rotation2d(3.065);
-  public static final Rotation2d frontRightZeroRotation = new Rotation2d(-3.101);
-  public static final Rotation2d backLeftZeroRotation = new Rotation2d(-3.108);
-  public static final Rotation2d backRightZeroRotation = new Rotation2d(3.107);
+  // // Zeroed rotation values for each module, see setup instructions
+  public static final Rotation2d frontLeftZeroRotation = new Rotation2d(0);
+  // module 1
+  public static final Rotation2d frontRightZeroRotation = new Rotation2d(0);
+  // module 2
+  public static final Rotation2d backLeftZeroRotation = new Rotation2d(0);
+  // module 3
+  public static final Rotation2d backRightZeroRotation = new Rotation2d(0);
 
   // Device CAN IDs
   public static final int pigeonCanId = 9;
 
-  public static final int frontLeftDriveCanId = 5;
-  public static final int backLeftDriveCanId = 7;
+  public static final int frontLeftDriveCanId = 7;
+  public static final int backLeftDriveCanId = 8;
   public static final int frontRightDriveCanId = 6;
-  public static final int backRightDriveCanId = 8;
+  public static final int backRightDriveCanId = 5;
 
-  public static final int frontLeftTurnCanId = 1;
-  public static final int backLeftTurnCanId = 3;
+  public static final int frontLeftTurnCanId = 3;
+  public static final int backLeftTurnCanId = 4;
   public static final int frontRightTurnCanId = 2;
-  public static final int backRightTurnCanId = 4;
+  public static final int backRightTurnCanId = 1;
 
   // Drive motor configuration
-  public static final int driveMotorCurrentLimit = 50;
-  public static final double wheelRadiusMeters = Units.inchesToMeters(1.479);
-  public static final double driveMotorReduction = (45.0 * 20.0) / (16.0 * 15.0); // MAXSwerve with 14 pinion teeth and
-                                                                                  // 22 spur teeth
+  // This is how to tune all the values here
+  // https://docs.advantagekit.org/getting-started/template-projects/spark-swerve-template/#tuning
+  public static final int driveMotorCurrentLimit = 40;
+  public static final double wheelRadiusMeters = Units.inchesToMeters(1.470);
+  // MAXSwerve with 16 pinion teeth and 20 spur teeth
+  // We think the 15 teeth is the bevel drive shaft, and the 45 is the wheel bevel
+  // NOTE: this must CHANGE if you change our gear kit. Today we use Extra High 4
+  // https://www.revrobotics.com/rev-21-3005/
+  public static final double driveMotorReduction = (45.0 * 20.0) / (16.0 * 15.0);
   public static final DCMotor driveGearbox = DCMotor.getNeoVortex(1);
 
   // Drive encoder configuration
+  public static final boolean driveEncoderInverted = true;
   public static final double driveEncoderPositionFactor = 2 * Math.PI / driveMotorReduction; // Rotor Rotations -> Wheel
                                                                                              // Radians
   public static final double driveEncoderVelocityFactor = (2 * Math.PI) / 60.0 / driveMotorReduction; // Rotor RPM ->
@@ -73,8 +86,12 @@ public class DriveConstants {
   // Drive PID configuration
   public static final double driveKp = 0.0;
   public static final double driveKd = 0.0;
-  public static final double driveKs = 0.17859;
-  public static final double driveKv = 0.06385;
+  public static final double driveKs = switch (Constants.robotName) {
+    case Constants.ROBOT_ALPHA -> 0.14945;
+    case Constants.ROBOT_COMP -> 0.14945;
+    default -> 0.14945;
+  };
+  public static final double driveKv = 0.06761;
   public static final double driveSimP = 0.05;
   public static final double driveSimD = 0.0;
   public static final double driveSimKs = 0.0;
@@ -100,8 +117,8 @@ public class DriveConstants {
   public static final double turnPIDMaxInput = 2 * Math.PI; // Radians
 
   // PathPlanner configuration
-  public static final double robotMassKg = 74.088;
-  public static final double robotMOI = 6.883;
+  public static final double robotMassKg = 22.6796;
+  public static final double robotMOI = 2;
   public static final double wheelCOF = 1.2;
   public static final RobotConfig ppConfig = new RobotConfig(
       Mass.ofBaseUnits(robotMassKg, Kilograms),

@@ -15,9 +15,13 @@ import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.path.PathConstraints;
+import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.PathPlannerLogging;
+
+import choreo.auto.AutoChooser;
 import edu.wpi.first.hal.FRCNetComm.tInstances;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
@@ -33,6 +37,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
@@ -49,10 +54,13 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
 import frc.robot.util.LocalADStarAK;
+
+import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
+import org.photonvision.EstimatedRobotPose;
 
 public class Drive extends SubsystemBase {
   static final Lock odometryLock = new ReentrantLock();
@@ -92,6 +100,10 @@ public class Drive extends SubsystemBase {
 
     // Start odometry thread
     SparkOdometryThread.getInstance().start();
+
+    // DO THIS FIRST
+    Pathfinding.setPathfinder(new LocalADStarAK());
+    // ... remaining robot initialization
 
     // Configure AutoBuilder for PathPlanner
     AutoBuilder.configure(
@@ -338,6 +350,23 @@ public class Drive extends SubsystemBase {
    */
   public Rotation2d getYaw() {
     return rawGyroRotation;
+  }
+
+  public boolean isByBlueAlliance() {
+    Pose2d currentPose = getPose();
+    if (currentPose.getTranslation().getX() < Units.inchesToMeters(325.65)) {
+      return true;
+    }
+    return false;
+  }
+
+  public boolean isByOutpost() {
+    Pose2d currentPose = getPose();
+    if ((isByBlueAlliance() && currentPose.getTranslation().getY() < Units.inchesToMeters(158.32))
+        || (!isByBlueAlliance() && currentPose.getTranslation().getY() > Units.inchesToMeters(158.32))) {
+      return true;
+    }
+    return false;
   }
 
   public Command recalibrateDrivetrain() {

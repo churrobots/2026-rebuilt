@@ -3,48 +3,53 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.9992136140101024,
-        "y": 7.4664308449052745
+        "x": 7.99903425141243,
+        "y": 3.506132922846046
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.9319973520498919,
-        "y": 6.669604160010383
+        "x": 8.14032353460452,
+        "y": 3.025797746733758
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "3"
     },
     {
       "anchor": {
-        "x": 2.530521846070288,
-        "y": 5.556573857058051
+        "x": 6.180176664018362,
+        "y": 0.7218146958862997
       },
       "prevControl": {
-        "x": 2.36194621698455,
-        "y": 5.741187662821184
+        "x": 6.4053828375773945,
+        "y": 0.8303604438034757
       },
       "nextControl": {
-        "x": 3.1710517943586307,
-        "y": 4.85510430241305
+        "x": 5.712451514044435,
+        "y": 0.496378707959062
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 7.598246877206922,
-        "y": 5.693842635504943
+        "x": 0.8512965108580508,
+        "y": 0.7218146958862997
       },
       "prevControl": {
-        "x": 7.860392726464849,
-        "y": 5.814420010509014
+        "x": -0.1487034891419492,
+        "y": 0.7218146958862997
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "neutral"
+      "linkedName": "yuh"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.5,
+      "rotationDegrees": 0.0
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [],
@@ -58,13 +63,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -4.380164761044767
+    "rotation": -0.772934774877027
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -179.3394809517054
+    "rotation": -82.63637689091559
   },
-  "useDefaultConstraints": false
+  "useDefaultConstraints": true
 }

@@ -154,6 +154,13 @@ public class ClimberTW extends SubsystemBase {
     // This method will be called once per scheduler run during simulation
     elevator.simIterate();
   }
+  // This method will be called once per scheduler run
+
+  /** Creates a new ClimberTW. */
+  public ClimberTW() {
+    // setDefaultCommand(setHeight(Meters.of(0)));
+    setDefaultCommand(set(0));
+  }
 
   @Override
   public void periodic() {

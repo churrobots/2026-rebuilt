@@ -25,6 +25,10 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
+import static frc.robot.subsystems.vision.VisionConstants.*;
+
+import java.util.function.Supplier;
+
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -32,6 +36,8 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.CalibrationMode;
@@ -42,6 +48,8 @@ import frc.robot.subsystems.Feeder;
 import frc.robot.subsystems.IntakeArm;
 import frc.robot.subsystems.IntakeRoller;
 import frc.robot.subsystems.Shooter;
+import frc.robot.subsystems.Shooter;
+import frc.robot.subsystems.commands.DriveToTower;
 import frc.robot.subsystems.Spindexer;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
@@ -49,6 +57,14 @@ import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOSpark;
+
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.RPM;
+
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
@@ -67,6 +83,7 @@ import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 public class RobotContainer {
   private static final String SHOOTER_SPEED_KEY = "SHOOTER_SPEED";
   private static final String FEEDER_SPEED_KEY = "FEEDER_SPEED";
+  // Subsystems
   private final Drive drive;
 
   private final ClimberTW climber = null;
@@ -102,9 +119,11 @@ public class RobotContainer {
 
         new Vision(
             drive::addVisionMeasurement,
-            new VisionIOPhotonVision(cameraFrontName, robotToCameraFront),
-            new VisionIOPhotonVision(cameraBackName, robotToCameraBack),
-            new VisionIOPhotonVision(cameraRightName, robotToCameraRight));
+            new VisionIOPhotonVision(cameraFrontRight, robotToCameraFrontRight),
+            new VisionIOPhotonVision(cameraBackRight, robotToCameraBackRight),
+            new VisionIOPhotonVision(cameraFrontLeft, robotToCameraFrontLeft),
+            new VisionIOPhotonVision(cameraBackLeft, robotToCameraBackLeft));
+
         break;
 
       case SIM:
@@ -119,10 +138,13 @@ public class RobotContainer {
 
         new Vision(
             drive::addVisionMeasurement,
-            new VisionIOPhotonVisionSim(cameraFrontName, robotToCameraFront, drive::getPose),
-            new VisionIOPhotonVisionSim(cameraBackName, robotToCameraBack, drive::getPose),
-            new VisionIOPhotonVisionSim(cameraRightName, robotToCameraRight, drive::getPose));
-
+            new VisionIOPhotonVisionSim(cameraFrontRight, robotToCameraFrontRight, drive::getPose),
+            new VisionIOPhotonVisionSim(cameraBackRight, robotToCameraBackRight,
+                drive::getPose),
+            new VisionIOPhotonVisionSim(cameraFrontLeft, robotToCameraFrontLeft,
+                drive::getPose),
+            new VisionIOPhotonVisionSim(cameraBackLeft, robotToCameraBackLeft,
+                drive::getPose));
         break;
 
       default:
@@ -192,33 +214,33 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   void bindCommandsForTeleop() {
-
     // Driving controls.
     Command driveWithJoysticks = DriveCommands.joystickDrive(
         drive,
         () -> -controller.getLeftY(),
         () -> -controller.getLeftX(),
         () -> -controller.getRightX());
-
     Command driveWithAutoAim = DriveCommands.joystickDriveAtAngle(
         drive,
         () -> -controller.getLeftY(),
         () -> -controller.getLeftX(),
         this::getAngleToHub);
-
     Command resetGyro = Commands.runOnce(
         () -> drive.setPose(
             new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
         drive)
         .ignoringDisable(true);
-
     Command resetPoseFacingAway = drive.recalibrateDrivetrain();
-
     Command anchorInPlace = Commands.runOnce(drive::stopWithX, drive);
+    Command runSpindexer = spindexer != null ? spindexer.setVelocity(RPM.of(12 * 60)) : warningNoSubsystem("spindexer");
+    Command autoGoToClimb = new DriveToTower(drive).andThen(new InstantCommand(drive::stop, drive));
+    Command climberUp = climber != null ? climber.set(0.5) : warningNoSubsystem("climber");
+    Command climberDown = climber != null ? climber.set(-0.5) : warningNoSubsystem("climber");
 
     drive.setDefaultCommand(driveWithJoysticks);
+
     controller.a().whileTrue(driveWithAutoAim);
-    controller.x().onTrue(anchorInPlace);
+    controller.rightBumper().whileTrue(anchorInPlace.alongWith(runSpindexer));
     controller.b().onTrue(resetGyro);
     controller.back().whileTrue(resetPoseFacingAway);
 
@@ -260,6 +282,12 @@ public class RobotContainer {
     return drive.getPose();
   }
 
+  private Command warningNoSubsystem(String subsystemName) {
+    return new InstantCommand(() -> {
+      System.out.println("WARNING WARNING WARNING - subsystem disconnected - " + subsystemName);
+    });
+  }
+
   private Rotation2d getAngleToHub() {
     boolean isRedAlliance = DriverStation.getAlliance().orElseGet(() -> Alliance.Blue) == Alliance.Red;
     Distance blueHubX = Distance.ofBaseUnits(4.63, Meters);
@@ -273,5 +301,6 @@ public class RobotContainer {
         hubY.minus(robotY).in(Meters),
         hubX.minus(robotX).in(Meters));
     return Rotation2d.fromRadians(targetAngleInRadians);
+
   }
 }

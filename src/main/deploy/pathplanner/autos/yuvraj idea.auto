@@ -7,19 +7,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "start to neutral zone"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 10.0
+            "pathName": "outpost trench to neutral"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "neutral zone back out to hub"
+            "pathName": "Neutral to outpost"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "outpost to shoot"
           }
         }
       ]
