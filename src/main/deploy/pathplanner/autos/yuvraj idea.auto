@@ -7,19 +7,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "under trench to neutral"
+            "pathName": "outpost trench to neutral"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "neutral to depot"
+            "pathName": "Neutral to outpost"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "2 depot to tower "
+            "pathName": "outpost to shoot"
           }
         }
       ]

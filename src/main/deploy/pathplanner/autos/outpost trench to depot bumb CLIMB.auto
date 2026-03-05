@@ -7,19 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "under trench to neutral"
+            "pathName": "outpost trench to neutral to depot bump"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "neutral to depot"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "2 depot to tower "
+            "pathName": "depot to tower"
           }
         }
       ]

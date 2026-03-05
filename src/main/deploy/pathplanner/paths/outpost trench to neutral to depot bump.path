@@ -3,48 +3,53 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.357245817884887,
-        "y": 2.437318204890537
+        "x": 3.987289570091808,
+        "y": 0.7151857123940681
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.109744900982626,
-        "y": 2.4020578002907604
-      },
-      "isLocked": false,
-      "linkedName": "outpost  climb 1"
-    },
-    {
-      "anchor": {
-        "x": 0.9700511507500118,
-        "y": 1.8121757389747097
-      },
-      "prevControl": {
-        "x": 0.9700511507500118,
-        "y": 1.4979246295318245
-      },
-      "nextControl": {
-        "x": 0.9700511507500118,
-        "y": 2.0621757389747097
+        "x": 4.446673287429378,
+        "y": 0.42273625088276956
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 1.1262922461123341,
-        "y": 2.8209025363960016
+        "x": 7.859148183704097,
+        "y": 1.2879879502118639
       },
       "prevControl": {
-        "x": 1.1262922461123341,
-        "y": 2.4133365215074805
+        "x": 7.8897431756206355,
+        "y": 0.8190731395802551
+      },
+      "nextControl": {
+        "x": 7.5229087217514135,
+        "y": 6.441369394420903
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 3.2337144685734467,
+        "y": 5.54050505384887
+      },
+      "prevControl": {
+        "x": 3.481826016863116,
+        "y": 5.509834879325352
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "depot to climb"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 1.2,
+      "rotationDegrees": 115.99082326458986
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [],
@@ -58,13 +63,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -90.0
+    "rotation": -179.57512676937822
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -179.87997594064296
+    "rotation": 0.0
   },
   "useDefaultConstraints": true
 }
