@@ -233,17 +233,23 @@ public class RobotContainer {
         feeder.setVelocity(
             () -> RPM.of(SmartDashboard.getNumber(FEEDER_SPEED_KEY, ControlsConstants.FEEDER_VELOCITY.in(RPM)))),
         shooter.setVelocity(
-            () -> RPM.of(SmartDashboard.getNumber(SHOOTER_SPEED_KEY, ControlsConstants.SHOOTER_VELOCITY.in(RPM)))),
-        anchorInPlace.alongWith(runSpindexer)) : warningNoSubsystem("shooter");
+            () -> RPM.of(SmartDashboard.getNumber(SHOOTER_SPEED_KEY, ControlsConstants.SHOOTER_VELOCITY.in(RPM)))))
+        : warningNoSubsystem("shooter");
+    Command runFlywheel = shooter != null ? shooter.setVelocity(
+        () -> RPM.of(SmartDashboard.getNumber(SHOOTER_SPEED_KEY, ControlsConstants.SHOOTER_VELOCITY.in(RPM))))
+        : warningNoSubsystem("shooter");
+    Command feedToFlywheel = spindexer != null && feeder != null
+        ? spindexer.setVelocity(ControlsConstants.SPINDEXER_VELOCITY).alongWith(feeder.setVelocity(
+            () -> RPM.of(SmartDashboard.getNumber(FEEDER_SPEED_KEY, ControlsConstants.FEEDER_VELOCITY.in(RPM)))))
+        : warningNoSubsystem("spindexer and feeder");
 
     drive.setDefaultCommand(driveWithJoysticks);
 
     controller.a().whileTrue(driveWithAutoAim);
-    controller.rightBumper().whileTrue(anchorInPlace.alongWith(runSpindexer));
     controller.b().onTrue(resetGyro);
     controller.back().whileTrue(resetPoseFacingAway);
-    controller.leftBumper().whileTrue(runSpindexer.alongWith(runIntake));
-    controller.rightBumper().whileTrue(runShooter);
+    controller.leftBumper().whileTrue(runFlywheel);
+    controller.rightBumper().whileTrue(feedToFlywheel);
   }
 
   /**

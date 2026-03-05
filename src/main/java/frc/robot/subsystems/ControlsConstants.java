@@ -55,10 +55,13 @@ public class ControlsConstants {
   public static final double INTAKE_ROLLER_DEFAULT_DUTY_CYCLE = 0;
 
   // ========== Shooter ==========
-  public static final double SHOOTER_KP = 50;
+  public static final double SHOOTER_KP = 0.3;
   public static final double SHOOTER_KI = 0;
   public static final double SHOOTER_KD = 0;
   public static final double SHOOTER_DEFAULT_DUTY_CYCLE = 0;
+  public static final double SHOOTER_KV = 0.112;
+  // TODO: control the feeder from shooter target velocity?
+  public static final double SHOOTER_TO_FEEDER_RATIO = 3000.0 / 3500.0;
 
   // ========== Spindexer ==========
   public static final double SPINDEXER_KP = 50;
@@ -67,7 +70,7 @@ public class ControlsConstants {
   public static final double SPINDEXER_DEFAULT_DUTY_CYCLE = 0;
 
   // ========== Controller Binding Constants ==========
-  public static final AngularVelocity SPINDEXER_VELOCITY = RPM.of(300);
+  public static final AngularVelocity SPINDEXER_VELOCITY = RPM.of(800);
   public static final AngularVelocity INTAKE_ROLLER_VELOCITY = RPM.of(100);
   public static final Angle INTAKE_ARM_EXTENDED_ANGLE = Degrees.of(0);
   public static final AngularVelocity FEEDER_VELOCITY = RPM.of(5000);
