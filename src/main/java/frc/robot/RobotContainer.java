@@ -95,10 +95,10 @@ public class RobotContainer {
         // Real robot, instantiate hardware IO implementations
         drive = new Drive(
             new GyroIOPigeon2(),
-            new ModuleIOSpark(0),
-            new ModuleIOSpark(1),
-            new ModuleIOSpark(2),
-            new ModuleIOSpark(3));
+            new ModuleIOSpark(0, "FrontLeft"),
+            new ModuleIOSpark(1, "FrontRight"),
+            new ModuleIOSpark(2, "BackLeft"),
+            new ModuleIOSpark(3, "BackRight"));
 
         new Vision(
             drive::addVisionMeasurement,
