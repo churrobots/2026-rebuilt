@@ -54,4 +54,6 @@ public final class Constants {
     /** In calibration mode. */
     ENABLED
   }
+
+  public static final boolean debugMemoryUsage = false;
 }

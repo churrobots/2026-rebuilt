@@ -39,7 +39,7 @@ public class VisionIOPhotonVision implements VisionIO {
    */
   public VisionIOPhotonVision(String name, Transform3d robotToCamera) {
     camera = new PhotonCamera(name);
-    HardwareMonitor.registerHardware("PhotonCamera_" + name, camera);
+    HardwareMonitor.registerHardware(name, camera);
     this.robotToCamera = robotToCamera;
   }
 

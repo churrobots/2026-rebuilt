@@ -104,8 +104,7 @@ public class Robot extends LoggedRobot {
     // Threads.setCurrentThreadPriority(false, 10);
 
     // Monitor highlevel hardware faults during a match.
-    boolean includeMemoryMonitoring = false;
-    HardwareMonitor.dumpHardwareStatusToNetworkTables(includeMemoryMonitoring);
+    HardwareMonitor.dumpHardwareStatusToNetworkTables(Constants.debugMemoryUsage);
   }
 
   /** This function is called once when the robot is disabled. */
