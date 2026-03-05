@@ -10,12 +10,6 @@ package frc.robot;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.RPM;
 import static frc.robot.subsystems.vision.VisionConstants.aprilTagLayout;
-import static frc.robot.subsystems.vision.VisionConstants.cameraBackName;
-import static frc.robot.subsystems.vision.VisionConstants.cameraFrontName;
-import static frc.robot.subsystems.vision.VisionConstants.cameraRightName;
-import static frc.robot.subsystems.vision.VisionConstants.robotToCameraBack;
-import static frc.robot.subsystems.vision.VisionConstants.robotToCameraFront;
-import static frc.robot.subsystems.vision.VisionConstants.robotToCameraRight;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -48,7 +42,6 @@ import frc.robot.subsystems.Feeder;
 import frc.robot.subsystems.IntakeArm;
 import frc.robot.subsystems.IntakeRoller;
 import frc.robot.subsystems.Shooter;
-import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.commands.DriveToTower;
 import frc.robot.subsystems.Spindexer;
 import frc.robot.subsystems.drive.Drive;
@@ -60,10 +53,6 @@ import frc.robot.subsystems.drive.ModuleIOSpark;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.RPM;
-
-import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
@@ -232,10 +221,20 @@ public class RobotContainer {
         .ignoringDisable(true);
     Command resetPoseFacingAway = drive.recalibrateDrivetrain();
     Command anchorInPlace = Commands.runOnce(drive::stopWithX, drive);
-    Command runSpindexer = spindexer != null ? spindexer.setVelocity(RPM.of(12 * 60)) : warningNoSubsystem("spindexer");
+    Command runSpindexer = spindexer != null ? spindexer.setVelocity(ControlsConstants.SPINDEXER_VELOCITY)
+        : warningNoSubsystem("spindexer");
     Command autoGoToClimb = new DriveToTower(drive).andThen(new InstantCommand(drive::stop, drive));
     Command climberUp = climber != null ? climber.set(0.5) : warningNoSubsystem("climber");
     Command climberDown = climber != null ? climber.set(-0.5) : warningNoSubsystem("climber");
+    Command runIntake = intakeArm != null && intakeRoller != null ? Commands.parallel(
+        intakeArm.setAngle(ControlsConstants.INTAKE_ARM_EXTENDED_ANGLE),
+        intakeRoller.setVelocity(ControlsConstants.INTAKE_ROLLER_VELOCITY)) : warningNoSubsystem("intake");
+    Command runShooter = shooter != null && feeder != null ? Commands.parallel(
+        feeder.setVelocity(
+            () -> RPM.of(SmartDashboard.getNumber(FEEDER_SPEED_KEY, ControlsConstants.FEEDER_VELOCITY.in(RPM)))),
+        shooter.setVelocity(
+            () -> RPM.of(SmartDashboard.getNumber(SHOOTER_SPEED_KEY, ControlsConstants.SHOOTER_VELOCITY.in(RPM)))),
+        anchorInPlace.alongWith(runSpindexer)) : warningNoSubsystem("shooter");
 
     drive.setDefaultCommand(driveWithJoysticks);
 
@@ -243,30 +242,8 @@ public class RobotContainer {
     controller.rightBumper().whileTrue(anchorInPlace.alongWith(runSpindexer));
     controller.b().onTrue(resetGyro);
     controller.back().whileTrue(resetPoseFacingAway);
-
-    // Spindexer controls
-    if (spindexer != null) {
-      Command runSpindexer = spindexer.setVelocity(ControlsConstants.SPINDEXER_VELOCITY);
-      controller.leftBumper().whileTrue(runSpindexer);
-    }
-
-    // Intake controls
-    if (intakeArm != null && intakeRoller != null) {
-      Command runIntake = Commands.parallel(
-          intakeArm.setAngle(ControlsConstants.INTAKE_ARM_EXTENDED_ANGLE),
-          intakeRoller.setVelocity(ControlsConstants.INTAKE_ROLLER_VELOCITY));
-      controller.leftBumper().toggleOnTrue(runIntake);
-    }
-
-    // Shooter controls
-    if (shooter != null && feeder != null) {
-      Command runShooter = Commands.parallel(
-          feeder.setVelocity(
-              () -> RPM.of(SmartDashboard.getNumber(FEEDER_SPEED_KEY, ControlsConstants.FEEDER_VELOCITY.in(RPM)))),
-          shooter.setVelocity(
-              () -> RPM.of(SmartDashboard.getNumber(SHOOTER_SPEED_KEY, ControlsConstants.SHOOTER_VELOCITY.in(RPM)))));
-      controller.rightBumper().toggleOnTrue(runShooter);
-    }
+    controller.leftBumper().whileTrue(runSpindexer.alongWith(runIntake));
+    controller.rightBumper().whileTrue(runShooter);
   }
 
   /**

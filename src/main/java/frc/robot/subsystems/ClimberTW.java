@@ -121,7 +121,9 @@ public class ClimberTW extends SubsystemBase {
 
   /** Creates a new ClimberTW. */
   public ClimberTW() {
-    setDefaultCommand(setHeight(ControlsConstants.CLIMBER_DEFAULT_HEIGHT));
+    // TODO: set to height later. Right now we just want default to be safely "off"
+    // setDefaultCommand(setHeight(ControlsConstants.CLIMBER_DEFAULT_HEIGHT));
+    setDefaultCommand(set(0));
   }
 
   /**
@@ -155,12 +157,6 @@ public class ClimberTW extends SubsystemBase {
     elevator.simIterate();
   }
   // This method will be called once per scheduler run
-
-  /** Creates a new ClimberTW. */
-  public ClimberTW() {
-    // setDefaultCommand(setHeight(Meters.of(0)));
-    setDefaultCommand(set(0));
-  }
 
   @Override
   public void periodic() {
