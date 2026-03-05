@@ -27,7 +27,8 @@ import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.util.FaultMonitor;
+
+import frc.robot.util.HardwareMonitor;
 import frc.robot.util.PatchedTalonFXWrapper;
 import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;
@@ -124,6 +125,7 @@ public class ClimberTW extends SubsystemBase {
     // TODO: set to height later. Right now we just want default to be safely "off"
     // setDefaultCommand(setHeight(ControlsConstants.CLIMBER_DEFAULT_HEIGHT));
     setDefaultCommand(set(0));
+    HardwareMonitor.registerHardware("climberMotor", motor);
   }
 
   /**
@@ -162,7 +164,5 @@ public class ClimberTW extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     elevator.updateTelemetry();
-    boolean hasFaults = FaultMonitor.hasAnyDisconnectsOrFaults(motor);
-    SmartDashboard.putBoolean("climberfaults", hasFaults);
   }
 }

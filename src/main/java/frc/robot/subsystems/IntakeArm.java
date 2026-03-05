@@ -29,7 +29,8 @@ import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.util.FaultMonitor;
+
+import frc.robot.util.HardwareMonitor;
 import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;
 import yams.mechanisms.config.ArmConfig;
@@ -117,6 +118,7 @@ public class IntakeArm extends SubsystemBase {
   /** Creates a new IntakeArm. */
   public IntakeArm() {
     setDefaultCommand(setAngle(ControlsConstants.INTAKE_ARM_DEFAULT_ANGLE));
+    HardwareMonitor.registerHardware("intakeArmMotor", motor);
   }
 
   /**
@@ -148,8 +150,6 @@ public class IntakeArm extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     arm.updateTelemetry();
-    boolean hasFaults = FaultMonitor.hasAnyDisconnectsOrFaults(motor);
-    SmartDashboard.putBoolean("intakearmfaults", hasFaults);
   }
 
   @Override

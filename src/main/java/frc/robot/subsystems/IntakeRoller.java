@@ -19,7 +19,8 @@ import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.util.FaultMonitor;
+
+import frc.robot.util.HardwareMonitor;
 import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;
 import yams.mechanisms.config.FlyWheelConfig;
@@ -55,7 +56,7 @@ public class IntakeRoller extends SubsystemBase {
           ControlsConstants.INTAKE_ROLLER_KP, ControlsConstants.INTAKE_ROLLER_KI, ControlsConstants.INTAKE_ROLLER_KD)
       .withSimClosedLoopController(SIM_KP, SIM_KI, SIM_KD)
       // Telemetry name and verbosity level
-      .withTelemetry(MOTOR_TELEMETRY, TelemetryVerbosity.HIGH) 
+      .withTelemetry(MOTOR_TELEMETRY, TelemetryVerbosity.HIGH)
       // Gearing from the motor rotor to final shaft.
       // In this example GearBox.fromReductionStages(3,4) is the same as
       // GearBox.fromStages("3:1","4:1") which corresponds to the gearbox attached to
@@ -90,6 +91,7 @@ public class IntakeRoller extends SubsystemBase {
   /** Creates a new IntakeRoller. */
   public IntakeRoller() {
     setDefaultCommand(set(ControlsConstants.INTAKE_ROLLER_DEFAULT_DUTY_CYCLE));
+    HardwareMonitor.registerHardware("intakeRollerMotor", motor);
   }
 
   /**
@@ -124,8 +126,6 @@ public class IntakeRoller extends SubsystemBase {
   @Override
   public void periodic() {
     roller.updateTelemetry();
-    boolean hasFaults = FaultMonitor.hasAnyDisconnectsOrFaults(motor);
-    SmartDashboard.putBoolean("intakerollerfaults", hasFaults);
   }
 
   @Override

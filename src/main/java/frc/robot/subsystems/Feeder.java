@@ -21,8 +21,9 @@ import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.util.FaultMonitor;
-import frc.robot.util.PatchedTalonFXWrapper; 
+
+import frc.robot.util.HardwareMonitor;
+import frc.robot.util.PatchedTalonFXWrapper;
 import yams.mechanisms.config.FlyWheelConfig;
 import yams.mechanisms.velocity.FlyWheel;
 import yams.motorcontrollers.SmartMotorController;
@@ -83,6 +84,7 @@ public class Feeder extends SubsystemBase {
   /** Creates a new Feeder. */
   public Feeder() {
     setDefaultCommand(set(ControlsConstants.FEEDER_DEFAULT_DUTY_CYCLE));
+    HardwareMonitor.registerHardware("feederMotor", motor);
   }
 
   /**
@@ -121,8 +123,6 @@ public class Feeder extends SubsystemBase {
   @Override
   public void periodic() {
     feeder.updateTelemetry();
-    boolean hasFaults = FaultMonitor.hasAnyDisconnectsOrFaults(motor);
-    SmartDashboard.putBoolean("feederfaults", hasFaults);
   }
 
   @Override

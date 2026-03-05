@@ -21,7 +21,8 @@ import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.util.FaultMonitor;
+
+import frc.robot.util.HardwareMonitor;
 import frc.robot.util.PatchedTalonFXWrapper;
 import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;
@@ -86,6 +87,7 @@ public class Shooter extends SubsystemBase {
   /** Creates a new Shooter. */
   public Shooter() {
     setDefaultCommand(set(ControlsConstants.SHOOTER_DEFAULT_DUTY_CYCLE));
+    HardwareMonitor.registerHardware("shooterMotor", motor);
   }
 
   /**
@@ -124,8 +126,6 @@ public class Shooter extends SubsystemBase {
   @Override
   public void periodic() {
     shooter.updateTelemetry();
-    boolean hasFaults = FaultMonitor.hasAnyDisconnectsOrFaults(motor);
-    SmartDashboard.putBoolean("shooterfaults", hasFaults);
   }
 
   @Override

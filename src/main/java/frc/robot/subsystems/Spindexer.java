@@ -20,7 +20,8 @@ import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.util.FaultMonitor;
+
+import frc.robot.util.HardwareMonitor;
 import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;
 import yams.mechanisms.config.FlyWheelConfig;
@@ -87,6 +88,7 @@ public class Spindexer extends SubsystemBase {
   /** Creates a new Spindexer. */
   public Spindexer() {
     setDefaultCommand(set(ControlsConstants.SPINDEXER_DEFAULT_DUTY_CYCLE));
+    HardwareMonitor.registerHardware("spindexerMotor", motor);
   }
 
   /**
@@ -122,8 +124,6 @@ public class Spindexer extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     spindexer.updateTelemetry();
-    boolean hasFaults = FaultMonitor.hasAnyDisconnectsOrFaults(motor);
-    SmartDashboard.putBoolean("spindexerFaults", hasFaults);
   }
 
   @Override
