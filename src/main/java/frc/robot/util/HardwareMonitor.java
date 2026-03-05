@@ -50,23 +50,23 @@ public class HardwareMonitor {
       SmartDashboard.putNumber("HardwareMonitor/freeMemory", presumableFreeMemoryInBytes);
     }
     for (var talon : talonMap.entrySet()) {
-      SmartDashboard.putBoolean("HardwareMonitor/" + talon.getKey() + "/hasFaults",
+      SmartDashboard.putBoolean("HardwareMonitor/FaultStatus/" + talon.getKey(),
           // TODO: refactor FaultMonitor method into this class for registerHardware idiom
-          hasAnyDisconnectsOrFaults(talon.getValue()));
+          !hasAnyDisconnectsOrFaults(talon.getValue()));
     }
     for (var spark : sparkMap.entrySet()) {
-      SmartDashboard.putBoolean("HardwareMonitor/" + spark.getKey() + "/hasFaults",
+      SmartDashboard.putBoolean("HardwareMonitor/FaultStatus/" + spark.getKey(),
           // TODO: refactor FaultMonitor method into this class for registerHardware idiom
-          hasAnyDisconnectsOrFaults(spark.getValue()));
+          !hasAnyDisconnectsOrFaults(spark.getValue()));
     }
     for (var pigeon : pigeonMap.entrySet()) {
-      SmartDashboard.putBoolean("HardwareMonitor/" + pigeon.getKey() + "/hasFaults",
+      SmartDashboard.putBoolean("HardwareMonitor/FaultStatus/" + pigeon.getKey(),
           // TODO: refactor FaultMonitor method into this class for registerHardware idiom
-          hasAnyDisconnectsOrFaults(pigeon.getValue()));
+          !hasAnyDisconnectsOrFaults(pigeon.getValue()));
     }
     for (var camera : cameraMap.entrySet()) {
-      SmartDashboard.putBoolean("HardwareMonitor/" + camera.getKey() + "/hasFaults",
-          _cameraHasFaults(camera.getValue()));
+      SmartDashboard.putBoolean("HardwareMonitor/FaultStatus/" + camera.getKey(),
+          !_cameraHasFaults(camera.getValue()));
     }
   }
 
