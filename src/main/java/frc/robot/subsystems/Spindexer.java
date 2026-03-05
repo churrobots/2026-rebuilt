@@ -9,6 +9,8 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.RPM;
 
+import java.util.function.Supplier;
+
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
@@ -108,6 +110,16 @@ public class Spindexer extends SubsystemBase {
    */
   public Command setVelocity(AngularVelocity speed) {
     return spindexer.setSpeed(speed);
+  }
+
+  /**
+   * Set the spindexer velocity.
+   *
+   * @param speed Speed to set.
+   * @return {@link edu.wpi.first.wpilibj2.command.RunCommand}
+   */
+  public Command setVelocity(Supplier<AngularVelocity> speedSupplier) {
+    return spindexer.setSpeed(speedSupplier.get());
   }
 
   /**

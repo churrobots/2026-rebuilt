@@ -58,6 +58,7 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
+import frc.robot.util.TunableNumber;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -70,11 +71,8 @@ import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
  */
 
 public class RobotContainer {
-  private static final String SHOOTER_SPEED_KEY = "SHOOTER_SPEED";
-  private static final String FEEDER_SPEED_KEY = "FEEDER_SPEED";
-  // Subsystems
-  private final Drive drive;
 
+  private final Drive drive;
   private final ClimberTW climber = null;
   private final Spindexer spindexer = new Spindexer();
   private final IntakeRoller intakeRoller = null;
@@ -92,10 +90,6 @@ public class RobotContainer {
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
-    // SmartDashboard values
-    SmartDashboard.putNumber(SHOOTER_SPEED_KEY, ControlsConstants.SHOOTER_VELOCITY.in(RPM));
-    SmartDashboard.putNumber(FEEDER_SPEED_KEY, ControlsConstants.FEEDER_VELOCITY.in(RPM));
-
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
@@ -203,6 +197,14 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   void bindCommandsForTeleop() {
+
+    TunableNumber tunableShooterSpeed = new TunableNumber("SHOOTER_SPEED",
+        ControlsConstants.SHOOTER_VELOCITY.in(RPM));
+    TunableNumber tunableFeederSpeed = new TunableNumber("FEEDER_SPEED",
+        ControlsConstants.FEEDER_VELOCITY.in(RPM));
+    TunableNumber tunableSpindexerSpeed = new TunableNumber("SPINDEXER_SPEED",
+        ControlsConstants.SPINDEXER_VELOCITY.in(RPM));
+
     // Driving controls.
     Command driveWithJoysticks = DriveCommands.joystickDrive(
         drive,
@@ -221,35 +223,28 @@ public class RobotContainer {
         .ignoringDisable(true);
     Command resetPoseFacingAway = drive.recalibrateDrivetrain();
     Command anchorInPlace = Commands.runOnce(drive::stopWithX, drive);
-    Command runSpindexer = spindexer != null ? spindexer.setVelocity(ControlsConstants.SPINDEXER_VELOCITY)
-        : warningNoSubsystem("spindexer");
     Command autoGoToClimb = new DriveToTower(drive).andThen(new InstantCommand(drive::stop, drive));
     Command climberUp = climber != null ? climber.set(0.5) : warningNoSubsystem("climber");
     Command climberDown = climber != null ? climber.set(-0.5) : warningNoSubsystem("climber");
     Command runIntake = intakeArm != null && intakeRoller != null ? Commands.parallel(
         intakeArm.setAngle(ControlsConstants.INTAKE_ARM_EXTENDED_ANGLE),
         intakeRoller.setVelocity(ControlsConstants.INTAKE_ROLLER_VELOCITY)) : warningNoSubsystem("intake");
-    Command runShooter = shooter != null && feeder != null ? Commands.parallel(
-        feeder.setVelocity(
-            () -> RPM.of(SmartDashboard.getNumber(FEEDER_SPEED_KEY, ControlsConstants.FEEDER_VELOCITY.in(RPM)))),
-        shooter.setVelocity(
-            () -> RPM.of(SmartDashboard.getNumber(SHOOTER_SPEED_KEY, ControlsConstants.SHOOTER_VELOCITY.in(RPM)))))
+    Command runTunableFlywheel = shooter != null ? shooter.setVelocity(
+        () -> RPM.of(tunableShooterSpeed.getLatest()))
         : warningNoSubsystem("shooter");
-    Command runFlywheel = shooter != null ? shooter.setVelocity(
-        () -> RPM.of(SmartDashboard.getNumber(SHOOTER_SPEED_KEY, ControlsConstants.SHOOTER_VELOCITY.in(RPM))))
-        : warningNoSubsystem("shooter");
-    Command feedToFlywheel = spindexer != null && feeder != null
-        ? spindexer.setVelocity(ControlsConstants.SPINDEXER_VELOCITY).alongWith(feeder.setVelocity(
-            () -> RPM.of(SmartDashboard.getNumber(FEEDER_SPEED_KEY, ControlsConstants.FEEDER_VELOCITY.in(RPM)))))
+    Command runTunableFeederAndSpindexer = spindexer != null && feeder != null
+        ? spindexer
+            .setVelocity(() -> RPM.of(tunableSpindexerSpeed.getLatest()))
+            .alongWith(
+                feeder.setVelocity(() -> RPM.of(tunableFeederSpeed.getLatest())))
         : warningNoSubsystem("spindexer and feeder");
 
     drive.setDefaultCommand(driveWithJoysticks);
 
     controller.a().whileTrue(driveWithAutoAim);
-    controller.b().onTrue(resetGyro);
     controller.back().whileTrue(resetPoseFacingAway);
-    controller.leftBumper().whileTrue(runFlywheel);
-    controller.rightBumper().whileTrue(feedToFlywheel);
+    controller.leftBumper().whileTrue(runTunableFlywheel);
+    controller.rightBumper().whileTrue(runTunableFeederAndSpindexer);
   }
 
   /**
