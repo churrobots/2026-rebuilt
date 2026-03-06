@@ -1,7 +1,9 @@
 package frc.robot.util;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.photonvision.PhotonCamera;
 import org.photonvision.targeting.PhotonPipelineResult;
@@ -24,13 +26,16 @@ public class HardwareMonitor {
   private static final HashMap<String, TalonFX> talonMap = new HashMap<>();
   private static final HashMap<String, SparkBase> sparkMap = new HashMap<>();
   private static final HashMap<String, Pigeon2> pigeonMap = new HashMap<>();
+  private static final Set<String> nullHardware = new HashSet<>();
 
   private static final int MAX_VISION_RESULTS_TO_SAMPLE = 3;
   private static final long MAX_ALLOWABLE_VISION_LATENCY_MILLISECONDS = 60;
   private static final long MAX_ALLOWABLE_VISION_UNSEEN_SECONDS = 5;
 
   public static void registerHardware(String hardwareName, Object device) {
-    if (device instanceof TalonFX) {
+    if (device == null) {
+      nullHardware.add(hardwareName);
+    } else if (device instanceof TalonFX) {
       _registerTalonFX(hardwareName, (TalonFX) device);
     } else if (device instanceof SparkBase) {
       _registerSparkBase(hardwareName, (SparkBase) device);
@@ -48,6 +53,10 @@ public class HardwareMonitor {
       long allocatedMemoryInBytes = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory());
       long presumableFreeMemoryInBytes = Runtime.getRuntime().maxMemory() - allocatedMemoryInBytes;
       SmartDashboard.putNumber("HardwareMonitor/freeMemory", presumableFreeMemoryInBytes);
+    }
+    for (String nullHardwareName : nullHardware) {
+      // Nulled hardware objects are automatically faulted
+      SmartDashboard.putBoolean("HardwareMonitor/FaultStatus/" + nullHardwareName, false);
     }
     for (var talon : talonMap.entrySet()) {
       SmartDashboard.putBoolean("HardwareMonitor/FaultStatus/" + talon.getKey(),
