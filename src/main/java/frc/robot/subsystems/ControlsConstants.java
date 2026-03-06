@@ -32,10 +32,11 @@ public class ControlsConstants {
   public static final Distance CLIMBER_DEFAULT_HEIGHT = Meters.of(0);
 
   // ========== Feeder ==========
-  public static final double FEEDER_KP = 50;
+  public static final double FEEDER_KP = .25;
   public static final double FEEDER_KI = 0;
   public static final double FEEDER_KD = 0;
   public static final double FEEDER_DEFAULT_DUTY_CYCLE = 0;
+  public static final double FEEDER_KV = 0.111;
 
   // ========== IntakeArm ==========
   public static final double INTAKE_ARM_KP = 50;

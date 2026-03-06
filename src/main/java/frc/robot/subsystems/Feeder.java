@@ -11,6 +11,7 @@ import static edu.wpi.first.units.Units.RPM;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
 import java.util.function.Supplier;
 
@@ -18,7 +19,6 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Mass;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -52,6 +52,7 @@ public class Feeder extends SubsystemBase {
       .withControlMode(ControlMode.CLOSED_LOOP)
       // Feedback Constants (PID Constants)
       .withClosedLoopController(ControlsConstants.FEEDER_KP, ControlsConstants.FEEDER_KI, ControlsConstants.FEEDER_KD)
+      .withSimFeedforward(new SimpleMotorFeedforward(0, ControlsConstants.FEEDER_KV))
       .withSimClosedLoopController(SIM_KP, SIM_KI, SIM_KD)
       // Telemetry name and verbosity level
       .withTelemetry(MOTOR_TELEMETRY, TelemetryVerbosity.HIGH)
