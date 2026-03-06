@@ -59,6 +59,7 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
+import frc.robot.util.AutoShootingHelper;
 import frc.robot.util.TunableNumber;
 
 /**
@@ -80,6 +81,9 @@ public class RobotContainer {
   private final IntakeArm intakeArm = null;
   private final Shooter shooter = new Shooter();
   private final Feeder feeder = new Feeder();
+
+  // Helpers for automatic aiming and shooting
+  private final AutoShootingHelper shootingHelper;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(Hardware.DriverStation.driverXboxPort);
@@ -152,6 +156,7 @@ public class RobotContainer {
         break;
     }
 
+    shootingHelper = new AutoShootingHelper(drive::getPose);
     bindCommandsForTeleop();
     bindCommandsForAuto();
   }
@@ -216,7 +221,7 @@ public class RobotContainer {
         drive,
         () -> -controller.getLeftY(),
         () -> -controller.getLeftX(),
-        this::getAngleToHub);
+        () -> shootingHelper.getAngleToHub());
     Command resetGyro = Commands.runOnce(
         () -> drive.setPose(
             new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
@@ -265,52 +270,5 @@ public class RobotContainer {
     return new InstantCommand(() -> {
       System.out.println("WARNING WARNING WARNING - subsystem disconnected - " + subsystemName);
     });
-  }
-
-  private Rotation2d getAngleToHub() {
-    boolean isRedAlliance = DriverStation.getAlliance().orElseGet(() -> Alliance.Blue) == Alliance.Red;
-    Distance blueHubX = Distance.ofBaseUnits(4.63, Meters);
-    Distance redHubX = Distance.ofBaseUnits(aprilTagLayout.getFieldLength(), Meters).minus(blueHubX);
-    Distance hubY = Distance.ofBaseUnits(4.035, Meters);
-    Distance hubX = isRedAlliance ? redHubX : blueHubX;
-    Pose2d robotPose = drive.getPose();
-    Distance robotX = Distance.ofBaseUnits(robotPose.getX(), Meters);
-    Distance robotY = Distance.ofBaseUnits(robotPose.getY(), Meters);
-    double targetAngleInRadians = Math.atan2(
-        hubY.minus(robotY).in(Meters),
-        hubX.minus(robotX).in(Meters));
-    return Rotation2d.fromRadians(targetAngleInRadians);
-
-  }
-
-  private Distance getDistanceToHub() {
-    boolean isRedAlliance = DriverStation.getAlliance().orElseGet(() -> Alliance.Blue) == Alliance.Red;
-    Distance blueHubX = Distance.ofBaseUnits(4.63, Meters);
-    Distance redHubX = Distance.ofBaseUnits(aprilTagLayout.getFieldLength(), Meters).minus(blueHubX);
-    Distance hubY = Distance.ofBaseUnits(4.035, Meters);
-    Distance hubX = isRedAlliance ? redHubX : blueHubX;
-    Pose2d robotPose = drive.getPose();
-    Distance robotX = Distance.ofBaseUnits(robotPose.getX(), Meters);
-    Distance robotY = Distance.ofBaseUnits(robotPose.getY(), Meters);
-    Translation2d robotPos = new Translation2d(robotX, robotY);
-    Translation2d hubPos = new Translation2d(hubX, hubY);
-    double distance = robotPos.getDistance(hubPos);
-    return Meters.of(distance);
-  }
-
-  private double getRpmForDistance(Distance inputDistance) {
-    InterpolatingDoubleTreeMap table = new InterpolatingDoubleTreeMap();
-    // First Value is INCHES btw
-    table.put(215., 4300.);
-    table.put(191., 3900.);
-    table.put(167., 3500.);
-    table.put(143., 3200.);
-    table.put(119., 3000.);
-    table.put(107., 2900.);
-    table.put(95., 2800.);
-    table.put(83., 2750.);
-    table.put(77., 2750.);
-    double inputInInches = inputDistance.in(Inches);
-    return table.get(inputInInches);
   }
 }
