@@ -64,7 +64,7 @@ public class Feeder extends SubsystemBase {
       .withStatorCurrentLimit(STATOR_CURRENT_LIMIT);
 
   // Vendor motor controller object
-  private TalonFX motor = HardwareConstants.HAS_FEEDER ? new TalonFX(HardwareConstants.FEEDER_MOTOR_ID) : null;
+  private TalonFX motor = new TalonFX(HardwareConstants.FEEDER_MOTOR_ID);
 
   // Create our SmartMotorController wrapping the TalonFX.
   private SmartMotorController controller = YAMSUtil.createSmartMotorController(motor, DCMotor.getFalcon500(1),

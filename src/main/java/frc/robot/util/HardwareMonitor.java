@@ -119,7 +119,7 @@ public class HardwareMonitor {
   }
 
   private static boolean _hasAnyDisconnectsOrFaults(Pigeon2 device) {
-    if (device == null || !device.isConnected()) {
+    if (!device.isConnected()) {
       return true;
     } else {
       boolean faultHardware = device.getFault_Hardware().getValue() == true;
@@ -150,7 +150,7 @@ public class HardwareMonitor {
   private static boolean _hasAnyDisconnectsOrFaults(SparkBase device) {
     // TODO: check for supply voltage dropping out? how would we detect the white
     // wires being disconnected?
-    if (device == null || device.hasActiveFault() || device.hasActiveWarning()) {
+    if (device.hasActiveFault() || device.hasActiveWarning()) {
       return true;
     } else {
       return false;
@@ -158,7 +158,7 @@ public class HardwareMonitor {
   }
 
   private static boolean _hasAnyDisconnectsOrFaults(TalonFX device) {
-    if (device == null || !device.isConnected()) {
+    if (!device.isConnected()) {
       return true;
     } else {
       boolean faultHardware = device.getFault_Hardware().getValue() == true;
