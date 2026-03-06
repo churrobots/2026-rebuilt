@@ -337,23 +337,6 @@ public class Drive extends SubsystemBase {
     return rawGyroRotation;
   }
 
-  public boolean isByBlueAlliance() {
-    Pose2d currentPose = getPose();
-    if (currentPose.getTranslation().getX() < Units.inchesToMeters(325.65)) {
-      return true;
-    }
-    return false;
-  }
-
-  public boolean isByOutpost() {
-    Pose2d currentPose = getPose();
-    if ((isByBlueAlliance() && currentPose.getTranslation().getY() < Units.inchesToMeters(158.32))
-        || (!isByBlueAlliance() && currentPose.getTranslation().getY() > Units.inchesToMeters(158.32))) {
-      return true;
-    }
-    return false;
-  }
-
   public Command recalibrateDrivetrain() {
     return run(() -> {
       boolean isBlueAlliance = DriverStation.getAlliance().orElseGet(() -> Alliance.Blue) == Alliance.Blue;

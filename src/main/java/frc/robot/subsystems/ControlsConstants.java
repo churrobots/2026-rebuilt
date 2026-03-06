@@ -62,8 +62,7 @@ public class ControlsConstants {
   public static final double SHOOTER_KD = 0;
   public static final double SHOOTER_DEFAULT_DUTY_CYCLE = 0;
   public static final double SHOOTER_KV = 0.112;
-  // TODO: control the feeder from shooter target velocity?
-  public static final double SHOOTER_TO_FEEDER_RATIO = 3000.0 / 3500.0;
+  public static final double FEEDER_TO_SHOOTER_RPM_RATIO = 3500.0 / 3000.0;
 
   // ========== Spindexer ==========
   public static final double SPINDEXER_KP = 50;

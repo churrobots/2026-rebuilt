@@ -16,22 +16,24 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import frc.robot.subsystems.ControlsConstants;
 
 /** Add your docs here. */
-public class AutoShootingHelper {
+public class SemiAutoHelper {
 
   public static AprilTagFieldLayout aprilTagLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
-  private Supplier<Pose2d> m_robotPoseSupplier;
+  private Supplier<Pose2d> robotPoseSupplier;
 
   // Use this to automatically select an RPM for a given distance
   InterpolatingDoubleTreeMap lookupDistanceInInchesToRPM = new InterpolatingDoubleTreeMap();
 
-  public AutoShootingHelper(Supplier<Pose2d> robotPoseSupplier) {
-    m_robotPoseSupplier = robotPoseSupplier;
+  public SemiAutoHelper(Supplier<Pose2d> robotPoseSupplier) {
+    this.robotPoseSupplier = robotPoseSupplier;
 
     // First Value is INCHES btw
     lookupDistanceInInchesToRPM.put(215., 4300.);
@@ -51,7 +53,7 @@ public class AutoShootingHelper {
     Distance redHubX = Distance.ofBaseUnits(aprilTagLayout.getFieldLength(), Meters).minus(blueHubX);
     Distance hubY = Distance.ofBaseUnits(4.035, Meters);
     Distance hubX = isRedAlliance ? redHubX : blueHubX;
-    Pose2d robotPose = m_robotPoseSupplier.get();
+    Pose2d robotPose = robotPoseSupplier.get();
     Distance robotX = Distance.ofBaseUnits(robotPose.getX(), Meters);
     Distance robotY = Distance.ofBaseUnits(robotPose.getY(), Meters);
     double targetAngleInRadians = Math.atan2(
@@ -67,7 +69,7 @@ public class AutoShootingHelper {
     Distance redHubX = Distance.ofBaseUnits(aprilTagLayout.getFieldLength(), Meters).minus(blueHubX);
     Distance hubY = Distance.ofBaseUnits(4.035, Meters);
     Distance hubX = isRedAlliance ? redHubX : blueHubX;
-    Pose2d robotPose = m_robotPoseSupplier.get();
+    Pose2d robotPose = robotPoseSupplier.get();
     Distance robotX = Distance.ofBaseUnits(robotPose.getX(), Meters);
     Distance robotY = Distance.ofBaseUnits(robotPose.getY(), Meters);
     Translation2d robotPos = new Translation2d(robotX, robotY);
@@ -76,10 +78,35 @@ public class AutoShootingHelper {
     return Meters.of(distance);
   }
 
-  public AngularVelocity getShooterVelocityToHitHub() {
+  public AngularVelocity getShooterVelocityForHubDistance() {
     Distance distance = getDistanceToHub();
     double inputInInches = distance.in(Inches);
-    double rpm = lookupDistanceInInchesToRPM.get(inputInInches);
-    return RPM.of(rpm);
+    double shooterRpm = lookupDistanceInInchesToRPM.get(inputInInches);
+    return RPM.of(shooterRpm);
+  }
+
+  public AngularVelocity getFeederVelocityForHubDistance() {
+    Distance distance = getDistanceToHub();
+    double inputInInches = distance.in(Inches);
+    double shooterRpm = lookupDistanceInInchesToRPM.get(inputInInches);
+    double feederRpm = ControlsConstants.FEEDER_TO_SHOOTER_RPM_RATIO * shooterRpm;
+    return RPM.of(feederRpm);
+  }
+
+  public boolean isByBlueAlliance() {
+    Pose2d currentPose = robotPoseSupplier.get();
+    if (currentPose.getTranslation().getX() < Units.inchesToMeters(325.65)) {
+      return true;
+    }
+    return false;
+  }
+
+  public boolean isByOutpost() {
+    Pose2d currentPose = robotPoseSupplier.get();
+    if ((isByBlueAlliance() && currentPose.getTranslation().getY() < Units.inchesToMeters(158.32))
+        || (!isByBlueAlliance() && currentPose.getTranslation().getY() > Units.inchesToMeters(158.32))) {
+      return true;
+    }
+    return false;
   }
 }

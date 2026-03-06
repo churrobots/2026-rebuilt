@@ -45,7 +45,7 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
-import frc.robot.util.AutoShootingHelper;
+import frc.robot.util.SemiAutoHelper;
 import frc.robot.util.TunableNumber;
 
 /**
@@ -69,7 +69,7 @@ public class RobotContainer {
   private final Feeder feeder = new Feeder();
 
   // Helpers for automatic aiming and shooting
-  private final AutoShootingHelper shootingHelper;
+  private final SemiAutoHelper semiAutoHelper;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(Hardware.DriverStation.driverXboxPort);
@@ -142,7 +142,7 @@ public class RobotContainer {
         break;
     }
 
-    shootingHelper = new AutoShootingHelper(drive::getPose);
+    semiAutoHelper = new SemiAutoHelper(drive::getPose);
     bindCommandsForTeleop();
     bindCommandsForAuto();
   }
@@ -165,7 +165,7 @@ public class RobotContainer {
 
     NamedCommands.registerCommand(
         "autoPrepFlywheels",
-        shooter.setVelocity(shootingHelper::getShooterVelocityToHitHub));
+        shooter.setVelocity(semiAutoHelper::getShooterVelocityForHubDistance));
 
     // TODO: do we want to have a feeder.setVelocityBasedOnFlywheelVelocity?
     NamedCommands.registerCommand(
@@ -234,7 +234,7 @@ public class RobotContainer {
         drive,
         () -> -controller.getLeftY(),
         () -> -controller.getLeftX(),
-        () -> shootingHelper.getAngleToHub());
+        () -> semiAutoHelper.getAngleToHub());
     Command resetGyro = Commands.runOnce(
         () -> drive.setPose(
             new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
@@ -242,7 +242,7 @@ public class RobotContainer {
         .ignoringDisable(true);
     Command resetPoseFacingAway = drive.recalibrateDrivetrain();
     Command anchorInPlace = Commands.runOnce(drive::stopWithX, drive);
-    Command autoGoToClimb = new DriveToTower(drive).andThen(new InstantCommand(drive::stop, drive));
+    Command autoGoToClimb = new DriveToTower(drive, semiAutoHelper).andThen(new InstantCommand(drive::stop, drive));
     Command climberUp = climber.set(0.5);
     Command climberDown = climber.set(-0.5);
     Command runIntake = Commands.parallel(
