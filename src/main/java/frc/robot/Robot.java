@@ -9,6 +9,8 @@ package frc.robot;
 
 import com.revrobotics.util.StatusLogger;
 
+import edu.wpi.first.net.WebServer;
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -105,6 +107,9 @@ public class Robot extends LoggedRobot {
 
     // Monitor highlevel hardware faults during a match.
     HardwareMonitor.dumpHardwareStatusToNetworkTables(Constants.debugMemoryUsage);
+
+    // Make sure Elastic dashboard is available for download.
+    WebServer.start(5800, Filesystem.getDeployDirectory().getPath());
   }
 
   /** This function is called once when the robot is disabled. */

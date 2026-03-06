@@ -19,13 +19,11 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Mass;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.util.HardwareMonitor;
-import yams.gearing.GearBox;
-import yams.gearing.MechanismGearing;
+import frc.robot.util.YAMSUtil;
 import yams.mechanisms.config.FlyWheelConfig;
 import yams.mechanisms.velocity.FlyWheel;
 import yams.motorcontrollers.SmartMotorController;
@@ -33,7 +31,6 @@ import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
-import yams.motorcontrollers.local.SparkWrapper;
 
 public class Spindexer extends SubsystemBase {
   private static final String MOTOR_TELEMETRY = "SpindexerMotor";
@@ -71,7 +68,7 @@ public class Spindexer extends SubsystemBase {
 
   // Vendor motor controller object
   private SparkMax motor = new SparkMax(HardwareConstants.SPINDEXER_MOTOR_ID, MotorType.kBrushless);
-  private SmartMotorController controller = new SparkWrapper(motor, DCMotor.getNEO(1),
+  private SmartMotorController controller = YAMSUtil.safeGetSmartMotorController(motor, DCMotor.getNEO(1),
       motorConfig);
 
   private final FlyWheelConfig spindexerConfig = new FlyWheelConfig(controller)

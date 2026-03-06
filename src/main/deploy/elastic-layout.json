@@ -8,13 +8,13 @@
         "layouts": [
           {
             "title": "Cameras",
-            "x": 5.0,
-            "y": 10.0,
+            "x": 260.0,
+            "y": 0.0,
             "width": 260.0,
-            "height": 305.0,
+            "height": 260.0,
             "type": "List Layout",
             "properties": {
-              "label_position": "TOP"
+              "label_position": "LEFT"
             },
             "children": [
               {
@@ -88,25 +88,25 @@
             ]
           },
           {
-            "title": "Mechanisms",
-            "x": 270.0,
-            "y": 10.0,
+            "title": "Drive",
+            "x": 0.0,
+            "y": 0.0,
             "width": 260.0,
-            "height": 570.0,
+            "height": 385.0,
             "type": "List Layout",
             "properties": {
-              "label_position": "TOP"
+              "label_position": "LEFT"
             },
             "children": [
               {
-                "title": "feederMotor",
+                "title": "BackLeftDrive",
                 "x": 0.0,
                 "y": 0.0,
                 "width": 130.0,
                 "height": 130.0,
                 "type": "Boolean Box",
                 "properties": {
-                  "topic": "/SmartDashboard/HardwareMonitor/FaultStatus/feederMotor",
+                  "topic": "/SmartDashboard/HardwareMonitor/FaultStatus/BackLeftDrive",
                   "period": 0.06,
                   "data_type": "boolean",
                   "true_color": 4283215696,
@@ -116,6 +116,138 @@
                 }
               },
               {
+                "title": "BackLeftTurn",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Boolean Box",
+                "properties": {
+                  "topic": "/SmartDashboard/HardwareMonitor/FaultStatus/BackLeftTurn",
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "true_color": 4283215696,
+                  "false_color": 4294198070,
+                  "true_icon": "None",
+                  "false_icon": "None"
+                }
+              },
+              {
+                "title": "BackRightDrive",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Boolean Box",
+                "properties": {
+                  "topic": "/SmartDashboard/HardwareMonitor/FaultStatus/BackRightDrive",
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "true_color": 4283215696,
+                  "false_color": 4294198070,
+                  "true_icon": "None",
+                  "false_icon": "None"
+                }
+              },
+              {
+                "title": "BackRightTurn",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Boolean Box",
+                "properties": {
+                  "topic": "/SmartDashboard/HardwareMonitor/FaultStatus/BackRightTurn",
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "true_color": 4283215696,
+                  "false_color": 4294198070,
+                  "true_icon": "None",
+                  "false_icon": "None"
+                }
+              },
+              {
+                "title": "FrontLeftDrive",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Boolean Box",
+                "properties": {
+                  "topic": "/SmartDashboard/HardwareMonitor/FaultStatus/FrontLeftDrive",
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "true_color": 4283215696,
+                  "false_color": 4294198070,
+                  "true_icon": "None",
+                  "false_icon": "None"
+                }
+              },
+              {
+                "title": "FrontLeftTurn",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Boolean Box",
+                "properties": {
+                  "topic": "/SmartDashboard/HardwareMonitor/FaultStatus/FrontLeftTurn",
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "true_color": 4283215696,
+                  "false_color": 4294198070,
+                  "true_icon": "None",
+                  "false_icon": "None"
+                }
+              },
+              {
+                "title": "FrontRightDrive",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Boolean Box",
+                "properties": {
+                  "topic": "/SmartDashboard/HardwareMonitor/FaultStatus/FrontRightDrive",
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "true_color": 4283215696,
+                  "false_color": 4294198070,
+                  "true_icon": "None",
+                  "false_icon": "None"
+                }
+              },
+              {
+                "title": "FrontRightTurn",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Boolean Box",
+                "properties": {
+                  "topic": "/SmartDashboard/HardwareMonitor/FaultStatus/FrontRightTurn",
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "true_color": 4283215696,
+                  "false_color": 4294198070,
+                  "true_icon": "None",
+                  "false_icon": "None"
+                }
+              }
+            ]
+          },
+          {
+            "title": "Mechanisms",
+            "x": 260.0,
+            "y": 260.0,
+            "width": 260.0,
+            "height": 305.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "LEFT"
+            },
+            "children": [
+              {
                 "title": "shooterMotor",
                 "x": 0.0,
                 "y": 0.0,
@@ -124,6 +256,23 @@
                 "type": "Boolean Box",
                 "properties": {
                   "topic": "/SmartDashboard/HardwareMonitor/FaultStatus/shooterMotor",
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "true_color": 4283215696,
+                  "false_color": 4294198070,
+                  "true_icon": "None",
+                  "false_icon": "None"
+                }
+              },
+              {
+                "title": "feederMotor",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Boolean Box",
+                "properties": {
+                  "topic": "/SmartDashboard/HardwareMonitor/FaultStatus/feederMotor",
                   "period": 0.06,
                   "data_type": "boolean",
                   "true_color": 4283215696,
@@ -148,49 +297,71 @@
                   "true_icon": "None",
                   "false_icon": "None"
                 }
+              },
+              {
+                "title": "intakeRollerMotor",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Boolean Box",
+                "properties": {
+                  "topic": "/SmartDashboard/HardwareMonitor/FaultStatus/intakeRollerMotor",
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "true_color": 4283215696,
+                  "false_color": 4294198070,
+                  "true_icon": "None",
+                  "false_icon": "None"
+                }
+              },
+              {
+                "title": "intakeArmMotor",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Boolean Box",
+                "properties": {
+                  "topic": "/SmartDashboard/HardwareMonitor/FaultStatus/intakeArmMotor",
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "true_color": 4283215696,
+                  "false_color": 4294198070,
+                  "true_icon": "None",
+                  "false_icon": "None"
+                }
+              },
+              {
+                "title": "climberMotor",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Boolean Box",
+                "properties": {
+                  "topic": "/SmartDashboard/HardwareMonitor/FaultStatus/climberMotor",
+                  "period": 0.06,
+                  "data_type": "boolean",
+                  "true_color": 4283215696,
+                  "false_color": 4294198070,
+                  "true_icon": "None",
+                  "false_icon": "None"
+                }
               }
             ]
-          },
-          {
-            "title": "Drive",
-            "x": 535.0,
-            "y": 15.0,
-            "width": 260.0,
-            "height": 260.0,
-            "type": "List Layout",
-            "properties": {
-              "label_position": "TOP"
-            },
-            "children": []
           }
         ],
         "containers": [
           {
-            "title": "Alliance",
-            "x": 1410.0,
-            "y": 5.0,
-            "width": 100.0,
-            "height": 100.0,
-            "type": "Boolean Box",
-            "properties": {
-              "topic": "/FMSInfo/IsRedAlliance",
-              "period": 0.06,
-              "data_type": "boolean",
-              "true_color": 4294901760,
-              "false_color": 4282600941,
-              "true_icon": "None",
-              "false_icon": "None"
-            }
-          },
-          {
-            "title": "Auto Chooser",
-            "x": 860.0,
-            "y": 5.0,
-            "width": 550.0,
+            "title": "Auto Choices",
+            "x": 520.0,
+            "y": 0.0,
+            "width": 635.0,
             "height": 130.0,
             "type": "ComboBox Chooser",
             "properties": {
-              "topic": "/SmartDashboard/Auto Chooser",
+              "topic": "/SmartDashboard/Auto Choices",
               "period": 0.06,
               "sort_options": false
             }
@@ -204,13 +375,13 @@
         "layouts": [
           {
             "title": "Speed Tuning",
-            "x": 75.0,
-            "y": 60.0,
+            "x": 0.0,
+            "y": 365.0,
             "width": 260.0,
             "height": 260.0,
             "type": "List Layout",
             "properties": {
-              "label_position": "TOP"
+              "label_position": "LEFT"
             },
             "children": [
               {
@@ -259,13 +430,13 @@
           },
           {
             "title": "Spindexer Tuner",
-            "x": 375.0,
-            "y": 40.0,
+            "x": 260.0,
+            "y": 5.0,
             "width": 260.0,
-            "height": 525.0,
+            "height": 380.0,
             "type": "List Layout",
             "properties": {
-              "label_position": "TOP"
+              "label_position": "LEFT"
             },
             "children": [
               {
@@ -369,14 +540,14 @@
             ]
           },
           {
-            "title": "Flywheel Tuner",
-            "x": 690.0,
-            "y": 65.0,
+            "title": "Shooter Tuner",
+            "x": 0.0,
+            "y": 10.0,
             "width": 260.0,
-            "height": 470.0,
+            "height": 350.0,
             "type": "List Layout",
             "properties": {
-              "label_position": "TOP"
+              "label_position": "LEFT"
             },
             "children": [
               {
@@ -458,6 +629,297 @@
                 "type": "Text Display",
                 "properties": {
                   "topic": "/Tuning/Shooter/ShooterMotor/closedloop/feedforward/kA",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              }
+            ]
+          },
+          {
+            "title": "IntakeArm Tuner",
+            "x": 525.0,
+            "y": 10.0,
+            "width": 260.0,
+            "height": 365.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "LEFT"
+            },
+            "children": [
+              {
+                "title": "Live Tuning",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 260.0,
+                "height": 130.0,
+                "type": "Command",
+                "properties": {
+                  "topic": "/SmartDashboard/Mechanisms/Commands/IntakeArm/Live Tuning",
+                  "period": 0.06,
+                  "show_type": true,
+                  "maximize_button_space": false
+                }
+              },
+              {
+                "title": "kP",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Tuning/IntakeArm/IntakeArmMotor/closedloop/feedback/kP",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "kI",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Tuning/IntakeArm/IntakeArmMotor/closedloop/feedback/kI",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "kD",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Tuning/IntakeArm/IntakeArmMotor/closedloop/feedback/kD",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "kV",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Tuning/IntakeArm/IntakeArmMotor/closedloop/feedforward/kV",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "kA",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Tuning/IntakeArm/IntakeArmMotor/closedloop/feedforward/kA",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              }
+            ]
+          },
+          {
+            "title": "IntakeRoller Tuner",
+            "x": 785.0,
+            "y": 10.0,
+            "width": 260.0,
+            "height": 370.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "LEFT"
+            },
+            "children": [
+              {
+                "title": "Live Tuning",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 260.0,
+                "height": 130.0,
+                "type": "Command",
+                "properties": {
+                  "topic": "/SmartDashboard/Mechanisms/Commands/IntakeRoller/Live Tuning",
+                  "period": 0.06,
+                  "show_type": true,
+                  "maximize_button_space": false
+                }
+              },
+              {
+                "title": "kP",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Tuning/IntakeRoller/IntakeRollerMotor/closedloop/feedback/kP",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "kI",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Tuning/IntakeRoller/IntakeRollerMotor/closedloop/feedback/kI",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "kD",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Tuning/IntakeRoller/IntakeRollerMotor/closedloop/feedback/kD",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "kV",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Tuning/IntakeRoller/IntakeRollerMotor/closedloop/feedforward/kV",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "kA",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Tuning/IntakeRoller/IntakeRollerMotor/closedloop/feedforward/kA",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              }
+            ]
+          },
+          {
+            "title": "Feeder Tuner",
+            "x": 1050.0,
+            "y": 10.0,
+            "width": 260.0,
+            "height": 375.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "LEFT"
+            },
+            "children": [
+              {
+                "title": "Live Tuning",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 260.0,
+                "height": 130.0,
+                "type": "Command",
+                "properties": {
+                  "topic": "/SmartDashboard/Mechanisms/Commands/Feeder/Live Tuning",
+                  "period": 0.06,
+                  "show_type": true,
+                  "maximize_button_space": false
+                }
+              },
+              {
+                "title": "kP",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Tuning/Feeder/FeederMotor/closedloop/feedback/kP",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "kI",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Tuning/Feeder/FeederMotor/closedloop/feedback/kI",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "kD",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Tuning/Feeder/FeederMotor/closedloop/feedback/kD",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "kV",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Tuning/Feeder/FeederMotor/closedloop/feedforward/kV",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "kA",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 130.0,
+                "height": 130.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/Tuning/Feeder/FeederMotor/closedloop/feedforward/kA",
                   "period": 0.06,
                   "data_type": "double",
                   "show_submit_button": false

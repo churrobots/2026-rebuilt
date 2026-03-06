@@ -8,14 +8,17 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.util.SemiAutoHelper;
 
 public class DriveToTower extends Command {
 
   private Drive drive;
   private Command pathCommand;
+  private final SemiAutoHelper semiAutoHelper;
 
-  public DriveToTower(Drive drive) {
+  public DriveToTower(Drive drive, SemiAutoHelper shootingHelper) {
     this.drive = drive;
+    this.semiAutoHelper = shootingHelper;
 
     addRequirements(drive);
   }
@@ -28,14 +31,14 @@ public class DriveToTower extends Command {
         Units.degreesToRadians(540), Units.degreesToRadians(720));
     try {
       PathPlannerPath path;
-      if (drive.isByOutpost()) {
+      if (semiAutoHelper.isByOutpost()) {
         path = PathPlannerPath.fromPathFile("outpost to tower");
       } else {
         path = PathPlannerPath.fromPathFile("depot to tower");
       }
       // TOOD: figure out if we need to flip the path for blue alliance on a real
       // field.
-      if (drive.isByBlueAlliance() && Constants.currentMode == Constants.simMode) {
+      if (semiAutoHelper.isByBlueAlliance() && Constants.currentMode == Constants.simMode) {
         path = path.flipPath();
       }
       pathCommand = AutoBuilder.pathfindThenFollowPath(path, constraints);
