@@ -52,17 +52,17 @@ public class HardwareMonitor {
     for (var talon : talonMap.entrySet()) {
       SmartDashboard.putBoolean("HardwareMonitor/FaultStatus/" + talon.getKey(),
           // TODO: refactor FaultMonitor method into this class for registerHardware idiom
-          !hasAnyDisconnectsOrFaults(talon.getValue()));
+          !_hasAnyDisconnectsOrFaults(talon.getValue()));
     }
     for (var spark : sparkMap.entrySet()) {
       SmartDashboard.putBoolean("HardwareMonitor/FaultStatus/" + spark.getKey(),
           // TODO: refactor FaultMonitor method into this class for registerHardware idiom
-          !hasAnyDisconnectsOrFaults(spark.getValue()));
+          !_hasAnyDisconnectsOrFaults(spark.getValue()));
     }
     for (var pigeon : pigeonMap.entrySet()) {
       SmartDashboard.putBoolean("HardwareMonitor/FaultStatus/" + pigeon.getKey(),
           // TODO: refactor FaultMonitor method into this class for registerHardware idiom
-          !hasAnyDisconnectsOrFaults(pigeon.getValue()));
+          !_hasAnyDisconnectsOrFaults(pigeon.getValue()));
     }
     for (var camera : cameraMap.entrySet()) {
       SmartDashboard.putBoolean("HardwareMonitor/FaultStatus/" + camera.getKey(),
@@ -87,6 +87,9 @@ public class HardwareMonitor {
   }
 
   private static boolean _cameraHasFaults(PhotonCamera camera) {
+    if (camera == null) {
+      return true;
+    }
     boolean hasConnection = camera.isConnected();
     long maxAllowableTimeSinceLastPong = MAX_ALLOWABLE_VISION_UNSEEN_SECONDS * 1000000L;
     List<PhotonPipelineResult> allResults = camera.getAllUnreadResults();
@@ -106,9 +109,9 @@ public class HardwareMonitor {
     return !hasConnection || hasHighLatency || longTimeSinceLastPong;
   }
 
-  private static boolean hasAnyDisconnectsOrFaults(Pigeon2 device) {
-    if (!device.isConnected()) {
-      return false;
+  private static boolean _hasAnyDisconnectsOrFaults(Pigeon2 device) {
+    if (device == null || !device.isConnected()) {
+      return true;
     } else {
       boolean faultHardware = device.getFault_Hardware().getValue() == true;
       boolean faultUndervoltage = device.getFault_Undervoltage().getValue() == true;
@@ -135,19 +138,19 @@ public class HardwareMonitor {
     }
   }
 
-  private static boolean hasAnyDisconnectsOrFaults(SparkBase device) {
+  private static boolean _hasAnyDisconnectsOrFaults(SparkBase device) {
     // TODO: check for supply voltage dropping out? how would we detect the white
     // wires being disconnected?
-    if (device.hasActiveFault() || device.hasActiveWarning()) {
+    if (device == null || device.hasActiveFault() || device.hasActiveWarning()) {
       return true;
     } else {
       return false;
     }
   }
 
-  private static boolean hasAnyDisconnectsOrFaults(TalonFX device) {
-    if (!device.isConnected()) {
-      return false;
+  private static boolean _hasAnyDisconnectsOrFaults(TalonFX device) {
+    if (device == null || !device.isConnected()) {
+      return true;
     } else {
       boolean faultHardware = device.getFault_Hardware().getValue() == true;
       boolean faultProcTemp = device.getFault_ProcTemp().getValue() == true;
