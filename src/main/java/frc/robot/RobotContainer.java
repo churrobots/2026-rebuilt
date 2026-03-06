@@ -12,6 +12,7 @@ import static edu.wpi.first.units.Units.RPM;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -151,6 +152,43 @@ public class RobotContainer {
    * share commands between teleop and auto.
    */
   void bindCommandsForAuto() {
+
+    NamedCommands.registerCommand(
+        "runIntake",
+        intakeArm != null && intakeRoller != null
+            ? intakeArm.setAngle(ControlsConstants.INTAKE_ARM_EXTENDED_ANGLE).alongWith(
+                intakeRoller.setVelocity(ControlsConstants.INTAKE_ROLLER_VELOCITY))
+            : warningNoSubsystem("intake"));
+
+    NamedCommands.registerCommand(
+        "stopIntake",
+        intakeArm != null && intakeRoller != null
+            ? intakeArm.setAngle(ControlsConstants.INTAKE_ARM_DEFAULT_ANGLE).alongWith(
+                intakeRoller.set(ControlsConstants.INTAKE_ROLLER_DEFAULT_DUTY_CYCLE))
+            : warningNoSubsystem("intake"));
+
+    NamedCommands.registerCommand(
+        "autoPrepFlywheels",
+        shooter != null
+            ? shooter.setVelocity(shootingHelper::getShooterVelocityToHitHub)
+            : warningNoSubsystem("shooter"));
+
+    // TODO: do we want to have a feeder.setVelocityBasedOnFlywheelVelocity?
+    NamedCommands.registerCommand(
+        "autoShoot",
+        feeder != null && spindexer != null
+            ? feeder.setVelocity(ControlsConstants.FEEDER_VELOCITY)
+                .alongWith(spindexer.setVelocity(ControlsConstants.SPINDEXER_VELOCITY))
+            : warningNoSubsystem("feeder and spindexer"));
+
+    NamedCommands.registerCommand(
+        "stopAllShooting",
+        shooter != null && feeder != null && spindexer != null
+            ? shooter.set(ControlsConstants.SHOOTER_DEFAULT_DUTY_CYCLE)
+                .alongWith(feeder.set(ControlsConstants.FEEDER_DEFAULT_DUTY_CYCLE))
+                .alongWith(spindexer.set(ControlsConstants.SPINDEXER_DEFAULT_DUTY_CYCLE))
+            : warningNoSubsystem("shooter and feeder and spindexer"));
+
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
