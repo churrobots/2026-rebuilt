@@ -9,7 +9,6 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.RPM;
-import static frc.robot.subsystems.vision.VisionConstants.aprilTagLayout;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -17,6 +16,8 @@ import com.pathplanner.lib.auto.AutoBuilder;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import static frc.robot.subsystems.vision.VisionConstants.*;
@@ -280,5 +281,36 @@ public class RobotContainer {
         hubX.minus(robotX).in(Meters));
     return Rotation2d.fromRadians(targetAngleInRadians);
 
+  }
+
+  private Distance getDistanceToHub() {
+    boolean isRedAlliance = DriverStation.getAlliance().orElseGet(() -> Alliance.Blue) == Alliance.Red;
+    Distance blueHubX = Distance.ofBaseUnits(4.63, Meters);
+    Distance redHubX = Distance.ofBaseUnits(aprilTagLayout.getFieldLength(), Meters).minus(blueHubX);
+    Distance hubY = Distance.ofBaseUnits(4.035, Meters);
+    Distance hubX = isRedAlliance ? redHubX : blueHubX;
+    Pose2d robotPose = drive.getPose();
+    Distance robotX = Distance.ofBaseUnits(robotPose.getX(), Meters);
+    Distance robotY = Distance.ofBaseUnits(robotPose.getY(), Meters);
+    Translation2d robotPos = new Translation2d(robotX, robotY);
+    Translation2d hubPos = new Translation2d(hubX, hubY);
+    double distance = robotPos.getDistance(hubPos);
+    return Meters.of(distance);
+  }
+
+  private double getRpmForDistance(Distance inputDistance) {
+    InterpolatingDoubleTreeMap table = new InterpolatingDoubleTreeMap();
+    // First Value is INCHES btw
+    table.put(215., 4300.);
+    table.put(191., 3900.);
+    table.put(167., 3500.);
+    table.put(143., 3200.);
+    table.put(119., 3000.);
+    table.put(107., 2900.);
+    table.put(95., 2800.);
+    table.put(83., 2750.);
+    table.put(77., 2750.);
+    double inputInInches = inputDistance.in(Inches);
+    return table.get(inputInInches);
   }
 }
