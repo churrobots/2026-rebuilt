@@ -18,8 +18,11 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
+import frc.robot.Hardware;
 import frc.robot.util.DisconnectedMotorController;
 import frc.robot.util.HardwareMonitor;
+import frc.robot.util.YAMSUtil;
 import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;
 import yams.mechanisms.config.FlyWheelConfig;
@@ -51,7 +54,7 @@ public class IntakeRoller extends SubsystemBase {
   private final FlyWheel roller;
 
   /** Creates a new IntakeRoller. */
-  public IntakeRoller(boolean isConnected) {
+  public IntakeRoller() {
 
     SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
         .withControlMode(ControlMode.CLOSED_LOOP)
@@ -73,9 +76,10 @@ public class IntakeRoller extends SubsystemBase {
         .withStatorCurrentLimit(STATOR_CURRENT_LIMIT);
 
     // Vendor motor controller object
-    SparkMax motor = isConnected ? new SparkMax(HardwareConstants.INTAKE_ROLLERS_MOTOR_ID, MotorType.kBrushless) : null;
-    SmartMotorController controller = isConnected ? new SparkWrapper(motor, DCMotor.getNEO(1), motorConfig)
-        : new DisconnectedMotorController(DCMotor.getNEO(1), motorConfig);
+    SparkMax motor = HardwareConstants.HAS_INTAKE_ROLLER
+        ? new SparkMax(HardwareConstants.INTAKE_ROLLERS_MOTOR_ID, MotorType.kBrushless)
+        : null;
+    SmartMotorController controller = YAMSUtil.createSmartMotorController(motor, DCMotor.getNEO(1), motorConfig);
 
     FlyWheelConfig rollerConfig = new FlyWheelConfig(controller)
         // Diameter of the flywheel.

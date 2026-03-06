@@ -73,7 +73,7 @@ public class IntakeArm extends SubsystemBase {
   private final Arm arm;
 
   /** Creates a new IntakeArm. */
-  public IntakeArm(boolean isConnected) {
+  public IntakeArm() {
 
     SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
         .withControlMode(ControlMode.CLOSED_LOOP)
@@ -98,6 +98,7 @@ public class IntakeArm extends SubsystemBase {
         .withOpenLoopRampRate(OPEN_LOOP_RAMP_RATE);
 
     // Optionally connect to the real hardware
+    boolean isConnected = HardwareConstants.HAS_INTAKE_ARM;
     SparkMax motor = isConnected ? new SparkMax(HardwareConstants.INTAKE_ARM_MOTOR_ID, MotorType.kBrushless) : null;
     SmartMotorController controller = isConnected ? new SparkWrapper(motor, DCMotor.getNEO(1), motorConfig)
         : new DisconnectedMotorController(DCMotor.getNEO(1), motorConfig);

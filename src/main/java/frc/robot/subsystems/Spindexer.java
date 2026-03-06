@@ -19,13 +19,10 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Mass;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.DisconnectedMotorController;
 import frc.robot.util.HardwareMonitor;
-import yams.gearing.GearBox;
-import yams.gearing.MechanismGearing;
 import yams.mechanisms.config.FlyWheelConfig;
 import yams.mechanisms.velocity.FlyWheel;
 import yams.motorcontrollers.SmartMotorController;
@@ -55,7 +52,7 @@ public class Spindexer extends SubsystemBase {
   private final FlyWheel spindexer;
 
   /** Creates a new Spindexer. */
-  public Spindexer(boolean isConnected) {
+  public Spindexer() {
 
     SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
         .withControlMode(ControlMode.CLOSED_LOOP)
@@ -76,6 +73,7 @@ public class Spindexer extends SubsystemBase {
         .withStatorCurrentLimit(STATOR_CURRENT_LIMIT);
 
     // Vendor motor controller object
+    boolean isConnected = HardwareConstants.HAS_SPINDEXER;
     SparkMax motor = isConnected ? new SparkMax(HardwareConstants.SPINDEXER_MOTOR_ID, MotorType.kBrushless) : null;
     SmartMotorController controller = isConnected ? new SparkWrapper(motor, DCMotor.getNEO(1), motorConfig)
         : new DisconnectedMotorController(DCMotor.getNEO(1), motorConfig);

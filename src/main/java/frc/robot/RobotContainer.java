@@ -61,10 +61,10 @@ import frc.robot.util.TunableNumber;
 public class RobotContainer {
 
   private final Drive drive;
-  private final ClimberTW climber = null;
-  private final Spindexer spindexer = new Spindexer(true);
-  private final IntakeRoller intakeRoller = new IntakeRoller(false);
-  private final IntakeArm intakeArm = new IntakeArm(false);
+  private final ClimberTW climber = new ClimberTW();
+  private final Spindexer spindexer = new Spindexer();
+  private final IntakeRoller intakeRoller = new IntakeRoller();
+  private final IntakeArm intakeArm = new IntakeArm();
   private final Shooter shooter = new Shooter();
   private final Feeder feeder = new Feeder();
 

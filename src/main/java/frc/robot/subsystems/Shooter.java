@@ -21,9 +21,10 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
+import frc.robot.util.DisconnectedMotorController;
 import frc.robot.util.HardwareMonitor;
 import frc.robot.util.PatchedTalonFXWrapper;
+import frc.robot.util.YAMSUtil;
 import yams.mechanisms.config.FlyWheelConfig;
 import yams.mechanisms.velocity.FlyWheel;
 import yams.motorcontrollers.SmartMotorController;
@@ -48,44 +49,43 @@ public class Shooter extends SubsystemBase {
   private static final double SIM_KI = 0;
   private static final double SIM_KD = 0;
 
-  private SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
-      .withControlMode(ControlMode.CLOSED_LOOP)
-      .withFeedforward(new SimpleMotorFeedforward(0, ControlsConstants.SHOOTER_KV, 0))
-      // Feedback Constants (PID Constants)
-      .withClosedLoopController(ControlsConstants.SHOOTER_KP, ControlsConstants.SHOOTER_KI,
-          ControlsConstants.SHOOTER_KD)
-      .withSimClosedLoopController(SIM_KP, SIM_KI, SIM_KD)
-      // Telemetry name and verbosity level
-      // TODO: disable telemetry in competition mode?
-      .withTelemetry(MOTOR_TELEMETRY, TelemetryVerbosity.HIGH)
-      .withGearing(GEARING)
-      // Motor properties to prevent over currenting.
-      .withMotorInverted(true)
-      .withIdleMode(MotorMode.COAST)
-      .withStatorCurrentLimit(STATOR_CURRENT_LIMIT);
-
-  // Vendor motor controller object
-  private TalonFX motor = new TalonFX(HardwareConstants.SHOOTER_MOTOR_ID);
-
-  // Create our SmartMotorController wrapping the TalonFX.
-  private SmartMotorController controller = new PatchedTalonFXWrapper(motor, DCMotor.getFalcon500(1),
-      motorConfig);
-
-  private FlyWheelConfig shooterConfig = new FlyWheelConfig(controller)
-      // Diameter of the flywheel.
-      .withDiameter(DIAMETER)
-      // Mass of the flywheel.
-      .withMass(MASS)
-      // Maximum speed of the shooter.
-      .withUpperSoftLimit(UPPER_SOFT_LIMIT)
-      // Telemetry name and verbosity for the mechanism.
-      .withTelemetry(MECHANISM_TELEMETRY, TelemetryVerbosity.HIGH);
-
   // Shooter Mechanism
-  private FlyWheel shooter = new FlyWheel(shooterConfig);
+  private final FlyWheel shooter;
 
   /** Creates a new Shooter. */
   public Shooter() {
+
+    SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
+        .withControlMode(ControlMode.CLOSED_LOOP)
+        .withFeedforward(new SimpleMotorFeedforward(0, ControlsConstants.SHOOTER_KV, 0))
+        // Feedback Constants (PID Constants)
+        .withClosedLoopController(ControlsConstants.SHOOTER_KP, ControlsConstants.SHOOTER_KI,
+            ControlsConstants.SHOOTER_KD)
+        .withSimClosedLoopController(SIM_KP, SIM_KI, SIM_KD)
+        // Telemetry name and verbosity level
+        // TODO: disable telemetry in competition mode?
+        .withTelemetry(MOTOR_TELEMETRY, TelemetryVerbosity.HIGH)
+        .withGearing(GEARING)
+        // Motor properties to prevent over currenting.
+        .withMotorInverted(true)
+        .withIdleMode(MotorMode.COAST)
+        .withStatorCurrentLimit(STATOR_CURRENT_LIMIT);
+
+    // Optionally connect to hardware
+    TalonFX motor = HardwareConstants.HAS_SHOOTER ? new TalonFX(HardwareConstants.SHOOTER_MOTOR_ID) : null;
+    SmartMotorController controller = YAMSUtil.createSmartMotorController(motor, DCMotor.getFalcon500(1), motorConfig);
+
+    FlyWheelConfig shooterConfig = new FlyWheelConfig(controller)
+        // Diameter of the flywheel.
+        .withDiameter(DIAMETER)
+        // Mass of the flywheel.
+        .withMass(MASS)
+        // Maximum speed of the shooter.
+        .withUpperSoftLimit(UPPER_SOFT_LIMIT)
+        // Telemetry name and verbosity for the mechanism.
+        .withTelemetry(MECHANISM_TELEMETRY, TelemetryVerbosity.HIGH);
+
+    shooter = new FlyWheel(shooterConfig);
     setDefaultCommand(set(ControlsConstants.SHOOTER_DEFAULT_DUTY_CYCLE));
     HardwareMonitor.registerHardware("shooterMotor", motor);
   }
