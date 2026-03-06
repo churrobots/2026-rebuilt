@@ -64,7 +64,7 @@ public class RobotContainer {
   private final ClimberTW climber = null;
   private final Spindexer spindexer = new Spindexer();
   private final IntakeRoller intakeRoller = null;
-  private final IntakeArm intakeArm = null;
+  private final IntakeArm intakeArm = new IntakeArm(false);
   private final Shooter shooter = new Shooter();
   private final Feeder feeder = new Feeder();
 
