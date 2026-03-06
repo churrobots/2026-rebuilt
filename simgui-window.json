@@ -51,8 +51,8 @@
     },
     "###/SmartDashboard/Elevator/mechanism": {
       "Collapsed": "0",
-      "Pos": "5,341",
-      "Size": "271,247"
+      "Pos": "8,586",
+      "Size": "271,199"
     },
     "###/SmartDashboard/ExponentiallyProfiledArm/mechanism": {
       "Collapsed": "0",
@@ -61,22 +61,22 @@
     },
     "###/SmartDashboard/Feeder/mechanism": {
       "Collapsed": "0",
-      "Pos": "352,681",
+      "Pos": "636,426",
       "Size": "265,200"
     },
     "###/SmartDashboard/Field": {
       "Collapsed": "0",
-      "Pos": "384,23",
-      "Size": "915,465"
+      "Pos": "1157,20",
+      "Size": "192,119"
     },
     "###/SmartDashboard/IntakeArm/mechanism": {
       "Collapsed": "0",
-      "Pos": "295,427",
-      "Size": "283,243"
+      "Pos": "9,143",
+      "Size": "283,247"
     },
     "###/SmartDashboard/IntakeRoller/mechanism": {
       "Collapsed": "0",
-      "Pos": "47,615",
+      "Pos": "5,394",
       "Size": "291,187"
     },
     "###/SmartDashboard/PhotonAlerts": {
@@ -86,7 +86,7 @@
     },
     "###/SmartDashboard/Shooter/mechanism": {
       "Collapsed": "0",
-      "Pos": "639,681",
+      "Pos": "916,429",
       "Size": "270,200"
     },
     "###/SmartDashboard/ShooterMech/mechanism": {
@@ -96,8 +96,8 @@
     },
     "###/SmartDashboard/Spindexer/mechanism": {
       "Collapsed": "0",
-      "Pos": "-8,74",
-      "Size": "281,264"
+      "Pos": "348,428",
+      "Size": "281,259"
     },
     "###/SmartDashboard/VisionSystemSim-main/Sim Field": {
       "Collapsed": "0",
@@ -131,13 +131,13 @@
     },
     "###NetworkTables": {
       "Collapsed": "0",
-      "Pos": "955,50",
+      "Pos": "517,112",
       "Size": "750,566"
     },
     "###NetworkTables Info": {
       "Collapsed": "0",
-      "Pos": "622,332",
-      "Size": "749,335"
+      "Pos": "1169,143",
+      "Size": "158,103"
     },
     "###Other Devices": {
       "Collapsed": "0",
