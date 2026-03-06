@@ -155,39 +155,29 @@ public class RobotContainer {
 
     NamedCommands.registerCommand(
         "runIntake",
-        intakeArm != null && intakeRoller != null
-            ? intakeArm.setAngle(ControlsConstants.INTAKE_ARM_EXTENDED_ANGLE).alongWith(
-                intakeRoller.setVelocity(ControlsConstants.INTAKE_ROLLER_VELOCITY))
-            : warningNoSubsystem("intake"));
+        intakeArm.setAngle(ControlsConstants.INTAKE_ARM_EXTENDED_ANGLE).alongWith(
+            intakeRoller.setVelocity(ControlsConstants.INTAKE_ROLLER_VELOCITY)));
 
     NamedCommands.registerCommand(
         "stopIntake",
-        intakeArm != null && intakeRoller != null
-            ? intakeArm.setAngle(ControlsConstants.INTAKE_ARM_DEFAULT_ANGLE).alongWith(
-                intakeRoller.set(ControlsConstants.INTAKE_ROLLER_DEFAULT_DUTY_CYCLE))
-            : warningNoSubsystem("intake"));
+        intakeArm.setAngle(ControlsConstants.INTAKE_ARM_DEFAULT_ANGLE).alongWith(
+            intakeRoller.set(ControlsConstants.INTAKE_ROLLER_DEFAULT_DUTY_CYCLE)));
 
     NamedCommands.registerCommand(
         "autoPrepFlywheels",
-        shooter != null
-            ? shooter.setVelocity(shootingHelper::getShooterVelocityToHitHub)
-            : warningNoSubsystem("shooter"));
+        shooter.setVelocity(shootingHelper::getShooterVelocityToHitHub));
 
     // TODO: do we want to have a feeder.setVelocityBasedOnFlywheelVelocity?
     NamedCommands.registerCommand(
         "autoShoot",
-        feeder != null && spindexer != null
-            ? feeder.setVelocity(ControlsConstants.FEEDER_VELOCITY)
-                .alongWith(spindexer.setVelocity(ControlsConstants.SPINDEXER_VELOCITY))
-            : warningNoSubsystem("feeder and spindexer"));
+        feeder.setVelocity(ControlsConstants.FEEDER_VELOCITY)
+            .alongWith(spindexer.setVelocity(ControlsConstants.SPINDEXER_VELOCITY)));
 
     NamedCommands.registerCommand(
         "stopAllShooting",
-        shooter != null && feeder != null && spindexer != null
-            ? shooter.set(ControlsConstants.SHOOTER_DEFAULT_DUTY_CYCLE)
-                .alongWith(feeder.set(ControlsConstants.FEEDER_DEFAULT_DUTY_CYCLE))
-                .alongWith(spindexer.set(ControlsConstants.SPINDEXER_DEFAULT_DUTY_CYCLE))
-            : warningNoSubsystem("shooter and feeder and spindexer"));
+        shooter.set(ControlsConstants.SHOOTER_DEFAULT_DUTY_CYCLE)
+            .alongWith(feeder.set(ControlsConstants.FEEDER_DEFAULT_DUTY_CYCLE))
+            .alongWith(spindexer.set(ControlsConstants.SPINDEXER_DEFAULT_DUTY_CYCLE)));
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
@@ -253,20 +243,15 @@ public class RobotContainer {
     Command resetPoseFacingAway = drive.recalibrateDrivetrain();
     Command anchorInPlace = Commands.runOnce(drive::stopWithX, drive);
     Command autoGoToClimb = new DriveToTower(drive).andThen(new InstantCommand(drive::stop, drive));
-    Command climberUp = climber != null ? climber.set(0.5) : warningNoSubsystem("climber");
-    Command climberDown = climber != null ? climber.set(-0.5) : warningNoSubsystem("climber");
-    Command runIntake = intakeArm != null && intakeRoller != null ? Commands.parallel(
+    Command climberUp = climber.set(0.5);
+    Command climberDown = climber.set(-0.5);
+    Command runIntake = Commands.parallel(
         intakeArm.setAngle(ControlsConstants.INTAKE_ARM_EXTENDED_ANGLE),
-        intakeRoller.setVelocity(ControlsConstants.INTAKE_ROLLER_VELOCITY)) : warningNoSubsystem("intake");
-    Command runTunableFlywheel = shooter != null ? shooter.setVelocity(
-        () -> RPM.of(tunableShooterSpeed.getLatest()))
-        : warningNoSubsystem("shooter");
-    Command runTunableFeederAndSpindexer = spindexer != null && feeder != null
-        ? spindexer
-            .setVelocity(() -> RPM.of(tunableSpindexerSpeed.getLatest()))
-            .alongWith(
-                feeder.setVelocity(() -> RPM.of(tunableFeederSpeed.getLatest())))
-        : warningNoSubsystem("spindexer and feeder");
+        intakeRoller.setVelocity(ControlsConstants.INTAKE_ROLLER_VELOCITY));
+    Command runTunableFlywheel = shooter.setVelocity(() -> RPM.of(tunableShooterSpeed.getLatest()));
+    Command runTunableFeederAndSpindexer = Commands.parallel(
+        spindexer.setVelocity(() -> RPM.of(tunableSpindexerSpeed.getLatest())),
+        feeder.setVelocity(() -> RPM.of(tunableFeederSpeed.getLatest())));
 
     drive.setDefaultCommand(driveWithJoysticks);
 
@@ -289,9 +274,4 @@ public class RobotContainer {
     return drive.getPose();
   }
 
-  private Command warningNoSubsystem(String subsystemName) {
-    return new InstantCommand(() -> {
-      System.out.println("WARNING WARNING WARNING - subsystem disconnected - " + subsystemName);
-    });
-  }
 }

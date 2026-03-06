@@ -23,7 +23,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.util.HardwareMonitor;
-import frc.robot.util.PatchedTalonFXWrapper;
+
 import frc.robot.util.YAMSUtil;
 import yams.mechanisms.config.FlyWheelConfig;
 import yams.mechanisms.velocity.FlyWheel;
@@ -67,7 +67,7 @@ public class Feeder extends SubsystemBase {
   private TalonFX motor = new TalonFX(HardwareConstants.FEEDER_MOTOR_ID);
 
   // Create our SmartMotorController wrapping the TalonFX.
-  private SmartMotorController controller = YAMSUtil.createSmartMotorController(motor, DCMotor.getFalcon500(1),
+  private SmartMotorController controller = YAMSUtil.safeGetSmartMotorController(motor, DCMotor.getFalcon500(1),
       motorConfig);
 
   private FlyWheelConfig feederConfig = new FlyWheelConfig(controller)

@@ -18,7 +18,7 @@ public class YAMSUtil {
   private static final int NUM_CONNECTION_RETRIES = 5;
   private static final Time RETRY_DELAY = Milliseconds.of(10);
 
-  public static final SmartMotorController createSmartMotorController(
+  public static final SmartMotorController safeGetSmartMotorController(
       TalonFX controller,
       DCMotor motor,
       SmartMotorControllerConfig smartConfig) {
@@ -33,7 +33,7 @@ public class YAMSUtil {
     }
   }
 
-  public static final SmartMotorController createSmartMotorController(
+  public static final SmartMotorController safeGetSmartMotorController(
       SparkBase controller,
       DCMotor motor,
       SmartMotorControllerConfig smartConfig) {

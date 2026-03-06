@@ -26,7 +26,6 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.Time;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -41,7 +40,6 @@ import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
-import yams.motorcontrollers.local.SparkWrapper;
 
 public class IntakeArm extends SubsystemBase {
   private static final String MOTOR_TELEMETRY = "IntakeArmMotor";
@@ -98,7 +96,7 @@ public class IntakeArm extends SubsystemBase {
   private SparkMax motor = new SparkMax(HardwareConstants.INTAKE_ARM_MOTOR_ID, MotorType.kBrushless);
 
   // Create our SmartMotorController from our Spark and config with the NEO.
-  private SmartMotorController controller = YAMSUtil.createSmartMotorController(motor, DCMotor.getNEO(1), motorConfig);
+  private SmartMotorController controller = YAMSUtil.safeGetSmartMotorController(motor, DCMotor.getNEO(1), motorConfig);
 
   private ArmConfig armConfig = new ArmConfig(controller)
       // Soft limit is applied to the SmartMotorControllers PID

@@ -24,12 +24,10 @@ import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.Time;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.util.HardwareMonitor;
-import frc.robot.util.PatchedTalonFXWrapper;
 import frc.robot.util.YAMSUtil;
 import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;
@@ -109,7 +107,7 @@ public class ClimberTW extends SubsystemBase {
   private TalonFX motor = new TalonFX(HardwareConstants.CLIMBER_MOTOR_ID);
 
   // Create our SmartMotorController wrapping the TalonFX.
-  private SmartMotorController controller = YAMSUtil.createSmartMotorController(motor, DCMotor.getFalcon500(1),
+  private SmartMotorController controller = YAMSUtil.safeGetSmartMotorController(motor, DCMotor.getFalcon500(1),
       motorConfig);
 
   private ElevatorConfig elevatorConfig = new ElevatorConfig(controller)
