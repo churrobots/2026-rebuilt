@@ -9,6 +9,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
+import frc.robot.Constants;
 import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.local.SparkWrapper;
@@ -48,10 +49,9 @@ public class YAMSUtil {
   }
 
   private static boolean _isConnected(TalonFX controller) {
-    if (controller == null) {
-      return false;
+    if (_isSimulatingDevices()) {
+      return true;
     }
-
     for (int i = 0; i < NUM_CONNECTION_RETRIES; i++) {
       if (controller.isConnected()) {
         return true;
@@ -62,10 +62,9 @@ public class YAMSUtil {
   }
 
   private static boolean _isConnected(SparkBase controller) {
-    if (controller == null) {
-      return false;
+    if (_isSimulatingDevices()) {
+      return true;
     }
-
     for (int i = 0; i < NUM_CONNECTION_RETRIES; i++) {
       int version = controller.getFirmwareVersion();
       boolean isConnected = (version != 0);
@@ -77,4 +76,7 @@ public class YAMSUtil {
     return false;
   }
 
+  private static boolean _isSimulatingDevices() {
+    return Constants.simMode == Constants.Mode.SIM;
+  }
 }
