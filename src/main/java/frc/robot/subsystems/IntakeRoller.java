@@ -48,7 +48,7 @@ public class IntakeRoller extends SubsystemBase {
   private static final double SIM_KI = 0;
   private static final double SIM_KD = 0;
 
-  private FlyWheel roller;
+  private final FlyWheel roller;
 
   /** Creates a new IntakeRoller. */
   public IntakeRoller(boolean isConnected) {
@@ -73,19 +73,9 @@ public class IntakeRoller extends SubsystemBase {
         .withStatorCurrentLimit(STATOR_CURRENT_LIMIT);
 
     // Vendor motor controller object
-    SparkMax motor;
-    SmartMotorController controller;
-    if (isConnected) {
-
-      motor = new SparkMax(HardwareConstants.INTAKE_ROLLERS_MOTOR_ID, MotorType.kBrushless);
-
-      // Create our SmartMotorController from our Spark and config with the NEO.
-      controller = new SparkWrapper(motor, DCMotor.getNEO(1),
-          motorConfig);
-    } else {
-      motor = null;
-      controller = new DisconnectedMotorController(DCMotor.getNEO(1), motorConfig);
-    }
+    SparkMax motor = isConnected ? new SparkMax(HardwareConstants.INTAKE_ROLLERS_MOTOR_ID, MotorType.kBrushless) : null;
+    SmartMotorController controller = isConnected ? new SparkWrapper(motor, DCMotor.getNEO(1), motorConfig)
+        : new DisconnectedMotorController(DCMotor.getNEO(1), motorConfig);
 
     FlyWheelConfig rollerConfig = new FlyWheelConfig(controller)
         // Diameter of the flywheel.

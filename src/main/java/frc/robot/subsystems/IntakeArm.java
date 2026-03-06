@@ -70,7 +70,7 @@ public class IntakeArm extends SubsystemBase {
   private static final double SIM_KV = 0;
   private static final double SIM_KA = 0;
 
-  private Arm arm = null;
+  private final Arm arm;
 
   /** Creates a new IntakeArm. */
   public IntakeArm(boolean isConnected) {
@@ -98,15 +98,9 @@ public class IntakeArm extends SubsystemBase {
         .withOpenLoopRampRate(OPEN_LOOP_RAMP_RATE);
 
     // Optionally connect to the real hardware
-    SparkMax motor;
-    SmartMotorController controller;
-    if (isConnected) {
-      motor = new SparkMax(HardwareConstants.INTAKE_ARM_MOTOR_ID, MotorType.kBrushless);
-      controller = new SparkWrapper(motor, DCMotor.getNEO(1), motorConfig);
-    } else {
-      motor = null;
-      controller = new DisconnectedMotorController(DCMotor.getNEO(1), motorConfig);
-    }
+    SparkMax motor = isConnected ? new SparkMax(HardwareConstants.INTAKE_ARM_MOTOR_ID, MotorType.kBrushless) : null;
+    SmartMotorController controller = isConnected ? new SparkWrapper(motor, DCMotor.getNEO(1), motorConfig)
+        : new DisconnectedMotorController(DCMotor.getNEO(1), motorConfig);
 
     ArmConfig armConfig = new ArmConfig(controller)
         // Soft limit is applied to the SmartMotorControllers PID
@@ -120,6 +114,7 @@ public class IntakeArm extends SubsystemBase {
         .withMass(MASS)
         // Telemetry name and verbosity for the arm.
         .withTelemetry(MECHANISM_TELEMETRY, TelemetryVerbosity.HIGH);
+
     arm = new Arm(armConfig);
     setDefaultCommand(setAngle(ControlsConstants.INTAKE_ARM_DEFAULT_ANGLE));
     HardwareMonitor.registerHardware("intakeArmMotor", motor);
