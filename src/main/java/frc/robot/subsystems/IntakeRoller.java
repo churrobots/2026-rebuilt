@@ -16,10 +16,9 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Mass;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
+import frc.robot.util.DisconnectedMotorController;
 import frc.robot.util.HardwareMonitor;
 import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;
@@ -49,47 +48,57 @@ public class IntakeRoller extends SubsystemBase {
   private static final double SIM_KI = 0;
   private static final double SIM_KD = 0;
 
-  private SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
-      .withControlMode(ControlMode.CLOSED_LOOP)
-      // Feedback Constants (PID Constants)
-      .withClosedLoopController(
-          ControlsConstants.INTAKE_ROLLER_KP, ControlsConstants.INTAKE_ROLLER_KI, ControlsConstants.INTAKE_ROLLER_KD)
-      .withSimClosedLoopController(SIM_KP, SIM_KI, SIM_KD)
-      // Telemetry name and verbosity level
-      .withTelemetry(MOTOR_TELEMETRY, TelemetryVerbosity.HIGH)
-      // Gearing from the motor rotor to final shaft.
-      // In this example GearBox.fromReductionStages(3,4) is the same as
-      // GearBox.fromStages("3:1","4:1") which corresponds to the gearbox attached to
-      // your motor.
-      // You could also use .withGearing(12) which does the same thing.
-      .withGearing(new MechanismGearing(GearBox.fromReductionStages(GEAR_STAGE_1, GEAR_STAGE_2)))
-      // Motor properties to prevent over currenting.
-      .withMotorInverted(false)
-      .withIdleMode(MotorMode.COAST)
-      .withStatorCurrentLimit(STATOR_CURRENT_LIMIT);
-
-  // Vendor motor controller object
-  private SparkMax motor = new SparkMax(HardwareConstants.INTAKE_ROLLERS_MOTOR_ID, MotorType.kBrushless);
-
-  // Create our SmartMotorController from our Spark and config with the NEO.
-  private SmartMotorController controller = new SparkWrapper(motor, DCMotor.getNEO(1),
-      motorConfig);
-
-  private final FlyWheelConfig rollerConfig = new FlyWheelConfig(controller)
-      // Diameter of the flywheel.
-      .withDiameter(DIAMETER)
-      // Mass of the flywheel.
-      .withMass(MASS)
-      // Maximum speed of the intake.
-      .withUpperSoftLimit(UPPER_SOFT_LIMIT)
-      // Telemetry name and verbosity for the mechanism.
-      .withTelemetry(MECHANISM_TELEMETRY, TelemetryVerbosity.HIGH);
-
-  // Intake Roller Mechanism
-  private FlyWheel roller = new FlyWheel(rollerConfig);
+  private FlyWheel roller;
 
   /** Creates a new IntakeRoller. */
-  public IntakeRoller() {
+  public IntakeRoller(boolean isConnected) {
+
+    SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
+        .withControlMode(ControlMode.CLOSED_LOOP)
+        // Feedback Constants (PID Constants)
+        .withClosedLoopController(
+            ControlsConstants.INTAKE_ROLLER_KP, ControlsConstants.INTAKE_ROLLER_KI, ControlsConstants.INTAKE_ROLLER_KD)
+        .withSimClosedLoopController(SIM_KP, SIM_KI, SIM_KD)
+        // Telemetry name and verbosity level
+        .withTelemetry(MOTOR_TELEMETRY, TelemetryVerbosity.HIGH)
+        // Gearing from the motor rotor to final shaft.
+        // In this example GearBox.fromReductionStages(3,4) is the same as
+        // GearBox.fromStages("3:1","4:1") which corresponds to the gearbox attached to
+        // your motor.
+        // You could also use .withGearing(12) which does the same thing.
+        .withGearing(new MechanismGearing(GearBox.fromReductionStages(GEAR_STAGE_1, GEAR_STAGE_2)))
+        // Motor properties to prevent over currenting.
+        .withMotorInverted(false)
+        .withIdleMode(MotorMode.COAST)
+        .withStatorCurrentLimit(STATOR_CURRENT_LIMIT);
+
+    // Vendor motor controller object
+    SparkMax motor;
+    SmartMotorController controller;
+    if (isConnected) {
+
+      motor = new SparkMax(HardwareConstants.INTAKE_ROLLERS_MOTOR_ID, MotorType.kBrushless);
+
+      // Create our SmartMotorController from our Spark and config with the NEO.
+      controller = new SparkWrapper(motor, DCMotor.getNEO(1),
+          motorConfig);
+    } else {
+      motor = null;
+      controller = new DisconnectedMotorController(DCMotor.getNEO(1), motorConfig);
+    }
+
+    FlyWheelConfig rollerConfig = new FlyWheelConfig(controller)
+        // Diameter of the flywheel.
+        .withDiameter(DIAMETER)
+        // Mass of the flywheel.
+        .withMass(MASS)
+        // Maximum speed of the intake.
+        .withUpperSoftLimit(UPPER_SOFT_LIMIT)
+        // Telemetry name and verbosity for the mechanism.
+        .withTelemetry(MECHANISM_TELEMETRY, TelemetryVerbosity.HIGH);
+
+    // Intake Roller Mechanism
+    roller = new FlyWheel(rollerConfig);
     setDefaultCommand(set(ControlsConstants.INTAKE_ROLLER_DEFAULT_DUTY_CYCLE));
     HardwareMonitor.registerHardware("intakeRollerMotor", motor);
   }
