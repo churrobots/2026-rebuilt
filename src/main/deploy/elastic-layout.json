@@ -8,8 +8,8 @@
         "layouts": [
           {
             "title": "Cameras",
-            "x": 5.0,
-            "y": 10.0,
+            "x": 270.0,
+            "y": 15.0,
             "width": 260.0,
             "height": 305.0,
             "type": "List Layout",
@@ -89,10 +89,10 @@
           },
           {
             "title": "Mechanisms",
-            "x": 270.0,
-            "y": 10.0,
+            "x": 535.0,
+            "y": 15.0,
             "width": 260.0,
-            "height": 570.0,
+            "height": 410.0,
             "type": "List Layout",
             "properties": {
               "label_position": "TOP"
@@ -153,8 +153,8 @@
           },
           {
             "title": "Drive",
-            "x": 535.0,
-            "y": 15.0,
+            "x": 5.0,
+            "y": 10.0,
             "width": 260.0,
             "height": 560.0,
             "type": "List Layout",
@@ -299,6 +299,18 @@
                 }
               }
             ]
+          },
+          {
+            "title": "(driver station goes here)",
+            "x": 10.0,
+            "y": 575.0,
+            "width": 1490.0,
+            "height": 260.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": []
           }
         ],
         "containers": [
