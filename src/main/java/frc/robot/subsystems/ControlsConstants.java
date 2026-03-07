@@ -21,7 +21,7 @@ import edu.wpi.first.units.measure.LinearVelocity;
 
 public class ControlsConstants {
   // ========== ClimberTW ==========
-  public static final double CLIMBER_KP = 50;
+  public static final double CLIMBER_KP = 1;
   public static final double CLIMBER_KI = 0;
   public static final double CLIMBER_KD = 0;
   public static final LinearVelocity CLIMBER_MAX_VEL = MetersPerSecond.of(0.1);
@@ -65,7 +65,7 @@ public class ControlsConstants {
   public static final double FEEDER_TO_SHOOTER_RPM_RATIO = 3500.0 / 3000.0;
 
   // ========== Spindexer ==========
-  public static final double SPINDEXER_KP = 50;
+  public static final double SPINDEXER_KP = 5;
   public static final double SPINDEXER_KI = 0;
   public static final double SPINDEXER_KD = 0;
   public static final double SPINDEXER_DEFAULT_DUTY_CYCLE = 0;
