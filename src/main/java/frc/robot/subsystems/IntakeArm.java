@@ -129,6 +129,10 @@ public class IntakeArm extends SubsystemBase {
     return arm.setAngle(angle);
   }
 
+  public Command extendIntake() {
+    return arm.setAngle(ControlsConstants.INTAKE_ARM_EXTENDED_ANGLE);
+  }
+
   /**
    * Move the arm up and down.
    *

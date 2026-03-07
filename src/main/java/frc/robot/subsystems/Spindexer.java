@@ -109,6 +109,10 @@ public class Spindexer extends SubsystemBase {
     return spindexer.setSpeed(speed);
   }
 
+  public Command feedToShooter() {
+    return spindexer.setSpeed(ControlsConstants.SPINDEXER_VELOCITY);
+  }
+
   /**
    * Set the spindexer velocity.
    *

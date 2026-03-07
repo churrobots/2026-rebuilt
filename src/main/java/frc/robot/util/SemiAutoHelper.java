@@ -78,19 +78,25 @@ public class SemiAutoHelper {
     return Meters.of(distance);
   }
 
-  public AngularVelocity getShooterVelocityForHubDistance() {
-    Distance distance = getDistanceToHub();
-    double inputInInches = distance.in(Inches);
+  public AngularVelocity getShooterVelocity(Distance distanceToHub) {
+    double inputInInches = distanceToHub.in(Inches);
     double shooterRpm = lookupDistanceInInchesToRPM.get(inputInInches);
     return RPM.of(shooterRpm);
   }
 
-  public AngularVelocity getFeederVelocityForHubDistance() {
-    Distance distance = getDistanceToHub();
-    double inputInInches = distance.in(Inches);
+  public AngularVelocity getFeederVelocity(Distance distanceToHub) {
+    double inputInInches = distanceToHub.in(Inches);
     double shooterRpm = lookupDistanceInInchesToRPM.get(inputInInches);
     double feederRpm = ControlsConstants.FEEDER_TO_SHOOTER_RPM_RATIO * shooterRpm;
     return RPM.of(feederRpm);
+  }
+
+  public AngularVelocity getShooterVelocityForHubDistance() {
+    return getShooterVelocity(getDistanceToHub());
+  }
+
+  public AngularVelocity getFeederVelocityForHubDistance() {
+    return getFeederVelocity(getDistanceToHub());
   }
 
   public boolean isByBlueAlliance() {

@@ -66,7 +66,7 @@
     },
     "###/SmartDashboard/Field": {
       "Collapsed": "0",
-      "Pos": "1157,20",
+      "Pos": "738,20",
       "Size": "192,119"
     },
     "###/SmartDashboard/IntakeArm/mechanism": {
@@ -86,7 +86,7 @@
     },
     "###/SmartDashboard/Shooter/mechanism": {
       "Collapsed": "0",
-      "Pos": "916,429",
+      "Pos": "637,637",
       "Size": "270,200"
     },
     "###/SmartDashboard/ShooterMech/mechanism": {
@@ -116,8 +116,8 @@
     },
     "###Joysticks": {
       "Collapsed": "0",
-      "Pos": "1,197",
-      "Size": "796,189"
+      "Pos": "525,287",
+      "Size": "796,237"
     },
     "###Keyboard 0 Settings": {
       "Collapsed": "0",
@@ -131,12 +131,12 @@
     },
     "###NetworkTables": {
       "Collapsed": "0",
-      "Pos": "517,112",
+      "Pos": "726,70",
       "Size": "750,566"
     },
     "###NetworkTables Info": {
       "Collapsed": "0",
-      "Pos": "1169,143",
+      "Pos": "738,143",
       "Size": "158,103"
     },
     "###Other Devices": {
@@ -146,8 +146,8 @@
     },
     "###Plot <0>": {
       "Collapsed": "0",
-      "Pos": "394,95",
-      "Size": "898,367"
+      "Pos": "916,422",
+      "Size": "457,264"
     },
     "###System Joysticks": {
       "Collapsed": "0",
