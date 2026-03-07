@@ -230,11 +230,14 @@ public class RobotContainer {
         () -> -controller.getLeftY(),
         () -> -controller.getLeftX(),
         () -> -controller.getRightX());
-    Command driveWithAutoAim = DriveCommands.joystickDriveAtAngle(
-        drive,
-        () -> -controller.getLeftY(),
-        () -> -controller.getLeftX(),
-        () -> semiAutoHelper.getAngleToHub());
+
+    Command driveWithAutoAim = Commands.parallel(
+        DriveCommands.joystickDriveAtAngle(
+            drive,
+            () -> -controller.getLeftY(),
+            () -> -controller.getLeftX(),
+            () -> semiAutoHelper.getAngleToHub()),
+        shooter.setVelocity(() -> semiAutoHelper.getShooterVelocityForHubDistance()));
     Command resetGyro = Commands.runOnce(
         () -> drive.setPose(
             new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
