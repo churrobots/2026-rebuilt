@@ -249,8 +249,7 @@
       "Subscribers": {
         "open": true
       }
-    },
-    "visible": true
+    }
   },
   "NetworkTables View": {
     "visible": false
@@ -259,6 +258,11 @@
     "Plot <0>": {
       "plots": [
         {
+          "axis": [
+            {
+              "max": 100.0
+            }
+          ],
           "backgroundColor": [
             0.0,
             0.0,
