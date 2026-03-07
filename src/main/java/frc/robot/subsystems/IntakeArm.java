@@ -70,7 +70,11 @@ public class IntakeArm extends SubsystemBase {
   private static final double SIM_KV = 0;
   private static final double SIM_KA = 0;
 
+  // Vendor motor controller object
+  private SparkMax motor = new SparkMax(HardwareConstants.INTAKE_ARM_MOTOR_ID, MotorType.kBrushless);
+
   private SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
+      .withExternalEncoder(motor.getAbsoluteEncoder())
       .withControlMode(ControlMode.CLOSED_LOOP)
       // Feedback Constants (PID Constants)
       .withClosedLoopController(
@@ -91,9 +95,6 @@ public class IntakeArm extends SubsystemBase {
       .withStatorCurrentLimit(STATOR_CURRENT_LIMIT)
       .withClosedLoopRampRate(CLOSED_LOOP_RAMP_RATE)
       .withOpenLoopRampRate(OPEN_LOOP_RAMP_RATE);
-
-  // Vendor motor controller object
-  private SparkMax motor = new SparkMax(HardwareConstants.INTAKE_ARM_MOTOR_ID, MotorType.kBrushless);
 
   // Create our SmartMotorController from our Spark and config with the NEO.
   private SmartMotorController controller = YAMSUtil.safeGetSmartMotorController(motor, DCMotor.getNEO(1), motorConfig);
@@ -127,6 +128,10 @@ public class IntakeArm extends SubsystemBase {
    */
   public Command setAngle(Angle angle) {
     return arm.setAngle(angle);
+  }
+
+  public Command extendIntake() {
+    return arm.setAngle(ControlsConstants.INTAKE_ARM_EXTENDED_ANGLE);
   }
 
   /**

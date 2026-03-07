@@ -112,6 +112,10 @@ public class IntakeRoller extends SubsystemBase {
     return roller.setSpeed(speed);
   }
 
+  public Command feedToShooter() {
+    return roller.setSpeed(ControlsConstants.INTAKE_ROLLER_VELOCITY);
+  }
+
   /**
    * Set the dutycycle of the intake.
    *

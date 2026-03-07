@@ -194,6 +194,24 @@
       "open": false
     },
     "transitory": {
+      "Mechanisms": {
+        "Shooter": {
+          "ShooterMotor": {
+            "closedloop": {
+              "open": true,
+              "setpoint": {
+                "open": true
+              }
+            },
+            "open": true,
+            "rotor": {
+              "open": true
+            }
+          },
+          "open": true
+        },
+        "open": true
+      },
       "SmartDashboard": {
         "Arm": {
           "open": true
@@ -208,6 +226,9 @@
             },
             "open": true
           }
+        },
+        "Shooter": {
+          "open": true
         },
         "open": true
       },
@@ -228,8 +249,7 @@
       "Subscribers": {
         "open": true
       }
-    },
-    "visible": true
+    }
   },
   "NetworkTables View": {
     "visible": false
@@ -238,14 +258,29 @@
     "Plot <0>": {
       "plots": [
         {
+          "axis": [
+            {
+              "max": 100.0
+            }
+          ],
           "backgroundColor": [
             0.0,
             0.0,
             0.0,
             0.8500000238418579
           ],
-          "height": 305,
+          "height": 202,
+          "legend": false,
           "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/SHOOTER_SPEED"
+            },
             {
               "color": [
                 0.8666667342185974,
@@ -253,7 +288,7 @@
                 0.32156863808631897,
                 1.0
               ],
-              "id": "NT:/SmartDashboard/Arm/ExpectedFF"
+              "id": "NT:/Mechanisms/Shooter/ShooterMotor/rotor/velocity"
             },
             {
               "color": [
@@ -262,13 +297,13 @@
                 0.4078431725502014,
                 1.0
               ],
-              "id": "NT:/SmartDashboard/Arm/MotorVolts"
+              "id": "NT:/Mechanisms/Shooter/ShooterMotor/closedloop/setpoint/velocity"
             }
           ]
         }
       ],
       "window": {
-        "visible": false
+        "name": "Shooter"
       }
     }
   }
