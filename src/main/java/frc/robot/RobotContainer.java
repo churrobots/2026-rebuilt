@@ -7,7 +7,7 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.Feet;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -18,21 +18,19 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
+import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.CalibrationMode;
 import frc.robot.commands.DriveCommands;
-import frc.robot.subsystems.ClimberTW;
 import frc.robot.subsystems.ControlsConstants;
 import frc.robot.subsystems.Feeder;
 import frc.robot.subsystems.IntakeArm;
 import frc.robot.subsystems.IntakeRoller;
 import frc.robot.subsystems.Shooter;
-import frc.robot.subsystems.commands.DriveToTower;
 import frc.robot.subsystems.Spindexer;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
@@ -46,7 +44,6 @@ import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.util.SemiAutoHelper;
-import frc.robot.util.TunableNumber;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -61,7 +58,6 @@ import frc.robot.util.TunableNumber;
 public class RobotContainer {
 
   private final Drive drive;
-  private final ClimberTW climber = new ClimberTW();
   private final Spindexer spindexer = new Spindexer();
   private final IntakeRoller intakeRoller = new IntakeRoller();
   private final IntakeArm intakeArm = new IntakeArm();
@@ -217,14 +213,23 @@ public class RobotContainer {
    */
   void bindCommandsForTeleop() {
 
-    TunableNumber tunableShooterSpeed = new TunableNumber("SHOOTER_SPEED",
-        ControlsConstants.SHOOTER_VELOCITY.in(RPM));
-    TunableNumber tunableFeederSpeed = new TunableNumber("FEEDER_SPEED",
-        ControlsConstants.FEEDER_VELOCITY.in(RPM));
-    TunableNumber tunableSpindexerSpeed = new TunableNumber("SPINDEXER_SPEED",
-        ControlsConstants.SPINDEXER_VELOCITY.in(RPM));
+    // TODO: reenable tunables if we want to try speeds again
+    // TunableNumber tunableShooterSpeed = new TunableNumber("SHOOTER_SPEED",
+    // ControlsConstants.SHOOTER_VELOCITY.in(RPM));
+    // TunableNumber tunableFeederSpeed = new TunableNumber("FEEDER_SPEED",
+    // ControlsConstants.FEEDER_VELOCITY.in(RPM));
+    // TunableNumber tunableSpindexerSpeed = new TunableNumber("SPINDEXER_SPEED",
+    // ControlsConstants.SPINDEXER_VELOCITY.in(RPM));
 
-    // Driving controls.
+    // TODO: what is resetGyro useful for?
+    // Command resetGyro = Commands.runOnce(
+    // () -> drive.setPose(new Pose2d(drive.getPose().getTranslation(),
+    // Rotation2d.kZero)), drive)
+    // .ignoringDisable(true);
+    // TODO: bring back autoclimb
+    // Command autoGoToClimb = new DriveToTower(drive, semiAutoHelper).andThen(new
+    // InstantCommand(drive::stop, drive));
+
     Command driveWithJoysticks = DriveCommands.joystickDrive(
         drive,
         () -> -controller.getLeftY(),
@@ -232,36 +237,56 @@ public class RobotContainer {
         () -> -controller.getRightX());
 
     Command driveWithAutoAim = Commands.parallel(
+        shooter.setVelocity(() -> semiAutoHelper.getShooterVelocityForHubDistance()),
         DriveCommands.joystickDriveAtAngle(
             drive,
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
-            () -> semiAutoHelper.getAngleToHub()),
-        shooter.setVelocity(() -> semiAutoHelper.getShooterVelocityForHubDistance()));
-    Command resetGyro = Commands.runOnce(
-        () -> drive.setPose(
-            new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
-        drive)
-        .ignoringDisable(true);
+            () -> semiAutoHelper.getAngleToHub()));
+
+    Command driveWithLeftTrenchManualAim = Commands.parallel(
+        shooter.setVelocity(() -> semiAutoHelper.getShooterVelocity(Feet.of(11.5))),
+        DriveCommands.joystickDriveAtAngle(
+            drive,
+            () -> -controller.getLeftY(),
+            () -> -controller.getLeftX(),
+            () -> Rotation2d.fromDegrees(90)));
+
+    Command driveWithRightTrenchManualAim = Commands.parallel(
+        shooter.setVelocity(() -> semiAutoHelper.getShooterVelocity(Feet.of(11.5))),
+        DriveCommands.joystickDriveAtAngle(
+            drive,
+            () -> -controller.getLeftY(),
+            () -> -controller.getLeftX(),
+            () -> Rotation2d.fromDegrees(-90)));
+
+    Command driveWithTowerManualAim = Commands.parallel(
+        shooter.setVelocity(() -> semiAutoHelper.getShooterVelocity(Feet.of(11.5))),
+        DriveCommands.joystickDriveAtAngle(
+            drive,
+            () -> -controller.getLeftY(),
+            () -> -controller.getLeftX(),
+            () -> Rotation2d.fromDegrees(180)));
+
     Command resetPoseFacingAway = drive.recalibrateDrivetrain();
-    Command anchorInPlace = Commands.runOnce(drive::stopWithX, drive);
-    Command autoGoToClimb = new DriveToTower(drive, semiAutoHelper).andThen(new InstantCommand(drive::stop, drive));
-    Command climberUp = climber.set(0.5);
-    Command climberDown = climber.set(-0.5);
-    Command runIntake = Commands.parallel(
-        intakeArm.setAngle(ControlsConstants.INTAKE_ARM_EXTENDED_ANGLE),
-        intakeRoller.setVelocity(ControlsConstants.INTAKE_ROLLER_VELOCITY));
-    Command runTunableFlywheel = shooter.setVelocity(() -> RPM.of(tunableShooterSpeed.getLatest()));
-    Command runTunableFeederAndSpindexer = Commands.parallel(
-        spindexer.setVelocity(() -> RPM.of(tunableSpindexerSpeed.getLatest())),
-        feeder.setVelocity(() -> RPM.of(tunableFeederSpeed.getLatest())));
+    Command xLock = Commands.runOnce(drive::stopWithX, drive);
+    Command intake = Commands.parallel(
+        intakeArm.extendIntake(),
+        intakeRoller.feedToShooter());
+    Command shoot = Commands.parallel(
+        feeder.setVelocity(semiAutoHelper::getFeederVelocityForHubDistance),
+        spindexer.feedToShooter());
 
     drive.setDefaultCommand(driveWithJoysticks);
 
-    controller.a().whileTrue(driveWithAutoAim);
     controller.back().whileTrue(resetPoseFacingAway);
-    controller.leftBumper().whileTrue(runTunableFlywheel);
-    controller.rightBumper().whileTrue(runTunableFeederAndSpindexer);
+    controller.leftBumper().whileTrue(xLock);
+    controller.rightTrigger(0.75).whileTrue(shoot);
+    controller.leftTrigger(0.75).whileTrue(intake);
+    controller.x().whileTrue(driveWithLeftTrenchManualAim);
+    controller.y().whileTrue(driveWithTowerManualAim);
+    controller.b().whileTrue(driveWithRightTrenchManualAim);
+    controller.a().whileTrue(driveWithAutoAim);
   }
 
   /**
