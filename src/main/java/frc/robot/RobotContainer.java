@@ -8,6 +8,7 @@
 package frc.robot;
 
 import static edu.wpi.first.units.Units.Feet;
+import static edu.wpi.first.units.Units.RPM;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -46,6 +47,7 @@ import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.util.SemiAutoHelper;
+import frc.robot.util.TunableNumber;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -65,6 +67,16 @@ public class RobotContainer {
   private final IntakeArm intakeArm = new IntakeArm();
   private final Shooter shooter = new Shooter();
   private final Feeder feeder = new Feeder();
+
+  // Tunable speeds.
+  TunableNumber tunableShooterRpm = new TunableNumber("SHOOTER_SPEED",
+      ControlsConstants.SHOOTER_VELOCITY.in(RPM));
+  TunableNumber tunableFeederRpm = new TunableNumber("FEEDER_SPEED",
+      ControlsConstants.FEEDER_VELOCITY.in(RPM));
+  TunableNumber tunableSpindexerRpm = new TunableNumber("SPINDEXER_SPEED",
+      ControlsConstants.SPINDEXER_VELOCITY.in(RPM));
+  TunableNumber tunableIntakeRpm = new TunableNumber("INTAKE_SPEED",
+      ControlsConstants.INTAKE_ROLLER_VELOCITY.in(RPM));
 
   // Helpers for automatic aiming and shooting
   private final SemiAutoHelper semiAutoHelper;
@@ -197,14 +209,6 @@ public class RobotContainer {
    */
   void bindCommandsForTeleop() {
 
-    // TODO: reenable tunables if we want to try speeds again
-    // TunableNumber tunableShooterSpeed = new TunableNumber("SHOOTER_SPEED",
-    // ControlsConstants.SHOOTER_VELOCITY.in(RPM));
-    // TunableNumber tunableFeederSpeed = new TunableNumber("FEEDER_SPEED",
-    // ControlsConstants.FEEDER_VELOCITY.in(RPM));
-    // TunableNumber tunableSpindexerSpeed = new TunableNumber("SPINDEXER_SPEED",
-    // ControlsConstants.SPINDEXER_VELOCITY.in(RPM));
-
     // TODO: what is resetGyro useful for?
     // Command resetGyro = Commands.runOnce(
     // () -> drive.setPose(new Pose2d(drive.getPose().getTranslation(),
@@ -224,6 +228,7 @@ public class RobotContainer {
     controller.y().whileTrue(driveWithTowerManualAim());
     controller.b().whileTrue(driveWithRightTrenchManualAim());
     controller.a().whileTrue(driveWithAutoAim());
+    controller.rightBumper().whileTrue(tuneIntake());
   }
 
   /**
@@ -315,6 +320,10 @@ public class RobotContainer {
 
   public Command xLock() {
     return Commands.runOnce(drive::stopWithX, drive);
+  }
+
+  public Command tuneIntake() {
+    return intakeRoller.setVelocity(() -> RPM.of(tunableIntakeRpm.getLatest()));
   }
 
   // ========================================================================

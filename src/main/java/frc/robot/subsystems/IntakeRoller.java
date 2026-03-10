@@ -8,7 +8,11 @@ import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.RPM;
+
+import java.util.function.Supplier;
+
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.spark.SparkMax;
 
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -68,7 +72,7 @@ public class IntakeRoller extends SubsystemBase {
       .withStatorCurrentLimit(STATOR_CURRENT_LIMIT);
 
   // Vendor motor controller object
-  private SparkMax motor = new SparkMax(HardwareConstants.INTAKE_ROLLERS_MOTOR_ID, MotorType.kBrushless);
+  private TalonFX motor = new TalonFX(HardwareConstants.INTAKE_ROLLERS_MOTOR_ID);
 
   // Create our SmartMotorController from our Spark and config with the NEO.
   private SmartMotorController controller = YAMSUtil.safeGetSmartMotorController(motor, DCMotor.getNEO(1),
@@ -110,6 +114,10 @@ public class IntakeRoller extends SubsystemBase {
    */
   public Command setVelocity(AngularVelocity speed) {
     return roller.setSpeed(speed);
+  }
+
+  public Command setVelocity(Supplier<AngularVelocity> speedSupplier) {
+    return roller.setSpeed(speedSupplier);
   }
 
   public Command feedToShooter() {
