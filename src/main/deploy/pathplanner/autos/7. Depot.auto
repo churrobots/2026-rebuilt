@@ -7,13 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "outpost trench to neutral to depot bump"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "depot to tower"
+            "pathName": "7. trench to depot"
           }
         }
       ]

@@ -3,66 +3,70 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.854744990291433,
-        "y": 1.7996777343734687
+        "x": 1.537178561970339,
+        "y": 1.9409186308262711
       },
       "prevControl": null,
       "nextControl": {
-        "x": 8.098898339326743,
-        "y": 1.263294754785176
+        "x": 1.318162886284522,
+        "y": 1.820369330521852
       },
       "isLocked": false,
-      "linkedName": "neutral out post"
+      "linkedName": "3. outpost score"
     },
     {
       "anchor": {
-        "x": 6.989110413230654,
-        "y": 0.5417973399580966
+        "x": 2.744112757422073,
+        "y": 0.7083138266233562
       },
       "prevControl": {
-        "x": 7.236033668209411,
-        "y": 0.580898569487303
+        "x": 0.8348262920647931,
+        "y": 0.7684398389937402
       },
       "nextControl": {
-        "x": 6.7421871582518955,
-        "y": 0.5026961104288901
+        "x": 3.6337513741240506,
+        "y": 0.6802979036890339
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 2.416621961805556,
-        "y": 0.6471936965434464
+        "x": 6.0211413028085765,
+        "y": 0.7083138266233562
       },
       "prevControl": {
-        "x": 2.833511284722223,
-        "y": 0.6250237991898155
+        "x": 5.589286616825834,
+        "y": 0.5740859834195691
       },
       "nextControl": {
-        "x": 2.166974718993982,
-        "y": 0.6604697711356852
+        "x": 6.452995988791319,
+        "y": 0.8425416698271433
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 1.8809066651144626,
-        "y": 1.50931484671823
+        "x": 6.2660631289724575,
+        "y": 4.050241823358051
       },
       "prevControl": {
-        "x": 1.6870588005407314,
-        "y": 1.7182663527808686
+        "x": 6.084177370233051,
+        "y": 2.5023499845515533
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "out post"
+      "linkedName": "4. neutral to trench"
     }
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.5,
+      "waypointRelativePos": 0.92,
+      "rotationDegrees": 0.0
+    },
+    {
+      "waypointRelativePos": 1.9464026162790682,
       "rotationDegrees": 0.0
     }
   ],
@@ -79,13 +83,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -6.785882320757608
+    "rotation": 96.46070825585957
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 90.94584993043073
+    "rotation": 26.366644114957694
   },
   "useDefaultConstraints": true
 }

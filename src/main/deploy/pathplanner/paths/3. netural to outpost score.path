@@ -3,48 +3,57 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.357245817884887,
-        "y": 2.437318204890537
+        "x": 7.624654803240741,
+        "y": 3.484527633101852
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.109744900982626,
-        "y": 2.4020578002907604
+        "x": 7.770648834745764,
+        "y": 1.429035299699858
       },
       "isLocked": false,
-      "linkedName": "outpost  climb 1"
+      "linkedName": "3. neutral"
     },
     {
       "anchor": {
-        "x": 0.9700511507500118,
-        "y": 1.8121757389747097
+        "x": 6.2364988303319215,
+        "y": 0.744072596663135
       },
       "prevControl": {
-        "x": 0.9700511507500118,
-        "y": 1.4979246295318245
+        "x": 7.14994372351695,
+        "y": 0.7017825851871464
       },
       "nextControl": {
-        "x": 0.9700511507500118,
-        "y": 2.0621757389747097
+        "x": 5.473659061395531,
+        "y": 0.7793900009459191
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 1.1262922461123341,
-        "y": 2.8209025363960016
+        "x": 1.537178561970339,
+        "y": 1.9409186308262711
       },
       "prevControl": {
-        "x": 1.1262922461123341,
-        "y": 2.4133365215074805
+        "x": 0.5338311043432207,
+        "y": 0.4346877758651122
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "3. outpost score"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.7790367336152219,
+      "rotationDegrees": 0.0
+    },
+    {
+      "waypointRelativePos": 1.5520613107822414,
+      "rotationDegrees": 0.0
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [],
@@ -58,13 +67,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -90.0
+    "rotation": 26.366644114957694
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -179.87997594064296
+    "rotation": 88.69963669536627
   },
   "useDefaultConstraints": true
 }

@@ -3,53 +3,48 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.99903425141243,
-        "y": 3.506132922846046
+        "x": 6.2660631289724575,
+        "y": 4.050241823358051
       },
       "prevControl": null,
       "nextControl": {
-        "x": 8.14032353460452,
-        "y": 3.025797746733758
+        "x": 6.199676520568503,
+        "y": 3.066878089689266
       },
       "isLocked": false,
-      "linkedName": "3"
+      "linkedName": "4. neutral to trench"
     },
     {
       "anchor": {
-        "x": 6.180176664018362,
-        "y": 0.7218146958862997
+        "x": 6.165176774364408,
+        "y": 0.8980392059498581
       },
       "prevControl": {
-        "x": 6.4053828375773945,
-        "y": 0.8303604438034757
+        "x": 6.352754914080946,
+        "y": 1.549653985788608
       },
       "nextControl": {
-        "x": 5.712451514044435,
-        "y": 0.496378707959062
+        "x": 6.0958385747704815,
+        "y": 0.6571700101518354
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 0.8512965108580508,
-        "y": 0.7218146958862997
+        "x": 3.447922570180085,
+        "y": 0.6697021760240114
       },
       "prevControl": {
-        "x": -0.1487034891419492,
-        "y": 0.7218146958862997
+        "x": 4.639300902630647,
+        "y": 0.6121219544491521
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "yuh"
+      "linkedName": null
     }
   ],
-  "rotationTargets": [
-    {
-      "waypointRelativePos": 0.5,
-      "rotationDegrees": 0.0
-    }
-  ],
+  "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [],
@@ -63,13 +58,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -0.772934774877027
+    "rotation": 73.3606743770398
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -82.63637689091559
+    "rotation": 96.46070825585957
   },
   "useDefaultConstraints": true
 }
