@@ -50,9 +50,9 @@ public class HardwareMonitor {
   }
 
   public static void dumpHardwareStatusToNetworkTables(boolean includeMemoryMonitoring) {
-    // Only run every 5th tick to reduce load
+    // Only run every 10th tick to reduce load
     tickCounter++;
-    tickCounter = tickCounter % 5;
+    tickCounter = tickCounter % 10;
     if (tickCounter != 0) {
       return;
     }
