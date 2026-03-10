@@ -51,13 +51,14 @@ public class Spindexer extends SubsystemBase {
   private SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.CLOSED_LOOP)
       // Feedback Constants (PID Constants)
-      .withClosedLoopController(ControlsConstants.SPINDEXER_KP, ControlsConstants.SPINDEXER_KI,
+      .withClosedLoopController(
+          ControlsConstants.SPINDEXER_KP,
+          ControlsConstants.SPINDEXER_KI,
           ControlsConstants.SPINDEXER_KD)
       .withSimClosedLoopController(SIM_KP, SIM_KI, SIM_KD)
-      // TODO: figure out why SparkBase doesn't like feedforward values?
       // Feedforward Constants
-      // .withFeedforward(new SimpleMotorFeedforward(0, 9.17, 0))
-      // .withSimFeedforward(new SimpleMotorFeedforward(0, 9.17, 0))
+      .withFeedforward(new SimpleMotorFeedforward(0, ControlsConstants.SPINDEXER_KV, 0))
+      .withSimFeedforward(new SimpleMotorFeedforward(0, ControlsConstants.SPINDEXER_KV, 0))
       // Telemetry name and verbosity level
       .withTelemetry(MOTOR_TELEMETRY, TelemetryVerbosity.HIGH)
       .withGearing(GEARING)
