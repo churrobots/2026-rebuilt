@@ -286,7 +286,7 @@ public class RobotContainer {
             drive,
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
-            () -> Rotation2d.fromDegrees(90)));
+            () -> Rotation2d.fromDegrees(isRedAlliance() ? 90 : -90)));
   }
 
   public Command driveWithRightTrenchManualAim() {
@@ -296,7 +296,7 @@ public class RobotContainer {
             drive,
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
-            () -> Rotation2d.fromDegrees(-90)));
+            () -> Rotation2d.fromDegrees(isRedAlliance() ? -90 : 90)));
   }
 
   public Command driveWithTowerManualAim() {
@@ -306,7 +306,7 @@ public class RobotContainer {
             drive,
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
-            () -> Rotation2d.fromDegrees(180)));
+            () -> Rotation2d.fromDegrees(isRedAlliance() ? 180 : 0)));
   }
 
   public Command resetPoseFacingAway() {
