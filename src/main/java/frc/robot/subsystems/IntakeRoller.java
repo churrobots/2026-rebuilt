@@ -25,8 +25,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.util.HardwareMonitor;
 import frc.robot.util.YAMSUtil;
-import yams.gearing.GearBox;
-import yams.gearing.MechanismGearing;
 import yams.mechanisms.config.FlyWheelConfig;
 import yams.mechanisms.velocity.FlyWheel;
 import yams.motorcontrollers.SmartMotorController;
@@ -40,8 +38,6 @@ public class IntakeRoller extends SubsystemBase {
   private static final String MECHANISM_TELEMETRY = "IntakeRoller";
 
   // Stable physical constants
-  private static final int GEAR_STAGE_1 = 3;
-  private static final int GEAR_STAGE_2 = 4;
   private static final Current STATOR_CURRENT_LIMIT = Amps.of(40);
   private static final Distance DIAMETER = Inches.of(2);
   private static final Mass MASS = Pounds.of(0.25);
@@ -60,12 +56,6 @@ public class IntakeRoller extends SubsystemBase {
       .withSimClosedLoopController(SIM_KP, SIM_KI, SIM_KD)
       // Telemetry name and verbosity level
       .withTelemetry(MOTOR_TELEMETRY, TelemetryVerbosity.HIGH)
-      // Gearing from the motor rotor to final shaft.
-      // In this example GearBox.fromReductionStages(3,4) is the same as
-      // GearBox.fromStages("3:1","4:1") which corresponds to the gearbox attached to
-      // your motor.
-      // You could also use .withGearing(12) which does the same thing.
-      .withGearing(new MechanismGearing(GearBox.fromReductionStages(GEAR_STAGE_1, GEAR_STAGE_2)))
       // Motor properties to prevent over currenting.
       .withMotorInverted(false)
       .withIdleMode(MotorMode.COAST)
