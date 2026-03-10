@@ -60,6 +60,8 @@ public class Robot extends LoggedRobot {
         // Running on a real robot, log to a USB stick ("/U/logs")
         // TODO: we disabled logs since we aren't using them and it appears it was
         // overloading the rio
+        // TODO: somehow /home/lvuser/logs still gets new logfiles (ssh
+        // admin@roboRIO-8048-frc.local)
         // Logger.addDataReceiver(new WPILOGWriter());
         Logger.addDataReceiver(new NT4Publisher());
         break;
