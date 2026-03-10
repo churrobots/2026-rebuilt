@@ -34,13 +34,13 @@ public class VisionConstants {
 
   // Yaw only works right when it is inverted?
   public static Transform3d robotToCameraFrontRight = new Transform3d(
-      Units.inchesToMeters(12), Units.inchesToMeters(-12), Units.inchesToMeters(10),
+      Units.inchesToMeters(12.7839), Units.inchesToMeters(-12.4421), Units.inchesToMeters(10),
       new Rotation3d(Math.PI, -Math.PI / 6, -Math.PI / 6));
   public static Transform3d robotToCameraBackRight = new Transform3d(
       Units.inchesToMeters(-12), Units.inchesToMeters(-12.), Units.inchesToMeters(10),
       new Rotation3d(Math.PI, 0, -Math.PI / 2));
   public static Transform3d robotToCameraFrontLeft = new Transform3d(
-      Units.inchesToMeters(12), Units.inchesToMeters(12), Units.inchesToMeters(10),
+      Units.inchesToMeters(12.7839), Units.inchesToMeters(12.4421), Units.inchesToMeters(10),
       new Rotation3d(Math.PI, -Math.PI / 6, Math.PI / 6));
   public static Transform3d robotToCameraBackLeft = new Transform3d(
       Units.inchesToMeters(-12), Units.inchesToMeters(12), Units.inchesToMeters(10),
