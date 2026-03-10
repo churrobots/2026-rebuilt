@@ -68,7 +68,11 @@ public class DriveConstants {
   // This is how to tune all the values here
   // https://docs.advantagekit.org/getting-started/template-projects/spark-swerve-template/#tuning
   public static final int driveMotorCurrentLimit = 40;
-  public static final double wheelRadiusMeters = Units.inchesToMeters(1.470);
+  public static final double wheelRadiusMeters = switch (Constants.robotName) {
+    case Constants.ROBOT_ALPHA -> Units.inchesToMeters(1.470);
+    case Constants.ROBOT_COMP -> Units.inchesToMeters(1.483);
+    default -> Units.inchesToMeters(1.483);
+  };
   // MAXSwerve with 16 pinion teeth and 20 spur teeth
   // We think the 15 teeth is the bevel drive shaft, and the 45 is the wheel bevel
   // NOTE: this must CHANGE if you change our gear kit. Today we use Extra High 4
@@ -88,10 +92,14 @@ public class DriveConstants {
   public static final double driveKd = 0.0;
   public static final double driveKs = switch (Constants.robotName) {
     case Constants.ROBOT_ALPHA -> 0.14945;
-    case Constants.ROBOT_COMP -> 0.14945;
-    default -> 0.14945;
+    case Constants.ROBOT_COMP -> 0.17170;
+    default -> 0.17170;
   };
-  public static final double driveKv = 0.06761;
+  public static final double driveKv = switch (Constants.robotName) {
+    case Constants.ROBOT_ALPHA -> 0.06761;
+    case Constants.ROBOT_COMP -> 0.06455;
+    default -> 0.06455;
+  };
   public static final double driveSimP = 0.05;
   public static final double driveSimD = 0.0;
   public static final double driveSimKs = 0.0;
@@ -117,7 +125,11 @@ public class DriveConstants {
   public static final double turnPIDMaxInput = 2 * Math.PI; // Radians
 
   // PathPlanner configuration
-  public static final double robotMassKg = 22.6796;
+  public static final double robotMassKg = switch (Constants.robotName) {
+    case Constants.ROBOT_ALPHA -> 22.6796;
+    case Constants.ROBOT_COMP -> 36;
+    default -> 36;
+  };
   public static final double robotMOI = 2;
   public static final double wheelCOF = 1.2;
   public static final RobotConfig ppConfig = new RobotConfig(
