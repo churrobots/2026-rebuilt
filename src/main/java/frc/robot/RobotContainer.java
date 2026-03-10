@@ -228,7 +228,9 @@ public class RobotContainer {
     controller.y().whileTrue(driveWithTowerManualAim());
     controller.b().whileTrue(driveWithRightTrenchManualAim());
     controller.a().whileTrue(driveWithAutoAim());
-    controller.rightBumper().whileTrue(tuneIntake());
+
+    // This is how you can run using our TunableNumbers
+    // controller.rightBumper().whileTrue(runIntakeWithTunableSpeed());
   }
 
   /**
@@ -322,7 +324,7 @@ public class RobotContainer {
     return Commands.runOnce(drive::stopWithX, drive);
   }
 
-  public Command tuneIntake() {
+  public Command runIntakeWithTunableSpeed() {
     return intakeRoller.setVelocity(() -> RPM.of(tunableIntakeRpm.getLatest()));
   }
 
