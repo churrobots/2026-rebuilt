@@ -50,11 +50,11 @@ public class ControlsConstants {
   public static final Angle INTAKE_ARM_DEFAULT_ANGLE = Degrees.of(90);
 
   // ========== IntakeRoller ==========
-  public static final double INTAKE_ROLLER_KP = 0.7;
+  public static final double INTAKE_ROLLER_KP = 2.1;
   public static final double INTAKE_ROLLER_KI = 0;
   public static final double INTAKE_ROLLER_KD = 0;
   public static final double INTAKE_ROLLER_DEFAULT_DUTY_CYCLE = 0;
-  public static final double INTAKE_ROLLER_KV = 0.128;
+  public static final double INTAKE_ROLLER_KV = 0.118;
 
   // ========== Shooter ==========
   public static final double SHOOTER_KP = 0.3;

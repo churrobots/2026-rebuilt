@@ -51,7 +51,7 @@ public class IntakeRoller extends SubsystemBase {
 
   private SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
       .withControlMode(ControlMode.CLOSED_LOOP)
-      .withFeedforward(new SimpleMotorFeedforward(0, ControlsConstants.FEEDER_KV))
+      .withFeedforward(new SimpleMotorFeedforward(0, ControlsConstants.INTAKE_ROLLER_KV))
       // Feedback Constants (PID Constants)
       .withClosedLoopController(
           ControlsConstants.INTAKE_ROLLER_KP, ControlsConstants.INTAKE_ROLLER_KI, ControlsConstants.INTAKE_ROLLER_KD)
