@@ -31,6 +31,7 @@ public class HardwareMonitor {
   private static final int MAX_VISION_RESULTS_TO_SAMPLE = 3;
   private static final long MAX_ALLOWABLE_VISION_LATENCY_MILLISECONDS = 60;
   private static final long MAX_ALLOWABLE_VISION_UNSEEN_SECONDS = 5;
+  private static int tickCounter = 0;
 
   public static void registerHardware(String hardwareName, Object device) {
     if (device == null) {
@@ -49,6 +50,12 @@ public class HardwareMonitor {
   }
 
   public static void dumpHardwareStatusToNetworkTables(boolean includeMemoryMonitoring) {
+    // Only run every 5th tick to reduce load
+    tickCounter++;
+    tickCounter = tickCounter % 5;
+    if (tickCounter != 0) {
+      return;
+    }
     if (includeMemoryMonitoring) {
       long allocatedMemoryInBytes = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory());
       long presumableFreeMemoryInBytes = Runtime.getRuntime().maxMemory() - allocatedMemoryInBytes;
