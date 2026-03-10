@@ -18,6 +18,8 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -131,6 +133,7 @@ public class RobotContainer {
             new ModuleIO() {
             });
 
+        // TODO: if we try replay we will probably have to update this
         // (Use same number of dummy implementations as the real robot)
         new Vision(drive::addVisionMeasurement, new VisionIO() {
         }, new VisionIO() {
@@ -149,31 +152,12 @@ public class RobotContainer {
    */
   void bindCommandsForAuto() {
 
-    NamedCommands.registerCommand(
-        "runIntake",
-        intakeArm.setAngle(ControlsConstants.INTAKE_ARM_EXTENDED_ANGLE).alongWith(
-            intakeRoller.setVelocity(ControlsConstants.INTAKE_ROLLER_VELOCITY)));
-
-    NamedCommands.registerCommand(
-        "stopIntake",
-        intakeArm.setAngle(ControlsConstants.INTAKE_ARM_DEFAULT_ANGLE).alongWith(
-            intakeRoller.set(ControlsConstants.INTAKE_ROLLER_DEFAULT_DUTY_CYCLE)));
-
-    NamedCommands.registerCommand(
-        "autoPrepFlywheels",
-        shooter.setVelocity(semiAutoHelper::getShooterVelocityForHubDistance));
-
-    // TODO: do we want to have a feeder.setVelocityBasedOnFlywheelVelocity?
-    NamedCommands.registerCommand(
-        "autoShoot",
-        feeder.setVelocity(ControlsConstants.FEEDER_VELOCITY)
-            .alongWith(spindexer.setVelocity(ControlsConstants.SPINDEXER_VELOCITY)));
-
-    NamedCommands.registerCommand(
-        "stopAllShooting",
-        shooter.set(ControlsConstants.SHOOTER_DEFAULT_DUTY_CYCLE)
-            .alongWith(feeder.set(ControlsConstants.FEEDER_DEFAULT_DUTY_CYCLE))
-            .alongWith(spindexer.set(ControlsConstants.SPINDEXER_DEFAULT_DUTY_CYCLE)));
+    // Register all our auto commands.
+    NamedCommands.registerCommand("runIntake", runIntake());
+    NamedCommands.registerCommand("stopIntake", stopIntake());
+    NamedCommands.registerCommand("autoPrepFlywheels", autoPrepFlywheels());
+    NamedCommands.registerCommand("autoShoot", autoShoot());
+    NamedCommands.registerCommand("stopAllShooting", stopAllShooting());
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
@@ -230,63 +214,16 @@ public class RobotContainer {
     // Command autoGoToClimb = new DriveToTower(drive, semiAutoHelper).andThen(new
     // InstantCommand(drive::stop, drive));
 
-    Command driveWithJoysticks = DriveCommands.joystickDrive(
-        drive,
-        () -> -controller.getLeftY(),
-        () -> -controller.getLeftX(),
-        () -> -controller.getRightX());
+    drive.setDefaultCommand(driveWithJoysticks());
 
-    Command driveWithAutoAim = Commands.parallel(
-        shooter.setVelocity(() -> semiAutoHelper.getShooterVelocityForHubDistance()),
-        DriveCommands.joystickDriveAtAngle(
-            drive,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> semiAutoHelper.getAngleToHub()));
-
-    Command driveWithLeftTrenchManualAim = Commands.parallel(
-        shooter.setVelocity(() -> semiAutoHelper.getShooterVelocity(Feet.of(11.5))),
-        DriveCommands.joystickDriveAtAngle(
-            drive,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> Rotation2d.fromDegrees(90)));
-
-    Command driveWithRightTrenchManualAim = Commands.parallel(
-        shooter.setVelocity(() -> semiAutoHelper.getShooterVelocity(Feet.of(11.5))),
-        DriveCommands.joystickDriveAtAngle(
-            drive,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> Rotation2d.fromDegrees(-90)));
-
-    Command driveWithTowerManualAim = Commands.parallel(
-        shooter.setVelocity(() -> semiAutoHelper.getShooterVelocity(Feet.of(11.5))),
-        DriveCommands.joystickDriveAtAngle(
-            drive,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> Rotation2d.fromDegrees(180)));
-
-    Command resetPoseFacingAway = drive.recalibrateDrivetrain();
-    Command xLock = Commands.runOnce(drive::stopWithX, drive);
-    Command intake = Commands.parallel(
-        intakeArm.extendIntake(),
-        intakeRoller.feedToShooter());
-    Command shoot = Commands.parallel(
-        feeder.setVelocity(semiAutoHelper::getFeederVelocityForHubDistance),
-        spindexer.feedToShooter());
-
-    drive.setDefaultCommand(driveWithJoysticks);
-
-    controller.back().whileTrue(resetPoseFacingAway);
-    controller.leftBumper().whileTrue(xLock);
-    controller.rightTrigger(0.75).whileTrue(shoot);
-    controller.leftTrigger(0.75).whileTrue(intake);
-    controller.x().whileTrue(driveWithLeftTrenchManualAim);
-    controller.y().whileTrue(driveWithTowerManualAim);
-    controller.b().whileTrue(driveWithRightTrenchManualAim);
-    controller.a().whileTrue(driveWithAutoAim);
+    controller.back().whileTrue(resetPoseFacingAway());
+    controller.leftBumper().whileTrue(xLock());
+    controller.rightTrigger(DriveTeamConstants.XBOX_TRIGGER_SENSITIVITY).whileTrue(autoShoot());
+    controller.leftTrigger(DriveTeamConstants.XBOX_TRIGGER_SENSITIVITY).whileTrue(runIntake());
+    controller.x().whileTrue(driveWithLeftTrenchManualAim());
+    controller.y().whileTrue(driveWithTowerManualAim());
+    controller.b().whileTrue(driveWithRightTrenchManualAim());
+    controller.a().whileTrue(driveWithAutoAim());
   }
 
   /**
@@ -300,6 +237,104 @@ public class RobotContainer {
 
   public Pose2d getPose() {
     return drive.getPose();
+  }
+
+  public boolean isRedAlliance() {
+    return DriverStation.getAlliance().orElseGet(() -> Alliance.Blue) == Alliance.Red;
+  }
+
+  // ========================================================================
+  // COMMANDS FOR AUTO
+  // ========================================================================
+
+  public Command autoPrepFlywheels() {
+    return shooter.setVelocity(semiAutoHelper::getShooterVelocityForHubDistance);
+  }
+
+  public Command stopAllShooting() {
+    return shooter.set(ControlsConstants.SHOOTER_DEFAULT_DUTY_CYCLE)
+        .alongWith(feeder.set(ControlsConstants.FEEDER_DEFAULT_DUTY_CYCLE))
+        .alongWith(spindexer.set(ControlsConstants.SPINDEXER_DEFAULT_DUTY_CYCLE));
+  }
+
+  // ========================================================================
+  // COMMANDS FOR TELEOP
+  // ========================================================================
+
+  public Command driveWithJoysticks() {
+    return DriveCommands.joystickDrive(
+        drive,
+        () -> -controller.getLeftY(),
+        () -> -controller.getLeftX(),
+        () -> -controller.getRightX());
+  }
+
+  public Command driveWithAutoAim() {
+    return Commands.parallel(
+        shooter.setVelocity(() -> semiAutoHelper.getShooterVelocityForHubDistance()),
+        DriveCommands.joystickDriveAtAngle(
+            drive,
+            () -> -controller.getLeftY(),
+            () -> -controller.getLeftX(),
+            () -> semiAutoHelper.getAngleToHub()));
+  }
+
+  public Command driveWithLeftTrenchManualAim() {
+    return Commands.parallel(
+        shooter.setVelocity(() -> semiAutoHelper.getShooterVelocity(Feet.of(11.5))),
+        DriveCommands.joystickDriveAtAngle(
+            drive,
+            () -> -controller.getLeftY(),
+            () -> -controller.getLeftX(),
+            () -> Rotation2d.fromDegrees(90)));
+  }
+
+  public Command driveWithRightTrenchManualAim() {
+    return Commands.parallel(
+        shooter.setVelocity(() -> semiAutoHelper.getShooterVelocity(Feet.of(11.5))),
+        DriveCommands.joystickDriveAtAngle(
+            drive,
+            () -> -controller.getLeftY(),
+            () -> -controller.getLeftX(),
+            () -> Rotation2d.fromDegrees(-90)));
+  }
+
+  public Command driveWithTowerManualAim() {
+    return Commands.parallel(
+        shooter.setVelocity(() -> semiAutoHelper.getShooterVelocity(Feet.of(11.5))),
+        DriveCommands.joystickDriveAtAngle(
+            drive,
+            () -> -controller.getLeftY(),
+            () -> -controller.getLeftX(),
+            () -> Rotation2d.fromDegrees(180)));
+  }
+
+  public Command resetPoseFacingAway() {
+    return drive.recalibrateDrivetrain();
+  }
+
+  public Command xLock() {
+    return Commands.runOnce(drive::stopWithX, drive);
+  }
+
+  // ========================================================================
+  // COMMANDS FOR TELEOP *AND* AUTO
+  // ========================================================================
+
+  public Command runIntake() {
+    return Commands.parallel(
+        intakeArm.extendIntake(),
+        intakeRoller.feedToShooter());
+  }
+
+  public Command stopIntake() {
+    return intakeArm.retractIntake().alongWith(
+        intakeRoller.stopFeeding());
+  }
+
+  public Command autoShoot() {
+    return feeder.setVelocity(semiAutoHelper::getFeederVelocityForHubDistance)
+        .alongWith(spindexer.feedToShooter());
   }
 
 }

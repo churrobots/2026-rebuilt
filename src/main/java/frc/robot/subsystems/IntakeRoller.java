@@ -89,7 +89,7 @@ public class IntakeRoller extends SubsystemBase {
 
   /** Creates a new IntakeRoller. */
   public IntakeRoller() {
-    setDefaultCommand(set(ControlsConstants.INTAKE_ROLLER_DEFAULT_DUTY_CYCLE));
+    setDefaultCommand(stopFeeding());
     HardwareMonitor.registerHardware("intakeRollerMotor", motor);
   }
 
@@ -114,6 +114,10 @@ public class IntakeRoller extends SubsystemBase {
 
   public Command feedToShooter() {
     return roller.setSpeed(ControlsConstants.INTAKE_ROLLER_VELOCITY);
+  }
+
+  public Command stopFeeding() {
+    return set(ControlsConstants.INTAKE_ROLLER_DEFAULT_DUTY_CYCLE);
   }
 
   /**

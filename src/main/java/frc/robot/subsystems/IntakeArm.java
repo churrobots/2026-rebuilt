@@ -117,7 +117,7 @@ public class IntakeArm extends SubsystemBase {
 
   /** Creates a new IntakeArm. */
   public IntakeArm() {
-    setDefaultCommand(setAngle(ControlsConstants.INTAKE_ARM_DEFAULT_ANGLE));
+    setDefaultCommand(retractIntake());
     HardwareMonitor.registerHardware("intakeArmMotor", motor);
   }
 
@@ -132,6 +132,10 @@ public class IntakeArm extends SubsystemBase {
 
   public Command extendIntake() {
     return arm.setAngle(ControlsConstants.INTAKE_ARM_EXTENDED_ANGLE);
+  }
+
+  public Command retractIntake() {
+    return arm.setAngle(ControlsConstants.INTAKE_ARM_DEFAULT_ANGLE);
   }
 
   /**
