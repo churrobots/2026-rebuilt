@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.subsystems.HardwareConstants;
 import frc.robot.util.HardwareMonitor;
 
 import org.littletonrobotics.junction.LogFileUtil;
@@ -63,7 +64,9 @@ public class Robot extends LoggedRobot {
         // TODO: somehow /home/lvuser/logs still gets new logfiles (ssh
         // admin@roboRIO-8048-frc.local)
         // Logger.addDataReceiver(new WPILOGWriter());
-        Logger.addDataReceiver(new NT4Publisher());
+        if (!HardwareConstants.REDUCE_ROBORIO_RESOURCE_USAGE) {
+          Logger.addDataReceiver(new NT4Publisher());
+        }
         break;
 
       case SIM:

@@ -23,7 +23,9 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 public class ControlsConstants {
 
   // TODO: reduce this for competition
-  public static final TelemetryVerbosity YAMS_VERBOSITY = TelemetryVerbosity.HIGH;
+  public static final TelemetryVerbosity YAMS_VERBOSITY = HardwareConstants.REDUCE_ROBORIO_RESOURCE_USAGE
+      ? TelemetryVerbosity.LOW
+      : TelemetryVerbosity.HIGH;
 
   // ========== ClimberTW ==========
   public static final double CLIMBER_KP = 1;
