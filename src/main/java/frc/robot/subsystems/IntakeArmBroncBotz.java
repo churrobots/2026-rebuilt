@@ -11,6 +11,8 @@ import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.HardwareMonitor;
 import frc.robot.util.YAMSUtil;
@@ -21,7 +23,6 @@ import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 
 public class IntakeArmBroncBotz extends SubsystemBase {
 
@@ -33,10 +34,10 @@ public class IntakeArmBroncBotz extends SubsystemBase {
       .withSimClosedLoopController(10, 0, 0)
       .withFeedforward(new ArmFeedforward(0.15, 0, 50, 0))
       .withSimFeedforward(new ArmFeedforward(0.25, 0, 0.25))
-      .withTelemetry("IntakeArmMotor", TelemetryVerbosity.HIGH)
+      .withTelemetry("IntakeArmMotor", ControlsConstants.YAMS_VERBOSITY)
       .withGearing(25 * (80 / 24))
       .withMotorInverted(false)
-      .withIdleMode(MotorMode.COAST)
+      .withIdleMode(MotorMode.BRAKE)
       .withStatorCurrentLimit(Amps.of(40))
       .withStartingPosition(Degrees.zero())
       .withSoftLimit(Degrees.of(0), Degrees.of(65))
@@ -56,7 +57,7 @@ public class IntakeArmBroncBotz extends SubsystemBase {
       .withLength(Feet.of(1))
       .withMass(Pounds.of(5))
       // Telemetry name and verbosity for the arm.
-      .withTelemetry("IntakeArm", TelemetryVerbosity.HIGH);
+      .withTelemetry("IntakeArm", ControlsConstants.YAMS_VERBOSITY);
 
   // Arm Mechanism
   private Arm arm = new Arm(armMechanismConfig);
@@ -67,15 +68,26 @@ public class IntakeArmBroncBotz extends SubsystemBase {
   public IntakeArmBroncBotz() {
     setDefaultCommand(retractIntake());
     HardwareMonitor.registerHardware("intakeArmMotor", armMotor);
+  }
 
+  public Command allowCoast() {
+    return new InstantCommand(() -> armMotorController.setIdleMode(MotorMode.COAST));
+  }
+
+  public Command enforceBrake() {
+    return new InstantCommand(() -> armMotorController.setIdleMode(MotorMode.BRAKE));
   }
 
   public Command extendIntake() {
-    return arm.setAngle(Degrees.of(0));
+    return Commands.parallel(
+        allowCoast(),
+        arm.setAngle(Degrees.of(0)));
   }
 
   public Command retractIntake() {
-    return arm.setAngle(Degrees.of(70));
+    return Commands.parallel(
+        enforceBrake(),
+        arm.setAngle(Degrees.of(-15)));
   }
 
   public Command setAngle(Angle angle) {

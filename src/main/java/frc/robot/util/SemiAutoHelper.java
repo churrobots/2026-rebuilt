@@ -21,6 +21,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.ControlsConstants;
 
 /** Add your docs here. */
@@ -28,6 +29,8 @@ public class SemiAutoHelper {
 
   public static AprilTagFieldLayout aprilTagLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
   private Supplier<Pose2d> robotPoseSupplier;
+
+  private TunableNumber tunableShooterAddedRpm = new TunableNumber("SHOOTER_BOOST", 0);
 
   // Use this to automatically select an RPM for a given distance
   InterpolatingDoubleTreeMap lookupDistanceInInchesToRPM = new InterpolatingDoubleTreeMap();
@@ -77,12 +80,14 @@ public class SemiAutoHelper {
     Translation2d robotPos = new Translation2d(robotX, robotY);
     Translation2d hubPos = new Translation2d(hubX, hubY);
     double distance = robotPos.getDistance(hubPos);
+    SmartDashboard.putNumber("getDistance", Meters.of(distance).in(Inches));
     return Meters.of(distance);
   }
 
   public AngularVelocity getShooterVelocity(Distance distanceToHub) {
     double inputInInches = distanceToHub.in(Inches);
-    double shooterRpm = lookupDistanceInInchesToRPM.get(inputInInches);
+    double shooterRpm = lookupDistanceInInchesToRPM.get(inputInInches) + tunableShooterAddedRpm.getLatest();
+    SmartDashboard.putNumber("getVelocity", shooterRpm);
     return RPM.of(shooterRpm);
   }
 
@@ -109,10 +114,14 @@ public class SemiAutoHelper {
     return false;
   }
 
+  public boolean isRedAlliance() {
+    return DriverStation.getAlliance().orElseGet(() -> Alliance.Blue) == Alliance.Red;
+  }
+
   public boolean isByOutpost() {
     Pose2d currentPose = robotPoseSupplier.get();
-    if ((isByBlueAlliance() && currentPose.getTranslation().getY() < Units.inchesToMeters(158.32))
-        || (!isByBlueAlliance() && currentPose.getTranslation().getY() > Units.inchesToMeters(158.32))) {
+    if ((!isRedAlliance() && currentPose.getTranslation().getY() < Units.inchesToMeters(158.32))
+        || (isRedAlliance() && currentPose.getTranslation().getY() > Units.inchesToMeters(158.32))) {
       return true;
     }
     return false;

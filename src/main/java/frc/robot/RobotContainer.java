@@ -7,6 +7,7 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Feet;
 import static edu.wpi.first.units.Units.RPM;
 
@@ -17,6 +18,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import edu.wpi.first.wpilibj.DriverStation;
@@ -32,6 +34,7 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.ControlsConstants;
 import frc.robot.subsystems.Feeder;
 import frc.robot.subsystems.IntakeArm;
+import frc.robot.subsystems.IntakeArmBroncBotz;
 import frc.robot.subsystems.IntakeRoller;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Spindexer;
@@ -64,7 +67,8 @@ public class RobotContainer {
   private final Drive drive;
   private final Spindexer spindexer = new Spindexer();
   private final IntakeRoller intakeRoller = new IntakeRoller();
-  private final IntakeArm intakeArm = new IntakeArm();
+  // private final IntakeArm intakeArm = new IntakeArm();
+  // private final IntakeArmBroncBotz intakeArm = new IntakeArmBroncBotz();
   private final Shooter shooter = new Shooter();
   private final Feeder feeder = new Feeder();
 
@@ -231,6 +235,10 @@ public class RobotContainer {
 
     // This is how you can run using our TunableNumbers
     // controller.rightBumper().whileTrue(runIntakeWithTunableSpeed());
+    // controller.povLeft().whileTrue(runIntakeWithTunableSpeed());
+    // controller.povUp().whileTrue(runSpindexerWithTunableSpeed());
+    // controller.povLeft().whileTrue(intakeArm.setAngle(Degrees.of(0)));
+    // controller.povRight().whileTrue(intakeArm.setAngle(Degrees.of(15)));
   }
 
   /**
@@ -328,24 +336,32 @@ public class RobotContainer {
     return intakeRoller.setVelocity(() -> RPM.of(tunableIntakeRpm.getLatest()));
   }
 
+    return spindexer.setVelocity(() -> RPM.of(tunableSpindexerRpm.getLatest()));
+  }
+
   // ========================================================================
   // COMMANDS FOR TELEOP *AND* AUTO
   // ========================================================================
 
   public Command runIntake() {
     return Commands.parallel(
-        intakeArm.extendIntake(),
+        // TODO: fix this, SAFETY first right now
+        // intakeArm.extendIntake(),
         intakeRoller.feedToShooter());
   }
 
   public Command stopIntake() {
-    return intakeArm.retractIntake().alongWith(
+    return Commands.parallel(
+        // TODO: fix this, SAFETY first right now
+        // intakeArm.retractIntake(),
         intakeRoller.stopFeeding());
   }
 
   public Command autoShoot() {
     return feeder.setVelocity(semiAutoHelper::getFeederVelocityForHubDistance)
-        .alongWith(spindexer.feedToShooter());
+    return Commands.parallel(
+        feeder.setVelocity(semiAutoHelper::getFeederVelocityForHubDistance),
+        spindexer.feedToShooter());
   }
 
 }

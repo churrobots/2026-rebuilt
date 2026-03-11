@@ -38,7 +38,7 @@ public class DriveToTower extends Command {
       }
       // TOOD: figure out if we need to flip the path for blue alliance on a real
       // field.
-      if (semiAutoHelper.isByBlueAlliance() && Constants.currentMode == Constants.simMode) {
+      if (!semiAutoHelper.isRedAlliance() && Constants.currentMode == Constants.simMode) {
         path = path.flipPath();
       }
       pathCommand = AutoBuilder.pathfindThenFollowPath(path, constraints);

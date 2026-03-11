@@ -20,6 +20,10 @@ import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
 
 public class ControlsConstants {
+
+  // TODO: reduce this for competition
+  public static final TelemetryVerbosity YAMS_VERBOSITY = TelemetryVerbosity.HIGH;
+
   // ========== ClimberTW ==========
   public static final double CLIMBER_KP = 1;
   public static final double CLIMBER_KI = 0;

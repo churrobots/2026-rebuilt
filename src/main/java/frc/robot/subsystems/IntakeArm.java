@@ -60,14 +60,14 @@ public class IntakeArm extends SubsystemBase {
   private static final Mass MASS = Pounds.of(5);
 
   // Sim constants
-  private static final double SIM_KP = 4;
+  private static final double SIM_KP = 0.7;
   private static final double SIM_KI = 0;
-  private static final double SIM_KD = 0.2;
+  private static final double SIM_KD = 0;
   private static final AngularVelocity SIM_MAX_VEL = DegreesPerSecond.of(180);
   private static final AngularAcceleration SIM_MAX_ACCEL = DegreesPerSecondPerSecond.of(90);
   private static final double SIM_KS = 0;
   private static final double SIM_KG = 1.302;
-  private static final double SIM_KV = 0;
+  private static final double SIM_KV = 0.01;
   private static final double SIM_KA = 0;
 
   // Vendor motor controller object
@@ -75,6 +75,8 @@ public class IntakeArm extends SubsystemBase {
 
   private SmartMotorControllerConfig motorConfig = new SmartMotorControllerConfig(this)
       .withExternalEncoder(motor.getAbsoluteEncoder())
+      // .withExternalEncoderZeroOffset(Degrees.zero())
+      .withUseExternalFeedbackEncoder(true)
       .withControlMode(ControlMode.CLOSED_LOOP)
       // Feedback Constants (PID Constants)
       .withClosedLoopController(
@@ -85,10 +87,12 @@ public class IntakeArm extends SubsystemBase {
           SIM_MAX_VEL, SIM_MAX_ACCEL)
       // Feedforward Constants
       .withFeedforward(new ArmFeedforward(
-          ControlsConstants.INTAKE_ARM_KS, ControlsConstants.INTAKE_ARM_KG, ControlsConstants.INTAKE_ARM_KV))
+          ControlsConstants.INTAKE_ARM_KS,
+          ControlsConstants.INTAKE_ARM_KG,
+          ControlsConstants.INTAKE_ARM_KV))
       .withSimFeedforward(new ArmFeedforward(SIM_KS, SIM_KG, SIM_KV, SIM_KA))
       // Telemetry name and verbosity level
-      .withTelemetry(MOTOR_TELEMETRY, TelemetryVerbosity.HIGH)
+      .withTelemetry(MOTOR_TELEMETRY, ControlsConstants.YAMS_VERBOSITY)
       .withGearing(new MechanismGearing(GearBox.fromReductionStages(GEAR_STAGE_1, GEAR_STAGE_2)))
       .withMotorInverted(false)
       .withIdleMode(MotorMode.BRAKE)
@@ -110,7 +114,7 @@ public class IntakeArm extends SubsystemBase {
       .withLength(LENGTH)
       .withMass(MASS)
       // Telemetry name and verbosity for the arm.
-      .withTelemetry(MECHANISM_TELEMETRY, TelemetryVerbosity.HIGH);
+      .withTelemetry(MECHANISM_TELEMETRY, ControlsConstants.YAMS_VERBOSITY);
 
   // Arm Mechanism
   private Arm arm = new Arm(armConfig);
