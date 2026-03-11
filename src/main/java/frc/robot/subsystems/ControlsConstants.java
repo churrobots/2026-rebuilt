@@ -65,11 +65,11 @@ public class ControlsConstants {
   public static final double FEEDER_TO_SHOOTER_RPM_RATIO = 3500.0 / 3000.0;
 
   // ========== Spindexer ==========
-  public static final double SPINDEXER_KP = 5;
+  public static final double SPINDEXER_KP = 0.3;
   public static final double SPINDEXER_KI = 0;
   public static final double SPINDEXER_KD = 0;
   public static final double SPINDEXER_DEFAULT_DUTY_CYCLE = 0;
-  public static final double SPINDEXER_KV = 0;
+  public static final double SPINDEXER_KV = 0.9;
 
   // ========== Controller Binding Constants ==========
   public static final AngularVelocity SPINDEXER_VELOCITY = RPM.of(800);

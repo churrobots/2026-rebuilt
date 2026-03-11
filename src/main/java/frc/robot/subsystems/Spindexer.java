@@ -38,7 +38,7 @@ public class Spindexer extends SubsystemBase {
   private static final String MECHANISM_TELEMETRY = "Spindexer";
 
   // Stable physical constants
-  private static final double GEARING = 36.0;
+  private static final double GEARING = 20;
   private static final Current STATOR_CURRENT_LIMIT = Amps.of(40);
   private static final Distance DIAMETER = Inches.of(17.5);
   private static final Mass MASS = Pounds.of(1);
