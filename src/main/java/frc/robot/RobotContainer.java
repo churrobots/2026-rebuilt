@@ -234,7 +234,6 @@ public class RobotContainer {
     controller.a().whileTrue(driveWithAutoAim());
 
     // This is how you can run using our TunableNumbers
-    // controller.rightBumper().whileTrue(runIntakeWithTunableSpeed());
     // controller.povLeft().whileTrue(runIntakeWithTunableSpeed());
     // controller.povUp().whileTrue(runSpindexerWithTunableSpeed());
     // controller.povLeft().whileTrue(intakeArm.setAngle(Degrees.of(0)));
@@ -336,6 +335,7 @@ public class RobotContainer {
     return intakeRoller.setVelocity(() -> RPM.of(tunableIntakeRpm.getLatest()));
   }
 
+  public Command runSpindexerWithTunableSpeed() {
     return spindexer.setVelocity(() -> RPM.of(tunableSpindexerRpm.getLatest()));
   }
 
@@ -358,7 +358,6 @@ public class RobotContainer {
   }
 
   public Command autoShoot() {
-    return feeder.setVelocity(semiAutoHelper::getFeederVelocityForHubDistance)
     return Commands.parallel(
         feeder.setVelocity(semiAutoHelper::getFeederVelocityForHubDistance),
         spindexer.feedToShooter());
