@@ -61,7 +61,7 @@ public class Spindexer extends SubsystemBase {
       .withFeedforward(new SimpleMotorFeedforward(0, ControlsConstants.SPINDEXER_KV, 0))
       .withSimFeedforward(new SimpleMotorFeedforward(0, ControlsConstants.SPINDEXER_KV, 0))
       // Telemetry name and verbosity level
-      .withTelemetry(MOTOR_TELEMETRY, TelemetryVerbosity.HIGH)
+      .withTelemetry(MOTOR_TELEMETRY, ControlsConstants.YAMS_VERBOSITY)
       .withGearing(GEARING)
       // Motor properties to prevent over currenting.
       .withMotorInverted(true)
@@ -81,7 +81,7 @@ public class Spindexer extends SubsystemBase {
       // Maximum speed of the spindexer.
       .withUpperSoftLimit(UPPER_SOFT_LIMIT)
       // Telemetry name and verbosity for the mechanism.
-      .withTelemetry(MECHANISM_TELEMETRY, TelemetryVerbosity.HIGH);
+      .withTelemetry(MECHANISM_TELEMETRY, ControlsConstants.YAMS_VERBOSITY);
 
   // Spindexer Mechanism
   private FlyWheel spindexer = new FlyWheel(spindexerConfig);

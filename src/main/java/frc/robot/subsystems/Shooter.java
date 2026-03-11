@@ -57,7 +57,7 @@ public class Shooter extends SubsystemBase {
       .withSimClosedLoopController(SIM_KP, SIM_KI, SIM_KD)
       // Telemetry name and verbosity level
       // TODO: disable telemetry in competition mode?
-      .withTelemetry(MOTOR_TELEMETRY, TelemetryVerbosity.HIGH)
+      .withTelemetry(MOTOR_TELEMETRY, ControlsConstants.YAMS_VERBOSITY)
       .withGearing(GEARING)
       // Motor properties to prevent over currenting.
       .withMotorInverted(true)
@@ -79,7 +79,7 @@ public class Shooter extends SubsystemBase {
       // Maximum speed of the shooter.
       .withUpperSoftLimit(UPPER_SOFT_LIMIT)
       // Telemetry name and verbosity for the mechanism.
-      .withTelemetry(MECHANISM_TELEMETRY, TelemetryVerbosity.HIGH);
+      .withTelemetry(MECHANISM_TELEMETRY, ControlsConstants.YAMS_VERBOSITY);
 
   // Shooter Mechanism
   private FlyWheel shooter = new FlyWheel(shooterConfig);

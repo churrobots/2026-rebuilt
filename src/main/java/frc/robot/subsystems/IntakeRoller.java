@@ -57,7 +57,7 @@ public class IntakeRoller extends SubsystemBase {
           ControlsConstants.INTAKE_ROLLER_KP, ControlsConstants.INTAKE_ROLLER_KI, ControlsConstants.INTAKE_ROLLER_KD)
       .withSimClosedLoopController(SIM_KP, SIM_KI, SIM_KD)
       // Telemetry name and verbosity level
-      .withTelemetry(MOTOR_TELEMETRY, TelemetryVerbosity.HIGH)
+      .withTelemetry(MOTOR_TELEMETRY, ControlsConstants.YAMS_VERBOSITY)
       // Motor properties to prevent over currenting.
       .withMotorInverted(false)
       .withIdleMode(MotorMode.COAST)
@@ -79,7 +79,7 @@ public class IntakeRoller extends SubsystemBase {
       // Maximum speed of the intake.
       .withUpperSoftLimit(UPPER_SOFT_LIMIT)
       // Telemetry name and verbosity for the mechanism.
-      .withTelemetry(MECHANISM_TELEMETRY, TelemetryVerbosity.HIGH);
+      .withTelemetry(MECHANISM_TELEMETRY, ControlsConstants.YAMS_VERBOSITY);
 
   // Intake Roller Mechanism
   private FlyWheel roller = new FlyWheel(rollerConfig);

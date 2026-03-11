@@ -81,7 +81,7 @@ public class ClimberTW extends SubsystemBase {
           ControlsConstants.CLIMBER_KS, ControlsConstants.CLIMBER_KG, ControlsConstants.CLIMBER_KV))
       .withSimFeedforward(new ElevatorFeedforward(SIM_KS, SIM_KG, SIM_KV))
       // Telemetry name and verbosity level
-      .withTelemetry(MOTOR_TELEMETRY, TelemetryVerbosity.HIGH)
+      .withTelemetry(MOTOR_TELEMETRY, ControlsConstants.YAMS_VERBOSITY)
       // Gearing from the motor rotor to final shaft.
       // In this example GearBox.fromReductionStages(3,4) is the same as
       // GearBox.fromStages("3:1","4:1") which corresponds to the gearbox attached to
@@ -113,7 +113,7 @@ public class ClimberTW extends SubsystemBase {
   private ElevatorConfig elevatorConfig = new ElevatorConfig(controller)
       .withStartingHeight(STARTING_HEIGHT)
       .withHardLimits(HARD_LIMIT_LOW, HARD_LIMIT_HIGH)
-      .withTelemetry(MECHANISM_TELEMETRY, TelemetryVerbosity.HIGH)
+      .withTelemetry(MECHANISM_TELEMETRY, ControlsConstants.YAMS_VERBOSITY)
       .withMass(MASS);
 
   // Elevator Mechanism

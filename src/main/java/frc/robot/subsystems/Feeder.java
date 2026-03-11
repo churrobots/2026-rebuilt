@@ -56,7 +56,7 @@ public class Feeder extends SubsystemBase {
       .withSimFeedforward(new SimpleMotorFeedforward(0, ControlsConstants.FEEDER_KV))
       .withSimClosedLoopController(SIM_KP, SIM_KI, SIM_KD)
       // Telemetry name and verbosity level
-      .withTelemetry(MOTOR_TELEMETRY, TelemetryVerbosity.HIGH)
+      .withTelemetry(MOTOR_TELEMETRY, ControlsConstants.YAMS_VERBOSITY)
       .withGearing(GEARING)
       // Motor properties to prevent over currenting.
       .withMotorInverted(false)
@@ -78,7 +78,7 @@ public class Feeder extends SubsystemBase {
       // Maximum speed of the feeder.
       .withUpperSoftLimit(UPPER_SOFT_LIMIT)
       // Telemetry name and verbosity for the mechanism.
-      .withTelemetry(MECHANISM_TELEMETRY, TelemetryVerbosity.HIGH);
+      .withTelemetry(MECHANISM_TELEMETRY, ControlsConstants.YAMS_VERBOSITY);
 
   // Feeder Mechanism
   private FlyWheel feeder = new FlyWheel(feederConfig);
