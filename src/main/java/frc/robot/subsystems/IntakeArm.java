@@ -13,8 +13,6 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.HardwareMonitor;
 import frc.robot.util.YAMSUtil;
@@ -85,24 +83,16 @@ public class IntakeArm extends SubsystemBase {
     HardwareMonitor.registerHardware("intakeArmMotor", armMotor);
   }
 
-  public Command allowCoast() {
-    return new InstantCommand(() -> armMotorController.setIdleMode(MotorMode.COAST), this);
-  }
-
-  public Command enforceBrake() {
-    return new InstantCommand(() -> armMotorController.setIdleMode(MotorMode.BRAKE), this);
-  }
-
   public Command extendIntake() {
-    return allowCoast().andThen(arm.setAngle(EXTENDED_ANGLE));
+    return arm.setAngle(EXTENDED_ANGLE);
   }
 
   public Command retractIntake() {
-    return enforceBrake().andThen(arm.setAngle(RETRACTED_ANGLE));
+    return arm.setAngle(RETRACTED_ANGLE);
   }
 
   public Command stowIntake() {
-    return enforceBrake().andThen(arm.setAngle(STOWED_ANGLE));
+    return arm.setAngle(STOWED_ANGLE);
   }
 
   public Command setAngle(Angle angle) {

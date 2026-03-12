@@ -343,16 +343,14 @@ public class RobotContainer {
 
   public Command runIntake() {
     return Commands.parallel(
-        // TODO: fix this, SAFETY first right now
-        // intakeArm.extendIntake(),
+        intakeArm.extendIntake(),
         spindexer.agitate(),
         intakeRoller.feedToSpindexer());
   }
 
   public Command stopIntake() {
     return Commands.parallel(
-        // TODO: fix this, SAFETY first right now
-        // intakeArm.retractIntake(),
+        intakeArm.retractIntake(),
         intakeRoller.stopFeeding());
   }
 
