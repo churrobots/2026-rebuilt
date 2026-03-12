@@ -113,7 +113,7 @@ public class IntakeRoller extends SubsystemBase {
     return roller.setSpeed(speedSupplier);
   }
 
-  public Command feedToShooter() {
+  public Command feedToSpindexer() {
     return roller.setSpeed(ControlsConstants.INTAKE_ROLLER_VELOCITY);
   }
 

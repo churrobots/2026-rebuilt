@@ -347,7 +347,8 @@ public class RobotContainer {
     return Commands.parallel(
         // TODO: fix this, SAFETY first right now
         // intakeArm.extendIntake(),
-        intakeRoller.feedToShooter());
+        spindexer.agitate(),
+        intakeRoller.feedToSpindexer());
   }
 
   public Command stopIntake() {

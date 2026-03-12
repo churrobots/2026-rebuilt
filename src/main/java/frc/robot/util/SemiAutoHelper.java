@@ -4,9 +4,11 @@
 
 package frc.robot.util;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.Radians;
 
 import java.util.function.Supplier;
 
@@ -64,6 +66,7 @@ public class SemiAutoHelper {
     double targetAngleInRadians = Math.atan2(
         hubY.minus(robotY).in(Meters),
         hubX.minus(robotX).in(Meters));
+    SmartDashboard.putNumber("getAngleToHub", Radians.of(targetAngleInRadians).in(Degrees));
     return Rotation2d.fromRadians(targetAngleInRadians);
 
   }
@@ -126,4 +129,5 @@ public class SemiAutoHelper {
     }
     return false;
   }
+
 }

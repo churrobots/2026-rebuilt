@@ -115,6 +115,10 @@ public class Spindexer extends SubsystemBase {
     return spindexer.setSpeed(ControlsConstants.SPINDEXER_VELOCITY);
   }
 
+  public Command agitate() {
+    return spindexer.setSpeed(RPM.of(-175));
+  }
+
   /**
    * Set the spindexer velocity.
    *
