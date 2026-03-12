@@ -34,7 +34,6 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.ControlsConstants;
 import frc.robot.subsystems.Feeder;
 import frc.robot.subsystems.IntakeArm;
-import frc.robot.subsystems.IntakeArmBroncBotz;
 import frc.robot.subsystems.IntakeRoller;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Spindexer;
@@ -67,8 +66,7 @@ public class RobotContainer {
   private final Drive drive;
   private final Spindexer spindexer = new Spindexer();
   private final IntakeRoller intakeRoller = new IntakeRoller();
-  // private final IntakeArm intakeArm = new IntakeArm();
-  // private final IntakeArmBroncBotz intakeArm = new IntakeArmBroncBotz();
+  private final IntakeArm intakeArm = new IntakeArm();
   private final Shooter shooter = new Shooter();
   private final Feeder feeder = new Feeder();
 
