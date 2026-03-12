@@ -69,7 +69,7 @@ public class ControlsConstants {
 
   // ========== Controller Binding Constants ==========
   public static final AngularVelocity SPINDEXER_VELOCITY = RPM.of(800);
-  public static final AngularVelocity INTAKE_ROLLER_VELOCITY = RPM.of(5000);
+  public static final AngularVelocity INTAKE_ROLLER_VELOCITY = RPM.of(3000);
   public static final AngularVelocity FEEDER_VELOCITY = RPM.of(5000);
   public static final AngularVelocity SHOOTER_VELOCITY = RPM.of(4550);
 }
