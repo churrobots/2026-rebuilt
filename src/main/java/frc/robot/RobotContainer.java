@@ -234,8 +234,8 @@ public class RobotContainer {
     // This is how you can run using our TunableNumbers
     // controller.povLeft().whileTrue(runIntakeWithTunableSpeed());
     // controller.povUp().whileTrue(runSpindexerWithTunableSpeed());
-    // controller.povLeft().whileTrue(intakeArm.setAngle(Degrees.of(0)));
-    // controller.povRight().whileTrue(intakeArm.setAngle(Degrees.of(15)));
+    // controller.povLeft().onTrue(intakeArm.setAngle(Degrees.of(250)));
+    // controller.povRight().onTrue(intakeArm.setAngle(Degrees.of(290)));
   }
 
   /**

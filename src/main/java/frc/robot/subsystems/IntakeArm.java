@@ -33,9 +33,9 @@ public class IntakeArm extends SubsystemBase {
   // used the actual angles output by the mechanism and noted the targets.
   private static final Angle STOWED_ANGLE = Degrees.of(190);
   private static final Angle RETRACTED_ANGLE = Degrees.of(250);
-  private static final Angle EXTENDED_ANGLE = Degrees.of(300);
-  private static final double KP = 0;
-  private static final double KI = 0;
+  private static final Angle EXTENDED_ANGLE = Degrees.of(295);
+  private static final double KP = 5.0;
+  private static final double KI = 0.0001;
   private static final double KD = 0;
   private static final double KS = 0;
   private static final double KG = 0;
@@ -81,34 +81,28 @@ public class IntakeArm extends SubsystemBase {
    * Creates a new ExampleSubsystem.
    */
   public IntakeArm() {
-    // setDefaultCommand(retractIntake());
+    setDefaultCommand(retractIntake());
     HardwareMonitor.registerHardware("intakeArmMotor", armMotor);
   }
 
   public Command allowCoast() {
-    return new InstantCommand(() -> armMotorController.setIdleMode(MotorMode.COAST));
+    return new InstantCommand(() -> armMotorController.setIdleMode(MotorMode.COAST), this);
   }
 
   public Command enforceBrake() {
-    return new InstantCommand(() -> armMotorController.setIdleMode(MotorMode.BRAKE));
+    return new InstantCommand(() -> armMotorController.setIdleMode(MotorMode.BRAKE), this);
   }
 
   public Command extendIntake() {
-    return Commands.parallel(
-        allowCoast(),
-        arm.setAngle(EXTENDED_ANGLE));
+    return allowCoast().andThen(arm.setAngle(EXTENDED_ANGLE));
   }
 
   public Command retractIntake() {
-    return Commands.parallel(
-        enforceBrake(),
-        arm.setAngle(RETRACTED_ANGLE));
+    return enforceBrake().andThen(arm.setAngle(RETRACTED_ANGLE));
   }
 
   public Command stowIntake() {
-    return Commands.parallel(
-        enforceBrake(),
-        arm.setAngle(STOWED_ANGLE));
+    return enforceBrake().andThen(arm.setAngle(STOWED_ANGLE));
   }
 
   public Command setAngle(Angle angle) {
@@ -118,7 +112,7 @@ public class IntakeArm extends SubsystemBase {
   @Override
   public void periodic() {
     arm.updateTelemetry();
-    SmartDashboard.putNumber("arm", arm.getAngle().in(Degree));
+    SmartDashboard.putNumber("armDegrees", arm.getAngle().in(Degree));
   }
 
   @Override
