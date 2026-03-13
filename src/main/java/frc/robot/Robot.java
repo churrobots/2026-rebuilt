@@ -38,7 +38,7 @@ import org.littletonrobotics.urcl.URCL;
 public class Robot extends LoggedRobot {
   private Command autonomousCommand;
   private RobotContainer robotContainer;
-  private Field2d field;
+  private Field2d field = null;
 
   public Robot() {
     // Record metadata
@@ -158,11 +158,18 @@ public class Robot extends LoggedRobot {
     if (autonomousCommand != null) {
       autonomousCommand.cancel();
     }
+    if (HardwareConstants.ENABLE_DIAGNISTIC_POSES) {
+      field = new Field2d();
+      SmartDashboard.putData("DiagnosticField", field);
+    }
   }
 
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
+    if (HardwareConstants.ENABLE_DIAGNISTIC_POSES && field != null) {
+      field.setRobotPose(robotContainer.getPose());
+    }
   }
 
   /** This function is called once when test mode is enabled. */
