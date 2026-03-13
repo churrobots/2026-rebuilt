@@ -43,15 +43,14 @@ public class SemiAutoHelper {
     // First Value is INCHES btw
     // TODO: Howard said we mis-measured these by 8 inches, need to subtract 8
     // inches from all the distance measurements (the first number)
-    lookupDistanceInInchesToRPM.put(207., 4300.);
-    lookupDistanceInInchesToRPM.put(183., 3900.);
-    lookupDistanceInInchesToRPM.put(159., 3500.);
-    lookupDistanceInInchesToRPM.put(135., 3200.);
-    lookupDistanceInInchesToRPM.put(111., 3000.);
-    lookupDistanceInInchesToRPM.put(99., 2900.);
-    lookupDistanceInInchesToRPM.put(88., 2800.);
-    lookupDistanceInInchesToRPM.put(75., 2750.);
-    lookupDistanceInInchesToRPM.put(69., 2750.);
+    lookupDistanceInInchesToRPM.put(207., 4000.);
+    lookupDistanceInInchesToRPM.put(183., 3750.);
+    lookupDistanceInInchesToRPM.put(159., 3400.);
+    lookupDistanceInInchesToRPM.put(135., 3100.);
+    lookupDistanceInInchesToRPM.put(111., 2900.);
+    lookupDistanceInInchesToRPM.put(99., 2850.);
+    lookupDistanceInInchesToRPM.put(88., 2775.);
+    lookupDistanceInInchesToRPM.put(75., 2800.); // marginal shot, miss some
   }
 
   public Rotation2d getAngleToHub() {
