@@ -3,32 +3,37 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.9306199240819213,
-        "y": 5.333506576624294
+        "x": 3.900967624470339,
+        "y": 7.315959734728108
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.350193656459109,
-        "y": 5.362676822564533
+        "x": 2.8295400225105936,
+        "y": 7.359169094279662
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 5.843646881620763,
-        "y": 5.496376346221751
+        "x": 2.545461467161017,
+        "y": 6.85638247042726
       },
       "prevControl": {
-        "x": 6.093027906762299,
-        "y": 5.51395770849423
+        "x": 2.6990409825211867,
+        "y": 7.5951512292549435
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "1. Mark"
+      "linkedName": "2. (D) to neutral intake"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.5054505813953492,
+      "rotationDegrees": 179.11747226587394
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [],
@@ -42,13 +47,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -1.794492606979201
+    "rotation": -72.83134481735212
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -50.386946663356746
+    "rotation": 177.96602966225834
   },
   "useDefaultConstraints": true
 }

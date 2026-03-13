@@ -5,6 +5,12 @@
     "data": {
       "commands": [
         {
+          "type": "named",
+          "data": {
+            "name": "autoPrepFlywheels"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "4. under trench to outpost"
@@ -17,22 +23,27 @@
           }
         },
         {
-          "type": "deadline",
+          "type": "named",
           "data": {
-            "commands": [
-              {
-                "type": "wait",
-                "data": {
-                  "waitTime": 5.0
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "autoShoot"
-                }
-              }
-            ]
+            "name": "autoShoot"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 5.0
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "stopAllShooting"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "runIntake"
           }
         },
         {
@@ -42,28 +53,33 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "autoPrepFlywheels"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "4. neutral to undertrench"
           }
         },
         {
-          "type": "deadline",
+          "type": "named",
           "data": {
-            "commands": [
-              {
-                "type": "wait",
-                "data": {
-                  "waitTime": 10.0
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "autoShoot"
-                }
-              }
-            ]
+            "name": "autoShoot"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 5.0
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "stopAllShooting"
           }
         }
       ]

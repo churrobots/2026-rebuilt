@@ -3,7 +3,62 @@
   "command": {
     "type": "sequential",
     "data": {
-      "commands": []
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "autoPrepFlywheels"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "2. undertrench + shoot"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "autoShoot"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 3.0
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "2. neutral intake"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "runIntake"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "autoPrepFlywheels"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "2. neutral to shoot"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "autoShoot"
+          }
+        }
+      ]
     }
   },
   "resetOdom": true,

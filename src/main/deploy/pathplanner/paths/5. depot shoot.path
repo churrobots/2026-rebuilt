@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.9306199240819213,
-        "y": 5.333506576624294
+        "x": 1.1574439761141895,
+        "y": 5.931072509307612
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.350193656459109,
-        "y": 5.362676822564533
+        "x": 1.809886233227401,
+        "y": 6.23490317134534
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "5. depot shoot"
     },
     {
       "anchor": {
-        "x": 5.843646881620763,
-        "y": 5.496376346221751
+        "x": 2.140367673022599,
+        "y": 6.044694893185028
       },
       "prevControl": {
-        "x": 6.093027906762299,
-        "y": 5.51395770849423
+        "x": 1.5913717116878532,
+        "y": 6.1255007503531065
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "1. Mark"
+      "linkedName": "5. shoot"
     }
   ],
   "rotationTargets": [],
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -1.794492606979201
+    "rotation": -58.024556099586874
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -50.386946663356746
+    "rotation": -179.67312036766316
   },
   "useDefaultConstraints": true
 }
