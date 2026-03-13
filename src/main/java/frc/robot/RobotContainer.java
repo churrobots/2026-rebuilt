@@ -7,7 +7,6 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Feet;
 import static edu.wpi.first.units.Units.RPM;
 
@@ -170,7 +169,9 @@ public class RobotContainer {
     NamedCommands.registerCommand("runIntake", runIntake().withTimeout(0));
     NamedCommands.registerCommand("stopIntake", stopIntake().withTimeout(0));
     NamedCommands.registerCommand("autoPrepFlywheels", autoPrepFlywheels().withTimeout(0));
-    NamedCommands.registerCommand("autoShoot", autoShoot().withTimeout(0));
+    // NOTE: shooting MUST run for a minimum of 3 seconds, and to make sure pose
+    // catches up and adjusts distance.
+    NamedCommands.registerCommand("autoShoot", autoShoot().withTimeout(3));
     NamedCommands.registerCommand("stopAllShooting", stopAllShooting().withTimeout(0));
 
     // Set up auto routines
@@ -245,7 +246,9 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return autoChooser.get();
+    // Always make sure to retract the intake before starting ANY auto
+    // TODO: this gives an exception every second time you run it
+    return intakeArm.retractIntake().withTimeout(0).andThen(autoChooser.get());
   }
 
   public Pose2d getPose() {
