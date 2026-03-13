@@ -14,5 +14,5 @@ public class HardwareConstants {
 
   // Set this to "true" if we're at a competition and seeing loop overruns or
   // inability to load Elastic dashboard or AdvantageKit
-  public static final boolean REDUCE_ROBORIO_RESOURCE_USAGE = false;
+  public static final boolean REDUCE_ROBORIO_RESOURCE_USAGE = true;
 }
