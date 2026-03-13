@@ -158,7 +158,7 @@ public class Robot extends LoggedRobot {
     if (autonomousCommand != null) {
       autonomousCommand.cancel();
     }
-    if (HardwareConstants.ENABLE_DIAGNISTIC_POSES) {
+    if (HardwareConstants.ENABLE_DIAGNOSTIC_POSES) {
       field = new Field2d();
       SmartDashboard.putData("DiagnosticField", field);
     }
@@ -167,7 +167,7 @@ public class Robot extends LoggedRobot {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-    if (HardwareConstants.ENABLE_DIAGNISTIC_POSES && field != null) {
+    if (HardwareConstants.ENABLE_DIAGNOSTIC_POSES && field != null) {
       field.setRobotPose(robotContainer.getPose());
     }
   }
