@@ -308,12 +308,12 @@ public class RobotContainer {
             drive,
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
-            () -> Rotation2d.fromDegrees(isRedAlliance() ? -90 : 90)));
+            () -> Rotation2d.fromDegrees(isRedAlliance() ? -100 : 100)));
   }
 
   public Command driveWithTowerManualAim() {
     return Commands.parallel(
-        shooter.setVelocity(() -> semiAutoHelper.getShooterVelocity(Feet.of(11.5))),
+        shooter.setVelocity(() -> semiAutoHelper.getShooterVelocity(Feet.of(10.5))),
         DriveCommands.joystickDriveAtAngle(
             drive,
             () -> -controller.getLeftY(),
