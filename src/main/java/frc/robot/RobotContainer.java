@@ -167,11 +167,11 @@ public class RobotContainer {
   void bindCommandsForAuto() {
 
     // Register all our auto commands.
-    NamedCommands.registerCommand("runIntake", runIntake());
-    NamedCommands.registerCommand("stopIntake", stopIntake());
-    NamedCommands.registerCommand("autoPrepFlywheels", autoPrepFlywheels());
-    NamedCommands.registerCommand("autoShoot", autoShoot());
-    NamedCommands.registerCommand("stopAllShooting", stopAllShooting());
+    NamedCommands.registerCommand("runIntake", runIntake().withTimeout(0));
+    NamedCommands.registerCommand("stopIntake", stopIntake().withTimeout(0));
+    NamedCommands.registerCommand("autoPrepFlywheels", autoPrepFlywheels().withTimeout(0));
+    NamedCommands.registerCommand("autoShoot", autoShoot().withTimeout(0));
+    NamedCommands.registerCommand("stopAllShooting", stopAllShooting().withTimeout(0));
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());

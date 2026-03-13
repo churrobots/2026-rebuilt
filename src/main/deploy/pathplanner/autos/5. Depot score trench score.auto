@@ -3,7 +3,74 @@
   "command": {
     "type": "sequential",
     "data": {
-      "commands": []
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "5. undertrench to depot"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "runIntake"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "autoPrepFlywheels"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "5. depot shoot"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "autoShoot"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 5.0
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "stopAllShooting"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "5. shoot to undertrench"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "autoPrepFlywheels"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "5. neutral to shoot"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "autoShoot"
+          }
+        }
+      ]
     }
   },
   "resetOdom": true,

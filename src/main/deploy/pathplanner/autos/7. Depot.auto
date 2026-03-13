@@ -7,7 +7,61 @@
         {
           "type": "path",
           "data": {
-            "pathName": "7. trench to depot"
+            "pathName": "7. bump to depot"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "runIntake"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "autoPrepFlywheels"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "7. to shoot"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "autoShoot"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 5.0
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "7. over hub to neutral"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "autoPrepFlywheels"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "7. neutral to origin"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "autoShoot"
           }
         }
       ]
