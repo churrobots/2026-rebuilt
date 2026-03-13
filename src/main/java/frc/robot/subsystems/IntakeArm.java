@@ -31,7 +31,7 @@ public class IntakeArm extends SubsystemBase {
   // used the actual angles output by the mechanism and noted the targets.
   private static final Angle STOWED_ANGLE = Degrees.of(190);
   private static final Angle RETRACTED_ANGLE = Degrees.of(250);
-  private static final Angle EXTENDED_ANGLE = Degrees.of(295);
+  private static final Angle EXTENDED_ANGLE = Degrees.of(300);
   private static final double KP = 5.0;
   private static final double KI = 0.0001;
   private static final double KD = 0;
