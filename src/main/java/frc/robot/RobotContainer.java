@@ -230,6 +230,7 @@ public class RobotContainer {
     controller.y().whileTrue(driveWithTowerManualAim());
     controller.b().whileTrue(driveWithRightTrenchManualAim());
     controller.a().whileTrue(driveWithAutoAim());
+    controller.povDown().toggleOnTrue(stowIntake());
 
     // This is how you can run using our TunableNumbers
     // controller.povLeft().whileTrue(runIntakeWithTunableSpeed());
@@ -327,6 +328,10 @@ public class RobotContainer {
 
   public Command xLock() {
     return Commands.runOnce(drive::stopWithX, drive);
+  }
+
+  public Command stowIntake() {
+    return intakeArm.stowIntake();
   }
 
   public Command runIntakeWithTunableSpeed() {
