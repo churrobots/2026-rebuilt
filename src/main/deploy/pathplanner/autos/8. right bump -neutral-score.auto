@@ -5,33 +5,9 @@
     "data": {
       "commands": [
         {
-          "type": "named",
-          "data": {
-            "name": "autoPrepFlywheels"
-          }
-        },
-        {
           "type": "path",
           "data": {
-            "pathName": "2. undertrench + shoot"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "autoShoot"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 3.0
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "2. neutral intake"
+            "pathName": "8. left bump to neutral"
           }
         },
         {
@@ -49,7 +25,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "2. neutral to shoot"
+            "pathName": "8. runintake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "8. neutral to score"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "stopIntake"
           }
         },
         {

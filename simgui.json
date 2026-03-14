@@ -88,11 +88,6 @@
           "visible": true
         }
       },
-      "/SmartDashboard/Elevator/mechanism": {
-        "window": {
-          "visible": true
-        }
-      },
       "/SmartDashboard/Feeder/mechanism": {
         "window": {
           "visible": true
