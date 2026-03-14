@@ -27,6 +27,7 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.CalibrationMode;
@@ -82,6 +83,9 @@ public class RobotContainer {
 
   // Helpers for automatic aiming and shooting
   private final SemiAutoHelper semiAutoHelper;
+
+  // Make xlock work.
+  private boolean isXlocked = false;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(Hardware.DriverStation.driverXboxPort);
@@ -229,6 +233,7 @@ public class RobotContainer {
     controller.x().whileTrue(driveWithLeftTrenchManualAim());
     controller.y().whileTrue(driveWithTowerManualAim());
     controller.b().whileTrue(driveWithRightTrenchManualAim());
+    // TODO: try this with driveWithAutoAimAtHubOrAlliance
     controller.a().whileTrue(driveWithAutoAim());
     controller.povDown().toggleOnTrue(stowIntake());
 
@@ -304,7 +309,26 @@ public class RobotContainer {
             drive,
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
-            () -> semiAutoHelper.getAngleToHub()));
+            () -> semiAutoHelper.getAngleToHub(),
+            () -> isXlocked));
+  }
+
+  public Command driveWithAutoAimAtAlliance() {
+    return Commands.parallel(
+        shooter.setVelocity(RPM.of(3400)),
+        DriveCommands.joystickDriveAtAngle(
+            drive,
+            () -> -controller.getLeftY(),
+            () -> -controller.getLeftX(),
+            () -> semiAutoHelper.getAngleToAlliance(),
+            () -> isXlocked));
+  }
+
+  public Command driveWithAutoAimAtHubOrAlliance() {
+    return new ConditionalCommand(
+        driveWithAutoAimAtAlliance(),
+        driveWithAutoAim(),
+        semiAutoHelper::isInNeutralZone);
   }
 
   public Command driveWithLeftTrenchManualAim() {
@@ -314,7 +338,8 @@ public class RobotContainer {
             drive,
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
-            () -> Rotation2d.fromDegrees(isRedAlliance() ? 90 : -90)));
+            () -> Rotation2d.fromDegrees(isRedAlliance() ? 90 : -90),
+            () -> isXlocked));
   }
 
   public Command driveWithRightTrenchManualAim() {
@@ -324,7 +349,8 @@ public class RobotContainer {
             drive,
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
-            () -> Rotation2d.fromDegrees(isRedAlliance() ? -100 : 100)));
+            () -> Rotation2d.fromDegrees(isRedAlliance() ? -100 : 100),
+            () -> isXlocked));
   }
 
   public Command driveWithTowerManualAim() {
@@ -334,7 +360,8 @@ public class RobotContainer {
             drive,
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
-            () -> Rotation2d.fromDegrees(isRedAlliance() ? 180 : 0)));
+            () -> Rotation2d.fromDegrees(isRedAlliance() ? 180 : 0),
+            () -> isXlocked));
   }
 
   public Command resetPoseFacingAway() {
@@ -384,7 +411,20 @@ public class RobotContainer {
   public Command autoShoot() {
     return Commands.parallel(
         feeder.setVelocity(semiAutoHelper::getFeederVelocityForHubDistance),
+        this.enableXlock(),
         spindexer.feedToShooter());
   }
 
+  // Helpers for xlocking
+  public Command enableXlock() {
+    return Commands.run(this::setXlockToTrue).finallyDo(this::setXlockToFalse);
+  }
+
+  public void setXlockToTrue() {
+    isXlocked = true;
+  }
+
+  public void setXlockToFalse() {
+    isXlocked = false;
+  }
 }
