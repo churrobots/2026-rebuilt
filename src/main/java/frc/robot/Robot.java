@@ -18,6 +18,8 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.HardwareConstants;
 import frc.robot.util.HardwareMonitor;
 
+import static edu.wpi.first.units.Units.RPM;
+
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -195,5 +197,9 @@ public class Robot extends LoggedRobot {
   @Override
   public void simulationPeriodic() {
     field.setRobotPose(robotContainer.getPose());
+    SmartDashboard.putNumber("getExpectedShooterVelocityForHub",
+        robotContainer.getExpectedShooterVelocityForHub().in(RPM));
+    SmartDashboard.putNumber("getActualShooterVelocity",
+        robotContainer.getActualShooterVelocity().in(RPM));
   }
 }

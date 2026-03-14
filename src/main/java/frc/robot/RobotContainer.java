@@ -17,6 +17,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.measure.AngularVelocity;
 
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
@@ -171,7 +172,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("autoPrepFlywheels", autoPrepFlywheels().withTimeout(0));
     // NOTE: shooting MUST run for a minimum of 3 seconds, and to make sure pose
     // catches up and adjusts distance.
-    NamedCommands.registerCommand("autoShoot", autoShoot().withTimeout(3));
+    NamedCommands.registerCommand("autoShoot", autoShootWithRePreppedFlywheels().withTimeout(3));
     NamedCommands.registerCommand("stopAllShooting", stopAllShooting().withTimeout(0));
 
     // Set up auto routines
@@ -248,11 +249,19 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     // Always make sure to retract the intake before starting ANY auto
     // TODO: this gives an exception every second time you run it
-    return intakeArm.retractIntake().withTimeout(0).andThen(autoChooser.get());
+    return intakeArm.retractIntake().withTimeout(0.2).andThen(autoChooser.get());
   }
 
   public Pose2d getPose() {
     return drive.getPose();
+  }
+
+  public AngularVelocity getExpectedShooterVelocityForHub() {
+    return semiAutoHelper.getShooterVelocityForHubDistance();
+  }
+
+  public AngularVelocity getActualShooterVelocity() {
+    return shooter.getVelocity();
   }
 
   public boolean isRedAlliance() {
@@ -265,6 +274,10 @@ public class RobotContainer {
 
   public Command autoPrepFlywheels() {
     return shooter.setVelocity(semiAutoHelper::getShooterVelocityForHubDistance);
+  }
+
+  public Command autoShootWithRePreppedFlywheels() {
+    return autoPrepFlywheels().withTimeout(0.2).andThen(autoShoot());
   }
 
   public Command stopAllShooting() {
