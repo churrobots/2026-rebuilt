@@ -13,13 +13,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "4. under trench to outpost"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "3. outpost to score"
+            "pathName": "2. undertrench + shoot"
           }
         },
         {
@@ -31,7 +25,7 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 5.0
+            "waitTime": 3.0
           }
         },
         {
@@ -49,7 +43,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "4. outpost score to neutral"
+            "pathName": "2. neutral intake"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "runIntake"
           }
         },
         {
@@ -61,25 +61,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "4. neutral to undertrench"
+            "pathName": "2. neutral to shoot"
           }
         },
         {
           "type": "named",
           "data": {
             "name": "autoShoot"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 5.0
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "stopAllShooting"
           }
         }
       ]

@@ -7,7 +7,6 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Feet;
 import static edu.wpi.first.units.Units.RPM;
 
@@ -18,6 +17,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.measure.AngularVelocity;
 
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
@@ -171,11 +171,11 @@ public class RobotContainer {
   void bindCommandsForAuto() {
 
     // Register all our auto commands.
-    NamedCommands.registerCommand("runIntake", runIntake());
-    NamedCommands.registerCommand("stopIntake", stopIntake());
-    NamedCommands.registerCommand("autoPrepFlywheels", autoPrepFlywheels());
-    NamedCommands.registerCommand("autoShoot", autoShoot());
-    NamedCommands.registerCommand("stopAllShooting", stopAllShooting());
+    NamedCommands.registerCommand("runIntake", runIntake().withTimeout(0));
+    NamedCommands.registerCommand("stopIntake", stopIntake().withTimeout(0));
+    NamedCommands.registerCommand("autoPrepFlywheels", autoPrepFlywheels().withTimeout(0));
+    NamedCommands.registerCommand("autoShoot", autoShootWithRePreppedFlywheels().withTimeout(1));
+    NamedCommands.registerCommand("stopAllShooting", stopAllShooting().withTimeout(0));
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
@@ -235,6 +235,7 @@ public class RobotContainer {
     controller.b().whileTrue(driveWithRightTrenchManualAim());
     // TODO: try this with driveWithAutoAimAtHubOrAlliance
     controller.a().whileTrue(driveWithAutoAim());
+    controller.povDown().toggleOnTrue(stowIntake());
 
     // This is how you can run using our TunableNumbers
     // controller.povLeft().whileTrue(runIntakeWithTunableSpeed());
@@ -249,11 +250,21 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return autoChooser.get();
+    // Always make sure to retract the intake before starting ANY auto
+    // TODO: this gives an exception every second time you run it
+    return intakeArm.retractIntake().withTimeout(0.8).andThen(autoChooser.get());
   }
 
   public Pose2d getPose() {
     return drive.getPose();
+  }
+
+  public AngularVelocity getExpectedShooterVelocityForHub() {
+    return semiAutoHelper.getShooterVelocityForHubDistance();
+  }
+
+  public AngularVelocity getActualShooterVelocity() {
+    return shooter.getVelocity();
   }
 
   public boolean isRedAlliance() {
@@ -266,6 +277,10 @@ public class RobotContainer {
 
   public Command autoPrepFlywheels() {
     return shooter.setVelocity(semiAutoHelper::getShooterVelocityForHubDistance);
+  }
+
+  public Command autoShootWithRePreppedFlywheels() {
+    return autoPrepFlywheels().withTimeout(0.2).andThen(autoShoot());
   }
 
   public Command stopAllShooting() {
@@ -333,13 +348,13 @@ public class RobotContainer {
             drive,
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
-            () -> Rotation2d.fromDegrees(isRedAlliance() ? -90 : 90),
+            () -> Rotation2d.fromDegrees(isRedAlliance() ? -100 : 100),
             () -> isXlocked));
   }
 
   public Command driveWithTowerManualAim() {
     return Commands.parallel(
-        shooter.setVelocity(() -> semiAutoHelper.getShooterVelocity(Feet.of(11.5))),
+        shooter.setVelocity(() -> semiAutoHelper.getShooterVelocity(Feet.of(10.5))),
         DriveCommands.joystickDriveAtAngle(
             drive,
             () -> -controller.getLeftY(),
@@ -354,6 +369,10 @@ public class RobotContainer {
 
   public Command xLock() {
     return Commands.runOnce(drive::stopWithX, drive);
+  }
+
+  public Command stowIntake() {
+    return intakeArm.stowIntake();
   }
 
   public Command runIntakeWithTunableSpeed() {

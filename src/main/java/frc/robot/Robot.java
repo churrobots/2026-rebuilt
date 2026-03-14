@@ -18,6 +18,8 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.HardwareConstants;
 import frc.robot.util.HardwareMonitor;
 
+import static edu.wpi.first.units.Units.RPM;
+
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -38,7 +40,7 @@ import org.littletonrobotics.urcl.URCL;
 public class Robot extends LoggedRobot {
   private Command autonomousCommand;
   private RobotContainer robotContainer;
-  private Field2d field;
+  private Field2d field = null;
 
   public Robot() {
     // Record metadata
@@ -158,11 +160,18 @@ public class Robot extends LoggedRobot {
     if (autonomousCommand != null) {
       autonomousCommand.cancel();
     }
+    if (HardwareConstants.ENABLE_DIAGNOSTIC_POSES) {
+      field = new Field2d();
+      SmartDashboard.putData("DiagnosticField", field);
+    }
   }
 
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
+    if (HardwareConstants.ENABLE_DIAGNOSTIC_POSES && field != null) {
+      field.setRobotPose(robotContainer.getPose());
+    }
   }
 
   /** This function is called once when test mode is enabled. */
@@ -188,5 +197,9 @@ public class Robot extends LoggedRobot {
   @Override
   public void simulationPeriodic() {
     field.setRobotPose(robotContainer.getPose());
+    SmartDashboard.putNumber("getExpectedShooterVelocityForHub",
+        robotContainer.getExpectedShooterVelocityForHub().in(RPM));
+    SmartDashboard.putNumber("getActualShooterVelocity",
+        robotContainer.getActualShooterVelocity().in(RPM));
   }
 }

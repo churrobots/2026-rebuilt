@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "5. undertrench to depot"
+            "pathName": "9. right bump to neutral"
           }
         },
         {
@@ -25,55 +25,25 @@
         {
           "type": "path",
           "data": {
-            "pathName": "5. depot shoot"
+            "pathName": "9. runtinake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "9. neutral to score"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "autoShoot"
           }
         },
         {
           "type": "named",
           "data": {
             "name": "stopIntake"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "autoShoot"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 5.0
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "stopAllShooting"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "5. shoot to undertrench"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "autoPrepFlywheels"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "5. neutral to shoot"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "autoShoot"
           }
         }
       ]

@@ -32,14 +32,13 @@ import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 
 public class IntakeRoller extends SubsystemBase {
   private static final String MOTOR_TELEMETRY = "IntakeRollerMotor";
   private static final String MECHANISM_TELEMETRY = "IntakeRoller";
 
   // Stable physical constants
-  private static final Current STATOR_CURRENT_LIMIT = Amps.of(40);
+  private static final Current STATOR_CURRENT_LIMIT = Amps.of(60);
   private static final Distance DIAMETER = Inches.of(2);
   private static final Mass MASS = Pounds.of(0.25);
   private static final AngularVelocity UPPER_SOFT_LIMIT = RPM.of(1000);

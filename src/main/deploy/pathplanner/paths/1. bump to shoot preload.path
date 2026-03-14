@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.5836522283926397,
-        "y": 5.611875496557203
+        "x": 2.931,
+        "y": 5.334
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.33646804157575,
-        "y": 5.5744592195153455
+        "x": 2.6826993947403786,
+        "y": 5.147753538080701
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "1. Marky"
     },
     {
       "anchor": {
-        "x": 3.3144112495260614,
-        "y": 5.407642022333066
+        "x": 2.6368109085648155,
+        "y": 4.886887152777778
       },
       "prevControl": {
-        "x": 3.245229069595148,
-        "y": 5.167405001913634
+        "x": 2.680663897275633,
+        "y": 4.640763372169059
       },
       "nextControl": null,
       "isLocked": false,
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -56.12202739653426
+    "rotation": -46.05112627950637
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -89.60790653736373
+    "rotation": -50.386946663356746
   },
   "useDefaultConstraints": true
 }

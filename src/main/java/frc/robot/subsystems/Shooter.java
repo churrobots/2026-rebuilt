@@ -30,7 +30,6 @@ import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 
 public class Shooter extends SubsystemBase {
   private static final String MOTOR_TELEMETRY = "ShooterMotor";
@@ -86,7 +85,7 @@ public class Shooter extends SubsystemBase {
 
   /** Creates a new Shooter. */
   public Shooter() {
-    setDefaultCommand(set(ControlsConstants.SHOOTER_DEFAULT_DUTY_CYCLE));
+    setDefaultCommand(setVelocity(ControlsConstants.SHOOTER_IDLE_VELOCITY));
     HardwareMonitor.registerHardware("shooterMotor", motor);
   }
 
