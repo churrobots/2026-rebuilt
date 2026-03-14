@@ -170,9 +170,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("runIntake", runIntake().withTimeout(0));
     NamedCommands.registerCommand("stopIntake", stopIntake().withTimeout(0));
     NamedCommands.registerCommand("autoPrepFlywheels", autoPrepFlywheels().withTimeout(0));
-    // NOTE: shooting MUST run for a minimum of 3 seconds, and to make sure pose
-    // catches up and adjusts distance.
-    NamedCommands.registerCommand("autoShoot", autoShootWithRePreppedFlywheels().withTimeout(3));
+    NamedCommands.registerCommand("autoShoot", autoShootWithRePreppedFlywheels().withTimeout(0));
     NamedCommands.registerCommand("stopAllShooting", stopAllShooting().withTimeout(0));
 
     // Set up auto routines
