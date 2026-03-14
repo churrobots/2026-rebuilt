@@ -234,7 +234,7 @@ public class RobotContainer {
     controller.y().whileTrue(driveWithTowerManualAim());
     controller.b().whileTrue(driveWithRightTrenchManualAim());
     // TODO: try this with driveWithAutoAimAtHubOrAlliance
-    controller.a().whileTrue(driveWithAutoAimAtHub());
+    controller.a().whileTrue(driveWithAutoAim());
 
     // This is how you can run using our TunableNumbers
     // controller.povLeft().whileTrue(runIntakeWithTunableSpeed());
@@ -290,7 +290,7 @@ public class RobotContainer {
     return shooter.setVelocity(() -> semiAutoHelper.getShooterVelocityForHubDistance());
   }
 
-  public Command driveWithAutoAimAtHub() {
+  public Command driveWithAutoAim() {
     return Commands.parallel(
         runShooterForHubDistance(),
         DriveCommands.joystickDriveAtAngle(
@@ -315,7 +315,7 @@ public class RobotContainer {
   public Command driveWithAutoAimAtHubOrAlliance() {
     return new ConditionalCommand(
         driveWithAutoAimAtAlliance(),
-        driveWithAutoAimAtHub(),
+        driveWithAutoAim(),
         semiAutoHelper::isInNeutralZone);
   }
 
