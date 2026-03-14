@@ -116,6 +116,11 @@ public class IntakeRoller extends SubsystemBase {
     return roller.setSpeed(ControlsConstants.INTAKE_ROLLER_VELOCITY);
   }
 
+  public Command feedToSpindexerFaster() {
+    // @hannah: raised to 1.2 times after 2nd quals
+    return roller.setSpeed(ControlsConstants.INTAKE_ROLLER_VELOCITY.times(1.2));
+  }
+
   public Command stopFeeding() {
     return set(ControlsConstants.INTAKE_ROLLER_DEFAULT_DUTY_CYCLE);
   }

@@ -167,7 +167,7 @@ public class RobotContainer {
   void bindCommandsForAuto() {
 
     // Register all our auto commands.
-    NamedCommands.registerCommand("runIntake", runIntake().withTimeout(0));
+    NamedCommands.registerCommand("runIntake", runIntakeFaster().withTimeout(0));
     NamedCommands.registerCommand("stopIntake", stopIntake().withTimeout(0));
     NamedCommands.registerCommand("autoPrepFlywheels", autoPrepFlywheels().withTimeout(0));
     NamedCommands.registerCommand("autoShoot", autoShootWithRePreppedFlywheels().withTimeout(1));
@@ -223,7 +223,7 @@ public class RobotContainer {
     drive.setDefaultCommand(driveWithJoysticks());
 
     controller.back().whileTrue(resetPoseFacingAway());
-    controller.leftBumper().whileTrue(xLock());
+    // controller.leftBumper().whileTrue(xLock());
     controller.rightTrigger(DriveTeamConstants.XBOX_TRIGGER_SENSITIVITY).whileTrue(autoShoot());
     controller.leftTrigger(DriveTeamConstants.XBOX_TRIGGER_SENSITIVITY).whileTrue(runIntake());
     controller.x().whileTrue(driveWithLeftTrenchManualAim());
@@ -247,7 +247,8 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     // Always make sure to retract the intake before starting ANY auto
     // TODO: this gives an exception every second time you run it
-    return intakeArm.retractIntake().withTimeout(0.8).andThen(autoChooser.get());
+    // @hannah: dropped from 0.8 to 0.5 after the first quals
+    return intakeArm.retractIntake().withTimeout(0.5).andThen(autoChooser.get());
   }
 
   public Pose2d getPose() {
@@ -365,6 +366,13 @@ public class RobotContainer {
         intakeArm.extendIntake(),
         spindexer.agitate(),
         intakeRoller.feedToSpindexer());
+  }
+
+  public Command runIntakeFaster() {
+    return Commands.parallel(
+        intakeArm.extendIntake(),
+        spindexer.agitate(),
+        intakeRoller.feedToSpindexerFaster());
   }
 
   public Command stopIntake() {
