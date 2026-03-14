@@ -19,12 +19,6 @@
         {
           "type": "named",
           "data": {
-            "name": "runIntake"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
             "name": "autoPrepFlywheels"
           }
         },

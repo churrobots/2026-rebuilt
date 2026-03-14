@@ -170,7 +170,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("runIntake", runIntake().withTimeout(0));
     NamedCommands.registerCommand("stopIntake", stopIntake().withTimeout(0));
     NamedCommands.registerCommand("autoPrepFlywheels", autoPrepFlywheels().withTimeout(0));
-    NamedCommands.registerCommand("autoShoot", autoShootWithRePreppedFlywheels().withTimeout(0));
+    NamedCommands.registerCommand("autoShoot", autoShootWithRePreppedFlywheels().withTimeout(1));
     NamedCommands.registerCommand("stopAllShooting", stopAllShooting().withTimeout(0));
 
     // Set up auto routines
@@ -247,7 +247,7 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     // Always make sure to retract the intake before starting ANY auto
     // TODO: this gives an exception every second time you run it
-    return intakeArm.retractIntake().withTimeout(0.2).andThen(autoChooser.get());
+    return intakeArm.retractIntake().withTimeout(0.8).andThen(autoChooser.get());
   }
 
   public Pose2d getPose() {
