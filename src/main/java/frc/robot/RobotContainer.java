@@ -286,13 +286,9 @@ public class RobotContainer {
         () -> -controller.getRightX());
   }
 
-  public Command runShooterForHubDistance() {
-    return shooter.setVelocity(() -> semiAutoHelper.getShooterVelocityForHubDistance());
-  }
-
   public Command driveWithAutoAim() {
     return Commands.parallel(
-        runShooterForHubDistance(),
+        shooter.setVelocity(() -> semiAutoHelper.getShooterVelocityForHubDistance()),
         DriveCommands.joystickDriveAtAngle(
             drive,
             () -> -controller.getLeftY(),
