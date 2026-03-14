@@ -108,7 +108,8 @@ public class DriveCommands {
       Drive drive,
       DoubleSupplier xSupplier,
       DoubleSupplier ySupplier,
-      Supplier<Rotation2d> rotationSupplier) {
+      Supplier<Rotation2d> rotationSupplier,
+      Supplier<Boolean> xlockSupplier) {
 
     // Create PID controller
     ProfiledPIDController angleController = new ProfiledPIDController(
@@ -136,12 +137,16 @@ public class DriveCommands {
               omega);
           boolean isFlipped = DriverStation.getAlliance().isPresent()
               && DriverStation.getAlliance().get() == Alliance.Red;
-          drive.runVelocity(
-              ChassisSpeeds.fromFieldRelativeSpeeds(
-                  speeds,
-                  isFlipped
-                      ? drive.getRotation().plus(new Rotation2d(Math.PI))
-                      : drive.getRotation()));
+          if (xlockSupplier.get() == true) {
+            drive.stopWithX();
+          } else {
+            drive.runVelocity(
+                ChassisSpeeds.fromFieldRelativeSpeeds(
+                    speeds,
+                    isFlipped
+                        ? drive.getRotation().plus(new Rotation2d(Math.PI))
+                        : drive.getRotation()));
+          }
         },
         drive)
 
