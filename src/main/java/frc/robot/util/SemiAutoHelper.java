@@ -10,6 +10,7 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Radians;
 
+import java.nio.file.attribute.PosixFileAttributeView;
 import java.util.function.Supplier;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
@@ -129,4 +130,19 @@ public class SemiAutoHelper {
     return false;
   }
 
+  public boolean isInNeutralZone() {
+    Pose2d currentPose = robotPoseSupplier.get();
+    Distance robotY = Meters.of(currentPose.getTranslation().getY());
+    SmartDashboard.putNumber("robotYInInches", robotY.in(Inches));
+    return robotY.in(Inches) > 170 && robotY.in(Inches) < 457;
+  }
+
+  public Rotation2d getAngleToAlliance() {
+    boolean isRedAlliance = DriverStation.getAlliance().orElseGet(() -> Alliance.Blue) == Alliance.Red;
+    if (isRedAlliance) {
+      return Rotation2d.fromDegrees(0);
+    } else {
+      return Rotation2d.fromDegrees(180);
+    }
+  }
 }

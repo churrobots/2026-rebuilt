@@ -27,6 +27,7 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.CalibrationMode;
@@ -229,7 +230,8 @@ public class RobotContainer {
     controller.x().whileTrue(driveWithLeftTrenchManualAim());
     controller.y().whileTrue(driveWithTowerManualAim());
     controller.b().whileTrue(driveWithRightTrenchManualAim());
-    controller.a().whileTrue(driveWithAutoAim());
+    // TODO: try this with driveWithAutoAimAtHubOrAlliance
+    controller.a().whileTrue(driveWithAutoAimAtHub());
 
     // This is how you can run using our TunableNumbers
     // controller.povLeft().whileTrue(runIntakeWithTunableSpeed());
@@ -281,14 +283,35 @@ public class RobotContainer {
         () -> -controller.getRightX());
   }
 
-  public Command driveWithAutoAim() {
+  public Command runShooterForHubDistance() {
+    return shooter.setVelocity(() -> semiAutoHelper.getShooterVelocityForHubDistance());
+  }
+
+  public Command driveWithAutoAimAtHub() {
     return Commands.parallel(
-        shooter.setVelocity(() -> semiAutoHelper.getShooterVelocityForHubDistance()),
+        runShooterForHubDistance(),
         DriveCommands.joystickDriveAtAngle(
             drive,
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
             () -> semiAutoHelper.getAngleToHub()));
+  }
+
+  public Command driveWithAutoAimAtAlliance() {
+    return Commands.parallel(
+        shooter.setVelocity(RPM.of(3400)),
+        DriveCommands.joystickDriveAtAngle(
+            drive,
+            () -> -controller.getLeftY(),
+            () -> -controller.getLeftX(),
+            () -> semiAutoHelper.getAngleToAlliance()));
+  }
+
+  public Command driveWithAutoAimAtHubOrAlliance() {
+    return new ConditionalCommand(
+        driveWithAutoAimAtAlliance(),
+        driveWithAutoAimAtHub(),
+        semiAutoHelper::isInNeutralZone);
   }
 
   public Command driveWithLeftTrenchManualAim() {
