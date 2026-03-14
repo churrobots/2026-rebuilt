@@ -5,24 +5,6 @@
     "data": {
       "commands": [
         {
-          "type": "path",
-          "data": {
-            "pathName": "7. bump to depot"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "runIntake"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 3.0
-          }
-        },
-        {
           "type": "named",
           "data": {
             "name": "autoPrepFlywheels"
@@ -31,7 +13,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "7. to shoot"
+            "pathName": "4. under trench to outpost"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "3. outpost to score"
           }
         },
         {
@@ -49,13 +37,19 @@
         {
           "type": "named",
           "data": {
-            "name": "stopIntake"
+            "name": "stopAllShooting"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "runIntake"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "7. over hub to neutral"
+            "pathName": "4. outpost score to neutral"
           }
         },
         {
@@ -67,7 +61,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "7. neutral to origin"
+            "pathName": "4. neutral to undertrench"
           }
         },
         {
@@ -75,11 +69,23 @@
           "data": {
             "name": "autoShoot"
           }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 5.0
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "stopAllShooting"
+          }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": null,
+  "folder": "Archive",
   "choreoAuto": false
 }

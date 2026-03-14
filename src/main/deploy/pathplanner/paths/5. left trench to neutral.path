@@ -3,41 +3,41 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.140367673022599,
-        "y": 6.044694893185028
+        "x": 4.378990176622114,
+        "y": 7.399668796345339
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.8129829846398304,
-        "y": 7.7986277908336294
+        "x": 4.62943994710234,
+        "y": 7.420862188824153
       },
       "isLocked": false,
       "linkedName": "5. shoot"
     },
     {
       "anchor": {
-        "x": 5.762937797934322,
-        "y": 7.426475050759181
+        "x": 6.830155753442797,
+        "y": 7.399668796345339
       },
       "prevControl": {
-        "x": 2.1177710650600288,
-        "y": 7.499248708951272
+        "x": 6.580238179305881,
+        "y": 7.39324959565364
       },
       "nextControl": {
-        "x": 6.63490281556999,
-        "y": 7.4090667704803685
+        "x": 7.988602351684797,
+        "y": 7.429423811495485
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 5.903259346310028,
-        "y": 4.3890457825741525
+        "x": 7.694573574750416,
+        "y": 4.813329040048688
       },
       "prevControl": {
-        "x": 6.067193624205508,
-        "y": 5.500053738524011
+        "x": 7.8585078526458965,
+        "y": 5.924336995998547
       },
       "nextControl": null,
       "isLocked": false,
@@ -45,10 +45,6 @@
     }
   ],
   "rotationTargets": [
-    {
-      "waypointRelativePos": 0.49879426532769544,
-      "rotationDegrees": 0.0
-    },
     {
       "waypointRelativePos": 1.0427622885835104,
       "rotationDegrees": 0.0
@@ -60,14 +56,7 @@
   ],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [
-    {
-      "name": "runIntake",
-      "waypointRelativePos": 0.9872898159898479,
-      "endWaypointRelativePos": null,
-      "command": null
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 3.0,
@@ -84,7 +73,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -58.024556099586874
+    "rotation": 0.0
   },
   "useDefaultConstraints": true
 }

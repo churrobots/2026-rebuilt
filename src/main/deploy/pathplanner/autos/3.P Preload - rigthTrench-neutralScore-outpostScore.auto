@@ -7,7 +7,43 @@
         {
           "type": "named",
           "data": {
+            "name": "autoPrepFlywheels"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "3P. right trench to shoot"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "autoShoot"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 2.0
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "stopAllShooting"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
             "name": "runIntake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "3P. trench to neutral"
           }
         },
         {
@@ -17,9 +53,9 @@
           }
         },
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "3. trench to neutral"
+            "name": "stopIntake"
           }
         },
         {
@@ -37,19 +73,13 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 5.0
+            "waitTime": 3.0
           }
         },
         {
           "type": "named",
           "data": {
             "name": "stopAllShooting"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "autoPrepFlywheels"
           }
         },
         {
@@ -61,7 +91,13 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 4.0
+            "waitTime": 3.0
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "autoPrepFlywheels"
           }
         },
         {

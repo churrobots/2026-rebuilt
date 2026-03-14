@@ -5,6 +5,18 @@
     "data": {
       "commands": [
         {
+          "type": "path",
+          "data": {
+            "pathName": "6. front of bump"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 3.0
+          }
+        },
+        {
           "type": "named",
           "data": {
             "name": "autoPrepFlywheels"
@@ -13,7 +25,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "2. undertrench + shoot"
+            "pathName": "6. shoot"
           }
         },
         {
@@ -25,7 +37,7 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 3.0
+            "waitTime": 5.0
           }
         },
         {
@@ -43,13 +55,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "2. neutral intake"
+            "pathName": "6. outpost score to neutral"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "runIntake"
+            "name": "stopIntake"
           }
         },
         {
@@ -61,7 +73,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "2. neutral to shoot"
+            "pathName": "6. neutral to score"
           }
         },
         {
@@ -69,11 +81,17 @@
           "data": {
             "name": "autoShoot"
           }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 10.0
+          }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": null,
+  "folder": "Archive",
   "choreoAuto": false
 }

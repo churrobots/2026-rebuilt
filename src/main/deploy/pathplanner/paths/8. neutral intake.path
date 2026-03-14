@@ -3,29 +3,45 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.485125503677937,
-        "y": 0.4634020810161519
+        "x": 5.715615565413136,
+        "y": 2.5212686754654636
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.1746826447740113,
-        "y": 0.47107460496115783
+        "x": 6.8990100856285315,
+        "y": 3.7289054775776833
+      },
+      "isLocked": false,
+      "linkedName": "8. neutral intake"
+    },
+    {
+      "anchor": {
+        "x": 7.803648591984464,
+        "y": 1.1704081700211861
+      },
+      "prevControl": {
+        "x": 8.831493014518522,
+        "y": 1.8590382729951995
+      },
+      "nextControl": {
+        "x": 7.008993147510593,
+        "y": 0.6380088607874291
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 0.47454314158799393,
-        "y": 0.7966342672911582
+        "x": 5.920726959745763,
+        "y": 2.2543679378531065
       },
       "prevControl": {
-        "x": 2.1423373241391492,
-        "y": 0.6772157909521193
+        "x": 6.367191417284605,
+        "y": 1.5847438316560738
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "3. receive outpost"
+      "linkedName": "8.neutral bump"
     }
   ],
   "rotationTargets": [],
@@ -41,13 +57,13 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 0,
-    "rotation": -90.22326784099076
+    "velocity": 3.5,
+    "rotation": -177.86085069102802
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
-    "velocity": 0,
+    "velocity": 3.5,
     "rotation": 0.0
   },
   "useDefaultConstraints": true

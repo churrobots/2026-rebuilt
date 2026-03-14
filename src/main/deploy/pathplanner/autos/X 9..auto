@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "8. left bump to neutral"
+            "pathName": "9. right bump to neutral"
           }
         },
         {
@@ -25,19 +25,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "8. runintake"
+            "pathName": "9. runtinake"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "8. neutral to score"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "stopIntake"
+            "pathName": "9. neutral to score"
           }
         },
         {
@@ -45,11 +39,17 @@
           "data": {
             "name": "autoShoot"
           }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "stopIntake"
+          }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": null,
+  "folder": "Archive",
   "choreoAuto": false
 }

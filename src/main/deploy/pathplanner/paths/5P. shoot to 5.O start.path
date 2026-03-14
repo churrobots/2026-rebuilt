@@ -3,32 +3,37 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 0.47454314158799393,
-        "y": 0.7966342672911582
+        "x": 2.7651493389483757,
+        "y": 7.021114332026129
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.0728939665249801,
-        "y": 1.4755265776109683
+        "x": 2.859249481373588,
+        "y": 7.35495944782839
       },
       "isLocked": false,
-      "linkedName": "3. receive outpost"
+      "linkedName": "5P. shoot to neutral"
     },
     {
       "anchor": {
-        "x": 1.537178561970339,
-        "y": 1.9409186308262711
+        "x": 4.378990176622114,
+        "y": 7.399668796345339
       },
       "prevControl": {
-        "x": 1.6935645082980226,
-        "y": 2.157497682733051
+        "x": 3.975821912517656,
+        "y": 7.374217370674435
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "3. outpost score"
+      "linkedName": "5. shoot"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.15,
+      "rotationDegrees": 0.0
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [],
@@ -41,14 +46,14 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 0,
-    "rotation": 26.366644114957694
+    "velocity": 5.5,
+    "rotation": 0.0
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -90.22326784099076
+    "rotation": -60.74277177230953
   },
   "useDefaultConstraints": true
 }

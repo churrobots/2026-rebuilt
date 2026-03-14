@@ -3,13 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 4.389008762739208,
-        "y": 0.6633851872133982
+        "x": 2.765226992075765,
+        "y": 0.9211942737023184
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.688295488453084,
-        "y": 0.675583434697985
+        "x": 5.1386941982092695,
+        "y": 0.8993415499837591
+      },
+      "isLocked": false,
+      "linkedName": "3P. shoot to neutral"
+    },
+    {
+      "anchor": {
+        "x": 5.850607314397876,
+        "y": 0.7
+      },
+      "prevControl": {
+        "x": 5.3758889260556595,
+        "y": 0.7
+      },
+      "nextControl": {
+        "x": 6.325325702740092,
+        "y": 0.7
       },
       "isLocked": false,
       "linkedName": null
@@ -28,7 +44,16 @@
       "linkedName": "3. neutral"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.046610729386892216,
+      "rotationDegrees": 0.0
+    },
+    {
+      "waypointRelativePos": 0.5,
+      "rotationDegrees": 0.0
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [],
@@ -48,7 +73,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 63.316481108728276
   },
   "useDefaultConstraints": true
 }
