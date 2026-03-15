@@ -35,15 +35,15 @@
           }
         },
         {
-          "type": "path",
-          "data": {
-            "pathName": "7. shoot to depot"
-          }
-        },
-        {
           "type": "named",
           "data": {
             "name": "runIntake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "7. shoot to depot"
           }
         },
         {

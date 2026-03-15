@@ -89,15 +89,15 @@
           }
         },
         {
-          "type": "path",
-          "data": {
-            "pathName": "5. undertrench to depot"
-          }
-        },
-        {
           "type": "named",
           "data": {
             "name": "runIntake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "5. undertrench to depot"
           }
         },
         {
