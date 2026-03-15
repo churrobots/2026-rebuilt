@@ -105,7 +105,7 @@ public class SemiAutoHelper {
   }
 
   public AngularVelocity getShooterVelocityForPassing() {
-    return RPM.of(3400);
+    return RPM.of(2900);
   }
 
   public AngularVelocity getFeederVelocityForHubDistance() {
