@@ -395,17 +395,22 @@ public class RobotContainer {
         feeder.setVelocity(semiAutoHelper::getFeederVelocityForHubDistance),
         // We don't want to xlock right away since the aim might not have completed
         // fully. Instead give it slightly more time to finish aiming before xlock.
-        new WaitCommand(0.5).andThen(this.enableXlock()),
+        new WaitCommand(0.25).andThen(this.enableXlock()),
         spindexer.feedToShooter());
   }
 
   // Helpers for xlocking
   public Command enableXlock() {
-    return Commands.run(this::setXlockToTrue).finallyDo(this::setXlockToFalse);
+    return Commands.run(this::setXlockToTrueWhenAimingAtHub).finallyDo(this::setXlockToFalse);
   }
 
-  public void setXlockToTrue() {
-    isXlocked = true;
+  public void setXlockToTrueWhenAimingAtHub() {
+    // only x-lock when shooting at the hub. Neutral zone we can pass on
+    // the fly so we don't want the trigger to xlock us.
+    boolean isAimingAtHub = !semiAutoHelper.isInNeutralZone();
+    if (isAimingAtHub) {
+      isXlocked = true;
+    }
   }
 
   public void setXlockToFalse() {
