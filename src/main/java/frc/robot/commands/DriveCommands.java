@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.subsystems.ControlsConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveConstants;
 import java.text.DecimalFormat;
@@ -137,7 +138,14 @@ public class DriveCommands {
               omega);
           boolean isFlipped = DriverStation.getAlliance().isPresent()
               && DriverStation.getAlliance().get() == Alliance.Red;
-          if (xlockSupplier.get() == true) {
+
+          // Handle x-lock in a smart way, so that the robot doesn't
+          // undershoot its goal angle before x-locking (resulting
+          // in inaccurate aiming for example).
+          boolean xLockIsRequested = xlockSupplier.get() == true;
+          boolean closeEnoughToGoal = Math
+              .abs(angleController.getPositionError()) < ControlsConstants.ALLOWABLE_AIMING_ERROR_BEFORE_XLOCK;
+          if (xLockIsRequested && closeEnoughToGoal) {
             drive.stopWithX();
           } else {
             drive.runVelocity(

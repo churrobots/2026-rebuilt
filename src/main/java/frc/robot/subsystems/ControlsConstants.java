@@ -73,4 +73,5 @@ public class ControlsConstants {
   public static final AngularVelocity FEEDER_VELOCITY = RPM.of(5000);
   public static final AngularVelocity SHOOTER_VELOCITY = RPM.of(4550);
   public static final AngularVelocity SHOOTER_IDLE_VELOCITY = RPM.of(400);
+  public static final double ALLOWABLE_AIMING_ERROR_BEFORE_XLOCK = 0.07;
 }
