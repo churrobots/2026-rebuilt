@@ -36,9 +36,11 @@ public class VisionConstants {
   public static Transform3d robotToCameraFrontRight = new Transform3d(
       Units.inchesToMeters(12.7839), Units.inchesToMeters(-12.4421), Units.inchesToMeters(10),
       new Rotation3d(Math.PI, -Math.PI / 6, -Math.PI / 6));
+  // hannah@: backRight camera mount replacement after quals 37 (to the right .9"
+  // and tilted back 15 degrees)
   public static Transform3d robotToCameraBackRight = new Transform3d(
-      Units.inchesToMeters(-12), Units.inchesToMeters(-12.), Units.inchesToMeters(10),
-      new Rotation3d(Math.PI, 0, -Math.PI / 2));
+      Units.inchesToMeters(-12), Units.inchesToMeters(-12.9), Units.inchesToMeters(10),
+      new Rotation3d(Math.PI, -Math.PI / 12, -Math.PI / 2));
   public static Transform3d robotToCameraFrontLeft = new Transform3d(
       Units.inchesToMeters(12.7839), Units.inchesToMeters(12.4421), Units.inchesToMeters(10),
       new Rotation3d(Math.PI, -Math.PI / 6, Math.PI / 6));
