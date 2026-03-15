@@ -399,11 +399,16 @@ public class RobotContainer {
 
   // Helpers for xlocking
   public Command enableXlock() {
-    return Commands.run(this::setXlockToTrue).finallyDo(this::setXlockToFalse);
+    return Commands.run(this::setXlockToTrueWhenAimingAtHub).finallyDo(this::setXlockToFalse);
   }
 
   public void setXlockToTrueWhenAimingAtHub() {
     // only x-lock when shooting at the hub. Neutral zone we can pass on
+    // the fly so we don't want the trigger to xlock us.
+    boolean isAimingAtHub = !semiAutoHelper.isInNeutralZone();
+    if (isAimingAtHub) {
+      isXlocked = true;
+    }
   }
 
   public void setXlockToFalse() {
