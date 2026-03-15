@@ -304,12 +304,12 @@ public class RobotContainer {
 
   public Command driveWithAutoAim() {
     return Commands.parallel(
-        shooter.setVelocity(() -> semiAutoHelper.getShooterVelocityForHubDistance()),
+        shooter.setVelocity(() -> semiAutoHelper.getFullAutoShooterVelocity()),
         DriveCommands.joystickDriveAtAngle(
             drive,
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
-            () -> semiAutoHelper.getAngleToHub(),
+            () -> semiAutoHelper.getFullAutoDriveAngle(),
             () -> isXlocked));
   }
 
@@ -395,7 +395,7 @@ public class RobotContainer {
         feeder.setVelocity(semiAutoHelper::getFeederVelocityForHubDistance),
         // We don't want to xlock right away since the aim might not have completed
         // fully. Instead give it slightly more time to finish aiming before xlock.
-        new WaitCommand(0.25).andThen(this.enableXlock()),
+        new WaitCommand(0.3).andThen(this.enableXlock()),
         spindexer.feedToShooter());
   }
 
