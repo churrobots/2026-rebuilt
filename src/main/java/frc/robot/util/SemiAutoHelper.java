@@ -104,6 +104,10 @@ public class SemiAutoHelper {
     return getShooterVelocity(getDistanceToHub());
   }
 
+  public AngularVelocity getShooterVelocityForPassing() {
+    return RPM.of(3400);
+  }
+
   public AngularVelocity getFeederVelocityForHubDistance() {
     return getFeederVelocity(getDistanceToHub());
   }
@@ -131,9 +135,10 @@ public class SemiAutoHelper {
 
   public boolean isInNeutralZone() {
     Pose2d currentPose = robotPoseSupplier.get();
-    Distance robotY = Meters.of(currentPose.getTranslation().getY());
-    SmartDashboard.putNumber("robotYInInches", robotY.in(Inches));
-    return robotY.in(Inches) > 170 && robotY.in(Inches) < 457;
+    Distance robotX = Meters.of(currentPose.getTranslation().getX());
+    // Neutral zone begins at 170" and goes to 457" according to
+    // the field map documentation.
+    return robotX.in(Inches) > 170 && robotX.in(Inches) < 457;
   }
 
   public Rotation2d getAngleToAlliance() {
@@ -142,6 +147,22 @@ public class SemiAutoHelper {
       return Rotation2d.fromDegrees(0);
     } else {
       return Rotation2d.fromDegrees(180);
+    }
+  }
+
+  public AngularVelocity getFullAutoShooterVelocity() {
+    if (isInNeutralZone()) {
+      return getShooterVelocityForPassing();
+    } else {
+      return getShooterVelocityForHubDistance();
+    }
+  }
+
+  public Rotation2d getFullAutoDriveAngle() {
+    if (isInNeutralZone()) {
+      return getAngleToAlliance();
+    } else {
+      return getAngleToHub();
     }
   }
 }

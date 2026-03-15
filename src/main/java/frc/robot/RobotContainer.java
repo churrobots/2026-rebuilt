@@ -234,7 +234,6 @@ public class RobotContainer {
     controller.x().whileTrue(driveWithLeftTrenchManualAim());
     controller.y().whileTrue(driveWithTowerManualAim());
     controller.b().whileTrue(driveWithRightTrenchManualAim());
-    // TODO: try this with driveWithAutoAimAtHubOrAlliance
     controller.a().whileTrue(driveWithAutoAim());
     controller.povDown().toggleOnTrue(stowIntake());
 
@@ -312,24 +311,6 @@ public class RobotContainer {
             () -> -controller.getLeftX(),
             () -> semiAutoHelper.getAngleToHub(),
             () -> isXlocked));
-  }
-
-  public Command driveWithAutoAimAtAlliance() {
-    return Commands.parallel(
-        shooter.setVelocity(RPM.of(3400)),
-        DriveCommands.joystickDriveAtAngle(
-            drive,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> semiAutoHelper.getAngleToAlliance(),
-            () -> isXlocked));
-  }
-
-  public Command driveWithAutoAimAtHubOrAlliance() {
-    return new ConditionalCommand(
-        driveWithAutoAimAtAlliance(),
-        driveWithAutoAim(),
-        semiAutoHelper::isInNeutralZone);
   }
 
   public Command driveWithLeftTrenchManualAim() {
