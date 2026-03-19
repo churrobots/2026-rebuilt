@@ -101,16 +101,6 @@ public class Spindexer extends SubsystemBase {
     return spindexer.getSpeed();
   }
 
-  /**
-   * Set the spindexer velocity.
-   *
-   * @param speed Speed to set.
-   * @return {@link edu.wpi.first.wpilibj2.command.RunCommand}
-   */
-  public Command setVelocity(AngularVelocity speed) {
-    return spindexer.setSpeed(speed);
-  }
-
   public Command feedToShooter() {
     return spindexer.setSpeed(ControlsConstants.SPINDEXER_VELOCITY);
   }
@@ -126,7 +116,7 @@ public class Spindexer extends SubsystemBase {
    * @return {@link edu.wpi.first.wpilibj2.command.RunCommand}
    */
   public Command setVelocity(Supplier<AngularVelocity> speedSupplier) {
-    return spindexer.setSpeed(speedSupplier.get());
+    return spindexer.setSpeed(speedSupplier);
   }
 
   /**
