@@ -8,7 +8,6 @@
 package frc.robot;
 
 import static edu.wpi.first.units.Units.Feet;
-import static edu.wpi.first.units.Units.RPM;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -27,8 +26,6 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.CalibrationMode;
@@ -51,7 +48,6 @@ import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.util.SemiAutoHelper;
-import frc.robot.util.TunableNumber;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -71,14 +67,6 @@ public class RobotContainer {
   private final IntakeArm intakeArm = new IntakeArm();
   private final Shooter shooter = new Shooter();
   private final Feeder feeder = new Feeder();
-
-  // Tunable speeds.
-  TunableNumber tunableShooterRpm = new TunableNumber("SHOOTER_SPEED",
-      ControlsConstants.SHOOTER_VELOCITY.in(RPM));
-  TunableNumber tunableFeederRpm = new TunableNumber("FEEDER_SPEED",
-      ControlsConstants.FEEDER_VELOCITY.in(RPM));
-  TunableNumber tunableIntakeRpm = new TunableNumber("INTAKE_SPEED",
-      ControlsConstants.INTAKE_ROLLER_VELOCITY.in(RPM));
 
   // Helpers for automatic aiming and shooting
   private final SemiAutoHelper semiAutoHelper;
@@ -234,12 +222,6 @@ public class RobotContainer {
     controller.b().whileTrue(driveWithRightTrenchManualAim());
     controller.a().whileTrue(driveWithAutoAim());
     controller.povDown().toggleOnTrue(stowIntake());
-
-    // This is how you can run using our TunableNumbers
-    // controller.povLeft().whileTrue(runIntakeWithTunableSpeed());
-    // controller.povUp().whileTrue(runSpindexerWithTunableSpeed());
-    // controller.povLeft().onTrue(intakeArm.setAngle(Degrees.of(250)));
-    // controller.povRight().onTrue(intakeArm.setAngle(Degrees.of(290)));
   }
 
   /**
@@ -354,14 +336,6 @@ public class RobotContainer {
 
   public Command stowIntake() {
     return intakeArm.stowIntake();
-  }
-
-  public Command runIntakeWithTunableSpeed() {
-    return intakeRoller.setVelocity(() -> RPM.of(tunableIntakeRpm.getLatest()));
-  }
-
-  public Command runSpindexerWithTunableSpeed() {
-    return spindexer.setVelocity(() -> RPM.of(tunableSpindexerRpm.getLatest()));
   }
 
   // ========================================================================
