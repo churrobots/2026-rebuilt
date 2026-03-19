@@ -3,16 +3,16 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.7651493389483757,
-        "y": 7.021114332026129
+        "x": 3.1337958487817796,
+        "y": 7.132186893096751
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.859249481373588,
-        "y": 7.35495944782839
+        "x": 2.96676481947387,
+        "y": 7.60942531779661
       },
       "isLocked": false,
-      "linkedName": "5P. shoot to neutral"
+      "linkedName": "5. to depot"
     },
     {
       "anchor": {
@@ -20,18 +20,18 @@
         "y": 7.401942973163842
       },
       "prevControl": {
-        "x": 4.8878536506201185,
-        "y": 7.376491547492938
+        "x": 4.270545550847458,
+        "y": 7.493248753089689
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "5. shoot"
+      "linkedName": "5V. to neutral"
     }
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.07679538847780108,
-      "rotationDegrees": 20.0
+      "waypointRelativePos": 0.26654168868921785,
+      "rotationDegrees": 0.0
     }
   ],
   "constraintZones": [],
@@ -46,14 +46,14 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 5.5,
+    "velocity": 0,
     "rotation": 0.0
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -60.74277177230953
+    "rotation": -60.58193207701897
   },
   "useDefaultConstraints": true
 }

@@ -7,6 +7,42 @@
         {
           "type": "named",
           "data": {
+            "name": "autoPrepFlywheels"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "5P. left trench to shoot"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "autoShoot"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 2.0
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "stopAllShooting"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "5P. shoot to 5.O start"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
             "name": "runIntake"
           }
         },
@@ -55,7 +91,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "5. undertrench to depot"
+            "pathName": "5V. to neutral"
           }
         },
         {
@@ -65,15 +101,9 @@
           }
         },
         {
-          "type": "wait",
+          "type": "path",
           "data": {
-            "waitTime": 2.0
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "stopIntake"
+            "pathName": "5V. neutral to score"
           }
         },
         {
@@ -85,7 +115,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "5. depot shoot"
+            "pathName": "5V. neutral to shoot"
           }
         },
         {
@@ -104,6 +134,6 @@
     }
   },
   "resetOdom": true,
-  "folder": "Archive",
+  "folder": null,
   "choreoAuto": false
 }
