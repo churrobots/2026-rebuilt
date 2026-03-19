@@ -72,7 +72,7 @@ public class RobotContainer {
   private final SemiAutoHelper semiAutoHelper;
 
   // Make xlock work.
-  private boolean isXlocked = false;
+  private boolean isRequestingXLock = false;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(Hardware.DriverStation.driverXboxPort);
@@ -290,7 +290,7 @@ public class RobotContainer {
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
             () -> semiAutoHelper.getFullAutoDriveAngle(),
-            () -> isXlocked));
+            () -> isRequestingXLock));
   }
 
   public Command driveWithLeftTrenchManualAim() {
@@ -301,7 +301,7 @@ public class RobotContainer {
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
             () -> Rotation2d.fromDegrees(isRedAlliance() ? 90 : -90),
-            () -> isXlocked));
+            () -> isRequestingXLock));
   }
 
   public Command driveWithRightTrenchManualAim() {
@@ -312,7 +312,7 @@ public class RobotContainer {
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
             () -> Rotation2d.fromDegrees(isRedAlliance() ? -100 : 100),
-            () -> isXlocked));
+            () -> isRequestingXLock));
   }
 
   public Command driveWithTowerManualAim() {
@@ -323,7 +323,7 @@ public class RobotContainer {
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
             () -> Rotation2d.fromDegrees(isRedAlliance() ? 180 : 0),
-            () -> isXlocked));
+            () -> isRequestingXLock));
   }
 
   public Command resetPoseFacingAway() {
@@ -364,28 +364,28 @@ public class RobotContainer {
 
   public Command autoShoot() {
     return Commands.parallel(
+        this.requestXLock(),
         feeder.setVelocity(semiAutoHelper::getFeederVelocityForHubDistance),
-        // We don't want to xlock right away since the aim might not have completed
-        // fully. Instead give it slightly more time to finish aiming before xlock.
-        new WaitCommand(0.3).andThen(this.enableXlock()),
         spindexer.spinToShooter());
   }
 
   // Helpers for xlocking
-  public Command enableXlock() {
-    return Commands.run(this::setXlockToTrueWhenAimingAtHub).finallyDo(this::setXlockToFalse);
+  public Command requestXLock() {
+    return Commands.run(this::requestXlockWhenAimingAtHub).finallyDo(this::dropXLock);
   }
 
-  public void setXlockToTrueWhenAimingAtHub() {
+  public void requestXlockWhenAimingAtHub() {
     // only x-lock when shooting at the hub. Neutral zone we can pass on
     // the fly so we don't want the trigger to xlock us.
     boolean isAimingAtHub = !semiAutoHelper.isInNeutralZone();
     if (isAimingAtHub) {
-      isXlocked = true;
+      isRequestingXLock = true;
+    } else {
+      isRequestingXLock = false;
     }
   }
 
-  public void setXlockToFalse() {
-    isXlocked = false;
+  public void dropXLock() {
+    isRequestingXLock = false;
   }
 }
