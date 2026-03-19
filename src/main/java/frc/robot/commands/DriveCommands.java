@@ -143,11 +143,10 @@ public class DriveCommands {
 
           // Handle x-lock in a smart way, so that the robot doesn't
           // undershoot its goal angle before x-locking (resulting
-          // in inaccurate aiming for example).
+          // in inaccurate aiming for example). Only xlock when we're
+          // fully aimed.
           boolean wantsXLock = xLockRequested.get() == true;
-          boolean closeEnoughToGoal = Math
-              .abs(angleController.getPositionError()) < ControlsConstants.ALLOWABLE_AIMING_ERROR_BEFORE_XLOCK;
-          if (wantsXLock && closeEnoughToGoal) {
+          if (wantsXLock && angleController.atGoal()) {
             drive.stopWithX();
           } else {
             drive.runVelocity(
