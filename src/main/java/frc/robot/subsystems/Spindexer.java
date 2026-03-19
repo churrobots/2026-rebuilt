@@ -20,10 +20,13 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Mass;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.util.HardwareMonitor;
+import frc.robot.util.TunableNumber;
 import frc.robot.util.YAMSUtil;
 import yams.mechanisms.config.FlyWheelConfig;
 import yams.mechanisms.velocity.FlyWheel;
@@ -86,6 +89,9 @@ public class Spindexer extends SubsystemBase {
   // Spindexer Mechanism
   private FlyWheel spindexer = new FlyWheel(spindexerConfig);
 
+  private TunableNumber tunableSpindexerRpm = new TunableNumber("SPINDEXER_SPEED",
+      ControlsConstants.SPINDEXER_VELOCITY.in(RPM));
+
   /** Creates a new Spindexer. */
   public Spindexer() {
     setDefaultCommand(set(ControlsConstants.SPINDEXER_DEFAULT_DUTY_CYCLE));
@@ -101,22 +107,13 @@ public class Spindexer extends SubsystemBase {
     return spindexer.getSpeed();
   }
 
-  public Command feedToShooter() {
-    return spindexer.setSpeed(ControlsConstants.SPINDEXER_VELOCITY);
+  public Command spinToShooter() {
+    // TODO: try setSpeedPulsed?
+    return spindexer.setSpeed(() -> RPM.of(tunableSpindexerRpm.getLatest()));
   }
 
   public Command agitate() {
     return spindexer.setSpeed(RPM.of(-175));
-  }
-
-  /**
-   * Set the spindexer velocity.
-   *
-   * @param speed Speed to set.
-   * @return {@link edu.wpi.first.wpilibj2.command.RunCommand}
-   */
-  public Command setVelocity(Supplier<AngularVelocity> speedSupplier) {
-    return spindexer.setSpeed(speedSupplier);
   }
 
   /**
@@ -140,4 +137,36 @@ public class Spindexer extends SubsystemBase {
     // This method will be called once per scheduler run during simulation
     spindexer.simIterate();
   }
+
+  /**
+   * Set the spindexer velocity, pulsing over the time window given, down
+   * to the minimum percentage of the given speedSupplier.
+   *
+   * @param speed Speed to set.
+   * @return {@link edu.wpi.first.wpilibj2.command.RunCommand}
+   */
+  public Command setSpeedPulsed(Supplier<AngularVelocity> speedSupplier, double pulseInSeconds, double minPercent) {
+    double startTime = Timer.getFPGATimestamp();
+
+    Supplier<AngularVelocity> pulsedSupplier = () -> {
+      double elapsed = Timer.getFPGATimestamp() - startTime;
+
+      // Sine wave formula: sin(2π * frequency * time)
+      double sineValue = Math.sin((2 * Math.PI / pulseInSeconds) * elapsed);
+
+      // Transform range from [-1, 1] to [0, 1]
+      double multiplier = 0.5 + (0.5 * sineValue);
+
+      // minimum at 80%
+      double scaledMultiplier = minPercent + ((1 - minPercent) * multiplier);
+
+      // Apply the multiplier to the original speed
+      // return speedSupplier.get().times(multiplier);
+      var actual = speedSupplier.get();
+      var pulsed = actual.times(scaledMultiplier);
+      return pulsed;
+    };
+    return spindexer.setSpeed(pulsedSupplier);
+  }
+
 }

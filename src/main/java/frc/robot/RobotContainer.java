@@ -77,8 +77,6 @@ public class RobotContainer {
       ControlsConstants.SHOOTER_VELOCITY.in(RPM));
   TunableNumber tunableFeederRpm = new TunableNumber("FEEDER_SPEED",
       ControlsConstants.FEEDER_VELOCITY.in(RPM));
-  TunableNumber tunableSpindexerRpm = new TunableNumber("SPINDEXER_SPEED",
-      ControlsConstants.SPINDEXER_VELOCITY.in(RPM));
   TunableNumber tunableIntakeRpm = new TunableNumber("INTAKE_SPEED",
       ControlsConstants.INTAKE_ROLLER_VELOCITY.in(RPM));
 
@@ -396,7 +394,7 @@ public class RobotContainer {
         // We don't want to xlock right away since the aim might not have completed
         // fully. Instead give it slightly more time to finish aiming before xlock.
         new WaitCommand(0.3).andThen(this.enableXlock()),
-        spindexer.feedToShooter());
+        spindexer.spinToShooter());
   }
 
   // Helpers for xlocking
