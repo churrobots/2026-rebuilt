@@ -91,7 +91,6 @@ public class SemiAutoHelper {
         hubX.minus(robotX).in(Meters));
     SmartDashboard.putNumber("getAngleToHub", Radians.of(targetAngleInRadians).in(Degrees));
     return Rotation2d.fromRadians(targetAngleInRadians);
-
   }
 
   public static Distance getDistanceToHub(Drive drive) {
