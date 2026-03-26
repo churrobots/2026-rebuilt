@@ -8,6 +8,7 @@
 package frc.robot;
 
 import static edu.wpi.first.units.Units.Feet;
+import static edu.wpi.first.units.Units.RPM;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -16,6 +17,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.AngularVelocity;
 
 import static frc.robot.subsystems.vision.VisionConstants.*;
@@ -146,7 +148,7 @@ public class RobotContainer {
         break;
     }
 
-    semiAutoHelper = new SemiAutoHelper(drive::getPose);
+    semiAutoHelper = new SemiAutoHelper(drive);
     bindCommandsForTeleop();
     bindCommandsForAuto();
   }
@@ -241,7 +243,7 @@ public class RobotContainer {
   }
 
   public AngularVelocity getExpectedShooterVelocityForHub() {
-    return semiAutoHelper.getShooterVelocityForHubDistance();
+    return SemiAutoHelper.getShooterVelocityForHubDistance(drive);
   }
 
   public AngularVelocity getActualShooterVelocity() {
@@ -257,7 +259,7 @@ public class RobotContainer {
   // ========================================================================
 
   public Command autoPrepFlywheels() {
-    return shooter.setVelocity(semiAutoHelper::getShooterVelocityForHubDistance);
+    return shooter.setVelocity(SemiAutoHelper.getShooterVelocityForHubDistance(drive));
   }
 
   public Command autoShootWithRePreppedFlywheels() {
@@ -284,18 +286,18 @@ public class RobotContainer {
 
   public Command driveWithAutoAim() {
     return Commands.parallel(
-        shooter.setVelocity(() -> semiAutoHelper.getFullAutoShooterVelocity()),
+        shooter.setVelocity(() -> SemiAutoHelper.getFullAutoShooterVelocity(drive)),
         DriveCommands.joystickDriveAtAngle(
             drive,
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
-            () -> semiAutoHelper.getFullAutoDriveAngle(),
+            () -> SemiAutoHelper.getFullAutoDriveAngle(drive),
             () -> isRequestingXLock));
   }
 
   public Command driveWithLeftTrenchManualAim() {
     return Commands.parallel(
-        shooter.setVelocity(() -> semiAutoHelper.getShooterVelocity(Feet.of(11.5))),
+        shooter.setVelocity(() -> SemiAutoHelper.getShooterVelocity(Feet.of(11.5))),
         DriveCommands.joystickDriveAtAngle(
             drive,
             () -> -controller.getLeftY(),
@@ -306,7 +308,7 @@ public class RobotContainer {
 
   public Command driveWithRightTrenchManualAim() {
     return Commands.parallel(
-        shooter.setVelocity(() -> semiAutoHelper.getShooterVelocity(Feet.of(11.5))),
+        shooter.setVelocity(() -> SemiAutoHelper.getShooterVelocity(Feet.of(11.5))),
         DriveCommands.joystickDriveAtAngle(
             drive,
             () -> -controller.getLeftY(),
@@ -317,7 +319,7 @@ public class RobotContainer {
 
   public Command driveWithTowerManualAim() {
     return Commands.parallel(
-        shooter.setVelocity(() -> semiAutoHelper.getShooterVelocity(Feet.of(10.5))),
+        shooter.setVelocity(() -> SemiAutoHelper.getShooterVelocity(Feet.of(10.5))),
         DriveCommands.joystickDriveAtAngle(
             drive,
             () -> -controller.getLeftY(),
@@ -365,7 +367,7 @@ public class RobotContainer {
   public Command autoShoot() {
     return Commands.parallel(
         this.requestXLock(),
-        feeder.setVelocity(semiAutoHelper::getFeederVelocityForHubDistance),
+        feeder.setVelocity(SemiAutoHelper.getFeederVelocityForHubDistance(drive)),
         spindexer.spinToShooter());
   }
 
@@ -377,7 +379,7 @@ public class RobotContainer {
   public void requestXlockWhenAimingAtHub() {
     // only x-lock when shooting at the hub. Neutral zone we can pass on
     // the fly so we don't want the trigger to xlock us.
-    boolean isAimingAtHub = !semiAutoHelper.isInNeutralZone();
+    boolean isAimingAtHub = !SemiAutoHelper.isInNeutralZone(drive);
     if (isAimingAtHub) {
       isRequestingXLock = true;
     } else {
