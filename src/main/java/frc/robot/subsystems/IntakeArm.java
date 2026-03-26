@@ -6,17 +6,21 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Feet;
 import static edu.wpi.first.units.Units.Pounds;
 
+import java.util.function.Supplier;
+
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
+
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.HardwareMonitor;
+import frc.robot.util.TunableNumber;
 import frc.robot.util.YAMSUtil;
-
 import yams.mechanisms.config.ArmConfig;
 import yams.mechanisms.positional.Arm;
 import yams.motorcontrollers.SmartMotorController;
@@ -32,6 +36,9 @@ public class IntakeArm extends SubsystemBase {
   private static final Angle STOWED_ANGLE = Degrees.of(190);
   private static final Angle RETRACTED_ANGLE = Degrees.of(250);
   private static final Angle EXTENDED_ANGLE = Degrees.of(300);
+  private static final Angle PULSING_ANGLE = Degrees.of(270);
+  private static final double PULSING_PERIOD_SECONDS = 1.0;
+  private static final double PULSING_SWEEP_ANGLE_DEGREES = 30.0;
   private static final double KP = 5.0;
   private static final double KI = 0.0001;
   private static final double KD = 0;
@@ -57,6 +64,9 @@ public class IntakeArm extends SubsystemBase {
       .withUseExternalFeedbackEncoder(true)
       .withExternalEncoderZeroOffset(Degrees.zero())
       .withStartingPosition(Degrees.zero());
+
+  private TunableNumber tunablePulsingAngle = new TunableNumber("INTAKE_ARM_PULSING_ANGLE",
+      PULSING_ANGLE.in(Degrees));
 
   private SmartMotorController armMotorController = YAMSUtil.safeGetSmartMotorController(
       armMotor,
@@ -99,6 +109,11 @@ public class IntakeArm extends SubsystemBase {
     return arm.setAngle(angle);
   }
 
+  public Command pulseArm() {
+    return setAnglePulsed(() -> Degrees.of(tunablePulsingAngle.getLatest()), PULSING_PERIOD_SECONDS,
+        PULSING_SWEEP_ANGLE_DEGREES);
+  }
+
   @Override
   public void periodic() {
     arm.updateTelemetry();
@@ -108,6 +123,23 @@ public class IntakeArm extends SubsystemBase {
   @Override
   public void simulationPeriodic() {
     arm.simIterate();
+  }
+
+  public Command setAnglePulsed(Supplier<Angle> angleSupplier, double periodInSeconds, double sweepAngleDegrees) {
+    double startTime = Timer.getFPGATimestamp();
+
+    Supplier<Angle> pulsedSupplier = () -> {
+      double elapsed = Timer.getFPGATimestamp() - startTime;
+
+      // Sine wave formula: sin(2π * frequency * time)
+      double sineValue = Math.sin((2 * Math.PI / periodInSeconds) * elapsed);
+      double angleDiff = (sweepAngleDegrees / 2) * sineValue;
+
+      var actual = angleSupplier.get();
+      var pulsed = actual.plus(Degrees.of(angleDiff));
+      return pulsed;
+    };
+    return arm.setAngle(pulsedSupplier);
   }
 
 }
