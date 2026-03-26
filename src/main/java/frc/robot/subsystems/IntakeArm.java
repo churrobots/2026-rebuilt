@@ -68,7 +68,7 @@ public class IntakeArm extends SubsystemBase {
       .withHardLimit(STOWED_ANGLE, EXTENDED_ANGLE)
       // Length and mass of your arm for sim.
       .withLength(Feet.of(1))
-      .withMass(Pounds.of(5))
+      .withMass(Pounds.of(15))
       // Telemetry name and verbosity for the arm.
       .withTelemetry("IntakeArm", ControlsConstants.YAMS_VERBOSITY);
 
