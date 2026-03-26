@@ -34,9 +34,14 @@
       "Pos": "60,60",
       "Size": "300,150"
     },
+    "###/FMSInfo": {
+      "Collapsed": "0",
+      "Pos": "574,130",
+      "Size": "140,179"
+    },
     "###/SmartDashboard/Auto Choices": {
       "Collapsed": "0",
-      "Pos": "8,22",
+      "Pos": "286,25",
       "Size": "262,50"
     },
     "###/SmartDashboard/Auto Chooser": {
@@ -61,22 +66,22 @@
     },
     "###/SmartDashboard/Feeder/mechanism": {
       "Collapsed": "0",
-      "Pos": "638,631",
+      "Pos": "297,525",
       "Size": "265,200"
     },
     "###/SmartDashboard/Field": {
       "Collapsed": "0",
-      "Pos": "738,20",
+      "Pos": "279,85",
       "Size": "192,119"
     },
     "###/SmartDashboard/IntakeArm/mechanism": {
       "Collapsed": "0",
-      "Pos": "9,143",
+      "Pos": "0,241",
       "Size": "283,247"
     },
     "###/SmartDashboard/IntakeRoller/mechanism": {
       "Collapsed": "0",
-      "Pos": "5,394",
+      "Pos": "-6,504",
       "Size": "291,187"
     },
     "###/SmartDashboard/PhotonAlerts": {
@@ -86,7 +91,7 @@
     },
     "###/SmartDashboard/Shooter/mechanism": {
       "Collapsed": "0",
-      "Pos": "635,425",
+      "Pos": "4,31",
       "Size": "270,200"
     },
     "###/SmartDashboard/ShooterMech/mechanism": {
@@ -96,12 +101,12 @@
     },
     "###/SmartDashboard/Spindexer/mechanism": {
       "Collapsed": "0",
-      "Pos": "350,489",
-      "Size": "281,259"
+      "Pos": "286,262",
+      "Size": "281,256"
     },
     "###/SmartDashboard/VisionSystemSim-main/Sim Field": {
       "Collapsed": "0",
-      "Pos": "375,18",
+      "Pos": "722,20",
       "Size": "780,400"
     },
     "###DIO": {
@@ -121,7 +126,7 @@
     },
     "###Keyboard 0 Settings": {
       "Collapsed": "0",
-      "Pos": "992,97",
+      "Pos": "587,470",
       "Size": "300,560"
     },
     "###Keyboard 1 Settings": {
@@ -136,17 +141,17 @@
     },
     "###NetworkTables Info": {
       "Collapsed": "0",
-      "Pos": "1151,162",
+      "Pos": "556,22",
       "Size": "158,103"
     },
     "###Other Devices": {
       "Collapsed": "0",
-      "Pos": "714,21",
-      "Size": "250,695"
+      "Pos": "714,30",
+      "Size": "250,686"
     },
     "###Plot <0>": {
       "Collapsed": "0",
-      "Pos": "916,422",
+      "Pos": "737,446",
       "Size": "457,264"
     },
     "###System Joysticks": {
@@ -166,7 +171,7 @@
     },
     "Robot State": {
       "Collapsed": "0",
-      "Pos": "272,21",
+      "Pos": "476,130",
       "Size": "94,122"
     }
   }
