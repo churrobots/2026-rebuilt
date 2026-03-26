@@ -185,10 +185,18 @@ public class Drive extends SubsystemBase {
    * @param speeds Speeds in meters/sec
    */
   public void runVelocity(ChassisSpeeds speeds) {
+    runVelocityWithSpeedCap(speeds, null);
+  }
+
+  public void runVelocityWithSpeedCap(ChassisSpeeds speeds, Double speedCapMetersPerSec) {
     // Calculate module setpoints
     ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
     SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
-    SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, maxSpeedMetersPerSec);
+    if (speedCapMetersPerSec != null) {
+      SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, speedCapMetersPerSec);
+    } else {
+      SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, maxSpeedMetersPerSec);
+    }
 
     // Log unoptimized setpoints
     Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
@@ -271,7 +279,7 @@ public class Drive extends SubsystemBase {
 
   /** Returns the measured chassis speeds of the robot. */
   @AutoLogOutput(key = "SwerveChassisSpeeds/Measured")
-  private ChassisSpeeds getChassisSpeeds() {
+  public ChassisSpeeds getChassisSpeeds() {
     return kinematics.toChassisSpeeds(getModuleStates());
   }
 
@@ -359,5 +367,14 @@ public class Drive extends SubsystemBase {
       ChassisSpeeds robotRelativeSpeeds = ChassisSpeeds.fromRobotRelativeSpeeds(new ChassisSpeeds(0, 0, 0), getYaw());
       kinematics.toSwerveModuleStates(robotRelativeSpeeds);
     });
+  }
+
+  public ChassisSpeeds getFieldVelocity() {
+    return ChassisSpeeds.fromRobotRelativeSpeeds(getChassisSpeeds(), getRotation());
+  }
+
+  public double getSpeedMetersPerSecond() {
+    ChassisSpeeds speeds = ChassisSpeeds.fromRobotRelativeSpeeds(getChassisSpeeds(), getRotation());
+    return Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
   }
 }
