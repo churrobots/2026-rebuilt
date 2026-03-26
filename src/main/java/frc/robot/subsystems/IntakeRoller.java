@@ -39,8 +39,8 @@ public class IntakeRoller extends SubsystemBase {
 
   // Stable physical constants
   private static final Current STATOR_CURRENT_LIMIT = Amps.of(60);
-  private static final Distance DIAMETER = Inches.of(2);
-  private static final Mass MASS = Pounds.of(0.25);
+  private static final Distance DIAMETER = Inches.of(3);
+  private static final Mass MASS = Pounds.of(0.50);
   private static final AngularVelocity UPPER_SOFT_LIMIT = RPM.of(1000);
 
   // Sim constants
