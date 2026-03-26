@@ -92,13 +92,13 @@ public class DriveConstants {
   public static final double driveKd = 0.0;
   public static final double driveKs = switch (Constants.robotName) {
     case Constants.ROBOT_ALPHA -> 0.14945;
-    case Constants.ROBOT_COMP -> 0.17170;
-    default -> 0.17170;
+    case Constants.ROBOT_COMP -> 0.15226;
+    default -> 0.15226;
   };
   public static final double driveKv = switch (Constants.robotName) {
     case Constants.ROBOT_ALPHA -> 0.06761;
-    case Constants.ROBOT_COMP -> 0.06455;
-    default -> 0.06455;
+    case Constants.ROBOT_COMP -> 0.06481;
+    default -> 0.06481;
   };
   public static final double driveSimP = 0.05;
   public static final double driveSimD = 0.0;
