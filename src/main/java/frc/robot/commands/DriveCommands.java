@@ -43,6 +43,7 @@ public class DriveCommands {
   private static final double FF_RAMP_RATE = 0.1; // Volts/Sec
   private static final double WHEEL_RADIUS_MAX_VELOCITY = 0.25; // Rad/Sec
   private static final double WHEEL_RADIUS_RAMP_RATE = 0.05; // Rad/Sec^2
+  private static final double ALLOWABLE_ERROR_MARGIN_FOR_AIMING = 0.06;
 
   private DriveCommands() {
   }
@@ -147,8 +148,7 @@ public class DriveCommands {
           // fully aimed.
           boolean wantsXLock = xLockRequested.get() == true;
           double error = angleController.getPositionError();
-          double errorDerivative = angleController.getVelocityError();
-          boolean closeEnough = error < 0.06; // angleController.atGoal()
+          boolean closeEnough = error < ALLOWABLE_ERROR_MARGIN_FOR_AIMING;
           if (wantsXLock && closeEnough) {
             drive.stopWithX();
           } else {
