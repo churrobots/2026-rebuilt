@@ -7,6 +7,7 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.SignalLogger;
 import com.revrobotics.util.StatusLogger;
 
 import edu.wpi.first.net.WebServer;
@@ -88,6 +89,8 @@ public class Robot extends LoggedRobot {
     // Initialize URCL
     Logger.registerURCL(URCL.startExternal());
     StatusLogger.disableAutoLogging(); // Disable REVLib's built-in logging
+
+    SignalLogger.enableAutoLogging(false);
 
     // Start AdvantageKit logger
     Logger.start();

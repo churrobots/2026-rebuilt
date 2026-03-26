@@ -13,7 +13,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "5P. left trench to shoot"
+            "pathName": "3P. right trench to shoot"
           }
         },
         {
@@ -35,12 +35,6 @@
           }
         },
         {
-          "type": "path",
-          "data": {
-            "pathName": "5P. shoot to 5.O start"
-          }
-        },
-        {
           "type": "named",
           "data": {
             "name": "runIntake"
@@ -49,7 +43,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "5. left trench to neutral"
+            "pathName": "3P. trench to neutral"
           }
         },
         {
@@ -59,15 +53,15 @@
           }
         },
         {
-          "type": "path",
-          "data": {
-            "pathName": "5V. neutral to shoot"
-          }
-        },
-        {
           "type": "named",
           "data": {
             "name": "stopIntake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "3. netural to outpost score"
           }
         },
         {
@@ -79,7 +73,7 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 3.0
+            "waitTime": 1.5
           }
         },
         {
@@ -91,19 +85,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "5V. to neutral"
+            "pathName": "3. receive outpost"
           }
         },
         {
-          "type": "named",
+          "type": "wait",
           "data": {
-            "name": "runIntake"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "5V. neutral to score"
+            "waitTime": 1.75
           }
         },
         {
@@ -115,7 +103,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "5V. neutral to shoot"
+            "pathName": "3. outpost to score"
           }
         },
         {

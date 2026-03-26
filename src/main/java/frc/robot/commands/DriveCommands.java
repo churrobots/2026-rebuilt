@@ -146,7 +146,10 @@ public class DriveCommands {
           // in inaccurate aiming for example). Only xlock when we're
           // fully aimed.
           boolean wantsXLock = xLockRequested.get() == true;
-          if (wantsXLock && angleController.atGoal()) {
+          double error = angleController.getPositionError();
+          double errorDerivative = angleController.getVelocityError();
+          boolean closeEnough = error < 0.06; // angleController.atGoal()
+          if (wantsXLock && closeEnough) {
             drive.stopWithX();
           } else {
             drive.runVelocity(
