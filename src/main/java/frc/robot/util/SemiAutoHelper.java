@@ -54,8 +54,9 @@ public class SemiAutoHelper {
       Map.entry(75., 2800.));
 
   public SemiAutoHelper(final Drive drive) {
-    GeneratedLUT shootOnTheMoveLookupTable = createShootOnTheMoveLookupTable();
-    this.shotCalculator = setupShotCalculator(shootOnTheMoveLookupTable);
+    // TODO: add back in
+    // GeneratedLUT shootOnTheMoveLookupTable = createShootOnTheMoveLookupTable();
+    // this.shotCalculator = setupShotCalculator(shootOnTheMoveLookupTable);
     this.drive = drive;
   }
 
