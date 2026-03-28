@@ -58,7 +58,7 @@ public class IntakeRoller extends SubsystemBase {
       // Telemetry name and verbosity level
       .withTelemetry(MOTOR_TELEMETRY, ControlsConstants.YAMS_VERBOSITY)
       // Motor properties to prevent over currenting.
-      .withMotorInverted(false)
+      .withMotorInverted(true)
       .withIdleMode(MotorMode.COAST)
       .withGearing(1)
       .withStatorCurrentLimit(STATOR_CURRENT_LIMIT);
