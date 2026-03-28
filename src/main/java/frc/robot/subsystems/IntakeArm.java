@@ -41,7 +41,7 @@ public class IntakeArm extends SubsystemBase {
   private static final Angle PULSING_ANGLE = EXTENDED_ANGLE.minus(Degrees.of(PULSING_SWEEP_ANGLE_DEGREES));
   private static final Angle DUTY_CYCLE_OFFSET = Degrees.of(180);
   private static final double KP = 4.5; // was 5.0
-  private static final double KI = 0.3; // was 0.0001
+  private static final double KI = 0.0001; // was 0.0001
   private static final double KD = 0;
   private static final double KS = 0;
   private static final double KG = 0.1; // was 0.0
