@@ -216,7 +216,6 @@ public class RobotContainer {
     drive.setDefaultCommand(driveWithJoysticks());
 
     controller.back().whileTrue(resetPoseFacingAway());
-    // controller.leftBumper().whileTrue(xLock());
     controller.rightTrigger(DriveTeamConstants.XBOX_TRIGGER_SENSITIVITY).whileTrue(autoShoot());
     controller.leftTrigger(DriveTeamConstants.XBOX_TRIGGER_SENSITIVITY).whileTrue(runIntake());
     controller.x().whileTrue(driveWithLeftTrenchManualAim());
@@ -235,7 +234,7 @@ public class RobotContainer {
     // Always make sure to retract the intake before starting ANY auto
     // TODO: this gives an exception every second time you run it
     // @hannah: dropped from 0.8 to 0.5 after the first quals
-    return intakeArm.retractIntake().withTimeout(0.5).andThen(autoChooser.get());
+    return retractIntake().withTimeout(0.5).andThen(autoChooser.get());
   }
 
   public Pose2d getPose() {
@@ -346,21 +345,21 @@ public class RobotContainer {
 
   public Command runIntake() {
     return Commands.parallel(
-        intakeArm.extendIntake(),
+        extendIntake(),
         spindexer.agitate(),
         intakeRoller.feedToSpindexer());
   }
 
   public Command runIntakeFaster() {
     return Commands.parallel(
-        intakeArm.extendIntake(),
+        extendIntake(),
         spindexer.agitate(),
         intakeRoller.feedToSpindexerFaster());
   }
 
   public Command stopIntake() {
     return Commands.parallel(
-        intakeArm.retractIntake(),
+        retractIntake(),
         intakeRoller.stopFeeding());
   }
 
@@ -390,4 +389,13 @@ public class RobotContainer {
   public void dropXLock() {
     isRequestingXLock = false;
   }
+
+  private Command retractIntake() {
+    return intakeArm.retractIntake();
+  }
+
+  private Command extendIntake() {
+   return intakeArm.extendIntake();
+  }
+
 }
