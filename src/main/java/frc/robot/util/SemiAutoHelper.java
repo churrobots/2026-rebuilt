@@ -10,6 +10,7 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Radians;
 
+import java.util.List;
 import java.util.Map;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
@@ -21,16 +22,14 @@ import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.ControlsConstants;
 import frc.robot.subsystems.drive.Drive;
-import frc.robot.subsystems.sotm.ProjectileSimulator;
-import frc.robot.subsystems.sotm.ProjectileSimulator.GeneratedLUT;
 import frc.robot.subsystems.sotm.ShotCalculator;
-import frc.robot.subsystems.sotm.ShotCalculator.LaunchParameters;
 
 /** Add your docs here. */
 public class SemiAutoHelper {
@@ -40,6 +39,8 @@ public class SemiAutoHelper {
   private Drive drive;
 
   private static TunableNumber tunableShooterAddedRpm = new TunableNumber("SHOOTER_BOOST", 0);
+  // Drive angle range from [-180, 180]
+  private static List<Double> bumpAngles = List.of(45.0, 45.0 + 90, -45.0, -45.0 - 90);
 
   // Use this to automatically select an RPM for a given distance (Inches, RPM)
   static InterpolatingDoubleTreeMap lookupDistanceInInchesToRPM = InterpolatingDoubleTreeMap.ofEntries(
@@ -129,6 +130,7 @@ public class SemiAutoHelper {
   }
 
   public static AngularVelocity getShooterVelocityForPassing() {
+    // Could update to be dependent on distance to alliance zone
     return RPM.of(2900);
   }
 
@@ -190,4 +192,18 @@ public class SemiAutoHelper {
     }
   }
 
+  public static Rotation2d getAngleToDriveOverBump(Drive drive) {
+    double driveAngle = drive.getPose().getRotation().getDegrees();
+    double minDiff = Double.MAX_VALUE;
+    double angleToDrive = 0;
+    for (Double candidateAngle : bumpAngles) {
+      double angleDiff = Math.abs(driveAngle - candidateAngle);
+      if (angleDiff < minDiff) {
+        minDiff = angleDiff;
+        angleToDrive = candidateAngle;
+      }
+    }
+
+    return Rotation2d.fromDegrees(angleToDrive);
+  }
 }

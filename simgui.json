@@ -191,10 +191,41 @@
     "Persistent Values": {
       "open": false
     },
-    "Retained Values": {
-      "open": false
+    "retained": {
+      "SmartDashboard": {
+        "Auto Choices": {
+          "open": true
+        },
+        "open": true
+      }
     },
     "transitory": {
+      "AdvantageKit": {
+        "Drive": {
+          "open": true
+        },
+        "RealOutputs": {
+          "open": true
+        },
+        "SystemStats": {
+          "open": true
+        },
+        "Vision": {
+          "Camera0": {
+            "open": true
+          },
+          "open": true
+        }
+      },
+      "CameraPublisher": {
+        "open": true
+      },
+      "FMSInfo": {
+        "open": true
+      },
+      "LiveWindow": {
+        "open": true
+      },
       "Mechanisms": {
         "Shooter": {
           "ShooterMotor": {
@@ -208,14 +239,18 @@
             "rotor": {
               "open": true
             }
-          },
-          "open": true
+          }
         },
         "open": true
       },
       "SmartDashboard": {
         "Arm": {
           "open": true
+        },
+        "HardwareMonitor": {
+          "FaultStatus": {
+            "open": true
+          }
         },
         "IntakeArm": {
           "mechanism": {
@@ -237,8 +272,22 @@
         "IntakeArm": {
           "IntakeArm": {
             "open": true
-          }
-        }
+          },
+          "IntakeArmMotor": {
+            "closedloop": {
+              "feedforward": {
+                "open": true
+              },
+              "open": true
+            },
+            "open": true
+          },
+          "open": true
+        },
+        "open": true
+      },
+      "photonvision": {
+        "open": true
       }
     }
   },
@@ -252,9 +301,6 @@
       }
     },
     "visible": true
-  },
-  "NetworkTables View": {
-    "visible": false
   },
   "Plot": {
     "Plot <0>": {

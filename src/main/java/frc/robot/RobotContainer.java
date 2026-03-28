@@ -8,7 +8,14 @@
 package frc.robot;
 
 import static edu.wpi.first.units.Units.Feet;
-import static edu.wpi.first.units.Units.RPM;
+import static frc.robot.subsystems.vision.VisionConstants.cameraBackLeft;
+import static frc.robot.subsystems.vision.VisionConstants.cameraBackRight;
+import static frc.robot.subsystems.vision.VisionConstants.cameraFrontLeft;
+import static frc.robot.subsystems.vision.VisionConstants.cameraFrontRight;
+import static frc.robot.subsystems.vision.VisionConstants.robotToCameraBackLeft;
+import static frc.robot.subsystems.vision.VisionConstants.robotToCameraBackRight;
+import static frc.robot.subsystems.vision.VisionConstants.robotToCameraFrontLeft;
+import static frc.robot.subsystems.vision.VisionConstants.robotToCameraFrontRight;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -17,13 +24,10 @@ import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.AngularVelocity;
-
-import static frc.robot.subsystems.vision.VisionConstants.*;
-
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -44,7 +48,6 @@ import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOSpark;
-
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
@@ -69,9 +72,6 @@ public class RobotContainer {
   private final IntakeArm intakeArm = new IntakeArm();
   private final Shooter shooter = new Shooter();
   private final Feeder feeder = new Feeder();
-
-  // Helpers for automatic aiming and shooting
-  private final SemiAutoHelper semiAutoHelper;
 
   // Make xlock work.
   private boolean isRequestingXLock = false;
@@ -148,7 +148,6 @@ public class RobotContainer {
         break;
     }
 
-    semiAutoHelper = new SemiAutoHelper(drive);
     bindCommandsForTeleop();
     bindCommandsForAuto();
   }
@@ -223,6 +222,7 @@ public class RobotContainer {
     controller.b().whileTrue(driveWithRightTrenchManualAim());
     controller.a().whileTrue(driveWithAutoAim());
     controller.povDown().toggleOnTrue(stowIntake());
+    controller.rightBumper().whileTrue(driveWithBumpAngle());
     // For tuning arm:
     // controller.povUp().toggleOnTrue(extendIntake());
     // controller.povRight().toggleOnTrue(retractIntake());
@@ -284,6 +284,15 @@ public class RobotContainer {
         () -> -controller.getLeftY(),
         () -> -controller.getLeftX(),
         () -> -controller.getRightX());
+  }
+
+  public Command driveWithBumpAngle() {
+    return DriveCommands.joystickDriveAtAngle(
+        drive,
+        () -> -controller.getLeftY(),
+        () -> -controller.getLeftX(),
+        () -> SemiAutoHelper.getAngleToDriveOverBump(drive),
+        () -> false);
   }
 
   public Command driveWithAutoAim() {
