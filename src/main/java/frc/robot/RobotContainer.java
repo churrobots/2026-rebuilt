@@ -223,8 +223,9 @@ public class RobotContainer {
     controller.b().whileTrue(driveWithRightTrenchManualAim());
     controller.a().whileTrue(driveWithAutoAim());
     controller.povDown().toggleOnTrue(stowIntake());
-    controller.povUp().toggleOnTrue(extendIntake());
-    controller.povRight().toggleOnTrue(retractIntake());
+    // For tuning arm:
+    // controller.povUp().toggleOnTrue(extendIntake());
+    // controller.povRight().toggleOnTrue(retractIntake());
   }
 
   /**
@@ -397,7 +398,7 @@ public class RobotContainer {
   }
 
   private Command extendIntake() {
-   return intakeArm.extendIntake();
+    return intakeArm.extendIntake();
   }
 
 }
