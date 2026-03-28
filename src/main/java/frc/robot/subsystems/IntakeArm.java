@@ -33,10 +33,9 @@ public class IntakeArm extends SubsystemBase {
   // NOTE: these are measured with EMPIRICALLY measured angles for safety.
   // We couldn't figure out the zero offsets for the real robot so we just
   // used the actual angles output by the mechanism and noted the targets.
-  private static final Angle STOWED_ANGLE = Degrees.of(190);
-  private static final Angle RETRACTED_ANGLE = Degrees.of(250);
-  private static final Angle EXTENDED_ANGLE = Degrees.of(300);
-  private static final Angle PULSING_ANGLE = Degrees.of(270);
+  private static final Angle STOWED_ANGLE = Degrees.of(0.68 * 360);
+  private static final Angle RETRACTED_ANGLE = Degrees.of(0.488 * 360);
+  private static final Angle EXTENDED_ANGLE = Degrees.of(0.34 * 360);
   private static final double PULSING_PERIOD_SECONDS = 1.0;
   private static final double PULSING_SWEEP_ANGLE_DEGREES = 30.0;
   private static final double KP = 5.0;
@@ -62,7 +61,7 @@ public class IntakeArm extends SubsystemBase {
       .withSoftLimit(STOWED_ANGLE, EXTENDED_ANGLE)
       .withExternalEncoder(armMotor.getAbsoluteEncoder())
       .withUseExternalFeedbackEncoder(true)
-      .withExternalEncoderZeroOffset(Degrees.zero())
+      .withExternalEncoderZeroOffset(DUTY_CYCLE_OFFSET)
       .withStartingPosition(Degrees.zero());
 
   private TunableNumber tunablePulsingAngle = new TunableNumber("INTAKE_ARM_PULSING_ANGLE",
