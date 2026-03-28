@@ -31,23 +31,26 @@ public class VisionConstants {
 
   // Robot to camera transforms
   // (Not used by Limelight, configure in web UI instead)
-
-  // Yaw only works right when it is inverted?
   public static Transform3d robotToCameraFrontRight = new Transform3d(
-      Units.inchesToMeters(7.16), Units.inchesToMeters(-12.4421), Units.inchesToMeters(28),
-      new Rotation3d(Math.PI, Units.degreesToRadians(0), 0));
-  // hannah@: backRight camera mount replacement after quals 37 (to the right .9"
-  // and tilted back 15 degrees)
+      Units.inchesToMeters(1.4), Units.inchesToMeters(-13),
+      Units.inchesToMeters(16.45),
+      new Rotation3d(Math.PI, Units.degreesToRadians(-15),
+          Units.degreesToRadians(-45)));
   public static Transform3d robotToCameraBackRight = new Transform3d(
-      Units.inchesToMeters(-12), Units.inchesToMeters(-12.9), Units.inchesToMeters(10),
-      new Rotation3d(Math.PI, Units.degreesToRadians(-15), Units.degreesToRadians(-90)));
+      Units.inchesToMeters(-12.7839), Units.inchesToMeters(-12.4421),
+      Units.inchesToMeters(10),
+      new Rotation3d(Math.PI, Units.degreesToRadians(-15),
+          Units.degreesToRadians(-150)));
   public static Transform3d robotToCameraFrontLeft = new Transform3d(
       Units.inchesToMeters(1.4), Units.inchesToMeters(13), Units.inchesToMeters(
           16.45),
-      new Rotation3d(Math.PI, Units.degreesToRadians(-15), Units.degreesToRadians(45)));
+      new Rotation3d(Math.PI, Units.degreesToRadians(-15),
+          Units.degreesToRadians(45)));
   public static Transform3d robotToCameraBackLeft = new Transform3d(
-      Units.inchesToMeters(-12), Units.inchesToMeters(12), Units.inchesToMeters(10),
-      new Rotation3d(Math.PI, Units.degreesToRadians(0), Units.degreesToRadians(180)));
+      Units.inchesToMeters(-12.7839), Units.inchesToMeters(12.4421),
+      Units.inchesToMeters(10),
+      new Rotation3d(Math.PI, Units.degreesToRadians(-15),
+          Units.degreesToRadians(150)));
 
   // Basic filtering thresholds
   public static double maxAmbiguity = 0.3;

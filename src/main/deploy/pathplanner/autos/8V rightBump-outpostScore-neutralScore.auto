@@ -7,31 +7,7 @@
         {
           "type": "named",
           "data": {
-            "name": "autoPrepFlywheels"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "8. right bump to shoot"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "autoShoot"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 2.0
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "stopAllShooting"
+            "name": "runIntake"
           }
         },
         {
@@ -41,15 +17,15 @@
           }
         },
         {
-          "type": "wait",
+          "type": "named",
           "data": {
-            "waitTime": 1.75
+            "name": "autoPrepFlywheels"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "autoPrepFlywheels"
+            "name": "stopIntake"
           }
         },
         {

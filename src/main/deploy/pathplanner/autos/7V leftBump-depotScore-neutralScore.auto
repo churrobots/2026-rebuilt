@@ -7,13 +7,37 @@
         {
           "type": "named",
           "data": {
+            "name": "runIntake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "7. shoot to depot"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 2.0
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "stopIntake"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
             "name": "autoPrepFlywheels"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "2. undertrench + shoot"
+            "pathName": "7. to shoot"
           }
         },
         {
@@ -35,6 +59,12 @@
           }
         },
         {
+          "type": "path",
+          "data": {
+            "pathName": "7. over hub to neutral"
+          }
+        },
+        {
           "type": "named",
           "data": {
             "name": "runIntake"
@@ -43,13 +73,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "2. neutral intake"
+            "pathName": "7. neutral intake"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "runIntake"
+            "name": "stopIntake"
           }
         },
         {
@@ -61,7 +91,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "2. neutral to shoot"
+            "pathName": "7. neutral to origin"
           }
         },
         {
@@ -69,11 +99,17 @@
           "data": {
             "name": "autoShoot"
           }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 5.0
+          }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": "Archive",
+  "folder": null,
   "choreoAuto": false
 }

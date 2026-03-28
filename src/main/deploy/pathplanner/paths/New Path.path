@@ -3,37 +3,32 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.1337958487817796,
-        "y": 7.132186893096751
+        "x": 4.000692697298729,
+        "y": 0.5070137963780461
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.96676481947387,
-        "y": 7.60942531779661
+        "x": 5.00069269729873,
+        "y": 0.5070137963780461
       },
       "isLocked": false,
-      "linkedName": "5. to depot"
+      "linkedName": "3p. right trench to shoot"
     },
     {
       "anchor": {
-        "x": 5.291021914724577,
-        "y": 7.401942973163842
+        "x": 5.65237409516243,
+        "y": 1.2829073424258468
       },
       "prevControl": {
-        "x": 4.270545550847458,
-        "y": 7.493248753089689
+        "x": 4.65237409516243,
+        "y": 1.2829073424258468
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "5V. to neutral"
+      "linkedName": null
     }
   ],
-  "rotationTargets": [
-    {
-      "waypointRelativePos": 0.26654168868921785,
-      "rotationDegrees": 0.0
-    }
-  ],
+  "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [],
@@ -53,7 +48,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -60.58193207701897
+    "rotation": 89.74816656383781
   },
   "useDefaultConstraints": true
 }

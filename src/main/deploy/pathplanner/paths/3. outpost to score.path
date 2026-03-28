@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 0.47454314158799393,
-        "y": 0.7966342672911582
+        "x": 0.7304526341795492,
+        "y": 0.6264701887840953
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.4214063725924162,
-        "y": 1.2364773234675925
+        "x": 1.4138900410548423,
+        "y": 0.743745199818618
       },
       "isLocked": false,
       "linkedName": "3. receive outpost"
@@ -20,8 +20,8 @@
         "y": 1.9409186308262711
       },
       "prevControl": {
-        "x": 0.8450780254400974,
-        "y": 0.7998819634212537
+        "x": 0.5213078406372285,
+        "y": 1.061286811312157
       },
       "nextControl": null,
       "isLocked": false,
@@ -48,7 +48,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -90.22326784099076
+    "rotation": -179.04923690686164
   },
   "useDefaultConstraints": true
 }
