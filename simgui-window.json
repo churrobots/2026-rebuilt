@@ -106,7 +106,7 @@
     },
     "###/SmartDashboard/VisionSystemSim-main/Sim Field": {
       "Collapsed": "0",
-      "Pos": "722,20",
+      "Pos": "763,19",
       "Size": "780,400"
     },
     "###DIO": {
@@ -136,7 +136,7 @@
     },
     "###NetworkTables": {
       "Collapsed": "0",
-      "Pos": "726,70",
+      "Pos": "175,195",
       "Size": "750,566"
     },
     "###NetworkTables Info": {
@@ -171,7 +171,7 @@
     },
     "Robot State": {
       "Collapsed": "0",
-      "Pos": "476,130",
+      "Pos": "445,91",
       "Size": "94,122"
     }
   }
