@@ -358,14 +358,16 @@ public class RobotContainer {
   public Command runIntake() {
     return Commands.parallel(
         extendIntake(),
-        spindexer.agitate(),
+        // NOTE: no longer need agitate with new dome spindexer
+        // spindexer.agitate(),
         intakeRoller.feedToSpindexer());
   }
 
   public Command runIntakeFaster() {
     return Commands.parallel(
         extendIntake(),
-        spindexer.agitate(),
+        // NOTE: no longer need agitate with new dome spindexer
+        // spindexer.agitate(),
         intakeRoller.feedToSpindexerFaster());
   }
 
