@@ -380,6 +380,7 @@ public class RobotContainer {
   public Command autoShoot() {
     return Commands.parallel(
         this.requestXLock(),
+        intakeArm.pulseArm(),
         feeder.setVelocity(SemiAutoHelper.getFeederVelocityForHubDistance(drive)),
         spindexer.spinToShooter());
   }
