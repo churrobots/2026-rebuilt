@@ -36,9 +36,12 @@ public class IntakeArm extends SubsystemBase {
   private static final Angle STOWED_ANGLE = Degrees.of(0.66 * 360);
   private static final Angle RETRACTED_ANGLE = Degrees.of(0.50 * 360);
   private static final Angle EXTENDED_ANGLE = Degrees.of(0.34 * 360);
-  private static final double PULSING_PERIOD_SECONDS = 1.0;
-  private static final double PULSING_SWEEP_ANGLE_DEGREES = 30.0;
-  private static final Angle PULSING_ANGLE = EXTENDED_ANGLE.plus(Degrees.of(PULSING_SWEEP_ANGLE_DEGREES));
+
+  // Pulsing constants
+  private static final double PULSING_PERIOD_SECONDS = 0.5;
+  private static final Angle PULSING_ANGLE_START = Degrees.of(0.36 * 360);
+  private static final Angle PULSING_ANGLE_END = Degrees.of(0.54 * 360);
+
   private static final Angle DUTY_CYCLE_OFFSET = Degrees.of(180);
   private static final double KP = 4.5; // was 5.0
   private static final double KI = 0.0001; // was 0.0001
@@ -60,15 +63,21 @@ public class IntakeArm extends SubsystemBase {
       .withMotorInverted(false)
       .withIdleMode(MotorMode.COAST)
       .withStatorCurrentLimit(Amps.of(40))
-      // TODO: soft limit prevents responding to commands at all - figure out why
-      // .withSoftLimit(STOWED_ANGLE, EXTENDED_ANGLE)
+      .withSoftLimit(EXTENDED_ANGLE, STOWED_ANGLE)
       .withExternalEncoder(armMotor.getAbsoluteEncoder())
       .withUseExternalFeedbackEncoder(true)
       .withExternalEncoderZeroOffset(DUTY_CYCLE_OFFSET)
       .withStartingPosition(Degrees.zero());
 
-  private TunableNumber tunablePulsingAngle = new TunableNumber("INTAKE_ARM_PULSING_ANGLE",
-      PULSING_ANGLE.in(Degrees));
+  private TunableNumber tunablePulsingAngleStart = new TunableNumber(
+      "PULSING_ANGLE_START",
+      PULSING_ANGLE_START.in(Degrees));
+  private TunableNumber tunablePulsingAngleEnd = new TunableNumber(
+      "PULSING_ANGLE_END",
+      PULSING_ANGLE_END.in(Degrees));
+  private TunableNumber tunablePulsingAnglePeriodInSeconds = new TunableNumber(
+      "PULSING_PERIOD_SECONDS",
+      PULSING_PERIOD_SECONDS);
 
   private SmartMotorController armMotorController = YAMSUtil.safeGetSmartMotorController(
       armMotor,
@@ -112,36 +121,40 @@ public class IntakeArm extends SubsystemBase {
   }
 
   public Command pulseArm() {
-    return setAnglePulsed(() -> Degrees.of(tunablePulsingAngle.getLatest()), PULSING_PERIOD_SECONDS,
-        PULSING_SWEEP_ANGLE_DEGREES);
-  }
-
-  @Override
-  public void periodic() {
-    arm.updateTelemetry();
-    SmartDashboard.putNumber("armDegrees", arm.getAngle().in(Degree));
-  }
-
-  @Override
-  public void simulationPeriodic() {
-    arm.simIterate();
-  }
-
-  public Command setAnglePulsed(Supplier<Angle> angleSupplier, double periodInSeconds, double sweepAngleDegrees) {
     double startTime = Timer.getFPGATimestamp();
 
     Supplier<Angle> pulsedSupplier = () -> {
       double elapsed = Timer.getFPGATimestamp() - startTime;
 
+      // Get latest values.
+      double periodInSeconds = tunablePulsingAnglePeriodInSeconds.getLatest();
+      double startAngleDegrees = tunablePulsingAngleStart.getLatest();
+      double endAngleDegrees = tunablePulsingAngleEnd.getLatest();
+      double lowestAngleDegrees = Math.min(startAngleDegrees, endAngleDegrees);
+      double highestAngleDegrees = Math.max(startAngleDegrees, endAngleDegrees);
+      double sweepAngleDegrees = highestAngleDegrees - lowestAngleDegrees;
+
       // Sine wave formula: sin(2π * frequency * time)
       double sineValue = Math.sin((2 * Math.PI / periodInSeconds) * elapsed);
-      double angleDiff = (sweepAngleDegrees / 2) * sineValue;
-
-      var actual = angleSupplier.get();
-      var pulsed = actual.plus(Degrees.of(angleDiff));
-      return pulsed;
+      double angleDiffDegrees = (sweepAngleDegrees / 2) * (sineValue + 1);
+      double pulsedAngleDegrees = lowestAngleDegrees + angleDiffDegrees;
+      SmartDashboard.putNumber("pulse_lowestAngleDegrees", lowestAngleDegrees);
+      SmartDashboard.putNumber("pulse_highestAngleDegrees", highestAngleDegrees);
+      SmartDashboard.putNumber("pulse_angleDiffDegrees", angleDiffDegrees);
+      SmartDashboard.putNumber("pulse_pulsedAngleDegrees", pulsedAngleDegrees);
+      return Degrees.of(pulsedAngleDegrees);
     };
     return arm.setAngle(pulsedSupplier);
+  }
+
+  @Override
+  public void periodic() {
+    arm.updateTelemetry();
+  }
+
+  @Override
+  public void simulationPeriodic() {
+    arm.simIterate();
   }
 
 }
