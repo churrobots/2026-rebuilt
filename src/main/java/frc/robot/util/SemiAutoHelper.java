@@ -90,7 +90,7 @@ public class SemiAutoHelper {
     Distance hubY = isRedAlliance ? redHubY : blueHubY;
 
     boolean isOnLeftSide = isRedAlliance ? robotY.lte(redHubY) : robotY.gte(blueHubY);
-    Distance offsetToCompensateForLeftCannon = isOnLeftSide ? Inches.of(-12.0) : Inches.of(12.0);
+    Distance offsetToCompensateForLeftCannon = isOnLeftSide ? Inches.of(-9.0) : Inches.of(9.0);
     Distance blueHubX = Distance.ofBaseUnits(4.63 + offsetToCompensateForLeftCannon.in(Meters), Meters);
     Distance redHubX = Distance.ofBaseUnits(aprilTagLayout.getFieldLength(), Meters).minus(blueHubX);
     Distance hubX = isRedAlliance ? redHubX : blueHubX;
