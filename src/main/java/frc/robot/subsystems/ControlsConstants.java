@@ -53,7 +53,7 @@ public class ControlsConstants {
   public static final double SHOOTER_KD = 0;
   public static final double SHOOTER_DEFAULT_DUTY_CYCLE = 0;
   public static final double SHOOTER_KV = 0.112;
-  public static final double FEEDER_TO_SHOOTER_RPM_RATIO = 5000.0 / 3400.0;
+  public static final double FEEDER_TO_SHOOTER_RPM_RATIO = 6000.0 / 3400.0;
 
   // ========== Spindexer ==========
   public static final double SPINDEXER_KP = 0.3;
@@ -64,8 +64,15 @@ public class ControlsConstants {
 
   // ========== Controller Binding Constants ==========
   public static final AngularVelocity SPINDEXER_VELOCITY = RPM.of(1500); // was 600
-  public static final AngularVelocity INTAKE_ROLLER_VELOCITY = RPM.of(4800);
-  public static final AngularVelocity FEEDER_VELOCITY = RPM.of(5000);
+
+  // Math for minimum RPM required, which surface speed should be 2x robot speed
+  // Drivetrain maxes at 4.6 m/s --> rollers need to run 2x = 9.2 m/s
+  // Rollers are 3" = 0.076m diameter x PI --> 0.2388m circumference
+  // Rollers therefore give 0.2388m / rotation
+  // Target Roller RPM = (9.2 m/sec DIVIDED BY 0.2388 m/rot) = 38.5 rot/sec
+  // 38.5 rot/sec x 60 sec/minute = 2310 rot/min (RPM)
+  public static final AngularVelocity INTAKE_ROLLER_VELOCITY = RPM.of(2500);
+
   public static final AngularVelocity SHOOTER_VELOCITY = RPM.of(4550);
   public static final AngularVelocity SHOOTER_IDLE_VELOCITY = RPM.of(400);
 }
