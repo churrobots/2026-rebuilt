@@ -41,7 +41,6 @@ public class IntakeRoller extends SubsystemBase {
   private static final Current STATOR_CURRENT_LIMIT = Amps.of(60);
   private static final Distance DIAMETER = Inches.of(3);
   private static final Mass MASS = Pounds.of(0.50);
-  private static final AngularVelocity UPPER_SOFT_LIMIT = RPM.of(1000);
 
   // Sim constants
   private static final double SIM_KP = 50;
@@ -75,8 +74,6 @@ public class IntakeRoller extends SubsystemBase {
       .withDiameter(DIAMETER)
       // Mass of the flywheel.
       .withMass(MASS)
-      // Maximum speed of the intake.
-      .withUpperSoftLimit(UPPER_SOFT_LIMIT)
       // Telemetry name and verbosity for the mechanism.
       .withTelemetry(MECHANISM_TELEMETRY, ControlsConstants.YAMS_VERBOSITY);
 
