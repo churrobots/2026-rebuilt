@@ -27,10 +27,8 @@ import edu.wpi.first.units.measure.MomentOfInertia;
 import frc.robot.Constants;
 
 public class DriveConstants {
-  // TODO: Extra High 4 is 7.22 m/s free speed theoretical max ratio, from:
-  // https://www.revrobotics.com/rev-21-3005/
-  // ...so we might want to change this to 7.22?
-  public static final double maxSpeedMetersPerSec = 6.2;
+  // Theoretical max is 4.92 m/s, we measured closer to 4.7 or 4.8
+  public static final double maxSpeedMetersPerSec = 4.8;
   public static final double odometryFrequency = 100.0; // Hz
   public static final double trackWidth = Units.inchesToMeters(24);
   public static final double wheelBase = Units.inchesToMeters(24);
@@ -67,7 +65,12 @@ public class DriveConstants {
   // Drive motor configuration
   // This is how to tune all the values here
   // https://docs.advantagekit.org/getting-started/template-projects/spark-swerve-template/#tuning
-  public static final int driveMotorCurrentLimit = 40;
+
+  // NOTE: this driveMotorCurrentLimit is a stator limit, so it can be above
+  // 40A and is also typically above 60A even, according to some basic
+  // research we did
+  public static final int driveMotorCurrentLimit = 60;
+
   public static final double wheelRadiusMeters = switch (Constants.robotName) {
     case Constants.ROBOT_ALPHA -> Units.inchesToMeters(1.470);
     case Constants.ROBOT_COMP -> Units.inchesToMeters(1.483);
