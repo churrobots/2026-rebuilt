@@ -80,14 +80,21 @@ public class SemiAutoHelper {
   }
 
   public static Rotation2d getAngleToHub(Drive drive) {
-    boolean isRedAlliance = DriverStation.getAlliance().orElseGet(() -> Alliance.Blue) == Alliance.Red;
-    Distance blueHubX = Distance.ofBaseUnits(4.63, Meters);
-    Distance redHubX = Distance.ofBaseUnits(aprilTagLayout.getFieldLength(), Meters).minus(blueHubX);
-    Distance hubY = Distance.ofBaseUnits(4.035, Meters);
-    Distance hubX = isRedAlliance ? redHubX : blueHubX;
     Pose2d robotPose = drive.getPose();
     Distance robotX = Distance.ofBaseUnits(robotPose.getX(), Meters);
     Distance robotY = Distance.ofBaseUnits(robotPose.getY(), Meters);
+
+    boolean isRedAlliance = DriverStation.getAlliance().orElseGet(() -> Alliance.Blue) == Alliance.Red;
+    Distance blueHubY = Distance.ofBaseUnits(4.035, Meters);
+    Distance redHubY = Distance.ofBaseUnits(4.035, Meters);
+    Distance hubY = isRedAlliance ? redHubY : blueHubY;
+
+    boolean isOnLeftSide = isRedAlliance ? robotY.lte(redHubY) : robotY.gte(blueHubY);
+    Distance offsetToCompensateForLeftCannon = isOnLeftSide ? Inches.of(-12.0) : Inches.of(12.0);
+    Distance blueHubX = Distance.ofBaseUnits(4.63 + offsetToCompensateForLeftCannon.in(Meters), Meters);
+    Distance redHubX = Distance.ofBaseUnits(aprilTagLayout.getFieldLength(), Meters).minus(blueHubX);
+    Distance hubX = isRedAlliance ? redHubX : blueHubX;
+
     double targetAngleInRadians = Math.atan2(
         hubY.minus(robotY).in(Meters),
         hubX.minus(robotX).in(Meters));
