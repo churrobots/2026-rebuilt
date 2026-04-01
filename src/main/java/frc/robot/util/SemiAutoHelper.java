@@ -131,7 +131,7 @@ public class SemiAutoHelper {
 
   public static AngularVelocity getShooterVelocityForPassing() {
     // Could update to be dependent on distance to alliance zone
-    return RPM.of(2900);
+    return RPM.of(3400);
   }
 
   public static AngularVelocity getFeederVelocityForHubDistance(Drive drive) {
