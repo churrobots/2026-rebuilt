@@ -76,11 +76,13 @@ public class DriveConstants {
     case Constants.ROBOT_COMP -> Units.inchesToMeters(1.483);
     default -> Units.inchesToMeters(1.483);
   };
-  // MAXSwerve with 16 pinion teeth and 20 spur teeth
+  // MAXSwerve with 12 pinion teeth and 22 spur teeth
   // We think the 15 teeth is the bevel drive shaft, and the 45 is the wheel bevel
-  // NOTE: this must CHANGE if you change our gear kit. Today we use Extra High 4
+  // NOTE: this must CHANGE if you change our gear kit. Today we use Low gear
   // https://www.revrobotics.com/rev-21-3005/
-  public static final double driveMotorReduction = (45.0 * 20.0) / (16.0 * 15.0);
+  public static final double pinionTeeth = 12.0;
+  public static final double spurTeeth = 22.0;
+  public static final double driveMotorReduction = (45.0 * spurTeeth) / (pinionTeeth * 15.0);
   public static final DCMotor driveGearbox = DCMotor.getNeoVortex(1);
 
   // Drive encoder configuration
