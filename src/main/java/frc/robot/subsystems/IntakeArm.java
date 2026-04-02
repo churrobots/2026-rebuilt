@@ -11,11 +11,11 @@ import java.util.function.Supplier;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.HardwareMonitor;
@@ -38,9 +38,10 @@ public class IntakeArm extends SubsystemBase {
   private static final Angle EXTENDED_ANGLE = Degrees.of(0.34 * 360);
 
   // Pulsing constants
-  private static final double PULSING_PERIOD_SECONDS = 0.5;
-  private static final Angle PULSING_ANGLE_START = Degrees.of(0.36 * 360);
-  private static final Angle PULSING_ANGLE_END = Degrees.of(0.54 * 360);
+  private static final double PULSING_PERIOD_SECONDS = 1;
+  private static final Angle PULSING_ANGLE_START = Degrees.of(0.40 * 360);
+  private static final Angle PULSING_ANGLE_END = Degrees.of(0.63 * 360);
+  private static final double PULSING_CUTOFF_PERCENT = 0.1;
 
   private static final Angle DUTY_CYCLE_OFFSET = Degrees.of(180);
   private static final double KP = 4.5; // was 5.0
@@ -135,14 +136,16 @@ public class IntakeArm extends SubsystemBase {
       double sweepAngleDegrees = highestAngleDegrees - lowestAngleDegrees;
 
       // Sine wave formula: sin(2π * frequency * time)
+      // We add a bit of excess so we can "cut off" the sine
+      // wave and get some flat spots at top and bottom, to
+      // prevent the gears from grinding from quick swiches
+      // between forward and backward motion.
       double sineValue = Math.sin((2 * Math.PI / periodInSeconds) * elapsed);
       double angleDiffDegrees = (sweepAngleDegrees / 2) * (sineValue + 1);
-      double pulsedAngleDegrees = lowestAngleDegrees + angleDiffDegrees;
-      SmartDashboard.putNumber("pulse_lowestAngleDegrees", lowestAngleDegrees);
-      SmartDashboard.putNumber("pulse_highestAngleDegrees", highestAngleDegrees);
-      SmartDashboard.putNumber("pulse_angleDiffDegrees", angleDiffDegrees);
-      SmartDashboard.putNumber("pulse_pulsedAngleDegrees", pulsedAngleDegrees);
-      return Degrees.of(pulsedAngleDegrees);
+      double angleDiffDegreesExpandedToAchieveCutoff = (1 + PULSING_CUTOFF_PERCENT) * angleDiffDegrees;
+      double pulsedAngleDegrees = lowestAngleDegrees + angleDiffDegreesExpandedToAchieveCutoff;
+      double cutoffPulsedAngleDegrees = MathUtil.clamp(pulsedAngleDegrees, lowestAngleDegrees, highestAngleDegrees);
+      return Degrees.of(cutoffPulsedAngleDegrees);
     };
     return arm.setAngle(pulsedSupplier);
   }
