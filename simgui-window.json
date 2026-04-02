@@ -66,8 +66,8 @@
     },
     "###/SmartDashboard/Feeder/mechanism": {
       "Collapsed": "0",
-      "Pos": "297,525",
-      "Size": "265,200"
+      "Pos": "5,491",
+      "Size": "265,201"
     },
     "###/SmartDashboard/Field": {
       "Collapsed": "0",
@@ -76,12 +76,12 @@
     },
     "###/SmartDashboard/IntakeArm/mechanism": {
       "Collapsed": "0",
-      "Pos": "0,241",
+      "Pos": "306,492",
       "Size": "283,247"
     },
     "###/SmartDashboard/IntakeRoller/mechanism": {
       "Collapsed": "0",
-      "Pos": "-6,504",
+      "Pos": "311,283",
       "Size": "291,187"
     },
     "###/SmartDashboard/PhotonAlerts": {
@@ -101,8 +101,8 @@
     },
     "###/SmartDashboard/Spindexer/mechanism": {
       "Collapsed": "0",
-      "Pos": "286,262",
-      "Size": "281,256"
+      "Pos": "8,249",
+      "Size": "281,234"
     },
     "###/SmartDashboard/VisionSystemSim-main/Sim Field": {
       "Collapsed": "0",
@@ -136,7 +136,7 @@
     },
     "###NetworkTables": {
       "Collapsed": "0",
-      "Pos": "175,195",
+      "Pos": "334,821",
       "Size": "750,566"
     },
     "###NetworkTables Info": {
@@ -171,7 +171,7 @@
     },
     "Robot State": {
       "Collapsed": "0",
-      "Pos": "445,91",
+      "Pos": "472,98",
       "Size": "94,122"
     }
   }

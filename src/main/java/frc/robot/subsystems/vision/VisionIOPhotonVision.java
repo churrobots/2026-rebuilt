@@ -36,7 +36,7 @@ public class VisionIOPhotonVision implements VisionIO {
    *
    * @param name             The configured name of the camera.
    * @param rotationSupplier The 3D position of the camera relative to the robot.
-   */
+  */
   public VisionIOPhotonVision(String name, Transform3d robotToCamera) {
     camera = new PhotonCamera(name);
     HardwareMonitor.registerHardware(name, camera);
