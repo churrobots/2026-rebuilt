@@ -13,6 +13,8 @@
 
 package frc.robot.subsystems.vision;
 
+import static edu.wpi.first.units.Units.Feet;
+import static edu.wpi.first.units.Units.Meters;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import edu.wpi.first.math.Matrix;
@@ -103,6 +105,9 @@ public class Vision extends SubsystemBase {
             || (observation.tagCount() == 1
                 && observation.ambiguity() > maxAmbiguity) // Cannot be high ambiguity
             || Math.abs(observation.pose().getZ()) > maxZError // Must have realistic Z coordinate
+            || observation.averageTagDistance() > maxDistance.in(Meters)
+            // TODO: try angles too
+            // TODO: can we WEIGHT measurements?
 
             // Must be within the field boundaries
             || observation.pose().getX() < 0.0
