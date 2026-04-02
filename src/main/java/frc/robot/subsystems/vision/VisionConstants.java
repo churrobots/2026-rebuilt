@@ -13,6 +13,8 @@
 
 package frc.robot.subsystems.vision;
 
+import static edu.wpi.first.units.Units.Feet;
+
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -81,10 +83,10 @@ public class VisionConstants {
   // Standard deviation multipliers for each camera
   // (Adjust to trust some cameras more than others)
   public static double[] cameraStdDevFactors = new double[] {
-      0.6, // Camera 0
-      0.4, // Camera 1
-      0.6, // Camera 2
-      0.8, // Camera 3
+      0.6, // Camera 0 - frontright
+      0.4, // Camera 1 - backright
+      0.4, // Camera 2 - frontleft
+      0.6, // Camera 3 - backleft
   };
 
   // Multipliers to apply for MegaTag 2 observations
