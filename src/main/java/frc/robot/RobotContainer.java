@@ -261,7 +261,7 @@ public class RobotContainer {
   // ========================================================================
 
   public Command autoPrepFlywheels() {
-    return shooter.setVelocity(SemiAutoHelper.getShooterVelocityForHubDistance(drive));
+    return shooter.setVelocity(() -> SemiAutoHelper.getShooterVelocityForHubDistance(drive));
   }
 
   public Command autoShootWithRePreppedFlywheels() {

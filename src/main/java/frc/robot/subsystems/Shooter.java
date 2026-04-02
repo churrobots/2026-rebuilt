@@ -85,7 +85,7 @@ public class Shooter extends SubsystemBase {
 
   /** Creates a new Shooter. */
   public Shooter() {
-    setDefaultCommand(setVelocity(ControlsConstants.SHOOTER_IDLE_VELOCITY));
+    setDefaultCommand(setVelocityFixed(ControlsConstants.SHOOTER_IDLE_VELOCITY));
     HardwareMonitor.registerHardware("shooterMotor", motor);
   }
 
@@ -104,7 +104,7 @@ public class Shooter extends SubsystemBase {
    * @param speed Speed to set.
    * @return {@link edu.wpi.first.wpilibj2.command.RunCommand}
    */
-  public Command setVelocity(AngularVelocity speed) {
+  private Command setVelocityFixed(AngularVelocity speed) {
     return shooter.setSpeed(speed);
   }
 
