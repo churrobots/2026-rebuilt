@@ -151,6 +151,9 @@ public class Robot extends LoggedRobot {
   /** This function is called periodically during autonomous. */
   @Override
   public void autonomousPeriodic() {
+    if (HardwareConstants.ENABLE_DIAGNOSTIC_POSES && field != null) {
+      field.setRobotPose(robotContainer.getPose());
+    }
   }
 
   /** This function is called once when teleop is enabled. */
