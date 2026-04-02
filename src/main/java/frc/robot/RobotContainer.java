@@ -381,6 +381,7 @@ public class RobotContainer {
     return Commands.parallel(
         this.requestXLock(),
         intakeArm.pulseArm(),
+        intakeRoller.keepFuelInside(),
         feeder.setVelocity(SemiAutoHelper.getFeederVelocityForHubDistance(drive)),
         spindexer.spinToShooter());
   }

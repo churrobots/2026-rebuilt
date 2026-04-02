@@ -113,6 +113,10 @@ public class IntakeRoller extends SubsystemBase {
     return roller.setSpeed(ControlsConstants.INTAKE_ROLLER_VELOCITY);
   }
 
+  public Command keepFuelInside() {
+    return roller.setSpeed(ControlsConstants.INTAKE_ROLLER_KEEP_INSIDE_VELOCITY);
+  }
+
   public Command feedToSpindexerFaster() {
     // @hannah: raised to 1.2 times after quals 7
     // @hannah: raised to 1.5 times after quals 23

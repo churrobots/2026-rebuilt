@@ -72,6 +72,7 @@ public class ControlsConstants {
   // Target Roller RPM = (9.2 m/sec DIVIDED BY 0.2388 m/rot) = 38.5 rot/sec
   // 38.5 rot/sec x 60 sec/minute = 2310 rot/min (RPM)
   public static final AngularVelocity INTAKE_ROLLER_VELOCITY = RPM.of(2500);
+  public static final AngularVelocity INTAKE_ROLLER_KEEP_INSIDE_VELOCITY = RPM.of(300);
 
   public static final AngularVelocity SHOOTER_VELOCITY = RPM.of(4550);
   public static final AngularVelocity SHOOTER_IDLE_VELOCITY = RPM.of(400);
