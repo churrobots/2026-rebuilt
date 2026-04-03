@@ -178,10 +178,10 @@ public class SemiAutoHelper {
     Pose2d currentPose = drive.getPose();
     Distance robotX = Meters.of(currentPose.getTranslation().getX());
     // 158" from alliance wall --> 205" from alliance wall
-    Distance buffer = Inches.of(12);
+    Distance bufferZone = Inches.of(19);
     Distance fieldLength = Inches.of(650.12);
-    Distance blueStartX = Inches.of(158).minus(buffer);
-    Distance blueEndX = Inches.of(205).plus(buffer);
+    Distance blueStartX = Inches.of(158).minus(bufferZone);
+    Distance blueEndX = Inches.of(205).plus(bufferZone);
     Distance redStartX = fieldLength.minus(blueStartX);
     Distance redEndX = fieldLength.minus(blueEndX);
     boolean isInRedTrench = robotX.gte(redEndX) && robotX.lte(redStartX);
