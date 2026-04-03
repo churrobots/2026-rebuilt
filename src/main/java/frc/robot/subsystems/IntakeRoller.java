@@ -41,7 +41,7 @@ public class IntakeRoller extends SubsystemBase {
   private static final String MECHANISM_TELEMETRY = "IntakeRoller";
 
   // Stable physical constants
-  private static final Current STATOR_CURRENT_LIMIT = Amps.of(60);
+  private static final Current STATOR_CURRENT_LIMIT = Amps.of(50);
   private static final Distance DIAMETER = Inches.of(3);
   private static final Mass MASS = Pounds.of(0.50);
 
