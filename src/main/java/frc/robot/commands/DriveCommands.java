@@ -149,8 +149,10 @@ public class DriveCommands {
           double error = angleController.getPositionError();
           boolean closeEnough = Math.abs(error) < ALLOWABLE_ERROR_MARGIN_FOR_AIMING;
           if (wantsXLock && closeEnough) {
+            SmartDashboard.putBoolean("AIM_LOCK", true);
             drive.stopWithX();
           } else {
+            SmartDashboard.putBoolean("AIM_LOCK", false);
             drive.runVelocity(
                 ChassisSpeeds.fromFieldRelativeSpeeds(
                     speeds,
