@@ -170,7 +170,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("stopAllShooting", stopAllShooting().withTimeout(0));
 
     // New commands added for Contra Costa to make our 3V and 5V autos work
-    NamedCommands.registerCommand("shootWithAutoAimBriefly", shootWithAutoAimForAutonomous(6));
+    NamedCommands.registerCommand("shootWithAutoAimBriefly", shootWithAutoAimForAutonomous(8));
     NamedCommands.registerCommand("shootWithAutoAimLonger", shootWithAutoAimForAutonomous(10));
     NamedCommands.registerCommand("runIntakeWithSafety", enableIntakeWithSafety());
     NamedCommands.registerCommand("stopIntakeWithSafety", stopIntakeWithSafety());
