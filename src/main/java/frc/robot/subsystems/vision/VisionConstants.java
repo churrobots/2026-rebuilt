@@ -40,7 +40,7 @@ public class VisionConstants {
       new Rotation3d(
           Math.PI,
           Units.degreesToRadians(-15),
-          Units.degreesToRadians(-42) // NOTE: CAD says 45deg but this works better
+          Units.degreesToRadians(-43) // NOTE: CAD says 45deg but this works better
       ));
 
   public static Transform3d robotToCameraBackRight = new Transform3d(
@@ -58,7 +58,7 @@ public class VisionConstants {
       new Rotation3d(
           Math.PI,
           Units.degreesToRadians(-15),
-          Units.degreesToRadians(42) // NOTE: CAD says 45deg but this works better
+          Units.degreesToRadians(43) // NOTE: CAD says 45deg but this works better
       ));
 
   public static Transform3d robotToCameraBackLeft = new Transform3d(
