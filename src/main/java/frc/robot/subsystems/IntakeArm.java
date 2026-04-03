@@ -1,7 +1,6 @@
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.Degree;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Feet;
 import static edu.wpi.first.units.Units.Pounds;
@@ -15,10 +14,13 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.drive.Drive;
 import frc.robot.util.HardwareMonitor;
+import frc.robot.util.SemiAutoHelper;
 import frc.robot.util.TunableNumber;
 import frc.robot.util.YAMSUtil;
 import yams.mechanisms.config.ArmConfig;
@@ -96,11 +98,13 @@ public class IntakeArm extends SubsystemBase {
 
   // Arm Mechanism
   private Arm arm = new Arm(armMechanismConfig);
+  private Drive drive;
 
   /**
    * Creates a new ExampleSubsystem.
    */
-  public IntakeArm() {
+  public IntakeArm(Drive drive) {
+    this.drive = drive;
     setDefaultCommand(retractIntake());
     HardwareMonitor.registerHardware("intakeArmMotor", armMotor);
   }
@@ -153,11 +157,40 @@ public class IntakeArm extends SubsystemBase {
   @Override
   public void periodic() {
     arm.updateTelemetry();
+
+    // Do the autonomous state.
+    if (DriverStation.isAutonomous()) {
+      if (autonomousState == AutonomousState.INTAKE) {
+        boolean needsSafety = SemiAutoHelper.isInTrenchBumpZone(drive);
+        if (needsSafety) {
+          armMotorController.setPosition(RETRACTED_ANGLE);
+        } else {
+          armMotorController.setPosition(EXTENDED_ANGLE);
+        }
+      } else if (autonomousState == AutonomousState.CHILLOUT) {
+        armMotorController.setPosition(RETRACTED_ANGLE);
+      }
+    }
+
   }
 
   @Override
   public void simulationPeriodic() {
     arm.simIterate();
+  }
+
+  public static enum AutonomousState {
+    OFF,
+    CHILLOUT,
+    INTAKE
+  }
+
+  private AutonomousState autonomousState = AutonomousState.OFF;
+
+  public Command setDesiredAutonomousState(AutonomousState desiredState) {
+    return run(() -> {
+      autonomousState = desiredState;
+    }).withTimeout(0);
   }
 
 }

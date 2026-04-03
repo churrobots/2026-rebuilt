@@ -68,8 +68,8 @@ public class RobotContainer {
 
   private final Drive drive;
   private final Spindexer spindexer = new Spindexer();
-  private final IntakeRoller intakeRoller = new IntakeRoller();
-  private final IntakeArm intakeArm = new IntakeArm();
+  private final IntakeRoller intakeRoller;
+  private final IntakeArm intakeArm;
   private final Shooter shooter = new Shooter();
   private final Feeder feeder = new Feeder();
 
@@ -148,6 +148,8 @@ public class RobotContainer {
         break;
     }
 
+    intakeArm = new IntakeArm(drive);
+    intakeRoller = new IntakeRoller(drive);
     bindCommandsForTeleop();
     bindCommandsForAuto();
   }

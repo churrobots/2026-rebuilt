@@ -21,10 +21,13 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Mass;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
+import frc.robot.subsystems.drive.Drive;
 import frc.robot.util.HardwareMonitor;
+import frc.robot.util.SemiAutoHelper;
 import frc.robot.util.YAMSUtil;
 import yams.mechanisms.config.FlyWheelConfig;
 import yams.mechanisms.velocity.FlyWheel;
@@ -79,9 +82,11 @@ public class IntakeRoller extends SubsystemBase {
 
   // Intake Roller Mechanism
   private FlyWheel roller = new FlyWheel(rollerConfig);
+  private Drive drive;
 
   /** Creates a new IntakeRoller. */
-  public IntakeRoller() {
+  public IntakeRoller(Drive drive) {
+    this.drive = drive;
     setDefaultCommand(keepFuelInside());
     HardwareMonitor.registerHardware("intakeRollerMotor", motor);
   }
@@ -140,10 +145,39 @@ public class IntakeRoller extends SubsystemBase {
   @Override
   public void periodic() {
     roller.updateTelemetry();
+
+    // Do the autonomous state.
+    if (DriverStation.isAutonomous()) {
+      if (autonomousState == AutonomousState.INTAKE) {
+        boolean needsSafety = SemiAutoHelper.isInTrenchBumpZone(drive);
+        if (needsSafety) {
+          controller.setVelocity(ControlsConstants.INTAKE_ROLLER_KEEP_INSIDE_VELOCITY);
+        } else {
+          controller.setVelocity(ControlsConstants.INTAKE_ROLLER_VELOCITY.times(1.5));
+        }
+      } else if (autonomousState == AutonomousState.CHILLOUT) {
+        controller.setVelocity(ControlsConstants.INTAKE_ROLLER_KEEP_INSIDE_VELOCITY);
+      }
+    }
   }
 
   @Override
   public void simulationPeriodic() {
     roller.simIterate();
   }
+
+  public static enum AutonomousState {
+    OFF,
+    CHILLOUT,
+    INTAKE
+  }
+
+  private AutonomousState autonomousState = AutonomousState.OFF;
+
+  public Command setDesiredAutonomousState(AutonomousState desiredState) {
+    return run(() -> {
+      autonomousState = desiredState;
+    }).withTimeout(0);
+  }
+
 }
