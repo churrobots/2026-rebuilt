@@ -69,7 +69,7 @@ public class DriveConstants {
   // NOTE: this driveMotorCurrentLimit is a stator limit, so it can be above
   // 40A and is also typically above 60A even, according to some basic
   // research we did
-  public static final int driveMotorCurrentLimit = 60;
+  public static final int driveMotorCurrentLimit = 56; // contra costa: down from 60A to prevent wheel slip
 
   public static final double wheelRadiusMeters = switch (Constants.robotName) {
     case Constants.ROBOT_ALPHA -> Units.inchesToMeters(1.470);
@@ -132,8 +132,8 @@ public class DriveConstants {
   // PathPlanner configuration
   public static final double robotMassKg = switch (Constants.robotName) {
     case Constants.ROBOT_ALPHA -> 22.6796;
-    case Constants.ROBOT_COMP -> 36;
-    default -> 36;
+    case Constants.ROBOT_COMP -> 40;
+    default -> 40;
   };
   public static final double robotMOI = 2;
   public static final double wheelCOF = 1.2;
