@@ -160,11 +160,13 @@ public class RobotContainer {
    */
   void bindCommandsForAuto() {
 
-    // Register all our auto commands.
+    // Used only in old autos. Do NOT use these commands anymore.
     NamedCommands.registerCommand("runIntake", runIntakeFaster().withTimeout(0));
     NamedCommands.registerCommand("stopIntake", stopIntake().withTimeout(0));
-    NamedCommands.registerCommand("autoPrepFlywheels", autoPrepFlywheels().withTimeout(0));
     NamedCommands.registerCommand("autoShoot", autoShootWithRePreppedFlywheels().withTimeout(1));
+
+    // Used in old autos AND new (3V + 5V) autos.
+    NamedCommands.registerCommand("autoPrepFlywheels", autoPrepFlywheels().withTimeout(0));
     NamedCommands.registerCommand("stopAllShooting", stopAllShooting().withTimeout(0));
 
     // New commands added for Contra Costa to make our 3V and 5V autos work
