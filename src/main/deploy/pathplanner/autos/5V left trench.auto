@@ -31,13 +31,7 @@
         {
           "type": "named",
           "data": {
-            "name": "autoShoot"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 3.0
+            "name": "shootWithAutoAimBriefly"
           }
         },
         {
@@ -67,13 +61,7 @@
         {
           "type": "named",
           "data": {
-            "name": "autoShoot"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 10.0
+            "name": "shootWithAutoAimLonger"
           }
         }
       ]

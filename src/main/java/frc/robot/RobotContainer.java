@@ -164,6 +164,8 @@ public class RobotContainer {
     NamedCommands.registerCommand("autoPrepFlywheels", autoPrepFlywheels().withTimeout(0));
     NamedCommands.registerCommand("autoShoot", autoShootWithRePreppedFlywheels().withTimeout(1));
     NamedCommands.registerCommand("stopAllShooting", stopAllShooting().withTimeout(0));
+    NamedCommands.registerCommand("shootWithAutoAimBriefly", autoShootWithRePreppedFlywheels().withTimeout(3));
+    NamedCommands.registerCommand("shootWithAutoAimLonger", autoShootWithRePreppedFlywheels().withTimeout(10));
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
