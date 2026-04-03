@@ -174,6 +174,21 @@ public class SemiAutoHelper {
     return robotX.in(Inches) > 170 && robotX.in(Inches) < 457;
   }
 
+  public static boolean isInTrenchBumpZone(Drive drive) {
+    Pose2d currentPose = drive.getPose();
+    Distance robotX = Meters.of(currentPose.getTranslation().getX());
+    // 158" from alliance wall --> 205" from alliance wall
+    Distance buffer = Inches.of(12);
+    Distance fieldLength = Inches.of(650.12);
+    Distance blueStartX = Inches.of(158).minus(buffer);
+    Distance blueEndX = Inches.of(205).plus(buffer);
+    Distance redStartX = fieldLength.minus(blueStartX);
+    Distance redEndX = fieldLength.minus(blueEndX);
+    boolean isInRedTrench = robotX.gte(redEndX) && robotX.lte(redStartX);
+    boolean isInBlueTrench = robotX.gte(blueStartX) && robotX.lte(blueEndX);
+    return isInBlueTrench || isInRedTrench;
+  }
+
   public static Rotation2d getAngleToAlliance() {
     boolean isRedAlliance = DriverStation.getAlliance().orElseGet(() -> Alliance.Blue) == Alliance.Red;
     if (isRedAlliance) {
