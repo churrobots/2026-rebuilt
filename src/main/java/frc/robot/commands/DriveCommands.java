@@ -147,7 +147,7 @@ public class DriveCommands {
           // fully aimed.
           boolean wantsXLock = xLockRequested.get() == true;
           double error = angleController.getPositionError();
-          boolean closeEnough = error < ALLOWABLE_ERROR_MARGIN_FOR_AIMING;
+          boolean closeEnough = Math.abs(error) < ALLOWABLE_ERROR_MARGIN_FOR_AIMING;
           if (wantsXLock && closeEnough) {
             drive.stopWithX();
           } else {
