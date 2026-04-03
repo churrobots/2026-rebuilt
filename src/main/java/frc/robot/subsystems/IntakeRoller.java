@@ -82,7 +82,7 @@ public class IntakeRoller extends SubsystemBase {
 
   /** Creates a new IntakeRoller. */
   public IntakeRoller() {
-    setDefaultCommand(stopFeeding());
+    setDefaultCommand(keepFuelInside());
     HardwareMonitor.registerHardware("intakeRollerMotor", motor);
   }
 

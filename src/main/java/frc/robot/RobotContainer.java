@@ -348,7 +348,9 @@ public class RobotContainer {
   }
 
   public Command stowIntake() {
-    return intakeArm.stowIntake();
+    return Commands.parallel(
+        intakeArm.stowIntake(),
+        intakeRoller.stopFeeding());
   }
 
   // ========================================================================
