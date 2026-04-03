@@ -166,8 +166,12 @@ public class RobotContainer {
     NamedCommands.registerCommand("autoPrepFlywheels", autoPrepFlywheels().withTimeout(0));
     NamedCommands.registerCommand("autoShoot", autoShootWithRePreppedFlywheels().withTimeout(1));
     NamedCommands.registerCommand("stopAllShooting", stopAllShooting().withTimeout(0));
-    NamedCommands.registerCommand("shootWithAutoAimBriefly", autoShootWithRePreppedFlywheels().withTimeout(3));
-    NamedCommands.registerCommand("shootWithAutoAimLonger", autoShootWithRePreppedFlywheels().withTimeout(10));
+
+    // New commands added for Contra Costa to make our 3V and 5V autos work
+    NamedCommands.registerCommand("shootWithAutoAimBriefly", shootWithAutoAimForAutonomous(3));
+    NamedCommands.registerCommand("shootWithAutoAimLonger", shootWithAutoAimForAutonomous(10));
+    NamedCommands.registerCommand("runIntakeWithSafety", enableIntakeWithSafety());
+    NamedCommands.registerCommand("stopIntakeWithSafety", stopIntakeWithSafety());
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
@@ -276,6 +280,54 @@ public class RobotContainer {
     return shooter.set(ControlsConstants.SHOOTER_DEFAULT_DUTY_CYCLE)
         .alongWith(feeder.set(ControlsConstants.FEEDER_DEFAULT_DUTY_CYCLE))
         .alongWith(spindexer.set(ControlsConstants.SPINDEXER_DEFAULT_DUTY_CYCLE));
+  }
+
+  public Command enableIntakeWithSafety() {
+    return Commands.parallel(
+        intakeArm.setDesiredAutonomousState(IntakeArm.AutonomousState.INTAKE),
+        intakeRoller.setDesiredAutonomousState(IntakeRoller.AutonomousState.INTAKE));
+  }
+
+  public Command stopIntakeWithSafety() {
+    return Commands.parallel(
+        intakeArm.setDesiredAutonomousState(IntakeArm.AutonomousState.CHILLOUT),
+        intakeRoller.setDesiredAutonomousState(IntakeRoller.AutonomousState.CHILLOUT));
+  }
+
+  public Command disableAutonomousStateSafeties() {
+    return Commands.parallel(
+        intakeArm.setDesiredAutonomousState(IntakeArm.AutonomousState.OFF),
+        intakeRoller.setDesiredAutonomousState(IntakeRoller.AutonomousState.OFF));
+  }
+
+  public Command shootWithAutoAimForAutonomous(double howLongInSeconds) {
+    Command autonomousAutoAimPrep = Commands.parallel(
+        shooter.setVelocity(() -> SemiAutoHelper.getFullAutoShooterVelocity(drive)),
+        DriveCommands.joystickDriveAtAngle(
+            drive,
+            () -> 0,
+            () -> 0,
+            () -> SemiAutoHelper.getFullAutoDriveAngle(drive),
+            () -> false));
+    Command autonomousAutoAimHold = Commands.parallel(
+        shooter.setVelocity(() -> SemiAutoHelper.getFullAutoShooterVelocity(drive)),
+        DriveCommands.joystickDriveAtAngle(
+            drive,
+            () -> 0,
+            () -> 0,
+            () -> SemiAutoHelper.getFullAutoDriveAngle(drive),
+            () -> false));
+    Command pullShootingTrigger = Commands.parallel(intakeArm.pulseArm(),
+        intakeRoller.keepFuelInside(),
+        feeder.setVelocity(SemiAutoHelper.getFeederVelocityForHubDistance(drive)),
+        spindexer.spinToShooter());
+    return autonomousAutoAimPrep.withTimeout(0.3)
+        // disable autonomous state periodic, so trigger can pulse the intakeArm
+        .andThen(disableAutonomousStateSafeties())
+        .andThen(Commands.parallel(autonomousAutoAimHold, pullShootingTrigger))
+        .withTimeout(howLongInSeconds)
+        // send intake back to normal so it stops pulsing
+        .andThen(stopIntakeWithSafety());
   }
 
   // ========================================================================

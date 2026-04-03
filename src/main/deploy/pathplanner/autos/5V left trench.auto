@@ -7,7 +7,7 @@
         {
           "type": "named",
           "data": {
-            "name": "runIntake"
+            "name": "runIntakeWithSafety"
           }
         },
         {
@@ -25,7 +25,7 @@
         {
           "type": "named",
           "data": {
-            "name": "stopIntake"
+            "name": "stopIntakeWithSafety"
           }
         },
         {
@@ -43,7 +43,7 @@
         {
           "type": "named",
           "data": {
-            "name": "runIntake"
+            "name": "runIntakeWithSafety"
           }
         },
         {
@@ -56,6 +56,12 @@
           "type": "path",
           "data": {
             "pathName": "5V. 2nd neutral"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "stopIntakeWithSafety"
           }
         },
         {
