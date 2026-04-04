@@ -8,24 +8,24 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.2438756841454808,
-        "y": 7.73489213674082
+        "x": 3.3955415127143618,
+        "y": 7.508070667595242
       },
       "isLocked": false,
       "linkedName": "5V. endshoot"
     },
     {
       "anchor": {
-        "x": 6.509980689442091,
-        "y": 7.195283203125
+        "x": 6.61349297202049,
+        "y": 7.458552725651637
       },
       "prevControl": {
-        "x": 6.000730780618319,
-        "y": 7.237609841176834
+        "x": 5.8179505043924165,
+        "y": 7.586876060644281
       },
       "nextControl": {
-        "x": 6.759121611463077,
-        "y": 7.174575693025216
+        "x": 7.066467637648152,
+        "y": 7.385486582578436
       },
       "isLocked": false,
       "linkedName": null
@@ -78,15 +78,19 @@
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.2301797040169134,
-      "rotationDegrees": -1.4024700918080049
+      "waypointRelativePos": 0.3373744714587737,
+      "rotationDegrees": 178.60900000000004
     },
     {
-      "waypointRelativePos": 0.6590578752642706,
-      "rotationDegrees": 0.0
+      "waypointRelativePos": 1.151526162790698,
+      "rotationDegrees": -179.81254134112856
     },
     {
-      "waypointRelativePos": 1.8623150105708217,
+      "waypointRelativePos": 1.2950251057082447,
+      "rotationDegrees": -101.26584721453654
+    },
+    {
+      "waypointRelativePos": 1.95,
       "rotationDegrees": -96.4200900176235
     },
     {
@@ -102,8 +106,8 @@
       "rotationDegrees": 176.2793443793365
     },
     {
-      "waypointRelativePos": 3.6753435517970385,
-      "rotationDegrees": 177.69127564916562
+      "waypointRelativePos": 3.675343551797038,
+      "rotationDegrees": -178.30868030440428
     }
   ],
   "constraintZones": [],
@@ -114,8 +118,8 @@
         "y": 5.5
       },
       "rotationOffset": 90.0,
-      "minWaypointRelativePos": 0.8612785532994923,
-      "maxWaypointRelativePos": 1.768995875634514,
+      "minWaypointRelativePos": 1.35,
+      "maxWaypointRelativePos": 1.9,
       "name": "Point Towards Zone"
     }
   ],
