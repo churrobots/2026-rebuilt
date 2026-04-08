@@ -29,6 +29,9 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.ControlsConstants;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.sotm.ProjectileSimulator;
+import frc.robot.subsystems.sotm.ProjectileSimulator.GeneratedLUT;
+import frc.robot.subsystems.sotm.ProjectileSimulator.SimParameters;
 import frc.robot.subsystems.sotm.ShotCalculator;
 
 /** Add your docs here. */
@@ -55,10 +58,20 @@ public class SemiAutoHelper {
       Map.entry(75., 2800.));
 
   public SemiAutoHelper(final Drive drive) {
-    // TODO: add back in
-    // GeneratedLUT shootOnTheMoveLookupTable = createShootOnTheMoveLookupTable();
-    // this.shotCalculator = setupShotCalculator(shootOnTheMoveLookupTable);
     this.drive = drive;
+
+    System.out.println("=== SOTM LUT Generation Started ===");
+    long startTime = System.currentTimeMillis();
+
+    GeneratedLUT shootOnTheMoveLookupTable = createShootOnTheMoveLookupTable();
+
+    long elapsed = System.currentTimeMillis() - startTime;
+    System.out.println("✓ LUT Generated in " + elapsed + "ms");
+    System.out.println("  - Reachable entries: " + shootOnTheMoveLookupTable.reachableCount());
+    System.out.println("  - Max range: " + String.format("%.2f", shootOnTheMoveLookupTable.maxRangeM()) + "m");
+    System.out.println("=== SOTM Ready ===");
+
+    this.shotCalculator = setupShotCalculator(shootOnTheMoveLookupTable);
   }
 
   private Translation2d getHubPosition() {
@@ -227,5 +240,126 @@ public class SemiAutoHelper {
     }
 
     return Rotation2d.fromDegrees(angleToDrive);
+  }
+
+  /**
+   * Creates the shoot-on-the-move lookup table using physics simulation.
+   * Configure these parameters based on your robot's CAD measurements and testing.
+   */
+  private GeneratedLUT createShootOnTheMoveLookupTable() {
+    // Configure your robot's physical parameters
+    // TODO: MEASURE THESE VALUES FROM YOUR CAD AND TUNE ON ROBOT
+    SimParameters params = new SimParameters(
+        0.215,    // ball mass kg (from game manual - 7.5 oz)
+        0.1501,   // ball diameter m (from game manual - 5.9 inches)
+        0.47,     // drag coefficient (smooth sphere, tune if needed)
+        0.2,      // Magnus coefficient (tune on robot for backspin/topspin effects)
+        1.225,    // air density kg/m^3 (sea level standard)
+        0.43,     // exit height from floor in meters (MEASURE FROM YOUR CAD)
+        0.1016,   // wheel diameter in meters (MEASURE YOUR ACTUAL WHEELS - 4 inches default)
+        1.83,     // target height in meters (hub height from game manual)
+        0.6,      // slip factor 0-1 (TUNE ON ROBOT - how much wheel speed transfers to ball)
+        45.0,     // launch angle in degrees (MEASURE FROM YOUR SHOOTER ANGLE)
+        0.001,    // simulation timestep (smaller = more accurate but slower)
+        1500,     // minimum RPM to test
+        6000,     // maximum RPM to test
+        25,       // binary search iterations for RPM solving
+        5.0       // max simulation time in seconds
+    );
+
+    ProjectileSimulator sim = new ProjectileSimulator(params);
+    return sim.generateLUT();
+  }
+
+  /**
+   * Sets up the ShotCalculator with the generated lookup table and configuration.
+   */
+  private ShotCalculator setupShotCalculator(GeneratedLUT lut) {
+    ShotCalculator.Config config = new ShotCalculator.Config();
+
+    // Launcher position relative to robot center (MEASURE FROM CAD)
+    config.launcherOffsetX = 0.20;  // meters forward of robot center
+    config.launcherOffsetY = 0.0;   // meters left of robot center (0 = centered)
+
+    // Scoring range limits
+    config.minScoringDistance = 0.5;  // minimum distance to shoot from (meters)
+    config.maxScoringDistance = 5.0;  // maximum distance to shoot from (meters)
+
+    // SOTM (Shoot On The Move) speed thresholds
+    config.minSOTMSpeed = 0.1;  // below this speed (m/s), use static aim
+    config.maxSOTMSpeed = 3.0;  // above this speed (m/s), don't shoot (too fast)
+
+    // Latency compensation (milliseconds)
+    config.phaseDelayMs = 30.0;   // vision pipeline processing lag
+    config.mechLatencyMs = 20.0;  // mechanism response time
+
+    // Drag compensation for horizontal velocity (tune if needed)
+    config.sotmDragCoeff = 0.24;  // default for FRC ball at ~10 m/s
+
+    ShotCalculator calculator = new ShotCalculator(config);
+
+    // Load all reachable entries from the generated LUT
+    for (var entry : lut.entries()) {
+      if (entry.reachable()) {
+        calculator.loadLUTEntry(entry.distanceM(), entry.rpm(), entry.tof());
+      }
+    }
+
+    return calculator;
+  }
+
+  /**
+   * Calculate the shoot-on-the-move firing solution.
+   * Accounts for robot velocity, drag, and latency.
+   * @return LaunchParameters with RPM, drive angle, TOF, and confidence (0-100)
+   */
+  public ShotCalculator.LaunchParameters calculateSOTMShot() {
+    ShotCalculator.ShotInputs inputs = new ShotCalculator.ShotInputs(
+        drive.getPose(),
+        drive.getFieldVelocity(),    // field-relative velocity
+        drive.getChassisSpeeds(),    // robot-relative velocity
+        getHubPosition(),
+        getHubFacingDirection(),
+        1.0  // vision confidence (0-1) - can wire to actual vision system later
+    );
+
+    return shotCalculator.calculate(inputs);
+  }
+
+  /**
+   * Publishes detailed SOTM telemetry to SmartDashboard for debugging.
+   * Call this periodically to monitor SOTM performance.
+   */
+  public void publishSOTMTelemetry() {
+    ShotCalculator.LaunchParameters shot = calculateSOTMShot();
+    edu.wpi.first.math.kinematics.ChassisSpeeds fieldVel = drive.getFieldVelocity();
+
+    // Core SOTM outputs
+    SmartDashboard.putNumber("SOTM/RPM", shot.rpm());
+    SmartDashboard.putNumber("SOTM/DriveAngleDeg", shot.driveAngle().getDegrees());
+    SmartDashboard.putNumber("SOTM/TOF", shot.timeOfFlightSec());
+    SmartDashboard.putNumber("SOTM/Confidence", shot.confidence());
+    SmartDashboard.putBoolean("SOTM/Valid", shot.isValid());
+    SmartDashboard.putNumber("SOTM/SolvedDistance", shot.solvedDistanceM());
+    SmartDashboard.putNumber("SOTM/Iterations", shot.iterationsUsed());
+    SmartDashboard.putBoolean("SOTM/WarmStart", shot.warmStartUsed());
+
+    // Robot state
+    SmartDashboard.putNumber("SOTM/RobotSpeedMPS",
+        Math.hypot(fieldVel.vxMetersPerSecond, fieldVel.vyMetersPerSecond));
+    SmartDashboard.putNumber("SOTM/RobotVelX", fieldVel.vxMetersPerSecond);
+    SmartDashboard.putNumber("SOTM/RobotVelY", fieldVel.vyMetersPerSecond);
+    SmartDashboard.putNumber("SOTM/RobotOmega", fieldVel.omegaRadiansPerSecond);
+
+    // Distance to target
+    SmartDashboard.putNumber("SOTM/DistanceToHub", getDistanceToHub(drive).in(Meters));
+  }
+
+  /**
+   * Gets the ShotCalculator instance for advanced operations.
+   * @return The ShotCalculator instance, or null if not initialized
+   */
+  public ShotCalculator getShotCalculator() {
+    return shotCalculator;
   }
 }

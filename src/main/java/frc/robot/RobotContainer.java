@@ -34,8 +34,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.subsystems.sotm.ShotCalculator;
 import frc.robot.Constants.CalibrationMode;
 import frc.robot.commands.DriveCommands;
+import frc.robot.subsystems.Churret;
 import frc.robot.subsystems.ControlsConstants;
 import frc.robot.subsystems.Feeder;
 import frc.robot.subsystems.IntakeArm;
@@ -72,6 +74,10 @@ public class RobotContainer {
   private final IntakeArm intakeArm;
   private final Shooter shooter = new Shooter();
   private final Feeder feeder = new Feeder();
+
+  // Churret (turret) - nullable, controlled by Constants.CHURRET_ENABLED
+  private final Churret churret;
+  private final SemiAutoHelper semiAutoHelper;
 
   // Make xlock work.
   private boolean isRequestingXLock = false;
@@ -150,6 +156,26 @@ public class RobotContainer {
 
     intakeArm = new IntakeArm(drive);
     intakeRoller = new IntakeRoller(drive);
+
+    // ========== CHURRET (TURRET) INITIALIZATION ==========
+    // Conditionally create churret based on feature flag in Constants
+    if (Constants.CHURRET_ENABLED) {
+      churret = new Churret();
+
+      // Initialize SemiAutoHelper with SOTM (Shoot On The Move) capabilities
+      semiAutoHelper = new SemiAutoHelper(drive);
+
+      // Set churret to autonomously aim (no button press needed)
+      // To use SOTM instead: churret.setDefaultCommand(churret.aimWithSOTM(semiAutoHelper, drive));
+      churret.setDefaultCommand(churret.fullAutoAim(drive));
+
+      System.out.println("✓ Churret (turret) ENABLED");
+    } else {
+      churret = null;
+      semiAutoHelper = null;
+      System.out.println("⚠️  Churret (turret) DISABLED - Set Constants.CHURRET_ENABLED = true to re-enable");
+    }
+
     bindCommandsForTeleop();
     bindCommandsForAuto();
   }
@@ -174,6 +200,12 @@ public class RobotContainer {
     NamedCommands.registerCommand("shootWithAutoAimLonger", shootWithAutoAimForAutonomous(10));
     NamedCommands.registerCommand("runIntakeWithSafety", enableIntakeWithSafety());
     NamedCommands.registerCommand("stopIntakeWithSafety", stopIntakeWithSafety());
+
+    // Turret auto-aim commands for autonomous (only if enabled)
+    if (Constants.CHURRET_ENABLED && churret != null) {
+      NamedCommands.registerCommand("aimTurretAtHub", churret.aimAtHub(drive).withTimeout(0));
+      NamedCommands.registerCommand("resetTurret", churret.resetToZero().withTimeout(0));
+    }
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
@@ -233,7 +265,32 @@ public class RobotContainer {
     controller.a().whileTrue(driveWithAutoAim());
     controller.povDown().toggleOnTrue(stowIntake());
     controller.rightBumper().whileTrue(driveWithBumpAngle());
-    // For tuning arm:
+
+    // ========== TURRET CONTROLS ==========
+    // Only bind turret controls if churret is enabled
+    if (Constants.CHURRET_ENABLED && churret != null) {
+      // Left Bumper: Aim turret at hub (primary aiming mode)
+      controller.leftBumper().whileTrue(churret.aimAtHub(drive));
+
+      // POV Left: Aim at alliance zone for passing notes
+      controller.povLeft().whileTrue(churret.aimAtAlliance(drive));
+
+      // POV Right: Shoot-on-the-move with velocity compensation (experimental)
+      controller.povRight().whileTrue(churret.aimWithSOTM(semiAutoHelper, drive));
+
+      // POV Up: Reset turret to forward-facing position
+      controller.povUp().onTrue(churret.resetToZero());
+
+      // Start Button: Full SOTM auto-shoot (RPM + turret + drive aim)
+      controller.start().whileTrue(autoShootWithSOTM());
+
+      // D-pad for RPM trim (use with caution, resets between matches)
+      // Uncomment these for in-match RPM tuning:
+      // controller.povUp().and(controller.leftStick()).onTrue(increaseRPMTrim());
+      // controller.povDown().and(controller.leftStick()).onTrue(decreaseRPMTrim());
+    }
+
+    // For tuning arm (currently disabled for turret controls):
     // controller.povUp().toggleOnTrue(extendIntake());
     // controller.povRight().toggleOnTrue(retractIntake());
   }
@@ -250,6 +307,16 @@ public class RobotContainer {
     return retractIntake().withTimeout(0.5).andThen(autoChooser.get());
   }
 
+  /**
+   * Called periodically in all modes. Used for telemetry updates.
+   */
+  public void periodic() {
+    // Publish SOTM telemetry when enabled
+    if (Constants.CHURRET_ENABLED && semiAutoHelper != null) {
+      semiAutoHelper.publishSOTMTelemetry();
+    }
+  }
+
   public Pose2d getPose() {
     return drive.getPose();
   }
@@ -260,6 +327,21 @@ public class RobotContainer {
 
   public AngularVelocity getActualShooterVelocity() {
     return shooter.getVelocity();
+  }
+
+  public boolean isTurretReadyToShoot() {
+    return Constants.CHURRET_ENABLED && churret != null ? churret.isReadyToShoot() : true;
+  }
+
+  /**
+   * Checks if both shooter and turret are ready to fire.
+   * @return true if both systems are at target
+   */
+  public boolean isReadyToFire() {
+    if (Constants.CHURRET_ENABLED && churret != null) {
+      return churret.isReadyToShoot() && churret.isAtTarget();
+    }
+    return true; // Always ready if churret is disabled
   }
 
   public boolean isRedAlliance() {
@@ -303,22 +385,49 @@ public class RobotContainer {
   }
 
   public Command shootWithAutoAimForAutonomous(double howLongInSeconds) {
-    Command autonomousAutoAimPrep = Commands.parallel(
-        shooter.setVelocity(() -> SemiAutoHelper.getFullAutoShooterVelocity(drive)),
-        DriveCommands.joystickDriveAtAngle(
-            drive,
-            () -> 0,
-            () -> 0,
-            () -> SemiAutoHelper.getFullAutoDriveAngle(drive),
-            () -> false));
-    Command autonomousAutoAimHold = Commands.parallel(
-        shooter.setVelocity(() -> SemiAutoHelper.getFullAutoShooterVelocity(drive)),
-        DriveCommands.joystickDriveAtAngle(
-            drive,
-            () -> 0,
-            () -> 0,
-            () -> SemiAutoHelper.getFullAutoDriveAngle(drive),
-            () -> false));
+    // Build the auto aim prep command with optional churret
+    Command autonomousAutoAimPrep;
+    Command autonomousAutoAimHold;
+
+    if (Constants.CHURRET_ENABLED && churret != null) {
+      // With churret: aim both drive and turret
+      autonomousAutoAimPrep = Commands.parallel(
+          shooter.setVelocity(() -> SemiAutoHelper.getFullAutoShooterVelocity(drive)),
+          churret.fullAutoAim(drive), // Turret aims independently
+          DriveCommands.joystickDriveAtAngle(
+              drive,
+              () -> 0,
+              () -> 0,
+              () -> SemiAutoHelper.getFullAutoDriveAngle(drive),
+              () -> false));
+      autonomousAutoAimHold = Commands.parallel(
+          shooter.setVelocity(() -> SemiAutoHelper.getFullAutoShooterVelocity(drive)),
+          churret.fullAutoAim(drive), // Turret continues aiming
+          DriveCommands.joystickDriveAtAngle(
+              drive,
+              () -> 0,
+              () -> 0,
+              () -> SemiAutoHelper.getFullAutoDriveAngle(drive),
+              () -> false));
+    } else {
+      // Without churret: just aim the drive base
+      autonomousAutoAimPrep = Commands.parallel(
+          shooter.setVelocity(() -> SemiAutoHelper.getFullAutoShooterVelocity(drive)),
+          DriveCommands.joystickDriveAtAngle(
+              drive,
+              () -> 0,
+              () -> 0,
+              () -> SemiAutoHelper.getFullAutoDriveAngle(drive),
+              () -> false));
+      autonomousAutoAimHold = Commands.parallel(
+          shooter.setVelocity(() -> SemiAutoHelper.getFullAutoShooterVelocity(drive)),
+          DriveCommands.joystickDriveAtAngle(
+              drive,
+              () -> 0,
+              () -> 0,
+              () -> SemiAutoHelper.getFullAutoDriveAngle(drive),
+              () -> false));
+    }
     Command pullShootingTrigger = Commands.parallel(intakeArm.pulseArm(),
         intakeRoller.keepFuelInside(),
         feeder.setVelocity(SemiAutoHelper.getFeederVelocityForHubDistance(drive)),
@@ -472,6 +581,68 @@ public class RobotContainer {
 
   private Command extendIntake() {
     return intakeArm.extendIntake();
+  }
+
+  /**
+   * Auto-shoot command with full SOTM integration.
+   * Uses shoot-on-the-move for both RPM and angle compensation.
+   * Only available when churret is enabled.
+   * @return Command that aims and shoots with velocity compensation
+   */
+  public Command autoShootWithSOTM() {
+    if (!Constants.CHURRET_ENABLED || churret == null || semiAutoHelper == null) {
+      // Fallback to regular auto-shoot if SOTM not available
+      return autoShoot();
+    }
+
+    return Commands.parallel(
+        // Use SOTM-calculated RPM instead of distance-based lookup
+        shooter.setVelocity(() -> {
+          ShotCalculator.LaunchParameters shot = semiAutoHelper.calculateSOTMShot();
+          return edu.wpi.first.units.Units.RPM.of(shot.rpm());
+        }),
+        // Turret aims with SOTM
+        churret.aimWithSOTM(semiAutoHelper, drive),
+        // Drive aims with SOTM angle
+        DriveCommands.joystickDriveAtAngle(
+            drive,
+            () -> -controller.getLeftY(),
+            () -> -controller.getLeftX(),
+            () -> semiAutoHelper.calculateSOTMShot().driveAngle(),
+            () -> isRequestingXLock),
+        // Trigger the shooting mechanism
+        this.requestXLock(),
+        intakeArm.pulseArm(),
+        intakeRoller.keepFuelInside(),
+        feeder.setVelocity(SemiAutoHelper.getFeederVelocityForHubDistance(drive)),
+        spindexer.spinToShooter()
+    ).withName("AutoShootWithSOTM");
+  }
+
+  /**
+   * RPM trim commands for in-match tuning.
+   * Increases the RPM offset by 25.
+   */
+  public Command increaseRPMTrim() {
+    return Commands.runOnce(() -> {
+      if (Constants.CHURRET_ENABLED && semiAutoHelper != null) {
+        semiAutoHelper.getShotCalculator().adjustOffset(25);
+        System.out.println("RPM offset: +" + semiAutoHelper.getShotCalculator().getOffset());
+      }
+    });
+  }
+
+  /**
+   * RPM trim commands for in-match tuning.
+   * Decreases the RPM offset by 25.
+   */
+  public Command decreaseRPMTrim() {
+    return Commands.runOnce(() -> {
+      if (Constants.CHURRET_ENABLED && semiAutoHelper != null) {
+        semiAutoHelper.getShotCalculator().adjustOffset(-25);
+        System.out.println("RPM offset: " + semiAutoHelper.getShotCalculator().getOffset());
+      }
+    });
   }
 
 }

@@ -46,6 +46,14 @@ public final class Constants {
 
   public static final CalibrationMode calibrationMode = CalibrationMode.ENABLED;
 
+  // ========== FEATURE FLAGS ==========
+  /**
+   * Enable/disable the Churret (turret) subsystem.
+   * Set to true when turret hardware is ready and tested.
+   * Set to false to disable turret without removing code.
+   */
+  public static final boolean CHURRET_ENABLED = false;  // ← SET TO TRUE TO RE-ENABLE TURRET
+
   /** Calibrating AdvantageKit Constants **/
   public static enum CalibrationMode {
     /** Not in calibration mode. */
