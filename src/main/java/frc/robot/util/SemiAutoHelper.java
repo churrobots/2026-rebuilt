@@ -53,6 +53,8 @@ public class SemiAutoHelper {
       Map.entry(99., 2850.),
       Map.entry(88., 2775.),
       Map.entry(75., 2800.));
+  private static int BLUE_ALLIANCE_X = 170;
+  private static int RED_ALLIANCE_X = 457;
 
   public SemiAutoHelper(final Drive drive) {
     // TODO: add back in
@@ -132,7 +134,7 @@ public class SemiAutoHelper {
   }
 
   public static AngularVelocity getShooterVelocityForPassing() {
-    // Could update to be dependent on distance to alliance zone
+    // TODO: Replace with interpolating map
     return RPM.of(3400);
   }
 
@@ -166,7 +168,7 @@ public class SemiAutoHelper {
     Distance robotX = Meters.of(currentPose.getTranslation().getX());
     // Neutral zone begins at 170" and goes to 457" according to
     // the field map documentation.
-    return robotX.in(Inches) > 170 && robotX.in(Inches) < 457;
+    return robotX.in(Inches) > BLUE_ALLIANCE_X && robotX.in(Inches) < RED_ALLIANCE_X;
   }
 
   public static boolean isInTrenchBumpZone(Drive drive) {
@@ -194,18 +196,29 @@ public class SemiAutoHelper {
   }
 
   public static AngularVelocity getFullAutoShooterVelocity(Drive drive) {
-    if (isInNeutralZone(drive)) {
-      return getShooterVelocityForPassing();
-    } else {
+    if (isInAllianceZone(drive)) {
       return getShooterVelocityForHubDistance(drive);
+    } else {
+      return getShooterVelocityForPassing();
     }
   }
 
   public static Rotation2d getFullAutoDriveAngle(Drive drive) {
-    if (isInNeutralZone(drive)) {
-      return getAngleToAlliance();
-    } else {
+    if (isInAllianceZone(drive)) {
       return getAngleToHub(drive);
+    } else {
+      return getAngleToAlliance();
+    }
+  }
+
+  private static boolean isInAllianceZone(Drive drive) {
+    boolean isRedAlliance = DriverStation.getAlliance().orElseGet(() -> Alliance.Blue) == Alliance.Red;
+    Pose2d currentPose = drive.getPose();
+    Distance robotX = Meters.of(currentPose.getTranslation().getX());
+    if (isRedAlliance) {
+      return robotX.in(Inches) > RED_ALLIANCE_X;
+    } else {
+      return robotX.in(Inches) < BLUE_ALLIANCE_X;
     }
   }
 
