@@ -49,11 +49,16 @@ import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOSpark;
+import frc.robot.subsystems.sotm.ProjectileSimulator;
+import frc.robot.subsystems.sotm.ProjectileSimulator.GeneratedLUT;
+import frc.robot.subsystems.sotm.ShotCalculator.LaunchParameters;
+import frc.robot.subsystems.sotm.ShotCalculator;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.util.SemiAutoHelper;
+import frc.robot.util.SemiAutoHelper.ShotParams;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -82,6 +87,9 @@ public class RobotContainer {
 
   // Dashboard inputs, for calibration only
   private LoggedDashboardChooser<Command> autoChooser;
+  private double CONTROLLER_DEADZONE = 0.05;
+  private double TRIGGER_THRESHOLD = 0.5;
+  private double SHOT_CONFIDENCE_THRESHOLD = 50.0;
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -366,6 +374,29 @@ public class RobotContainer {
             () -> isRequestingXLock));
   }
 
+  public Command driveWithShootOnTheMove() {
+    return Commands.parallel(
+        shooter.setVelocity(() -> {
+          LaunchParameters launchParameters = getLaunchParameters();
+          // TODO: Add differentiation between shooting and passing
+          if (launchParameters.isValid() && launchParameters.confidence() > SHOT_CONFIDENCE_THRESHOLD) {
+            return RPM.of(launchParameters.rpm());
+          } else {
+            return RPM.of(0.0);
+          }
+        }),
+        DriveCommands.driveWithAnything(
+            drive,
+            () -> -controller.getLeftY(),
+            () -> -controller.getLeftX(),
+            () -> isMoving(),
+            () -> isShooting(),
+            () -> isRequestingParking(),
+            () -> isPassing(),
+            () -> isHeSpeeding(),
+            () -> getLaunchParameters()));
+  }
+
   public Command driveWithLeftTrenchManualAim() {
     return Commands.parallel(
         shooter.setVelocity(() -> SemiAutoHelper.getShooterVelocity(Feet.of(11.5))),
@@ -459,6 +490,44 @@ public class RobotContainer {
   // Helpers for xlocking
   public Command requestXLock() {
     return Commands.run(this::requestXlockWhenAimingAtHub).finallyDo(this::dropXLock);
+  }
+
+  // is shooting, is moving, wants parking,
+
+  // desired angle, is shooting, is moving, shoot at thing while moving
+
+  /**
+   * is shooting, triggger and NOT neutral zone
+   * is moving, controller joystick outside a deadband
+   * wants parking = is shooting and not is moving
+   * speed cap = is shooting and is moving
+   */
+
+  public boolean isMoving() {
+    return Math.abs(controller.getLeftX()) < CONTROLLER_DEADZONE
+        && Math.abs(controller.getLeftY()) < CONTROLLER_DEADZONE;
+  }
+
+  public boolean isShooting() {
+    return (controller.getRightTriggerAxis() > TRIGGER_THRESHOLD)
+        && !SemiAutoHelper.isInNeutralZone(drive);
+  }
+
+  public boolean isRequestingParking() {
+    return isShooting() && !isMoving();
+  }
+
+  public boolean isPassing() {
+    return (controller.getRightTriggerAxis() > TRIGGER_THRESHOLD)
+        && SemiAutoHelper.isInNeutralZone(drive);
+  }
+
+  public boolean isHeSpeeding() {
+    return isShooting() && isMoving();
+  }
+
+  public LaunchParameters getLaunchParameters() {
+    return semiAutoHelper.shootOnTheMoveCalculation();
   }
 
   public void requestXlockWhenAimingAtHub() {

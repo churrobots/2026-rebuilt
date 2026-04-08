@@ -29,10 +29,15 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.ControlsConstants;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.sotm.ProjectileSimulator;
+import frc.robot.subsystems.sotm.ProjectileSimulator.GeneratedLUT;
 import frc.robot.subsystems.sotm.ShotCalculator;
+import frc.robot.subsystems.sotm.ShotCalculator.LaunchParameters;
 
 /** Add your docs here. */
 public class SemiAutoHelper {
+  public record ShotParams(AngularVelocity shooterVelocity, Rotation2d driveAngle) {
+  }
 
   public static AprilTagFieldLayout aprilTagLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
   private ShotCalculator shotCalculator;
@@ -235,5 +240,79 @@ public class SemiAutoHelper {
     }
 
     return Rotation2d.fromDegrees(angleToDrive);
+  }
+
+  // Shoot on the move
+  private GeneratedLUT createShootOnTheMoveLookupTable() {
+    // plug in YOUR robot's measurements from CAD
+    ProjectileSimulator.SimParameters params = new ProjectileSimulator.SimParameters(
+        0.215, // ball mass kg
+        0.1501, // ball diameter m
+        0.47, // drag coeff (smooth sphere)
+        0.2, // Magnus coeff
+        1.225, // air density
+        0.43, // exit height (m), floor to where the ball leaves the shooter
+        0.1016, // flywheel diameter (m), measure with calipers
+        1.83, // target height (m), from game manual
+        0.6, // slip factor (0=no grip, 1=perfect), tune this on the real robot
+        45.0, // launch angle from horizontal, measure from CAD
+        0.001, // sim timestep
+        1500, 6000, 25, 5.0 // RPM search range, iterations, max sim time
+    );
+
+    ProjectileSimulator sim = new ProjectileSimulator(params);
+    ProjectileSimulator.GeneratedLUT lut = sim.generateLUT();
+
+    // print it out
+    for (var entry : lut.entries()) {
+      if (entry.reachable()) {
+        System.out.printf("Shoot on the move lookup value: %.2fm -> %.0f RPM, %.3fs TOF%n",
+            entry.distanceM(), entry.rpm(), entry.tof());
+      }
+    }
+
+    return lut;
+  }
+
+  private ShotCalculator setupShotCalculator(GeneratedLUT lut) {
+    // in RobotContainer or wherever you set stuff up
+    ShotCalculator.Config config = new ShotCalculator.Config();
+    config.launcherOffsetX = 0.23; // how far forward the launcher is from robot center (m)
+    config.launcherOffsetY = 0.0; // how far left, 0 if centered
+    config.phaseDelayMs = 30.0; // your vision pipeline latency
+    config.mechLatencyMs = 20.0; // how long the mechanism takes to respond
+    config.maxTiltDeg = 5.0; // suppress firing when chassis tilts past this (bumps/ramps)
+    config.headingSpeedScalar = 1.0; // heading tolerance tightens with robot speed (0 to disable)
+    config.headingReferenceDistance = 2.5; // heading tolerance scales with distance from hub
+    config.maxSOTMSpeed = 10.0;
+
+    ShotCalculator shotCalc = new ShotCalculator(config);
+
+    // load the LUT you generated
+    for (var entry : lut.entries()) {
+      if (entry.reachable()) {
+        shotCalc.loadLUTEntry(entry.distanceM(), entry.rpm(), entry.tof());
+      }
+    }
+
+    return shotCalc;
+  }
+
+  public LaunchParameters shootOnTheMoveCalculation() {
+    // call this every cycle in robotPeriodic()
+    Translation2d hubCenter = getHubPosition();
+    Translation2d hubForward = getHubFacingDirection(); // which way the hub faces
+
+    ShotCalculator.ShotInputs inputs = new ShotCalculator.ShotInputs(
+        drive.getPose(),
+        drive.getFieldVelocity(),
+        drive.getChassisSpeeds(),
+        hubCenter,
+        hubForward,
+        0.9, // vision confidence, 0 to 1
+        0.0,
+        0.0);
+
+    return this.shotCalculator.calculate(inputs);
   }
 }

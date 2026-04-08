@@ -31,6 +31,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
+import frc.robot.subsystems.sotm.ShotCalculator.LaunchParameters;
+import frc.robot.util.SemiAutoHelper;
 
 public class DriveCommands {
   private static final double DEADBAND = 0.1;
@@ -304,6 +306,102 @@ public class DriveCommands {
     double[] positions = new double[4];
     Rotation2d lastAngle = Rotation2d.kZero;
     double gyroDelta = 0.0;
+  }
+
+  public static Command driveWithAnything(
+      Drive drive,
+      DoubleSupplier xSupplier,
+      DoubleSupplier ySupplier,
+      Supplier<Boolean> isMovingSupplier,
+      Supplier<Boolean> isShootingSupplier,
+      Supplier<Boolean> isRequestingParkingSupplier,
+      Supplier<Boolean> isPassingSupplier,
+      Supplier<Boolean> isHeSpeedingSupplier,
+      Supplier<LaunchParameters> getLaunchParametersSupplier) {
+    // Create PID controller
+    ProfiledPIDController angleController = new ProfiledPIDController(
+        ANGLE_KP,
+        0.0,
+        ANGLE_KD,
+        new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION));
+    angleController.enableContinuousInput(-Math.PI, Math.PI);
+
+    // Construct command
+    return Commands.run(
+        () -> {
+          // Get linear velocity
+          Translation2d linearVelocity = getLinearVelocityFromJoysticks(xSupplier.getAsDouble(),
+              ySupplier.getAsDouble());
+
+          // Calculate angular speed
+          LaunchParameters launchParameters = getLaunchParametersSupplier.get();
+          Rotation2d angle;
+          if (isShootingSupplier.get() && launchParameters.isValid()) {
+            angle = launchParameters.driveAngle();
+          } else if (isPassingSupplier.get()) {
+            angle = SemiAutoHelper.getAngleToAlliance();
+          } else {
+            angle = SemiAutoHelper.getAngleToHub(drive);
+          }
+
+          double omega = angleController.calculate(
+              drive.getRotation().getRadians(), angle.getRadians());
+          SmartDashboard.putBoolean("aimLocked", angleController.atGoal());
+
+          // Convert to field relative speeds & send command
+          ChassisSpeeds speeds = new ChassisSpeeds(
+              linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
+              linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
+              omega);
+          boolean isFlipped = DriverStation.getAlliance().isPresent()
+              && DriverStation.getAlliance().get() == Alliance.Red;
+
+          // Handle x-lock in a smart way, so that the robot doesn't
+          // undershoot its goal angle before x-locking (resulting
+          // in inaccurate aiming for example). Only xlock when we're
+          // fully aimed.
+          // boolean wantsXLock = xLockRequested.get() == true;
+          // if (wantsXLock && velocityMagnitudeMetersPerSecond >= 0.2) {
+          // drive.runVelocityWithSpeedCap(
+          // ChassisSpeeds.fromFieldRelativeSpeeds(
+          // speeds,
+          // isFlipped
+          // ? drive.getRotation().plus(new Rotation2d(Math.PI))
+          // : drive.getRotation()),
+          // SHOOT_ON_MOVE_SPEED_CAP);
+          // } else if (wantsXLock && angleController.atGoal()) {
+          // drive.stopWithX();
+          // } else {
+          // drive.runVelocity(
+          // ChassisSpeeds.fromFieldRelativeSpeeds(
+          // speeds,
+          // isFlipped
+          // ? drive.getRotation().plus(new Rotation2d(Math.PI))
+          // : drive.getRotation()));
+          // }
+
+          // MATT NOTE: I deleted from the in-progress changes to joystickDriveAtAngle
+          // private static final double SHOOT_ON_MOVE_SPEED_CAP = 2.5;
+          // double velocityMagnitudeMetersPerSecond =
+          // Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
+          // if (wantsXLock && velocityMagnitudeMetersPerSecond >= 0.2) {
+          // drive.runVelocityWithSpeedCap(
+          // ChassisSpeeds.fromFieldRelativeSpeeds(
+          // speeds,
+          // isFlipped
+          // ? drive.getRotation().plus(new Rotation2d(Math.PI))
+          // : drive.getRotation()),
+          // SHOOT_ON_MOVE_SPEED_CAP);
+
+          if (isRequestingParkingSupplier.get()) {
+            drive.stopWithX();
+          }
+
+        },
+        drive)
+
+        // Reset PID controller when command starts
+        .beforeStarting(() -> angleController.reset(drive.getRotation().getRadians()));
   }
 
 }
