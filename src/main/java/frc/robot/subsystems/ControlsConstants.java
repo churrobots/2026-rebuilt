@@ -54,6 +54,7 @@ public class ControlsConstants {
   public static final double SHOOTER_DEFAULT_DUTY_CYCLE = 0;
   public static final double SHOOTER_KV = 0.112;
   public static final double FEEDER_TO_SHOOTER_RPM_RATIO = 6000.0 / 3400.0;
+  public static final AngularVelocity SHOOTER_OUTTAKE_VELOCITY = RPM.of(100.0);
 
   // ========== Spindexer ==========
   public static final double SPINDEXER_KP = 0.3;

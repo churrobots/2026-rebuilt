@@ -61,7 +61,7 @@ public class SemiAutoHelper {
     this.drive = drive;
   }
 
-  private Translation2d getHubPosition() {
+  private static Translation2d getHubPosition() {
     boolean isRedAlliance = DriverStation.getAlliance().orElseGet(() -> Alliance.Blue) == Alliance.Red;
     Distance blueHubX = Distance.ofBaseUnits(4.63, Meters);
     Distance redHubX = Distance.ofBaseUnits(aprilTagLayout.getFieldLength(), Meters).minus(blueHubX);
@@ -103,16 +103,11 @@ public class SemiAutoHelper {
   }
 
   public static Distance getDistanceToHub(Drive drive) {
-    boolean isRedAlliance = DriverStation.getAlliance().orElseGet(() -> Alliance.Blue) == Alliance.Red;
-    Distance blueHubX = Distance.ofBaseUnits(4.63, Meters);
-    Distance redHubX = Distance.ofBaseUnits(aprilTagLayout.getFieldLength(), Meters).minus(blueHubX);
-    Distance hubY = Distance.ofBaseUnits(4.035, Meters);
-    Distance hubX = isRedAlliance ? redHubX : blueHubX;
     Pose2d robotPose = drive.getPose();
     Distance robotX = Distance.ofBaseUnits(robotPose.getX(), Meters);
     Distance robotY = Distance.ofBaseUnits(robotPose.getY(), Meters);
     Translation2d robotPos = new Translation2d(robotX, robotY);
-    Translation2d hubPos = new Translation2d(hubX, hubY);
+    Translation2d hubPos = getHubPosition();
     double distance = robotPos.getDistance(hubPos);
     SmartDashboard.putNumber("getDistance", Meters.of(distance).in(Inches));
     return Meters.of(distance);

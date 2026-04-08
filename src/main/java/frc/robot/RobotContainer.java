@@ -8,6 +8,7 @@
 package frc.robot;
 
 import static edu.wpi.first.units.Units.Feet;
+import static edu.wpi.first.units.Units.RPM;
 import static frc.robot.subsystems.vision.VisionConstants.cameraBackLeft;
 import static frc.robot.subsystems.vision.VisionConstants.cameraBackRight;
 import static frc.robot.subsystems.vision.VisionConstants.cameraFrontLeft;
@@ -233,6 +234,7 @@ public class RobotContainer {
     controller.a().whileTrue(driveWithAutoAim());
     controller.povDown().toggleOnTrue(stowIntake());
     controller.rightBumper().whileTrue(driveWithBumpAngle());
+    controller.leftBumper().whileTrue(runOuttake());
     // For tuning arm:
     // controller.povUp().toggleOnTrue(extendIntake());
     // controller.povRight().toggleOnTrue(retractIntake());
@@ -421,6 +423,15 @@ public class RobotContainer {
         // NOTE: no longer need agitate with new dome spindexer
         // spindexer.agitate(),
         intakeRoller.feedToSpindexer());
+  }
+
+  public Command runOuttake() {
+    return Commands.parallel(extendIntake(),
+        intakeRoller.spillFuelOutside(),
+        spindexer.spinToShooter(),
+        shooter.setVelocity(() -> RPM.of(Shooter.TUNABLE_VOMIT_RPM.getLatest())),
+        feeder.setVelocity(
+            () -> RPM.of(Shooter.TUNABLE_VOMIT_RPM.getLatest() * ControlsConstants.FEEDER_TO_SHOOTER_RPM_RATIO)));
   }
 
   public Command runIntakeFaster() {

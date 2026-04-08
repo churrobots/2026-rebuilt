@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.util.HardwareMonitor;
+import frc.robot.util.TunableNumber;
 import frc.robot.util.YAMSUtil;
 import yams.mechanisms.config.FlyWheelConfig;
 import yams.mechanisms.velocity.FlyWheel;
@@ -34,6 +35,9 @@ import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 public class Shooter extends SubsystemBase {
   private static final String MOTOR_TELEMETRY = "ShooterMotor";
   private static final String MECHANISM_TELEMETRY = "Shooter";
+
+  public static TunableNumber TUNABLE_VOMIT_RPM = new TunableNumber("OUTTAKE_RPM",
+      ControlsConstants.SHOOTER_OUTTAKE_VELOCITY.in(RPM));
 
   // Stable physical constants
   private static final double GEARING = 1.0;
@@ -104,7 +108,7 @@ public class Shooter extends SubsystemBase {
    * @param speed Speed to set.
    * @return {@link edu.wpi.first.wpilibj2.command.RunCommand}
    */
-  private Command setVelocityFixed(AngularVelocity speed) {
+  public Command setVelocityFixed(AngularVelocity speed) {
     return shooter.setSpeed(speed);
   }
 
