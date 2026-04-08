@@ -36,9 +36,6 @@ public class Shooter extends SubsystemBase {
   private static final String MOTOR_TELEMETRY = "ShooterMotor";
   private static final String MECHANISM_TELEMETRY = "Shooter";
 
-  public static TunableNumber TUNABLE_VOMIT_RPM = new TunableNumber("OUTTAKE_RPM",
-      ControlsConstants.SHOOTER_OUTTAKE_VELOCITY.in(RPM));
-
   // Stable physical constants
   private static final double GEARING = 1.0;
   private static final Current STATOR_CURRENT_LIMIT = Amps.of(80);
@@ -108,7 +105,7 @@ public class Shooter extends SubsystemBase {
    * @param speed Speed to set.
    * @return {@link edu.wpi.first.wpilibj2.command.RunCommand}
    */
-  public Command setVelocityFixed(AngularVelocity speed) {
+  private Command setVelocityFixed(AngularVelocity speed) {
     return shooter.setSpeed(speed);
   }
 

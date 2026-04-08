@@ -426,11 +426,9 @@ public class RobotContainer {
   }
 
   public Command runOuttake() {
-    return Commands.parallel(extendIntake(),
-        intakeRoller.spillFuelOutside(), 
-        shooter.setVelocity(() -> RPM.of(Shooter.TUNABLE_VOMIT_RPM.getLatest())),
-        feeder.setVelocity(
-            () -> RPM.of(Shooter.TUNABLE_VOMIT_RPM.getLatest() * ControlsConstants.FEEDER_TO_SHOOTER_RPM_RATIO)));
+    return Commands.parallel(
+        extendIntake(),
+        intakeRoller.spillFuelOutside());
   }
 
   public Command runIntakeFaster() {
