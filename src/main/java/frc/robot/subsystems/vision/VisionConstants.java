@@ -35,7 +35,7 @@ public class VisionConstants {
   // Robot to camera transforms
   // (Not used by Limelight, configure in web UI instead)
   public static Transform3d robotToCameraFrontRight = new Transform3d(
-      Units.inchesToMeters(1.25), Units.inchesToMeters(-13),
+      Units.inchesToMeters(0.875), Units.inchesToMeters(-13),
       Units.inchesToMeters(16.875),
       new Rotation3d(
           Math.PI,
@@ -44,8 +44,8 @@ public class VisionConstants {
       ));
 
   public static Transform3d robotToCameraBackRight = new Transform3d(
-      Units.inchesToMeters(-12.7839), Units.inchesToMeters(-12.4421),
-      Units.inchesToMeters(10),
+      Units.inchesToMeters(-11.875), Units.inchesToMeters(-10.875),
+      Units.inchesToMeters(16.75),
       new Rotation3d(
           Math.PI, // camera is upside down
           Units.degreesToRadians(-15), // pitched back
@@ -53,7 +53,7 @@ public class VisionConstants {
       ));
 
   public static Transform3d robotToCameraFrontLeft = new Transform3d(
-      Units.inchesToMeters(1.25), Units.inchesToMeters(13), Units.inchesToMeters(
+      Units.inchesToMeters(0.875), Units.inchesToMeters(13), Units.inchesToMeters(
           16.875),
       new Rotation3d(
           Math.PI,
@@ -62,7 +62,7 @@ public class VisionConstants {
       ));
 
   public static Transform3d robotToCameraBackLeft = new Transform3d(
-      Units.inchesToMeters(-12.7839), Units.inchesToMeters(12.4421),
+      Units.inchesToMeters(-11.875), Units.inchesToMeters(12.125),
       Units.inchesToMeters(10),
       new Rotation3d(
           Math.PI, // camera is upside down
