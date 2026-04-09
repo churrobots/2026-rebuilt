@@ -38,6 +38,7 @@ public class IntakeArm extends SubsystemBase {
   private static final Angle STOWED_ANGLE = Degrees.of(0.66 * 360);
   private static final Angle RETRACTED_ANGLE = Degrees.of(0.50 * 360);
   private static final Angle EXTENDED_ANGLE = Degrees.of(0.34 * 360);
+  private static final Angle DEPOT_PREP_ANGLE = EXTENDED_ANGLE.minus(Degrees.of(25)); // TODO: measure this
 
   // Pulsing constants
   private static final double PULSING_PERIOD_SECONDS = 1;
@@ -169,6 +170,8 @@ public class IntakeArm extends SubsystemBase {
         }
       } else if (autonomousState == AutonomousState.CHILLOUT) {
         armMotorController.setPosition(RETRACTED_ANGLE);
+      } else if (autonomousState == AutonomousState.DEPOT_PREP) {
+        armMotorController.setPosition(DEPOT_PREP_ANGLE);
       }
     }
 
@@ -182,7 +185,8 @@ public class IntakeArm extends SubsystemBase {
   public static enum AutonomousState {
     OFF,
     CHILLOUT,
-    INTAKE
+    INTAKE,
+    DEPOT_PREP
   }
 
   private AutonomousState autonomousState = AutonomousState.OFF;

@@ -1,0 +1,91 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "prepDepotIntakeWithSafety"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LR Triple Bite"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "runIntakeWithSafety"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "2nd part LR"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "prepDepotIntakeWithSafety"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "3rd part LR triple bite"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "4th part"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "runIntakeWithSafety"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "5th"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "stopIntakeWithSafety"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "autoPrepFlywheels"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "6th "
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shootWithAutoAimLonger"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}

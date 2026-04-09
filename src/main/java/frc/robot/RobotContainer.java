@@ -176,6 +176,9 @@ public class RobotContainer {
     NamedCommands.registerCommand("runIntakeWithSafety", enableIntakeWithSafety());
     NamedCommands.registerCommand("stopIntakeWithSafety", stopIntakeWithSafety());
 
+    // New commands added for DCMP;
+    NamedCommands.registerCommand("prepDepotIntakeWithSafety", prepDepotIntakeWithSafety());
+
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
@@ -296,6 +299,12 @@ public class RobotContainer {
     return Commands.parallel(
         intakeArm.setDesiredAutonomousState(IntakeArm.AutonomousState.CHILLOUT),
         intakeRoller.setDesiredAutonomousState(IntakeRoller.AutonomousState.CHILLOUT));
+  }
+
+  public Command prepDepotIntakeWithSafety() {
+    return Commands.parallel(
+        intakeArm.setDesiredAutonomousState(IntakeArm.AutonomousState.DEPOT_PREP),
+        intakeRoller.setDesiredAutonomousState(IntakeRoller.AutonomousState.INTAKE));
   }
 
   public Command disableAutonomousStateSafeties() {
