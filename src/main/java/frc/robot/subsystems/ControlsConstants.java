@@ -63,7 +63,7 @@ public class ControlsConstants {
   public static final double SPINDEXER_KV = 0.9;
 
   // ========== Controller Binding Constants ==========
-  public static final AngularVelocity SPINDEXER_VELOCITY = RPM.of(1500); // was 600
+  public static final AngularVelocity SPINDEXER_VELOCITY = RPM.of(1200); // was 600
 
   // Math for minimum RPM required, which surface speed should be 2x robot speed
   // Drivetrain maxes at 4.6 m/s --> rollers need to run 2x = 9.2 m/s
