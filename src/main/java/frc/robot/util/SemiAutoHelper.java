@@ -54,6 +54,13 @@ public class SemiAutoHelper {
       Map.entry(75., 2800.));
   private static int BLUE_ALLIANCE_X = 170;
   private static int RED_ALLIANCE_X = 457;
+  private static int FULL_FIELD_X = 651;
+
+  // Passing speeds
+  static InterpolatingDoubleTreeMap lookupDistanceInInchesToPassingRPM = InterpolatingDoubleTreeMap.ofEntries(
+      Map.entry(467., 5000.),
+      Map.entry(323., 4200.),
+      Map.entry(200., 3400.));
 
   public SemiAutoHelper(final Drive drive) {
     // TODO: add back in
@@ -103,6 +110,17 @@ public class SemiAutoHelper {
     return Rotation2d.fromRadians(targetAngleInRadians);
   }
 
+  public static Distance getDistanceToAlliance(Drive drive) {
+    Pose2d robotPose = drive.getPose();
+    Distance robotX = Distance.ofBaseUnits(robotPose.getX(), Meters);
+    boolean isRedAlliance = DriverStation.getAlliance().orElseGet(() -> Alliance.Blue) == Alliance.Red;
+    if (isRedAlliance) {
+      return Inches.of(FULL_FIELD_X).minus(robotX);
+    } else {
+      return robotX;
+    }
+  }
+
   public static Distance getDistanceToHub(Drive drive) {
     Pose2d robotPose = drive.getPose();
     Distance robotX = Distance.ofBaseUnits(robotPose.getX(), Meters);
@@ -132,9 +150,10 @@ public class SemiAutoHelper {
     return getShooterVelocity(getDistanceToHub(drive));
   }
 
-  public static AngularVelocity getShooterVelocityForPassing() {
-    // TODO: Replace with interpolating map
-    return RPM.of(3400);
+  public static AngularVelocity getShooterVelocityForPassing(Drive drive) {
+    Distance distanceToAlliance = getDistanceToAlliance(drive);
+    double passingRpm = lookupDistanceInInchesToPassingRPM.get(distanceToAlliance.in(Inches));
+    return RPM.of(passingRpm);
   }
 
   public static AngularVelocity getFeederVelocityForHubDistance(Drive drive) {
@@ -198,7 +217,7 @@ public class SemiAutoHelper {
     if (isInAllianceZone(drive)) {
       return getShooterVelocityForHubDistance(drive);
     } else {
-      return getShooterVelocityForPassing();
+      return getShooterVelocityForPassing(drive);
     }
   }
 
