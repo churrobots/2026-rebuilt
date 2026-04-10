@@ -1,0 +1,73 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "autoPrepFlywheels"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Delay auto"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shootWithAutoAimPreload"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "stopAllShooting"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "delay 1"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "runIntakeWithSafety"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "delay 2"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "autoPrepFlywheels"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "delay 3"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shootWithAutoAimLonger"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}
