@@ -44,9 +44,8 @@ public class SemiAutoHelper {
 
   // Use this to automatically select an RPM for a given distance (Inches, RPM)
   static InterpolatingDoubleTreeMap lookupDistanceInInchesToRPM = InterpolatingDoubleTreeMap.ofEntries(
-      Map.entry(207., 4000.),
-      Map.entry(207., 4000.),
-      Map.entry(183., 3750.),
+      Map.entry(207., 3800.),
+      Map.entry(183., 3700.),
       Map.entry(159., 3400.),
       Map.entry(135., 3100.),
       Map.entry(111., 2900.),
