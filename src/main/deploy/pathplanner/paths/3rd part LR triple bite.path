@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 0.8103275460605719,
-        "y": 6.556243697045207
+        "x": 0.42,
+        "y": 6.124920109463277
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.066948308975347,
-        "y": 6.62596516031943
+        "x": 0.6766207629147751,
+        "y": 6.1946415727375
       },
       "isLocked": false,
       "linkedName": "Ldepotintake"
     },
     {
       "anchor": {
-        "x": 1.633804435896212,
-        "y": 6.345771812749903
+        "x": 1.615807015801554,
+        "y": 6.059356075653248
       },
       "prevControl": {
-        "x": 1.4184571172506948,
-        "y": 6.472758159859291
+        "x": 1.2826643052612994,
+        "y": 6.406627714512711
       },
       "nextControl": null,
       "isLocked": false,
@@ -69,13 +69,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -166.8302826979496
+    "rotation": -90.03505186122912
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -138.6638802568899
+    "rotation": -90.44597771870801
   },
   "useDefaultConstraints": true
 }

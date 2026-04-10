@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.633804435896212,
-        "y": 6.345771812749903
+        "x": 1.615807015801554,
+        "y": 6.059356075653248
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.8643275742674343,
-        "y": 5.877137641344974
+        "x": 1.8463301541727763,
+        "y": 5.590721904248319
       },
       "isLocked": false,
       "linkedName": "M-depotintake"
     },
     {
       "anchor": {
-        "x": 0.9756650920802452,
-        "y": 5.07781729075243
+        "x": 0.7207974708686442,
+        "y": 5.1206533037605935
       },
       "prevControl": {
-        "x": 1.5348735930160653,
-        "y": 5.02697542721502
+        "x": 1.2800059718044643,
+        "y": 5.069811440223184
       },
       "nextControl": null,
       "isLocked": false,
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 129.76374381175793
+    "rotation": 116.78483326039974
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -166.8302826979496
+    "rotation": -90.03505186122912
   },
   "useDefaultConstraints": true
 }

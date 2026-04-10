@@ -38,7 +38,7 @@ public class IntakeArm extends SubsystemBase {
   private static final Angle STOWED_ANGLE = Degrees.of(0.66 * 360);
   private static final Angle RETRACTED_ANGLE = Degrees.of(0.50 * 360);
   private static final Angle EXTENDED_ANGLE = Degrees.of(0.34 * 360);
-  private static final Angle DEPOT_PREP_ANGLE = EXTENDED_ANGLE.plus(Degrees.of(25)); // TODO: measure this
+  private static final Angle DEPOT_PREP_ANGLE = EXTENDED_ANGLE.plus(Degrees.of(22)); // TODO: measure this
 
   // Pulsing constants
   private static final double PULSING_PERIOD_SECONDS = 1;

@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 0.9756650920802452,
-        "y": 5.07781729075243
+        "x": 0.7207974708686442,
+        "y": 5.1206533037605935
       },
       "prevControl": null,
       "nextControl": {
-        "x": 0.6828324290969983,
-        "y": 5.1360559065465825
+        "x": 0.41900936837923775,
+        "y": 4.931170826712571
       },
       "isLocked": false,
       "linkedName": "R depot to shoot"
     },
     {
       "anchor": {
-        "x": 0.6887326797512083,
-        "y": 5.214580415891003
+        "x": 0.7207974708686442,
+        "y": 5.338925891596046
       },
       "prevControl": {
-        "x": 0.882173794506469,
-        "y": 5.056212063237318
+        "x": 1.0896495961334747,
+        "y": 5.567553241966808
       },
       "nextControl": null,
       "isLocked": false,
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 117.81176226655394
+    "rotation": 127.04754301227352
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 129.76374381175793
+    "rotation": 116.78483326039974
   },
   "useDefaultConstraints": true
 }
