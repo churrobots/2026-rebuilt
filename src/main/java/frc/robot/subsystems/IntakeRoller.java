@@ -17,6 +17,7 @@ import com.revrobotics.spark.SparkMax;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
@@ -119,7 +120,8 @@ public class IntakeRoller extends SubsystemBase {
   }
 
   public Command keepFuelInside() {
-    return roller.setSpeed(ControlsConstants.INTAKE_ROLLER_KEEP_INSIDE_VELOCITY);
+    // return roller.setSpeed(ControlsConstants.INTAKE_ROLLER_KEEP_INSIDE_VELOCITY);
+    return roller.setVoltage(Units.Volts.of(1.5));
   }
 
   public Command spillFuelOutside() {
