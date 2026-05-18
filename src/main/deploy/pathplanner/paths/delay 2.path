@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 4.247861331846207,
-        "y": 7.3904112511029
+        "x": 4.203157143094067,
+        "y": 7.536681924964563
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.810154484463277,
-        "y": 7.427926652983757
+        "x": 4.7118820696388966,
+        "y": 7.338847311145307
       },
       "isLocked": false,
       "linkedName": "delay trench "
@@ -64,12 +64,12 @@
     },
     {
       "anchor": {
-        "x": 3.3328338820712236,
-        "y": 5.501961244792608
+        "x": 3.069577980324074,
+        "y": 5.467802806712963
       },
       "prevControl": {
-        "x": 3.576201570604861,
-        "y": 5.444758376177525
+        "x": 3.3129456688577115,
+        "y": 5.41059993809788
       },
       "nextControl": null,
       "isLocked": false,
@@ -87,7 +87,7 @@
     },
     {
       "waypointRelativePos": 2.8359540169133166,
-      "rotationDegrees": -129.8562533171707
+      "rotationDegrees": -36.56777063988821
     }
   ],
   "constraintZones": [],
@@ -113,8 +113,8 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 4.0,
-    "rotation": -129.06008515084386
+    "velocity": 3.0,
+    "rotation": -40.41677549714543
   },
   "reversed": false,
   "folder": null,

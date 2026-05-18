@@ -3,32 +3,37 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.996628587155007,
-        "y": 5.610642712526709
+        "x": 1.4833241194373898,
+        "y": 5.993501721393079
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.8172254245147625,
-        "y": 7.185489700106786
+        "x": 1.7818526420668581,
+        "y": 6.2466051412139345
       },
       "isLocked": false,
       "linkedName": "shoot delay"
     },
     {
       "anchor": {
-        "x": 4.247861331846207,
-        "y": 7.3904112511029
+        "x": 4.203157143094067,
+        "y": 7.536681924964563
       },
       "prevControl": {
-        "x": 3.1505240058621196,
-        "y": 7.449502950781103
+        "x": 3.1408558413121295,
+        "y": 7.4802554350597905
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": "delay trench "
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.30292019027484024,
+      "rotationDegrees": 14.001234004635338
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [],
@@ -48,7 +53,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -46.72854450599296
+    "rotation": -38.2594450050656
   },
   "useDefaultConstraints": true
 }

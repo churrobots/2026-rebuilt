@@ -3,29 +3,45 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.069577980324074,
-        "y": 5.467802806712963
+        "x": 3.520062994282898,
+        "y": 4.040282618554265
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.2715894501926819,
-        "y": 6.030458088981512
+        "x": 2.9228054866347537,
+        "y": 4.959334958129549
       },
       "isLocked": false,
-      "linkedName": "D neutral to shoot"
+      "linkedName": null
     },
     {
       "anchor": {
-        "x": 1.4833241194373898,
-        "y": 5.993501721393079
+        "x": 1.9204702078815887,
+        "y": 5.017782947603719
       },
       "prevControl": {
-        "x": 1.7319158840681115,
-        "y": 5.967003899637622
+        "x": 2.4137650556628647,
+        "y": 5.020466632596749
+      },
+      "nextControl": {
+        "x": 1.3885077916883357,
+        "y": 5.014888898416675
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 0.5201042428207909,
+        "y": 4.900713669910723
+      },
+      "prevControl": {
+        "x": 0.791089334991967,
+        "y": 5.012824610494539
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "shoot delay"
+      "linkedName": null
     }
   ],
   "rotationTargets": [],
@@ -42,13 +58,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -38.2594450050656
+    "rotation": 90.23417307373552
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -40.41677549714543
+    "rotation": 91.16797690592516
   },
   "useDefaultConstraints": true
 }
