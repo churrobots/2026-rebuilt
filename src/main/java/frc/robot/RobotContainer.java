@@ -45,8 +45,8 @@ import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
+import frc.robot.subsystems.drive.ModuleIOKraken;
 import frc.robot.subsystems.drive.ModuleIOSim;
-import frc.robot.subsystems.drive.ModuleIOSpark;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
@@ -90,10 +90,10 @@ public class RobotContainer {
         // Real robot, instantiate hardware IO implementations
         drive = new Drive(
             new GyroIOPigeon2(),
-            new ModuleIOSpark(0, "FrontLeft"),
-            new ModuleIOSpark(1, "FrontRight"),
-            new ModuleIOSpark(2, "BackLeft"),
-            new ModuleIOSpark(3, "BackRight"));
+            new ModuleIOKraken(0, "FrontLeft"),
+            new ModuleIOKraken(1, "FrontRight"),
+            new ModuleIOKraken(2, "BackLeft"),
+            new ModuleIOKraken(3, "BackRight"));
 
         new Vision(
             drive::addVisionMeasurement,

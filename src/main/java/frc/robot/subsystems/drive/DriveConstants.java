@@ -83,7 +83,9 @@ public class DriveConstants {
   public static final double pinionTeeth = 12.0;
   public static final double spurTeeth = 22.0;
   public static final double driveMotorReduction = (45.0 * spurTeeth) / (pinionTeeth * 15.0);
-  public static final DCMotor driveGearbox = DCMotor.getNeoVortex(1);
+  // Drive motor is a Kraken X60 on a TalonFX (was a NEO Vortex on a SparkFlex). Used by
+  // ModuleIOSim and the PathPlanner ppConfig to model the real motor.
+  public static final DCMotor driveGearbox = DCMotor.getKrakenX60(1);
 
   // Drive encoder configuration
   public static final boolean driveEncoderInverted = true;
@@ -109,6 +111,21 @@ public class DriveConstants {
   public static final double driveSimD = 0.0;
   public static final double driveSimKs = 0.0;
   public static final double driveSimKv = 0.0789;
+
+  // Kraken (TalonFX) drive configuration -- used by ModuleIOKraken only.
+  // Positive voltage must drive the robot forward; verify on-robot and flip if needed.
+  public static final boolean driveInverted = false;
+  // Supply current limit (stator limit reuses driveMotorCurrentLimit above).
+  public static final int driveSupplyCurrentLimit = 60;
+  // Slot0 gains in TalonFX NATIVE units. Because Feedback.SensorToMechanismRatio =
+  // driveMotorReduction, the closed loop runs in WHEEL rotations:
+  //   kV is volts per (wheel rotation / sec), kS is volts, kP/kD act on rotation error.
+  // These are seeded from the old rad-based Vortex gains (kVnative = kVrad * 2*pi) and
+  // MUST be re-tuned for the Kraken. kP starts at 0 like the previous drive config.
+  public static final double driveKrakenKp = 0.0;
+  public static final double driveKrakenKd = 0.0;
+  public static final double driveKrakenKs = driveKs;
+  public static final double driveKrakenKv = driveKv * 2.0 * Math.PI;
 
   // Turn motor configuration
   public static final boolean turnInverted = false;
