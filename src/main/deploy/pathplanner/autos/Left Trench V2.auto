@@ -1,0 +1,73 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "runIntakeWithSafety"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Left Trench Intake - V2"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Neutral Zone Sweep"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "stopIntakeWithSafety"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "autoPrepFlywheels"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Neutral to Shoot Lo."
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shootWithAutoAimPreload"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "stopAllShooting"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "shoot back to Neutral"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Passing"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}

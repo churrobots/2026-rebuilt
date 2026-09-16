@@ -41,7 +41,7 @@ public class ControlsConstants {
   public static final double FEEDER_KV = 0.111;
 
   // ========== IntakeRoller ==========
-  public static final double INTAKE_ROLLER_KP = 0.52;
+  public static final double INTAKE_ROLLER_KP = 0.50;
   public static final double INTAKE_ROLLER_KI = 0;
   public static final double INTAKE_ROLLER_KD = 0;
   public static final double INTAKE_ROLLER_DEFAULT_DUTY_CYCLE = 0;
@@ -71,7 +71,7 @@ public class ControlsConstants {
   // Rollers therefore give 0.2388m / rotation
   // Target Roller RPM = (9.2 m/sec DIVIDED BY 0.2388 m/rot) = 38.5 rot/sec
   // 38.5 rot/sec x 60 sec/minute = 2310 rot/min (RPM)
-  public static final AngularVelocity INTAKE_ROLLER_VELOCITY = RPM.of(2500);
+  public static final AngularVelocity INTAKE_ROLLER_VELOCITY = RPM.of(2900);
   public static final AngularVelocity INTAKE_ROLLER_KEEP_INSIDE_VELOCITY = RPM.of(350);
 
   public static final AngularVelocity SHOOTER_VELOCITY = RPM.of(4550);

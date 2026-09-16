@@ -170,6 +170,7 @@ public class RobotContainer {
 
     // New commands added for Contra Costa to make our 3V and 5V autos work
     NamedCommands.registerCommand("shootWithAutoAimBriefly", shootWithAutoAimForAutonomous(6.5));
+    NamedCommands.registerCommand("shootWithAutoAimPreload", shootWithAutoAimForAutonomous(2));
     NamedCommands.registerCommand("shootWithAutoAimLonger", shootWithAutoAimForAutonomous(10));
     NamedCommands.registerCommand("runIntakeWithSafety", enableIntakeWithSafety());
     NamedCommands.registerCommand("stopIntakeWithSafety", stopIntakeWithSafety());
@@ -250,7 +251,9 @@ public class RobotContainer {
     // Always make sure to retract the intake before starting ANY auto
     // TODO: this gives an exception every second time you run it
     // @hannah: dropped from 0.8 to 0.5 after the first quals
-    return retractIntake().withTimeout(0.5).andThen(autoChooser.get());
+    double intakeDelay = 0.5;
+    double additionalDelay = 0;
+    return retractIntake().withTimeout(intakeDelay + additionalDelay).andThen(autoChooser.get());
   }
 
   public Pose2d getPose() {

@@ -7,49 +7,19 @@
         {
           "type": "named",
           "data": {
-            "name": "runIntake"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "7. shoot to depot"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 2.0
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "stopIntake"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
             "name": "autoPrepFlywheels"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "7. to shoot"
+            "pathName": "Delay auto"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "autoShoot"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 3.0
+            "name": "shootWithAutoAimPreload"
           }
         },
         {
@@ -61,25 +31,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "7. over hub to neutral"
+            "pathName": "delay 1"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "runIntake"
+            "name": "runIntakeWithSafety"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "7. neutral intake"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "stopIntake"
+            "pathName": "delay 2"
           }
         },
         {
@@ -91,19 +55,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "7. neutral to origin"
+            "pathName": "delay 3"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "autoShoot"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 5.0
+            "name": "shootWithAutoAimLonger"
           }
         }
       ]

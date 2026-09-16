@@ -1,0 +1,88 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 5.934807501324153,
+        "y": 6.716351242496469
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 5.525116966807911,
+        "y": 7.772101540430791
+      },
+      "isLocked": false,
+      "linkedName": "Maximus"
+    },
+    {
+      "anchor": {
+        "x": 3.257907838983051,
+        "y": 7.339330530543785
+      },
+      "prevControl": {
+        "x": 3.7325333796786726,
+        "y": 7.448297470868645
+      },
+      "nextControl": {
+        "x": 2.8184813588429267,
+        "y": 7.238444769174067
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 2.172351308704096,
+        "y": 5.793906415519068
+      },
+      "prevControl": {
+        "x": 2.191464071327683,
+        "y": 6.741560734463277
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "8048"
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.3857604599792104,
+      "rotationDegrees": 177.37889518758257
+    }
+  ],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [
+    {
+      "name": "autoPrepFlywheels",
+      "waypointRelativePos": 0.7419084821428552,
+      "endWaypointRelativePos": null,
+      "command": null
+    },
+    {
+      "name": "shootWithAutoAimLonger",
+      "waypointRelativePos": 2.0,
+      "endWaypointRelativePos": null,
+      "command": null
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -45.1317320172361
+  },
+  "reversed": false,
+  "folder": null,
+  "idealStartingState": {
+    "velocity": 2.0,
+    "rotation": 112.78976357970923
+  },
+  "useDefaultConstraints": true
+}
