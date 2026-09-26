@@ -30,8 +30,8 @@ const watchedAssets = ["index.html", "style.css", "app.js", "nt4.js", "msgpack.j
 const cameraDefinitions = [
   { name: "Front left", camera: "camera_frontleft", port: 1185, flipped: true },
   { name: "Front right", camera: "camera_frontright", port: 1181, flipped: true },
-  { name: "Back left", camera: "camera_backleft", port: 1187 },
-  { name: "Back right", camera: "camera_backright", port: 1183 },
+  { name: "Back left", camera: "camera_backleft", port: 1187, flipped: true },
+  { name: "Back right", camera: "camera_backright", port: 1183, flipped: true },
 ];
 const field = { length: 17.548, width: 8.052 };
 let selectedMode = "teleop";
@@ -474,19 +474,32 @@ function createOrientedGroup(label, devices) {
   }
   section.append(heading, direction, grid);
   const extras = devices.filter((device) => !positioned.has(device));
-  if (extras.length) {
+  const gyroRegistered = devices.some((device) => {
+    const name = normalizeDeviceName(device.name);
+    return name.includes("gyro") || name.includes("pigeon");
+  });
+  if (extras.length || (label === "Drivetrain" && !gyroRegistered)) {
     const extraGrid = document.createElement("div");
     extraGrid.className = "device-grid orientation-extras";
     extraGrid.append(...extras.map(createDeviceCard));
+    if (label === "Drivetrain" && !gyroRegistered) extraGrid.append(createUnregisteredCard("Gyro"));
     section.append(extraGrid);
   }
   return section;
 }
 
-function createUnregisteredCard() {
+function createUnregisteredCard(label) {
   const card = document.createElement("div");
   card.className = "device unregistered";
-  card.textContent = "Not registered";
+  if (label) {
+    const name = document.createElement("span");
+    name.textContent = label;
+    const state = document.createElement("span");
+    state.textContent = "Not registered";
+    card.append(name, state);
+  } else {
+    card.textContent = "Not registered";
+  }
   return card;
 }
 
