@@ -28,8 +28,8 @@ const diagnosticPrefix = "/SmartDashboard/HardwareMonitor/FaultStatus/";
 const autoPrefix = "/SmartDashboard/Auto Choices/";
 const watchedAssets = ["index.html", "style.css", "app.js", "nt4.js", "msgpack.js", "manifest.webmanifest", "icon.svg"];
 const cameraDefinitions = [
-  { name: "Front left", camera: "camera_frontleft", port: 1185 },
-  { name: "Front right", camera: "camera_frontright", port: 1181 },
+  { name: "Front left", camera: "camera_frontleft", port: 1185, flipped: true },
+  { name: "Front right", camera: "camera_frontright", port: 1181, flipped: true },
   { name: "Back left", camera: "camera_backleft", port: 1187 },
   { name: "Back right", camera: "camera_backright", port: 1183 },
 ];
@@ -53,6 +53,7 @@ const cameraElements = cameraDefinitions.map((definition) => {
   card.className = "camera";
   card.innerHTML = `<div class="camera-header"><span>${definition.name}</span><span class="camera-status">Paused</span></div><div class="camera-frame"><img alt="${definition.name} camera"><span class="camera-placeholder">Open the Cameras tab to stream</span></div>`;
   const image = card.querySelector("img");
+  image.classList.toggle("flipped", definition.flipped === true);
   const status = card.querySelector(".camera-status");
   const placeholder = card.querySelector(".camera-placeholder");
   image.addEventListener("load", () => { status.textContent = "Live"; status.className = "camera-status live"; placeholder.hidden = true; });
