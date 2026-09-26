@@ -97,6 +97,9 @@ public class Robot extends LoggedRobot {
     // Start AdvantageKit logger
     Logger.start();
 
+    // Serve the dependency-free dashboard from src/main/deploy/dashboard.
+    WebServer.start(5800, Filesystem.getDeployDirectory().getPath() + "/dashboard");
+
     if (Constants.currentMode == Constants.Mode.SIM) {
       simulationControllerBridge = new SimulationControllerBridge();
     }
@@ -130,8 +133,6 @@ public class Robot extends LoggedRobot {
     // Monitor highlevel hardware faults during a match.
     HardwareMonitor.dumpHardwareStatusToNetworkTables(Constants.debugMemoryUsage);
 
-    // Make sure Elastic dashboard is available for download.
-    WebServer.start(5800, Filesystem.getDeployDirectory().getPath());
   }
 
   /** This function is called once when the robot is disabled. */

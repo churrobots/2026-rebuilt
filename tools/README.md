@@ -14,12 +14,19 @@ An alternate project directory can be supplied as the first argument. Stop the s
 
 The supervisor uses `--no-daemon` so the simulator remains in a process tree that can be terminated reliably during restarts. Gradle's normal incremental build cache is still used.
 
-## PWA NetworkTables contract
+## Browser dashboard
 
-A separate PWA can connect directly to the simulator's NT4 server at `localhost:5810`. It should publish these topics under the `SimSupervisor` table:
+The robot serves a zero-build dashboard from `src/main/deploy/dashboard` on port 5800.
+Open `http://localhost:5800` in simulation or `http://10.TE.AM.2:5800` on a robot.
+It connects directly to the NT4 server and publishes these topics under the `SimSupervisor` table:
+
+On `localhost`, the dashboard installs as a PWA and keeps atomic, versioned offline snapshots.
+Service workers require a secure context, so browsers disable PWA caching when the same dashboard is
+opened from a roboRIO's plain-HTTP IP address; telemetry and controls still work there.
 
 | Topic | NT type | Value |
 | --- | --- | --- |
+| `Available` | `boolean` | Published by the simulation bridge; reveals the faux DS |
 | `Joystick0/Axes` | `double[]` | WPILib Xbox order: LX, LY, LT, RT, RX, RY |
 | `Joystick0/Buttons` | `boolean[]` | A, B, X, Y, LB, RB, Back, Start, LS, RS |
 | `Joystick0/POV` | `int` | Degrees clockwise from up, or `-1` |

@@ -1,6 +1,7 @@
 package frc.robot.sim;
 
 import edu.wpi.first.networktables.BooleanArraySubscriber;
+import edu.wpi.first.networktables.BooleanPublisher;
 import edu.wpi.first.networktables.BooleanSubscriber;
 import edu.wpi.first.networktables.DoubleArraySubscriber;
 import edu.wpi.first.networktables.IntegerSubscriber;
@@ -9,7 +10,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringSubscriber;
 import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 
-/** Bridges gamepad data from the Python simulation supervisor into HALSim. */
+/** Bridges dashboard driver-station and gamepad data into HALSim. */
 public final class SimulationControllerBridge {
   private static final int JOYSTICK_PORT = 0;
   private static final int AXIS_COUNT = 6;
@@ -23,6 +24,7 @@ public final class SimulationControllerBridge {
   private final StringSubscriber name;
   private final StringSubscriber mode;
   private final IntegerSubscriber heartbeat;
+  private final BooleanPublisher available;
 
   private long previousHeartbeat = -1;
   private int staleCycles = STALE_CYCLES;
@@ -36,6 +38,8 @@ public final class SimulationControllerBridge {
     name = table.getStringTopic("Joystick0/Name").subscribe("Simulation Controller");
     mode = table.getStringTopic("Mode").subscribe("disabled");
     heartbeat = table.getIntegerTopic("Heartbeat").subscribe(-1);
+    available = table.getBooleanTopic("Available").publish();
+    available.set(true);
 
     DriverStationSim.setJoystickAxisCount(JOYSTICK_PORT, AXIS_COUNT);
     DriverStationSim.setJoystickButtonCount(JOYSTICK_PORT, BUTTON_COUNT);

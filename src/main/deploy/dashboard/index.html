@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#141923">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>Churrobots Dashboard</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" href="icon.svg" type="image/svg+xml">
+    <link id="dashboard-style" rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <header id="driver-station" hidden>
+      <div class="ds-brand">SIM DRIVER STATION</div>
+      <div class="modes" role="group" aria-label="Robot mode">
+        <button data-mode="teleop">Teleop</button>
+        <button data-mode="auto">Autonomous</button>
+        <button data-mode="test">Test</button>
+      </div>
+      <button id="enable" class="enable">Enable</button>
+      <button id="disable" class="disable">Disable</button>
+      <span id="gamepad-state">No gamepad</span>
+      <div id="gamepad-monitor" class="gamepad-monitor" aria-label="Live gamepad inputs">
+        <div id="gamepad-axes" class="gamepad-axes"></div>
+        <div class="gamepad-digital">
+          <div id="gamepad-buttons" class="gamepad-buttons"></div>
+          <div class="pov-readout"><span>POV</span><strong id="gamepad-pov">—</strong></div>
+        </div>
+      </div>
+    </header>
+
+    <nav>
+      <h1>Churrobots</h1>
+      <div class="tabs" role="tablist">
+        <button class="tab selected" data-tab="diagnostics">Diagnostics</button>
+        <button class="tab" data-tab="networktables">NetworkTables</button>
+      </div>
+      <span id="app-version" class="app-version">Web</span>
+      <span id="nt-state" class="status disconnected">NT disconnected</span>
+    </nav>
+
+    <main>
+      <section id="diagnostics-panel" class="card tab-panel">
+        <div class="section-title">
+          <h2>Hardware diagnostics</h2>
+          <span id="diagnostic-summary" class="diagnostic-summary">Waiting for devices…</span>
+        </div>
+        <div id="diagnostics" class="diagnostics"></div>
+      </section>
+
+      <section id="networktables-panel" class="card tab-panel" hidden>
+        <div class="section-title">
+          <h2>NetworkTables</h2>
+          <input id="topic-filter" type="search" placeholder="Filter topics" autocomplete="off">
+        </div>
+        <div id="topics" class="topics"></div>
+      </section>
+    </main>
+
+    <script type="module">
+      const version = new URLSearchParams(location.search).get("v") ?? "initial";
+      document.querySelector("#dashboard-style").href = `style.css?v=${version}`;
+      import(`./app.js?v=${version}`);
+    </script>
+  </body>
+</html>
