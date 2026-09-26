@@ -7,35 +7,12 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <title>Churrobots Dashboard</title>
     <link rel="manifest" href="manifest.webmanifest">
-    <link rel="icon" href="icon.svg" type="image/svg+xml">
-    <link id="dashboard-style" rel="stylesheet" href="style.css">
+    <link rel="icon" href="core/icon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="index.css">
+    <link id="dashboard-style" rel="stylesheet" href="app.css">
   </head>
   <body>
-    <section class="ds-zone" aria-label="Driver Station zone">
-      <div id="driver-station-placeholder" class="driver-station-placeholder">Driver Station floats here</div>
-      <header id="driver-station" hidden>
-        <div class="ds-controls">
-          <div class="ds-brand">SIM DRIVER STATION</div>
-          <div class="modes" role="group" aria-label="Robot mode">
-            <button data-mode="teleop">Teleop</button>
-            <button data-mode="auto">Autonomous</button>
-            <button data-mode="test">Test</button>
-          </div>
-          <div class="alliances" role="group" aria-label="Alliance">
-            <button data-alliance="blue">Blue</button>
-            <button data-alliance="red">Red</button>
-          </div>
-          <button id="enable-toggle" class="enable-toggle">Enable</button>
-        </div>
-        <div id="gamepads" class="gamepads" aria-label="Live gamepad inputs"></div>
-      </header>
-    </section>
-
-    <section class="connectivity" aria-label="NetworkTables connectivity">
-      <strong>NetworkTables</strong>
-      <input id="team-number" class="team-number" inputmode="numeric" aria-label="FRC team number" placeholder="Team #">
-      <div id="connection-points" class="connection-points"></div>
-    </section>
+    <dashboard-core></dashboard-core>
 
     <nav>
       <div class="tabs" role="tablist">
@@ -45,7 +22,7 @@
       </div>
     </nav>
 
-    <main>
+    <main id="app-root">
       <div class="aim-lock-frame">
         <div class="aim-lock-label" aria-label="Aim lock active"><span></span>AIM LOCK<span></span></div>
         <section id="diagnostics-panel" class="card tab-panel main-dashboard">
@@ -91,7 +68,7 @@
 
     <script type="module">
       const version = new URLSearchParams(location.search).get("v") ?? "initial";
-      document.querySelector("#dashboard-style").href = `style.css?v=${version}`;
+      document.querySelector("#dashboard-style").href = `app.css?v=${version}`;
       import(`./app.js?v=${version}`);
     </script>
   </body>

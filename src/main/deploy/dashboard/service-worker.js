@@ -3,12 +3,16 @@ const SNAPSHOT_PREFIX = "custom-dashboard-snapshot-";
 const ACTIVE_KEY = new URL("__active_snapshot__", self.registration.scope).href;
 const ASSETS = [
   "index.html",
-  "style.css",
+  "index.css",
+  "app.css",
   "app.js",
-  "nt4.js",
-  "msgpack.js",
+  "core/networktables.js",
+  "core/dashboard-core.js",
+  "core/nt-connectivity.js",
+  "core/sim-driver-station.js",
+  "core/msgpack.js",
   "manifest.webmanifest",
-  "icon.svg",
+  "core/icon.svg",
 ];
 let updatePromise = null;
 

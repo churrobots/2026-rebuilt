@@ -114,6 +114,11 @@
     "**/deploy/pathplanner/": true,
     // Churrobots: hide elastic dashboard files, those are edited by elastic
     "**/deploy/elastic-layout.json": true,
+    // Churrobots: Sim Driver Station, NetworkTables protocol, and PWA metadata are
+    // stable infrastructure. Keep them out of routine dashboard UI work.
+    "src/main/deploy/dashboard/core/**": true,
+    "src/main/deploy/dashboard/manifest.webmanifest": true,
+    "src/main/deploy/dashboard/service-worker.js": true,
     // Churrobots: hide junk files
     "**/deploy/example.txt": true,
   },

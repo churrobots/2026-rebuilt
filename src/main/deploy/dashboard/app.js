@@ -1,13 +1,8 @@
 const assetVersion = new URL(import.meta.url).searchParams.get("v") ?? "initial";
-const { NT4Client, probeNT4 } = await import(`./nt4.js?v=${assetVersion}`);
+await import(`./core/dashboard-core.js?v=${assetVersion}`);
 
-const pageHost = location.hostname || "localhost";
-let connectedHost = pageHost;
-let activeConnectionId = pageHost === "localhost" ? "sim" : "page";
-const nt = new NT4Client(connectedHost);
-const values = new Map();
-const ds = document.querySelector("#driver-station");
-const dsPlaceholder = document.querySelector("#driver-station-placeholder");
+const core = document.querySelector("dashboard-core").core;
+const values = core.values;
 const topicsElement = document.querySelector("#topics");
 const filterElement = document.querySelector("#topic-filter");
 const diagnosticsElement = document.querySelector("#diagnostics");
@@ -15,20 +10,14 @@ const diagnosticSummary = document.querySelector("#diagnostic-summary");
 const autoSelect = document.querySelector("#auto-selector");
 const camerasElement = document.querySelector("#cameras");
 const cameraHostInput = document.querySelector("#camera-host");
-const teamNumberInput = document.querySelector("#team-number");
-const connectionPoints = document.querySelector("#connection-points");
 const fieldCanvas = document.querySelector("#field-canvas");
 const fieldView = document.querySelector("#field-view");
 const fieldPose = document.querySelector("#field-pose");
-const gamepadsElement = document.querySelector("#gamepads");
 const aimLockFrame = document.querySelector(".aim-lock-frame");
-const axisNames = ["LX", "LY", "LT", "RT", "RX", "RY"];
-const buttonNames = ["A", "B", "X", "Y", "LB", "RB", "Back", "Start", "LS", "RS"];
 const diagnosticPrefix = "/SmartDashboard/HardwareMonitor/FaultStatus/";
 const autoPrefix = "/SmartDashboard/Auto Choices/";
 const aimLockTopic = "/SmartDashboard/aimLocked";
-const resumeTeleopKey = "resume-teleop-after-dashboard-reload";
-const watchedAssets = ["index.html", "style.css", "app.js", "nt4.js", "msgpack.js", "manifest.webmanifest", "icon.svg"];
+const watchedAssets = ["index.html", "index.css", "app.css", "app.js", "core/dashboard-core.js", "core/networktables.js", "core/nt-connectivity.js", "core/sim-driver-station.js", "core/msgpack.js", "core/icon.svg", "manifest.webmanifest"];
 const cameraDefinitions = [
   { name: "Front left", camera: "camera_frontleft", port: 1185, flipped: true },
   { name: "Front right", camera: "camera_frontright", port: 1181, flipped: true },
@@ -36,21 +25,8 @@ const cameraDefinitions = [
   { name: "Back right", camera: "camera_backright", port: 1183, flipped: true },
 ];
 const field = { length: 17.548, width: 8.052 };
-let selectedMode = "teleop";
-let selectedAlliance = localStorage.getItem("sim-alliance") === "red" ? "red" : "blue";
-let enabled = sessionStorage.getItem(resumeTeleopKey) === "true";
-sessionStorage.removeItem(resumeTeleopKey);
-let heartbeat = 0;
 let renderPending = false;
 let fieldRenderPending = false;
-let ntConnected = false;
-let discoveryPromise = null;
-let teamDiscoveryTimer = 0;
-const connectionAvailability = new Map();
-const previousShortcutPovs = [-1, -1];
-const simulationShortcutKeys = /Mac|iPhone|iPad/.test(navigator.platform) ? ["⌘", "⇧", "B"] : ["Ctrl", "Shift", "B"];
-
-const gamepadViews = [0, 1].map(createGamepadView);
 const cameraElements = cameraDefinitions.map((definition) => {
   const card = document.createElement("article");
   card.className = "camera";
@@ -65,23 +41,7 @@ const cameraElements = cameraDefinitions.map((definition) => {
   return { ...definition, image, status, placeholder };
 });
 cameraHostInput.value = localStorage.getItem("photonvision-host") || "photonvision.local";
-teamNumberInput.value = localStorage.getItem("frc-team-number") || "8048";
-renderConnectionPoints();
-
-nt.addEventListener("connected", () => {
-  ntConnected = true;
-  connectionAvailability.set(connectedHost, true);
-  renderConnectionPoints();
-});
-nt.addEventListener("disconnected", () => {
-  ntConnected = false;
-  connectionAvailability.set(connectedHost, false);
-  renderConnectionPoints();
-  enabled = false;
-  updateButtons();
-});
-nt.addEventListener("value", ({ detail: topic }) => {
-  values.set(topic.name, topic);
+core.addEventListener("topic", ({ detail: topic }) => {
   if (topic.name === aimLockTopic) updateAimLock();
   if (topic.name === "/AdvantageKit/RealOutputs/Odometry/Robot" || topic.name === "/FMSInfo/IsRedAlliance" || topic.name === "/FMSInfo/StationNumber") {
     scheduleFieldRender();
@@ -89,39 +49,13 @@ nt.addEventListener("value", ({ detail: topic }) => {
   scheduleRender();
 });
 
-document.querySelectorAll("[data-mode]").forEach((button) => {
-  button.addEventListener("click", () => {
-    selectedMode = button.dataset.mode;
-    enabled = false;
-    updateButtons();
-  });
-});
-document.querySelectorAll("[data-alliance]").forEach((button) => {
-  button.addEventListener("click", () => {
-    selectedAlliance = button.dataset.alliance;
-    localStorage.setItem("sim-alliance", selectedAlliance);
-    enabled = false;
-    updateButtons();
-  });
-});
-document.querySelector("#enable-toggle").addEventListener("click", () => { enabled = !enabled; updateButtons(); });
 filterElement.addEventListener("input", scheduleRender);
 autoSelect.addEventListener("change", () => {
-  nt.publish(`${autoPrefix}selected`, "string", autoSelect.value);
+  core.publish(`${autoPrefix}selected`, "string", autoSelect.value);
 });
 cameraHostInput.addEventListener("change", () => {
   localStorage.setItem("photonvision-host", cameraHostInput.value.trim());
   updateCameraStreams(true);
-});
-teamNumberInput.addEventListener("input", () => {
-  localStorage.setItem("frc-team-number", teamNumberInput.value.trim());
-  connectionAvailability.clear();
-  renderConnectionPoints();
-  clearTimeout(teamDiscoveryTimer);
-  teamDiscoveryTimer = setTimeout(discoverRobots, 300);
-});
-teamNumberInput.addEventListener("keydown", (event) => {
-  if (event.key === "Enter") discoverRobots();
 });
 document.querySelectorAll("[data-tab]").forEach((button) => {
   button.addEventListener("click", () => {
@@ -132,22 +66,12 @@ document.querySelectorAll("[data-tab]").forEach((button) => {
   });
 });
 
-function updateButtons() {
-  document.querySelectorAll("[data-mode]").forEach((button) => button.classList.toggle("selected", button.dataset.mode === selectedMode));
-  document.querySelectorAll("[data-alliance]").forEach((button) => button.classList.toggle("selected", button.dataset.alliance === selectedAlliance));
-  ds.classList.toggle("robot-enabled", enabled);
-  const enableToggle = document.querySelector("#enable-toggle");
-  enableToggle.classList.toggle("active", enabled);
-  enableToggle.textContent = enabled ? "Disable" : "Enable";
-}
-
 function updateAimLock() {
   aimLockFrame.classList.toggle("aim-locked", values.get(aimLockTopic)?.value === true);
 }
 
 function reloadDashboard(url) {
-  if (enabled && selectedMode === "teleop") sessionStorage.setItem(resumeTeleopKey, "true");
-  else sessionStorage.removeItem(resumeTeleopKey);
+  document.querySelector("sim-driver-station").prepareForReload();
   location.replace(url);
 }
 
@@ -302,7 +226,7 @@ new ResizeObserver(scheduleFieldRender).observe(fieldView);
 function updateCameraStreams(force = false) {
   const panelOpen = !document.querySelector("#cameras-panel").hidden;
   const simulation = values.get("/SimSupervisor/Available")?.value === true;
-  const cameraHost = simulation ? connectedHost : cameraHostInput.value.trim();
+  const cameraHost = simulation ? core.connection.host : cameraHostInput.value.trim();
   for (const camera of cameraElements) {
     if (!panelOpen || !cameraHost) {
       if (camera.image.src) camera.image.removeAttribute("src");
@@ -320,77 +244,6 @@ function updateCameraStreams(force = false) {
       camera.image.src = `${source}&view=${Date.now()}`;
     }
   }
-}
-
-function connectionCandidates(teamNumber) {
-  const team = Number.parseInt(teamNumber, 10);
-  const candidates = [
-    { id: "sim", host: "localhost", label: "Simulator" },
-  ];
-  if (Number.isInteger(team) && team > 0 && team <= 99999) {
-    candidates.push(
-      { id: "team-ip", host: `10.${Math.floor(team / 100)}.${team % 100}.2`, label: `10.${Math.floor(team / 100)}.${team % 100}.2` },
-      { id: "mdns", host: `roborio-${team}-frc.local`, label: `roborio-${team}-frc.local` },
-    );
-  }
-  if (!candidates.some((candidate) => candidate.host === pageHost)) {
-    candidates.push({ id: "page", host: pageHost, label: pageHost });
-  }
-  return candidates;
-}
-
-function renderConnectionPoints() {
-  const candidates = connectionCandidates(teamNumberInput.value.trim());
-  connectionPoints.replaceChildren(...candidates.map((candidate) => {
-    const pill = document.createElement("button");
-    const selected = candidate.id === activeConnectionId;
-    const connected = ntConnected && selected;
-    const unavailable = selected && !ntConnected;
-    pill.className = `connection-pill${connectionAvailability.get(candidate.host) ? " available" : ""}${connected ? " connected" : ""}${unavailable ? " unavailable" : ""}`;
-    pill.textContent = candidate.label;
-    pill.title = candidate.host;
-    pill.addEventListener("click", () => connectToRobot(candidate.host, candidate.id));
-    return pill;
-  }));
-}
-
-async function discoverRobots() {
-  if (discoveryPromise) return discoveryPromise;
-  discoveryPromise = (async () => {
-    const teamNumber = teamNumberInput.value.trim();
-    localStorage.setItem("frc-team-number", teamNumber);
-    const candidates = connectionCandidates(teamNumber);
-    const results = await Promise.all(candidates.map(async (candidate) => ({
-      ...candidate,
-      available: await probeNT4(candidate.host, 800),
-    })));
-    results.forEach((candidate) => connectionAvailability.set(candidate.host, candidate.available));
-    const available = results.filter((candidate) => candidate.available);
-    renderConnectionPoints();
-    if (!ntConnected && !available.some((candidate) => candidate.host === connectedHost) && available.length) {
-      connectToRobot(available[0].host, available[0].id);
-    }
-  })().finally(() => {
-    discoveryPromise = null;
-  });
-  return discoveryPromise;
-}
-
-function connectToRobot(host, connectionId = "manual") {
-  if (!host) return;
-  activeConnectionId = connectionId;
-  if (host === connectedHost) {
-    renderConnectionPoints();
-    return;
-  }
-  connectedHost = host;
-  values.clear();
-  enabled = false;
-  updateButtons();
-  renderConnectionPoints();
-  nt.setHost(host);
-  scheduleRender();
-  scheduleFieldRender();
 }
 
 function renderAutoChooser() {
@@ -611,150 +464,5 @@ function formatValue(value) {
   return String(value);
 }
 
-function createGamepadView(port) {
-  const monitor = document.createElement("div");
-  monitor.className = "gamepad-monitor";
-  monitor.innerHTML = `<div class="gamepad-title"><strong>Gamepad ${port + 1}</strong><span>No controller</span></div><div class="gamepad-axes"></div><div class="gamepad-digital"><div class="gamepad-buttons"></div><div class="pov-readout"><span>POV</span><strong>—</strong></div></div>`;
-  const axesContainer = monitor.querySelector(".gamepad-axes");
-  const buttonsContainer = monitor.querySelector(".gamepad-buttons");
-  const axes = axisNames.map((label) => {
-    const element = document.createElement("div");
-    element.className = "axis";
-    element.innerHTML = `<span>${label}</span><span class="axis-track"><span class="axis-fill"></span></span><span class="axis-value">0.00</span>`;
-    axesContainer.append(element);
-    return element;
-  });
-  const buttons = buttonNames.map((label) => {
-    const element = document.createElement("div");
-    element.className = "gamepad-button";
-    element.textContent = label;
-    buttonsContainer.append(element);
-    return element;
-  });
-  gamepadsElement.append(monitor);
-  return { port, monitor, name: monitor.querySelector(".gamepad-title span"), axes, buttons, pov: monitor.querySelector(".pov-readout strong") };
-}
-
-function readGamepad(gamepad) {
-  if (!gamepad) {
-    let name = "No gamepad — press a button";
-    if (!("getGamepads" in navigator)) name = "Gamepad API unavailable";
-    else if (!window.isSecureContext) name = "Gamepad blocked: open localhost";
-    return { connected: false, name, axes: [], buttons: [], pov: -1 };
-  }
-  const pressed = gamepad.buttons.map((button) => button.pressed);
-  let pov = -1;
-  if (pressed[12]) pov = 0;
-  else if (pressed[15]) pov = 90;
-  else if (pressed[13]) pov = 180;
-  else if (pressed[14]) pov = 270;
-  return {
-    connected: true,
-    name: gamepad.id,
-    axes: [gamepad.axes[0] ?? 0, gamepad.axes[1] ?? 0, gamepad.buttons[6]?.value ?? 0,
-      gamepad.buttons[7]?.value ?? 0, gamepad.axes[2] ?? 0, gamepad.axes[3] ?? 0],
-    // Browser standard: A B X Y LB RB LT RT Back Start LS RS.
-    // WPILib Xbox buttons omit the triggers: A B X Y LB RB Back Start LS RS.
-    buttons: [pressed[0], pressed[1], pressed[2], pressed[3], pressed[4], pressed[5],
-      pressed[8], pressed[9], pressed[10], pressed[11]],
-    pov,
-  };
-}
-
-function renderGamepad(view, gamepad) {
-  view.monitor.classList.toggle("connected", gamepad.connected);
-  view.name.textContent = friendlyGamepadName(gamepad.name);
-  view.axes.forEach((element, index) => {
-    const value = gamepad.axes[index] ?? 0;
-    const fill = element.querySelector(".axis-fill");
-    const trigger = index === 2 || index === 3;
-    const normalized = trigger ? value : (value + 1) / 2;
-    fill.style.left = trigger ? "0" : `${Math.min(normalized, 0.5) * 100}%`;
-    fill.style.width = trigger ? `${normalized * 100}%` : `${Math.abs(value) * 50}%`;
-    element.querySelector(".axis-value").textContent = value.toFixed(2);
-  });
-  view.buttons.forEach((element, index) => element.classList.toggle("pressed", gamepad.buttons[index] === true));
-  view.pov.textContent = gamepad.pov < 0 ? "—" : `${gamepad.pov}°`;
-}
-
-function friendlyGamepadName(name) {
-  return name.replace(/\s*\(STANDARD GAMEPAD.*$/i, "").replace(/\s+Vendor:.*$/i, "").trim() || name;
-}
-
-function updateDriverStationPlaceholder() {
-  const state = ntConnected ? "connected" : activeConnectionId === "sim" ? "simulator-offline" : "robot-offline";
-  if (dsPlaceholder.dataset.state === state) return;
-  dsPlaceholder.dataset.state = state;
-  if (ntConnected) {
-    dsPlaceholder.textContent = "Driver Station floats here";
-    return;
-  }
-  if (activeConnectionId !== "sim") {
-    dsPlaceholder.textContent = "Robot offline · Check robot power and network connection";
-    return;
-  }
-  const callout = document.createElement("div");
-  callout.className = "simulation-callout";
-  callout.innerHTML = "<strong>SIMULATION OFFLINE</strong><span>Start it from VS Code</span>";
-  const keys = document.createElement("div");
-  keys.className = "shortcut-keys";
-  keys.append(...simulationShortcutKeys.map((key) => {
-    const keycap = document.createElement("kbd");
-    keycap.textContent = key;
-    return keycap;
-  }));
-  callout.append(keys);
-  dsPlaceholder.replaceChildren(callout);
-}
-
-function applyGamepadModeShortcut(gamepad, port) {
-  const armed = gamepad.connected && gamepad.buttons[7] === true;
-  const newlyPressed = armed && gamepad.pov >= 0 && gamepad.pov !== previousShortcutPovs[port];
-  if (newlyPressed && (gamepad.pov === 0 || gamepad.pov === 180) && !autoSelect.disabled && autoSelect.options.length) {
-    const step = gamepad.pov === 0 ? -1 : 1;
-    const nextIndex = (autoSelect.selectedIndex + step + autoSelect.options.length) % autoSelect.options.length;
-    autoSelect.selectedIndex = nextIndex;
-    nt.publish(`${autoPrefix}selected`, "string", autoSelect.value);
-  } else if (newlyPressed && gamepad.pov === 270) {
-    const alreadyRunning = enabled && selectedMode === "auto";
-    selectedMode = "auto";
-    enabled = !alreadyRunning;
-    updateButtons();
-  } else if (newlyPressed && gamepad.pov === 90) {
-    const alreadyRunning = enabled && selectedMode === "teleop";
-    selectedMode = "teleop";
-    enabled = !alreadyRunning;
-    updateButtons();
-  }
-  previousShortcutPovs[port] = armed ? gamepad.pov : -1;
-}
-
-setInterval(() => {
-  const simulationAvailable = ntConnected && values.get("/SimSupervisor/Available")?.value === true;
-  ds.hidden = !simulationAvailable;
-  dsPlaceholder.hidden = simulationAvailable;
-  updateDriverStationPlaceholder();
-  if (!simulationAvailable) return;
-
-  const browserGamepads = [...(navigator.getGamepads?.() ?? [])].filter((gamepad) => gamepad?.connected).slice(0, 2);
-  const gamepads = gamepadViews.map((view, index) => readGamepad(browserGamepads[index]));
-  gamepads.forEach(applyGamepadModeShortcut);
-  nt.publish("/SimSupervisor/Heartbeat", "int", ++heartbeat);
-  nt.publish("/SimSupervisor/Mode", "string", enabled ? selectedMode : "disabled");
-  nt.publish("/SimSupervisor/Alliance", "string", selectedAlliance);
-  gamepads.forEach((gamepad, port) => {
-    renderGamepad(gamepadViews[port], gamepad);
-    nt.publish(`/SimSupervisor/Joystick${port}/Connected`, "boolean", gamepad.connected);
-    nt.publish(`/SimSupervisor/Joystick${port}/Name`, "string", gamepad.name);
-    nt.publish(`/SimSupervisor/Joystick${port}/Axes`, "double[]", gamepad.axes);
-    nt.publish(`/SimSupervisor/Joystick${port}/Buttons`, "boolean[]", gamepad.buttons);
-    nt.publish(`/SimSupervisor/Joystick${port}/POV`, "int", gamepad.pov);
-  });
-}, 20);
-
-updateButtons();
 renderTopics();
-nt.connect();
-discoverRobots();
-setInterval(() => { if (!ntConnected) discoverRobots(); }, 1000);
 startOfflineUpdates();
