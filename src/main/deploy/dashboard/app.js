@@ -45,6 +45,7 @@ let discoveryPromise = null;
 let teamDiscoveryTimer = 0;
 const connectionAvailability = new Map();
 const previousShortcutPovs = [-1, -1];
+const simulationShortcutKeys = /Mac|iPhone|iPad/.test(navigator.platform) ? ["⌘", "⇧", "B"] : ["Ctrl", "Shift", "B"];
 
 const gamepadViews = [0, 1].map(createGamepadView);
 const cameraElements = cameraDefinitions.map((definition) => {
@@ -647,6 +648,28 @@ function renderGamepad(view, gamepad) {
   view.pov.textContent = gamepad.pov < 0 ? "—" : `${gamepad.pov}°`;
 }
 
+function updateDriverStationPlaceholder() {
+  const state = ntConnected ? "connected" : "offline";
+  if (dsPlaceholder.dataset.state === state) return;
+  dsPlaceholder.dataset.state = state;
+  if (ntConnected) {
+    dsPlaceholder.textContent = "Driver Station floats here";
+    return;
+  }
+  const callout = document.createElement("div");
+  callout.className = "simulation-callout";
+  callout.innerHTML = "<strong>SIMULATION OFFLINE</strong><span>Start it from VS Code</span>";
+  const keys = document.createElement("div");
+  keys.className = "shortcut-keys";
+  keys.append(...simulationShortcutKeys.map((key) => {
+    const keycap = document.createElement("kbd");
+    keycap.textContent = key;
+    return keycap;
+  }));
+  callout.append(keys);
+  dsPlaceholder.replaceChildren(callout);
+}
+
 function applyGamepadModeShortcut(gamepad, port) {
   const armed = gamepad.connected && gamepad.buttons[7] === true;
   const newlyPressed = armed && gamepad.pov >= 0 && gamepad.pov !== previousShortcutPovs[port];
@@ -673,6 +696,7 @@ setInterval(() => {
   const simulationAvailable = ntConnected && values.get("/SimSupervisor/Available")?.value === true;
   ds.hidden = !simulationAvailable;
   dsPlaceholder.hidden = simulationAvailable;
+  updateDriverStationPlaceholder();
   if (!simulationAvailable) return;
 
   const browserGamepads = [...(navigator.getGamepads?.() ?? [])].filter((gamepad) => gamepad?.connected).slice(0, 2);

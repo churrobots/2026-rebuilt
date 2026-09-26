@@ -30,6 +30,11 @@ button, input, select { font: inherit; }
   text-transform: uppercase;
 }
 .driver-station-placeholder[hidden] { display: none; }
+.simulation-callout { display: flex; flex-direction: column; align-items: center; gap: 9px; color: #aeb8c8; }
+.simulation-callout strong { color: #ffbf47; font-size: .9rem; letter-spacing: .1em; }
+.simulation-callout span { font-size: .76rem; letter-spacing: .02em; text-transform: none; }
+.shortcut-keys { display: flex; align-items: center; gap: 7px; margin-top: 3px; }
+.shortcut-keys kbd { min-width: 36px; padding: 8px 11px; color: #07111d; background: #67b5ff; border: 1px solid #b9dcff; border-bottom-width: 4px; border-radius: 7px; box-shadow: 0 0 16px #57a6ff88; font: 800 .9rem ui-monospace, SFMono-Regular, Menlo, monospace; text-align: center; }
 
 #driver-station {
   width: 100%;
