@@ -99,8 +99,7 @@ document.querySelectorAll("[data-alliance]").forEach((button) => {
     updateButtons();
   });
 });
-document.querySelector("#enable").addEventListener("click", () => { enabled = true; updateButtons(); });
-document.querySelector("#disable").addEventListener("click", () => { enabled = false; updateButtons(); });
+document.querySelector("#enable-toggle").addEventListener("click", () => { enabled = !enabled; updateButtons(); });
 filterElement.addEventListener("input", scheduleRender);
 autoSelect.addEventListener("change", () => {
   nt.publish(`${autoPrefix}selected`, "string", autoSelect.value);
@@ -131,7 +130,9 @@ function updateButtons() {
   document.querySelectorAll("[data-mode]").forEach((button) => button.classList.toggle("selected", button.dataset.mode === selectedMode));
   document.querySelectorAll("[data-alliance]").forEach((button) => button.classList.toggle("selected", button.dataset.alliance === selectedAlliance));
   ds.classList.toggle("robot-enabled", enabled);
-  document.querySelector("#enable").classList.toggle("active", enabled);
+  const enableToggle = document.querySelector("#enable-toggle");
+  enableToggle.classList.toggle("active", enabled);
+  enableToggle.textContent = enabled ? "Disable" : "Enable";
 }
 
 function scheduleRender() {
