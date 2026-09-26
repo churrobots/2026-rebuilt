@@ -20,7 +20,6 @@ const connectionPoints = document.querySelector("#connection-points");
 const fieldCanvas = document.querySelector("#field-canvas");
 const fieldView = document.querySelector("#field-view");
 const fieldPose = document.querySelector("#field-pose");
-const gamepadState = document.querySelector("#gamepad-state");
 const gamepadsElement = document.querySelector("#gamepads");
 const axisNames = ["LX", "LY", "LT", "RT", "RX", "RY"];
 const buttonNames = ["A", "B", "X", "Y", "LB", "RB", "Back", "Start", "LS", "RS"];
@@ -619,7 +618,7 @@ function createGamepadView(port) {
     return element;
   });
   gamepadsElement.append(monitor);
-  return { port, name: monitor.querySelector(".gamepad-title span"), axes, buttons, pov: monitor.querySelector(".pov-readout strong") };
+  return { port, monitor, name: monitor.querySelector(".gamepad-title span"), axes, buttons, pov: monitor.querySelector(".pov-readout strong") };
 }
 
 function readGamepad(gamepad) {
@@ -649,7 +648,8 @@ function readGamepad(gamepad) {
 }
 
 function renderGamepad(view, gamepad) {
-  view.name.textContent = gamepad.name;
+  view.monitor.classList.toggle("connected", gamepad.connected);
+  view.name.textContent = friendlyGamepadName(gamepad.name);
   view.axes.forEach((element, index) => {
     const value = gamepad.axes[index] ?? 0;
     const fill = element.querySelector(".axis-fill");
@@ -661,6 +661,10 @@ function renderGamepad(view, gamepad) {
   });
   view.buttons.forEach((element, index) => element.classList.toggle("pressed", gamepad.buttons[index] === true));
   view.pov.textContent = gamepad.pov < 0 ? "—" : `${gamepad.pov}°`;
+}
+
+function friendlyGamepadName(name) {
+  return name.replace(/\s*\(STANDARD GAMEPAD.*$/i, "").replace(/\s+Vendor:.*$/i, "").trim() || name;
 }
 
 function updateDriverStationPlaceholder() {
@@ -721,8 +725,6 @@ setInterval(() => {
   const browserGamepads = [...(navigator.getGamepads?.() ?? [])].filter((gamepad) => gamepad?.connected).slice(0, 2);
   const gamepads = gamepadViews.map((view, index) => readGamepad(browserGamepads[index]));
   gamepads.forEach(applyGamepadModeShortcut);
-  const connectedCount = gamepads.filter((gamepad) => gamepad.connected).length;
-  gamepadState.textContent = `${connectedCount} gamepad${connectedCount === 1 ? "" : "s"}`;
   nt.publish("/SimSupervisor/Heartbeat", "int", ++heartbeat);
   nt.publish("/SimSupervisor/Mode", "string", enabled ? selectedMode : "disabled");
   nt.publish("/SimSupervisor/Alliance", "string", selectedAlliance);
