@@ -35,33 +35,27 @@
 
     <section class="connectivity" aria-label="NetworkTables connectivity">
       <strong>NetworkTables</strong>
-      <span id="nt-state" class="status disconnected">Disconnected</span>
-      <div class="robot-discovery">
-        <input id="team-number" inputmode="numeric" aria-label="FRC team number" placeholder="Team #">
-        <button id="find-robots">Find</button>
-        <select id="robot-target" aria-label="Robot connection"></select>
-      </div>
+      <input id="team-number" class="team-number" inputmode="numeric" aria-label="FRC team number" placeholder="Team #">
+      <div id="connection-points" class="connection-points"></div>
     </section>
 
     <nav>
-      <h1>Churrobots</h1>
       <div class="tabs" role="tablist">
         <button class="tab selected" data-tab="diagnostics">Main</button>
         <button class="tab" data-tab="cameras">Cameras</button>
         <button class="tab" data-tab="networktables">NetworkTables</button>
       </div>
-      <label class="auto-selector">
-        <span>Autonomous</span>
-        <select id="auto-selector" disabled>
-          <option>Waiting for chooser…</option>
-        </select>
-      </label>
-      <span id="app-version" class="app-version">Web</span>
     </nav>
 
     <main>
-      <section id="diagnostics-panel" class="card tab-panel">
-        <div class="field-section">
+      <section id="diagnostics-panel" class="card tab-panel main-dashboard">
+        <div class="dashboard-column field-section">
+          <div class="auto-bar">
+            <label for="auto-selector">Autonomous</label>
+            <select id="auto-selector" disabled>
+              <option>Waiting for chooser…</option>
+            </select>
+          </div>
           <div class="section-title">
             <h2>Field</h2>
             <span id="field-alliance" class="field-alliance blue">Blue alliance · station at bottom</span>
@@ -69,11 +63,13 @@
           </div>
           <div id="field-view" class="field-view"><canvas id="field-canvas"></canvas></div>
         </div>
-        <div class="section-title">
-          <h2>Hardware diagnostics</h2>
-          <span id="diagnostic-summary" class="diagnostic-summary">Waiting for devices…</span>
+        <div class="dashboard-column faults-column">
+          <div class="section-title faults-title">
+            <h2>Faults</h2>
+            <span id="diagnostic-summary" class="diagnostic-summary">Waiting for devices…</span>
+          </div>
+          <div id="diagnostics" class="diagnostics"></div>
         </div>
-        <div id="diagnostics" class="diagnostics"></div>
       </section>
 
       <section id="networktables-panel" class="card tab-panel" hidden>

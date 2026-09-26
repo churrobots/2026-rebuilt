@@ -17,7 +17,18 @@ self.addEventListener("install", (event) => {
 });
 
 self.addEventListener("activate", (event) => {
-  event.waitUntil(self.clients.claim());
+  event.waitUntil((async () => {
+    await self.clients.claim();
+    const active = await getActive();
+    if (!active) return;
+    const clients = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+    await Promise.all(clients.map((client) => {
+      const url = new URL(client.url);
+      if (url.searchParams.get("v") === active.version) return undefined;
+      url.searchParams.set("v", active.version);
+      return client.navigate(url.href);
+    }));
+  })());
 });
 
 self.addEventListener("message", (event) => {

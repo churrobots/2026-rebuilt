@@ -3,22 +3,20 @@ const { NT4Client, probeNT4 } = await import(`./nt4.js?v=${assetVersion}`);
 
 const pageHost = location.hostname || "localhost";
 let connectedHost = pageHost;
+let activeConnectionId = pageHost === "localhost" ? "sim" : "page";
 const nt = new NT4Client(connectedHost);
 const values = new Map();
-const ntState = document.querySelector("#nt-state");
 const ds = document.querySelector("#driver-station");
 const dsPlaceholder = document.querySelector("#driver-station-placeholder");
 const topicsElement = document.querySelector("#topics");
 const filterElement = document.querySelector("#topic-filter");
 const diagnosticsElement = document.querySelector("#diagnostics");
 const diagnosticSummary = document.querySelector("#diagnostic-summary");
-const appVersion = document.querySelector("#app-version");
 const autoSelect = document.querySelector("#auto-selector");
 const camerasElement = document.querySelector("#cameras");
 const cameraHostInput = document.querySelector("#camera-host");
 const teamNumberInput = document.querySelector("#team-number");
-const findRobotsButton = document.querySelector("#find-robots");
-const robotTarget = document.querySelector("#robot-target");
+const connectionPoints = document.querySelector("#connection-points");
 const fieldCanvas = document.querySelector("#field-canvas");
 const fieldView = document.querySelector("#field-view");
 const fieldAlliance = document.querySelector("#field-alliance");
@@ -45,6 +43,8 @@ let renderPending = false;
 let fieldRenderPending = false;
 let ntConnected = false;
 let discoveryPromise = null;
+let teamDiscoveryTimer = 0;
+const connectionAvailability = new Map();
 
 const gamepadViews = [0, 1].map(createGamepadView);
 const cameraElements = cameraDefinitions.map((definition) => {
@@ -61,17 +61,17 @@ const cameraElements = cameraDefinitions.map((definition) => {
 });
 cameraHostInput.value = localStorage.getItem("photonvision-host") || "photonvision.local";
 teamNumberInput.value = localStorage.getItem("frc-team-number") || "8048";
-setRobotOptions([{ host: connectedHost, label: `Current · ${connectedHost}` }]);
+renderConnectionPoints();
 
 nt.addEventListener("connected", () => {
   ntConnected = true;
-  ntState.textContent = `Connected · ${connectedHost}`;
-  ntState.classList.add("connected");
+  connectionAvailability.set(connectedHost, true);
+  renderConnectionPoints();
 });
 nt.addEventListener("disconnected", () => {
   ntConnected = false;
-  ntState.textContent = `Disconnected · ${connectedHost}`;
-  ntState.classList.remove("connected");
+  connectionAvailability.set(connectedHost, false);
+  renderConnectionPoints();
   enabled = false;
   updateButtons();
 });
@@ -107,14 +107,16 @@ cameraHostInput.addEventListener("change", () => {
   localStorage.setItem("photonvision-host", cameraHostInput.value.trim());
   updateCameraStreams(true);
 });
-findRobotsButton.addEventListener("click", discoverRobots);
 teamNumberInput.addEventListener("input", () => {
   localStorage.setItem("frc-team-number", teamNumberInput.value.trim());
+  connectionAvailability.clear();
+  renderConnectionPoints();
+  clearTimeout(teamDiscoveryTimer);
+  teamDiscoveryTimer = setTimeout(discoverRobots, 300);
 });
 teamNumberInput.addEventListener("keydown", (event) => {
   if (event.key === "Enter") discoverRobots();
 });
-robotTarget.addEventListener("change", () => connectToRobot(robotTarget.value));
 document.querySelectorAll("[data-tab]").forEach((button) => {
   button.addEventListener("click", () => {
     document.querySelectorAll("[data-tab]").forEach((tab) => tab.classList.toggle("selected", tab === button));
@@ -292,29 +294,36 @@ function updateCameraStreams(force = false) {
   }
 }
 
-function setRobotOptions(targets) {
-  robotTarget.replaceChildren(...targets.map((target) => {
-    const option = document.createElement("option");
-    option.value = target.host;
-    option.textContent = target.label;
-    option.selected = target.host === connectedHost;
-    return option;
-  }));
-}
-
 function connectionCandidates(teamNumber) {
   const team = Number.parseInt(teamNumber, 10);
   const candidates = [
-    { host: "localhost", label: "Simulation · localhost" },
-    { host: pageHost, label: `Page host · ${pageHost}` },
+    { id: "sim", host: "localhost", label: "localhost" },
   ];
   if (Number.isInteger(team) && team > 0 && team <= 99999) {
     candidates.push(
-      { host: `roborio-${team}-frc.local`, label: `roboRIO ${team} · mDNS` },
-      { host: `10.${Math.floor(team / 100)}.${team % 100}.2`, label: `roboRIO ${team} · team IP` },
+      { id: "team-ip", host: `10.${Math.floor(team / 100)}.${team % 100}.2`, label: `10.${Math.floor(team / 100)}.${team % 100}.2` },
+      { id: "mdns", host: `roborio-${team}-frc.local`, label: `roborio-${team}-frc.local` },
     );
   }
-  return candidates.filter((candidate, index, all) => all.findIndex((item) => item.host === candidate.host) === index);
+  if (!candidates.some((candidate) => candidate.host === pageHost)) {
+    candidates.push({ id: "page", host: pageHost, label: pageHost });
+  }
+  return candidates;
+}
+
+function renderConnectionPoints() {
+  const candidates = connectionCandidates(teamNumberInput.value.trim());
+  connectionPoints.replaceChildren(...candidates.map((candidate) => {
+    const pill = document.createElement("button");
+    const selected = candidate.id === activeConnectionId;
+    const connected = ntConnected && selected;
+    const unavailable = selected && !ntConnected;
+    pill.className = `connection-pill${connectionAvailability.get(candidate.host) ? " available" : ""}${connected ? " connected" : ""}${unavailable ? " unavailable" : ""}`;
+    pill.textContent = candidate.label;
+    pill.title = candidate.host;
+    pill.addEventListener("click", () => connectToRobot(candidate.host, candidate.id));
+    return pill;
+  }));
 }
 
 async function discoverRobots() {
@@ -322,34 +331,35 @@ async function discoverRobots() {
   discoveryPromise = (async () => {
     const teamNumber = teamNumberInput.value.trim();
     localStorage.setItem("frc-team-number", teamNumber);
-    findRobotsButton.disabled = true;
-    findRobotsButton.textContent = "Finding…";
     const candidates = connectionCandidates(teamNumber);
     const results = await Promise.all(candidates.map(async (candidate) => ({
       ...candidate,
       available: await probeNT4(candidate.host, 800),
     })));
+    results.forEach((candidate) => connectionAvailability.set(candidate.host, candidate.available));
     const available = results.filter((candidate) => candidate.available);
-    setRobotOptions(available.length ? available : [{ host: connectedHost, label: `No robot found · ${connectedHost}` }]);
-    if (!available.some((candidate) => candidate.host === connectedHost) && available.length) {
-      connectToRobot(available[0].host);
+    renderConnectionPoints();
+    if (!ntConnected && !available.some((candidate) => candidate.host === connectedHost) && available.length) {
+      connectToRobot(available[0].host, available[0].id);
     }
   })().finally(() => {
-    findRobotsButton.disabled = false;
-    findRobotsButton.textContent = "Find";
     discoveryPromise = null;
   });
   return discoveryPromise;
 }
 
-function connectToRobot(host) {
-  if (!host || host === connectedHost) return;
+function connectToRobot(host, connectionId = "manual") {
+  if (!host) return;
+  activeConnectionId = connectionId;
+  if (host === connectedHost) {
+    renderConnectionPoints();
+    return;
+  }
   connectedHost = host;
   values.clear();
   enabled = false;
   updateButtons();
-  ntState.textContent = `Connecting · ${host}`;
-  ntState.classList.remove("connected");
+  renderConnectionPoints();
   nt.setHost(host);
   scheduleRender();
   scheduleFieldRender();
@@ -397,12 +407,17 @@ function renderDiagnostics() {
   const faults = devices.filter((device) => !device.good).length;
   diagnosticSummary.textContent = faults ? `${faults} fault${faults === 1 ? "" : "s"} · ${devices.length} devices` : `All ${devices.length} devices healthy`;
   diagnosticSummary.className = `diagnostic-summary ${faults ? "bad" : "good"}`;
-  const groups = [
-    ["Vision", devices.filter((device) => classifyDevice(device.name) === "vision")],
-    ["Mechanisms", devices.filter((device) => classifyDevice(device.name) === "mechanisms")],
-    ["Drivetrain", devices.filter((device) => classifyDevice(device.name) === "drivetrain")],
-  ];
-  diagnosticsElement.replaceChildren(...groups.map(([label, groupDevices]) => {
+  const drivetrain = devices.filter((device) => classifyDevice(device.name) === "drivetrain");
+  const vision = devices.filter((device) => classifyDevice(device.name) === "vision");
+  const mechanisms = devices.filter((device) => classifyDevice(device.name) === "mechanisms");
+  diagnosticsElement.replaceChildren(
+    createOrientedGroup("Drivetrain", drivetrain),
+    createOrientedGroup("Vision", vision),
+    createDeviceGroup("Mechanisms", mechanisms),
+  );
+}
+
+function createDeviceGroup(label, groupDevices) {
     const section = document.createElement("section");
     section.className = "diagnostic-group";
     const heading = document.createElement("h3");
@@ -419,7 +434,52 @@ function renderDiagnostics() {
     }
     section.append(heading, grid);
     return section;
-  }));
+}
+
+function createOrientedGroup(label, devices) {
+  const section = document.createElement("section");
+  section.className = "diagnostic-group oriented-group";
+  const heading = document.createElement("h3");
+  heading.textContent = label;
+  const direction = document.createElement("div");
+  direction.className = "robot-forward";
+  direction.textContent = "↑ FRONT";
+  const grid = document.createElement("div");
+  grid.className = "orientation-grid";
+  const positions = [
+    ["Front left", "frontleft"], ["Front right", "frontright"],
+    ["Back left", "backleft"], ["Back right", "backright"],
+  ];
+  const positioned = new Set();
+  for (const [, token] of positions) {
+    const slot = document.createElement("div");
+    slot.className = "orientation-slot";
+    const matches = devices.filter((device) => normalizeDeviceName(device.name).includes(token));
+    matches.forEach((device) => positioned.add(device));
+    if (matches.length) slot.append(...matches.map(createDeviceCard));
+    else slot.append(createUnregisteredCard());
+    grid.append(slot);
+  }
+  section.append(heading, direction, grid);
+  const extras = devices.filter((device) => !positioned.has(device));
+  if (extras.length) {
+    const extraGrid = document.createElement("div");
+    extraGrid.className = "device-grid orientation-extras";
+    extraGrid.append(...extras.map(createDeviceCard));
+    section.append(extraGrid);
+  }
+  return section;
+}
+
+function createUnregisteredCard() {
+  const card = document.createElement("div");
+  card.className = "device unregistered";
+  card.textContent = "Not registered";
+  return card;
+}
+
+function normalizeDeviceName(name) {
+  return name.toLowerCase().replace(/[^a-z0-9]/g, "");
 }
 
 function createDeviceCard(device) {
@@ -479,28 +539,29 @@ async function watchDashboardSource() {
 
 async function startOfflineUpdates() {
   if (!("serviceWorker" in navigator) || !window.isSecureContext) {
-    appVersion.textContent = "Web · offline unavailable";
     watchDashboardSource();
     return;
   }
   try {
     await navigator.serviceWorker.register("./service-worker.js", { scope: "./" });
     const registration = await navigator.serviceWorker.ready;
-    appVersion.textContent = "PWA · cached";
     navigator.serviceWorker.addEventListener("message", (event) => {
       if (event.data?.type === "SNAPSHOT_STATUS") {
-        appVersion.textContent = `Known good · ${event.data.version}`;
+        const loadedVersion = new URLSearchParams(location.search).get("v");
+        if (event.data.version && loadedVersion !== event.data.version) {
+          enabled = false;
+          location.replace(`${location.pathname}?v=${event.data.version}`);
+        }
         return;
       }
       if (event.data?.type !== "SNAPSHOT_UPDATED") return;
-      appVersion.textContent = `Updating · ${event.data.version}`;
+      enabled = false;
       location.replace(`${location.pathname}?v=${event.data.version}`);
     });
     const check = () => (registration.active ?? navigator.serviceWorker.controller)?.postMessage({ type: "CHECK_UPDATE" });
     check();
     setInterval(check, 3000);
   } catch {
-    appVersion.textContent = "Web · cache failed";
     watchDashboardSource();
   }
 }

@@ -99,25 +99,23 @@ button.disable { background: #491d24; border-color: #a63d4b; }
 
 .connectivity { flex: none; min-height: 50px; padding: 7px 18px; display: flex; align-items: center; gap: 10px; background: #10151e; border-block: 1px solid var(--line); }
 .connectivity > strong { font-size: .8rem; }
-nav { flex: none; height: 64px; padding: 0 24px; display: flex; align-items: center; border-bottom: 1px solid var(--line); }
-nav h1 { font-size: 1.15rem; margin: 0; }
-.tabs { display: flex; align-self: stretch; margin-left: 32px; }
-.tab { border: 0; border-radius: 0; padding: 0 14px; color: #98a4b7; background: transparent; border-bottom: 2px solid transparent; }
+.team-number { margin: 0; width: 78px; padding: 6px 8px; }
+.connection-points { display: flex; min-width: 0; gap: 6px; }
+.connection-pill { padding: 5px 9px; color: #778294; background: #191e27; border-color: #343d4c; border-radius: 99px; font-size: .72rem; white-space: nowrap; }
+.connection-pill.available { color: #c2d2e6; border-color: #52627a; }
+.connection-pill.connected { color: #a7f3c1; background: #173b27; border-color: #38a963; box-shadow: 0 0 10px #38d97755; }
+.connection-pill.unavailable { color: #fecaca; background: #421d24; border-color: #dc4c5c; box-shadow: 0 0 10px #ef445d55; }
+nav { flex: none; height: 42px; padding: 0 18px; display: flex; align-items: center; border-bottom: 1px solid var(--line); }
+.tabs { display: flex; align-self: stretch; }
+.tab { border: 0; border-radius: 0; padding: 0 10px; color: #98a4b7; background: transparent; border-bottom: 2px solid transparent; font-size: .78rem; }
 .tab.selected { color: #edf2f7; background: transparent; border-color: var(--blue); }
-.auto-selector { margin-left: auto; display: flex; align-items: center; gap: 8px; color: #8f9bad; font-size: .72rem; }
-.auto-selector select { max-width: 260px; padding: 6px 28px 6px 9px; color: #edf2f7; background: #0d1118; border: 1px solid #354055; border-radius: 6px; }
-.auto-selector select:disabled { color: #738096; }
-.robot-discovery { margin-left: auto; display: flex; gap: 5px; align-items: center; }
-.robot-discovery input { margin: 0; width: 76px; padding: 6px 7px; }
-.robot-discovery button { padding: 6px 9px; }
-.robot-discovery select { max-width: 190px; padding: 6px 7px; color: #edf2f7; background: #0d1118; border: 1px solid #354055; border-radius: 6px; }
-.app-version { margin-left: 14px; color: #778397; font: .7rem ui-monospace, SFMono-Regular, Menlo, monospace; }
-.status { margin-left: 12px; padding: 5px 9px; border-radius: 99px; font-size: .78rem; background: #3a2026; color: #ff98a3; }
-.status.connected { background: #173b27; color: #84f0ab; }
 
 main { flex: 1; min-height: 0; padding: 24px; overflow: hidden; }
 .card { width: 100%; max-width: 1100px; height: 100%; margin: auto; display: flex; flex-direction: column; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
 .tab-panel[hidden] { display: none; }
+.main-dashboard { max-width: none; display: grid; grid-template-columns: minmax(300px, .72fr) minmax(520px, 1.28fr); }
+.dashboard-column { min-width: 0; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+.dashboard-column + .dashboard-column { border-left: 1px solid var(--line); }
 .section-title { display: flex; align-items: center; gap: 16px; padding: 14px 17px; border-bottom: 1px solid var(--line); }
 .section-title h2 { margin: 0; font-size: 1rem; }
 input { margin-left: auto; width: min(340px, 50vw); padding: 8px 11px; color: inherit; background: #0d1118; border: 1px solid var(--line); border-radius: 7px; }
@@ -129,18 +127,26 @@ input { margin-left: auto; width: min(340px, 50vw); padding: 8px 11px; color: in
 .diagnostic-summary { margin-left: auto; color: #aeb8c8; font-size: .82rem; }
 .diagnostic-summary.good { color: #83f0aa; }
 .diagnostic-summary.bad { color: #ff8c98; }
-.field-section { flex: none; height: min(39vh, 390px); min-height: 210px; display: flex; flex-direction: column; border-bottom: 1px solid var(--line); }
+.field-section { height: 100%; }
+.auto-bar { flex: none; min-height: 58px; padding: 10px 14px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--line); }
+.auto-bar label { color: #aeb8c8; font-size: .78rem; font-weight: 700; }
+.auto-bar select { flex: 1; min-width: 0; padding: 7px 28px 7px 9px; color: #edf2f7; background: #0d1118; border: 1px solid #354055; border-radius: 6px; }
+.auto-bar select:disabled { color: #738096; }
 .field-view { flex: 1; min-height: 0; padding: 12px; background: #0c1017; }
 .field-view canvas { display: block; width: 100%; height: 100%; }
 .field-alliance { margin-left: 10px; font-size: .76rem; font-weight: 700; }
 .field-alliance.blue { color: #65adff; }
 .field-alliance.red { color: #ff6f7d; }
 .field-pose { margin-left: auto; color: #8f9bad; font: .72rem ui-monospace, SFMono-Regular, Menlo, monospace; }
-.diagnostics { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 20px; padding: 16px; overflow: auto; }
+.diagnostics { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 16px; padding: 12px; overflow: auto; }
 .diagnostic-group h3 { margin: 0 0 9px; color: #abb7c9; font-size: .78rem; letter-spacing: .09em; text-transform: uppercase; }
-.device-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(215px, 1fr)); gap: 12px; }
+.device-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
+.robot-forward { margin: -24px auto 9px; width: max-content; color: #69778b; font-size: .64rem; font-weight: 800; letter-spacing: .08em; }
+.orientation-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+.orientation-slot { min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.orientation-extras { margin-top: 8px; }
 .group-empty { padding: 13px; color: #697487; border: 1px dashed #303849; border-radius: 8px; font-size: .8rem; }
-.device { min-height: 92px; padding: 14px; border: 1px solid; border-radius: 10px; display: flex; flex-direction: column; justify-content: space-between; }
+.device { min-height: 52px; padding: 9px 10px; border: 1px solid; border-radius: 8px; display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 8px; }
 .device.good { border-color: #287f4b; background: #102d1d; }
 .device.bad { border-color: #a23e4a; background: #38181e; }
 .device-name { font-weight: 700; overflow-wrap: anywhere; }
@@ -148,6 +154,7 @@ input { margin-left: auto; width: min(340px, 50vw); padding: 8px 11px; color: in
 .device-state::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: currentColor; box-shadow: 0 0 8px currentColor; }
 .device.good .device-state { color: var(--green); }
 .device.bad .device-state { color: var(--red); }
+.device.unregistered { min-height: 42px; justify-content: center; color: #626e81; background: transparent; border: 1px dashed #465166; font-size: .72rem; }
 .camera-host-label { margin-left: auto; display: flex; align-items: center; gap: 8px; color: #8f9bad; font-size: .75rem; }
 .camera-host-label input { margin: 0; width: 190px; }
 .cameras { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; padding: 16px; overflow: auto; }
@@ -174,16 +181,13 @@ input { margin-left: auto; width: min(340px, 50vw); padding: 8px 11px; color: in
   .gamepad-buttons { grid-template-columns: repeat(5, 1fr); }
   .gamepad-digital { grid-template-columns: 1fr auto; }
   .topic { grid-template-columns: 1fr; gap: 4px; }
-  nav { height: auto; min-height: 64px; flex-wrap: wrap; padding-top: 8px; }
+  nav { height: 42px; min-height: 42px; padding-top: 0; }
   .tabs { order: 3; width: 100%; height: 46px; margin-left: 0; }
-  .auto-selector { order: 2; width: 100%; margin: 8px 0 0; }
-  .auto-selector select { flex: 1; min-width: 0; }
   .connectivity { flex-wrap: wrap; }
-  .robot-discovery { width: 100%; margin: 0; }
-  .robot-discovery select { flex: 1; min-width: 0; max-width: none; }
+  .connection-points { order: 3; width: 100%; overflow-x: auto; scrollbar-width: none; }
   .cameras { grid-template-columns: 1fr; }
   .camera-host-label { width: 100%; margin-left: 0; }
   .camera-host-label input { flex: 1; min-width: 0; }
-  .field-section { height: 34vh; min-height: 175px; }
+  .main-dashboard { grid-template-columns: minmax(280px, .8fr) minmax(460px, 1.2fr); }
   .field-pose { display: none; }
 }

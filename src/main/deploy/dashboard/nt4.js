@@ -22,6 +22,7 @@ export class NT4Client extends EventTarget {
     const socket = new WebSocket(url, "v4.1.networktables.first.wpi.edu");
     this.socket = socket;
     socket.binaryType = "arraybuffer";
+    let verificationTimer;
     socket.addEventListener("open", () => {
       if (this.socket !== socket) return;
       this.sendControl("subscribe", { subuid: 1, topics: ["/"], options: { prefix: true, periodic: 0.1 } });
@@ -31,10 +32,20 @@ export class NT4Client extends EventTarget {
         options: { prefix: false, all: true, periodic: 0.02 },
       });
       for (const topic of this.published.values()) this.announce(topic);
-      this.dispatchEvent(new Event("connected"));
+      verificationTimer = setTimeout(() => {
+        if (!socket.ntVerified) socket.close();
+      }, 1500);
     });
-    socket.addEventListener("message", (event) => this.onMessage(event));
+    socket.addEventListener("message", (event) => {
+      if (!socket.ntVerified && isNT4ControlMessage(event.data)) {
+        socket.ntVerified = true;
+        clearTimeout(verificationTimer);
+        this.dispatchEvent(new Event("connected"));
+      }
+      this.onMessage(event);
+    });
     socket.addEventListener("close", () => {
+      clearTimeout(verificationTimer);
       if (this.socket !== socket) return;
       this.dispatchEvent(new Event("disconnected"));
       if (this.shouldReconnect) this.reconnectTimer = setTimeout(() => this.connect(), 1000);
@@ -113,7 +124,13 @@ export function probeNT4(host, timeoutMs = 1500) {
     let socket;
     try {
       socket = new WebSocket(`ws://${host}:5810/nt/chur-dashboard-probe-${Date.now()}`, "v4.1.networktables.first.wpi.edu");
-      socket.addEventListener("open", () => finish(true));
+      socket.addEventListener("open", () => socket.send(JSON.stringify([{
+        method: "subscribe",
+        params: { subuid: 1, topics: ["/"], options: { prefix: true, periodic: 0.1 } },
+      }])));
+      socket.addEventListener("message", (event) => {
+        if (isNT4ControlMessage(event.data)) finish(true);
+      });
       socket.addEventListener("error", () => finish(false));
       socket.addEventListener("close", () => finish(false));
     } catch {
@@ -122,4 +139,18 @@ export function probeNT4(host, timeoutMs = 1500) {
     }
     const timeout = setTimeout(() => finish(false), timeoutMs);
   });
+}
+
+function isNT4ControlMessage(data) {
+  if (typeof data !== "string") return false;
+  try {
+    const messages = JSON.parse(data);
+    return Array.isArray(messages) && messages.some((message) => {
+      if (message?.method !== "announce" || typeof message.params?.name !== "string") return false;
+      const name = message.params.name;
+      return !name.startsWith("$") && !name.startsWith("/SimSupervisor/");
+    });
+  } catch {
+    return false;
+  }
 }
