@@ -18,7 +18,7 @@ export class NT4Client extends EventTarget {
 
   connect() {
     clearTimeout(this.reconnectTimer);
-    const url = `ws://${this.host}:5810/nt/chur-dashboard`;
+    const url = `ws://${this.host}:5810/nt/custom-dashboard`;
     const socket = new WebSocket(url, "v4.1.networktables.first.wpi.edu");
     this.socket = socket;
     socket.binaryType = "arraybuffer";
@@ -123,7 +123,7 @@ export function probeNT4(host, timeoutMs = 1500) {
     };
     let socket;
     try {
-      socket = new WebSocket(`ws://${host}:5810/nt/chur-dashboard-probe-${Date.now()}`, "v4.1.networktables.first.wpi.edu");
+      socket = new WebSocket(`ws://${host}:5810/nt/custom-dashboard-probe-${Date.now()}`, "v4.1.networktables.first.wpi.edu");
       socket.addEventListener("open", () => socket.send(JSON.stringify([{
         method: "subscribe",
         params: { subuid: 1, topics: ["/"], options: { prefix: true, periodic: 0.1 } },

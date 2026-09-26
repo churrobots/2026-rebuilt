@@ -1,5 +1,5 @@
-const META_CACHE = "chur-dashboard-meta";
-const SNAPSHOT_PREFIX = "chur-dashboard-snapshot-";
+const META_CACHE = "custom-dashboard-meta";
+const SNAPSHOT_PREFIX = "custom-dashboard-snapshot-";
 const ACTIVE_KEY = new URL("__active_snapshot__", self.registration.scope).href;
 const ASSETS = [
   "index.html",
