@@ -44,7 +44,7 @@ public final class MechanismVisualizer extends SubsystemBase {
                     MechanismVisualizationConstants.INTAKE_ARM_LENGTH_METERS,
                     0.0,
                     8.0,
-                    new Color8Bit(Color.kOrange)));
+                    new Color8Bit(Color.kWhite)));
     intakeRollerLigament =
         intakeArmLigament
             .append(
@@ -55,7 +55,7 @@ public final class MechanismVisualizer extends SubsystemBase {
             .getRoot("SpindexerPivot", 0.50, 0.40)
             .append(
                 new LoggedMechanismLigament2d(
-                    "Spindexer", 0.14, 0.0, 8.0, new Color8Bit(Color.kPurple)));
+                    "Spindexer", 0.14, 0.0, 8.0, new Color8Bit(Color.kWhite)));
     feederLigament =
         schematic
             .getRoot("FeederPivot", 0.32, 0.58)

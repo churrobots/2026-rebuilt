@@ -109,7 +109,7 @@ public class Shooter extends SubsystemBase {
         MechanismVisualizationConstants.SHOOTER_Y_METERS,
         MechanismVisualizationConstants.SHOOTER_Z_METERS,
         new Rotation3d(
-            controller.getMechanismPosition().in(Radians)
+            -controller.getMechanismPosition().in(Radians)
                 / MechanismVisualizationConstants.SPIN_VISUALIZATION_REDUCTION,
             0.0,
             0.0));

@@ -108,7 +108,7 @@ public class IntakeRoller extends SubsystemBase {
   }
 
   public double getVisualizationSpinRadians() {
-    return controller.getMechanismPosition().in(Radians)
+    return -controller.getMechanismPosition().in(Radians)
         / MechanismVisualizationConstants.SPIN_VISUALIZATION_REDUCTION;
   }
 
