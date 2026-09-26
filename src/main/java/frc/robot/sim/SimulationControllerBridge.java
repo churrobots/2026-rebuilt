@@ -13,16 +13,12 @@ import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 
 /** Bridges dashboard driver-station and gamepad data into HALSim. */
 public final class SimulationControllerBridge {
-  private static final int JOYSTICK_PORT = 0;
+  private static final int JOYSTICK_COUNT = 2;
   private static final int AXIS_COUNT = 6;
   private static final int BUTTON_COUNT = 10;
   private static final int STALE_CYCLES = 25;
 
-  private final DoubleArraySubscriber axes;
-  private final BooleanArraySubscriber buttons;
-  private final IntegerSubscriber pov;
-  private final BooleanSubscriber connected;
-  private final StringSubscriber name;
+  private final JoystickState[] joysticks = new JoystickState[JOYSTICK_COUNT];
   private final StringSubscriber mode;
   private final StringSubscriber alliance;
   private final IntegerSubscriber heartbeat;
@@ -33,21 +29,18 @@ public final class SimulationControllerBridge {
 
   public SimulationControllerBridge() {
     NetworkTable table = NetworkTableInstance.getDefault().getTable("SimSupervisor");
-    axes = table.getDoubleArrayTopic("Joystick0/Axes").subscribe(new double[0]);
-    buttons = table.getBooleanArrayTopic("Joystick0/Buttons").subscribe(new boolean[0]);
-    pov = table.getIntegerTopic("Joystick0/POV").subscribe(-1);
-    connected = table.getBooleanTopic("Joystick0/Connected").subscribe(false);
-    name = table.getStringTopic("Joystick0/Name").subscribe("Simulation Controller");
+    for (int port = 0; port < JOYSTICK_COUNT; port++) {
+      joysticks[port] = new JoystickState(table, port);
+      DriverStationSim.setJoystickAxisCount(port, AXIS_COUNT);
+      DriverStationSim.setJoystickButtonCount(port, BUTTON_COUNT);
+      DriverStationSim.setJoystickPOVCount(port, 1);
+      DriverStationSim.setJoystickIsXbox(port, true);
+    }
     mode = table.getStringTopic("Mode").subscribe("disabled");
     alliance = table.getStringTopic("Alliance").subscribe("blue");
     heartbeat = table.getIntegerTopic("Heartbeat").subscribe(-1);
     available = table.getBooleanTopic("Available").publish();
     available.set(true);
-
-    DriverStationSim.setJoystickAxisCount(JOYSTICK_PORT, AXIS_COUNT);
-    DriverStationSim.setJoystickButtonCount(JOYSTICK_PORT, BUTTON_COUNT);
-    DriverStationSim.setJoystickPOVCount(JOYSTICK_PORT, 1);
-    DriverStationSim.setJoystickIsXbox(JOYSTICK_PORT, true);
   }
 
   /** Copies the newest supervisor state into HALSim, clearing stale input after 0.5 seconds. */
@@ -60,23 +53,27 @@ public final class SimulationControllerBridge {
       staleCycles++;
     }
 
-    boolean isConnected = connected.get() && staleCycles < STALE_CYCLES;
-    double[] currentAxes = isConnected ? axes.get() : new double[0];
-    boolean[] currentButtons = isConnected ? buttons.get() : new boolean[0];
-
-    for (int axis = 0; axis < AXIS_COUNT; axis++) {
-      DriverStationSim.setJoystickAxis(
-          JOYSTICK_PORT, axis, axis < currentAxes.length ? currentAxes[axis] : 0.0);
+    for (int port = 0; port < JOYSTICK_COUNT; port++) {
+      JoystickState joystick = joysticks[port];
+      boolean isConnected = joystick.connected.get() && staleCycles < STALE_CYCLES;
+      double[] currentAxes = isConnected ? joystick.axes.get() : new double[0];
+      boolean[] currentButtons = isConnected ? joystick.buttons.get() : new boolean[0];
+      for (int axis = 0; axis < AXIS_COUNT; axis++) {
+        DriverStationSim.setJoystickAxis(
+            port, axis, axis < currentAxes.length ? currentAxes[axis] : 0.0);
+      }
+      for (int button = 1; button <= BUTTON_COUNT; button++) {
+        DriverStationSim.setJoystickButton(
+            port,
+            button,
+            button <= currentButtons.length && currentButtons[button - 1]);
+      }
+      DriverStationSim.setJoystickPOV(
+          port, 0, isConnected ? (int) joystick.pov.get() : -1);
+      DriverStationSim.setJoystickName(
+          port,
+          isConnected ? joystick.name.get() : "Simulation Controller (disconnected)");
     }
-    for (int button = 1; button <= BUTTON_COUNT; button++) {
-      DriverStationSim.setJoystickButton(
-          JOYSTICK_PORT,
-          button,
-          button <= currentButtons.length && currentButtons[button - 1]);
-    }
-    DriverStationSim.setJoystickPOV(JOYSTICK_PORT, 0, isConnected ? (int) pov.get() : -1);
-    DriverStationSim.setJoystickName(
-        JOYSTICK_PORT, isConnected ? name.get() : "Simulation Controller (disconnected)");
 
     String selectedMode = mode.get();
     DriverStationSim.setAllianceStationId(
@@ -87,5 +84,22 @@ public final class SimulationControllerBridge {
     DriverStationSim.setTest(selectedMode.equals("test"));
     DriverStationSim.setEnabled(enabled);
     DriverStationSim.notifyNewData();
+  }
+
+  private static final class JoystickState {
+    final DoubleArraySubscriber axes;
+    final BooleanArraySubscriber buttons;
+    final IntegerSubscriber pov;
+    final BooleanSubscriber connected;
+    final StringSubscriber name;
+
+    JoystickState(NetworkTable table, int port) {
+      String prefix = "Joystick" + port + "/";
+      axes = table.getDoubleArrayTopic(prefix + "Axes").subscribe(new double[0]);
+      buttons = table.getBooleanArrayTopic(prefix + "Buttons").subscribe(new boolean[0]);
+      pov = table.getIntegerTopic(prefix + "POV").subscribe(-1);
+      connected = table.getBooleanTopic(prefix + "Connected").subscribe(false);
+      name = table.getStringTopic(prefix + "Name").subscribe("Simulation Controller " + port);
+    }
   }
 }

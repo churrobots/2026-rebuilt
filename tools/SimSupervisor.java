@@ -15,6 +15,8 @@ import java.util.stream.Stream;
 public final class SimSupervisor {
   private static final Duration POLL_INTERVAL = Duration.ofMillis(150);
   private static final Duration DEBOUNCE = Duration.ofMillis(350);
+  private static final Duration CRASH_RESTART_DELAY = Duration.ofSeconds(1);
+  private static final Duration MAX_FAILURE_RESTART_DELAY = Duration.ofSeconds(10);
   private static final List<String> WATCH_DIRECTORIES =
       List.of("src/main/java", "src/main/deploy", "vendordeps");
   private static final List<String> WATCH_FILES =
@@ -28,6 +30,8 @@ public final class SimSupervisor {
 
   private final Path root;
   private Process simulator;
+  private long restartAtNanos;
+  private int consecutiveFailedExits;
 
   private SimSupervisor(Path root) {
     this.root = root;
@@ -73,8 +77,21 @@ public final class SimSupervisor {
         pending.clear();
         restart();
       } else if (simulator != null && !simulator.isAlive()) {
-        System.out.println("[sim] exited with code " + simulator.exitValue() + "; waiting for changes");
+        int exitCode = simulator.exitValue();
         simulator = null;
+        long delayMillis = restartDelayMillis(exitCode);
+        restartAtNanos = System.nanoTime() + Duration.ofMillis(delayMillis).toNanos();
+        System.out.println(
+            "[sim] exited unexpectedly with code "
+                + exitCode
+                + "; restarting in "
+                + delayMillis
+                + " ms");
+      } else if (simulator == null
+          && restartAtNanos != 0
+          && System.nanoTime() >= restartAtNanos) {
+        restartAtNanos = 0;
+        start();
       }
     }
   }
@@ -129,8 +146,22 @@ public final class SimSupervisor {
     simulator = builder.start();
   }
 
+  private long restartDelayMillis(int exitCode) {
+    if (exitCode == 0) {
+      consecutiveFailedExits = 0;
+      return CRASH_RESTART_DELAY.toMillis();
+    }
+    consecutiveFailedExits = Math.min(consecutiveFailedExits + 1, 10);
+    long multiplier = 1L << Math.min(consecutiveFailedExits - 1, 4);
+    return Math.min(
+        CRASH_RESTART_DELAY.toMillis() * multiplier,
+        MAX_FAILURE_RESTART_DELAY.toMillis());
+  }
+
   private void restart() throws Exception {
     stop();
+    restartAtNanos = 0;
+    consecutiveFailedExits = 0;
     start();
   }
 
