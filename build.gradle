@@ -89,8 +89,7 @@ test {
 }
 
 // Simulation configuration (e.g. environment variables).
-def enableSimGuiByDefault = true
-wpi.sim.addGui().defaultEnabled = enableSimGuiByDefault && !project.hasProperty("supervisorHeadless")
+wpi.sim.addGui().defaultEnabled = !project.hasProperty("supervisorHeadless")
 wpi.sim.addDriverstation()
 
 // Setting up my Jar File. In this case, adding all libraries into the main jar ('fat jar')
