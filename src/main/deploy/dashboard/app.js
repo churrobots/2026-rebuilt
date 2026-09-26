@@ -11,6 +11,7 @@ const filterElement = document.querySelector("#topic-filter");
 const diagnosticsElement = document.querySelector("#diagnostics");
 const diagnosticSummary = document.querySelector("#diagnostic-summary");
 const appVersion = document.querySelector("#app-version");
+const autoSelect = document.querySelector("#auto-selector");
 const gamepadState = document.querySelector("#gamepad-state");
 const gamepadAxes = document.querySelector("#gamepad-axes");
 const gamepadButtons = document.querySelector("#gamepad-buttons");
@@ -18,6 +19,7 @@ const gamepadPov = document.querySelector("#gamepad-pov");
 const axisNames = ["LX", "LY", "LT", "RT", "RX", "RY"];
 const buttonNames = ["A", "B", "X", "Y", "LB", "RB", "Back", "Start", "LS", "RS"];
 const diagnosticPrefix = "/SmartDashboard/HardwareMonitor/FaultStatus/";
+const autoPrefix = "/SmartDashboard/Auto Choices/";
 const watchedAssets = ["index.html", "style.css", "app.js", "nt4.js", "msgpack.js", "manifest.webmanifest", "icon.svg"];
 let selectedMode = "teleop";
 let enabled = false;
@@ -76,6 +78,9 @@ document.querySelectorAll("[data-mode]").forEach((button) => {
 document.querySelector("#enable").addEventListener("click", () => { enabled = true; updateButtons(); });
 document.querySelector("#disable").addEventListener("click", () => { enabled = false; updateButtons(); });
 filterElement.addEventListener("input", scheduleRender);
+autoSelect.addEventListener("change", () => {
+  nt.publish(`${autoPrefix}selected`, "string", autoSelect.value);
+});
 document.querySelectorAll("[data-tab]").forEach((button) => {
   button.addEventListener("click", () => {
     document.querySelectorAll("[data-tab]").forEach((tab) => tab.classList.toggle("selected", tab === button));
@@ -97,6 +102,7 @@ function scheduleRender() {
 
 function renderTopics() {
   renderPending = false;
+  renderAutoChooser();
   renderDiagnostics();
   const filter = filterElement.value.toLowerCase();
   const topics = [...values.values()].filter((topic) => topic.name.toLowerCase().includes(filter)).sort((a, b) => a.name.localeCompare(b.name));
@@ -117,6 +123,32 @@ function renderTopics() {
     row.append(name, value);
     return row;
   }));
+}
+
+function renderAutoChooser() {
+  const options = values.get(`${autoPrefix}options`)?.value;
+  if (!Array.isArray(options) || !options.length) {
+    autoSelect.disabled = true;
+    return;
+  }
+  const signature = JSON.stringify(options);
+  if (autoSelect.dataset.options !== signature) {
+    autoSelect.replaceChildren(...options.map((option) => {
+      const element = document.createElement("option");
+      element.value = option;
+      element.textContent = option;
+      return element;
+    }));
+    autoSelect.dataset.options = signature;
+  }
+  const selected = values.get(`${autoPrefix}selected`)?.value;
+  const active = values.get(`${autoPrefix}active`)?.value;
+  const defaultOption = values.get(`${autoPrefix}default`)?.value;
+  const current = selected || active || defaultOption;
+  if (typeof current === "string" && options.includes(current) && document.activeElement !== autoSelect) {
+    autoSelect.value = current;
+  }
+  autoSelect.disabled = false;
 }
 
 function renderDiagnostics() {
