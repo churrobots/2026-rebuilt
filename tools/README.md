@@ -13,6 +13,8 @@ Run from the repository root with the WPILib JDK:
 An alternate project directory can be supplied as the first argument. Stop the supervisor and simulator with Ctrl-C.
 
 The supervisor uses `--no-daemon` so the simulator remains in a process tree that can be terminated reliably during restarts. Gradle's normal incremental build cache is still used.
+Unexpected simulator exits restart automatically after one second. Nonzero build/process failures use a
+capped exponential backoff, while any source change resets the backoff and starts a fresh build immediately.
 
 ## Browser dashboard
 
@@ -27,11 +29,11 @@ opened from a roboRIO's plain-HTTP IP address; telemetry and controls still work
 | Topic | NT type | Value |
 | --- | --- | --- |
 | `Available` | `boolean` | Published by the simulation bridge; reveals the faux DS |
-| `Joystick0/Axes` | `double[]` | WPILib Xbox order: LX, LY, LT, RT, RX, RY |
-| `Joystick0/Buttons` | `boolean[]` | A, B, X, Y, LB, RB, Back, Start, LS, RS |
-| `Joystick0/POV` | `int` | Degrees clockwise from up, or `-1` |
-| `Joystick0/Connected` | `boolean` | Gamepad connection state |
-| `Joystick0/Name` | `string` | Display name |
+| `Joystick{0,1}/Axes` | `double[]` | WPILib Xbox order: LX, LY, LT, RT, RX, RY |
+| `Joystick{0,1}/Buttons` | `boolean[]` | A, B, X, Y, LB, RB, Back, Start, LS, RS |
+| `Joystick{0,1}/POV` | `int` | Degrees clockwise from up, or `-1` |
+| `Joystick{0,1}/Connected` | `boolean` | Gamepad connection state |
+| `Joystick{0,1}/Name` | `string` | Display name |
 | `Mode` | `string` | `disabled`, `teleop`, `auto`, or `test` |
 | `Alliance` | `string` | `blue` or `red` |
 | `Heartbeat` | `int` | Increment continuously, ideally at 50 Hz |

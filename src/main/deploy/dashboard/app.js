@@ -1,11 +1,13 @@
 const assetVersion = new URL(import.meta.url).searchParams.get("v") ?? "initial";
-const { NT4Client } = await import(`./nt4.js?v=${assetVersion}`);
+const { NT4Client, probeNT4 } = await import(`./nt4.js?v=${assetVersion}`);
 
-const host = location.hostname || "localhost";
-const nt = new NT4Client(host);
+const pageHost = location.hostname || "localhost";
+let connectedHost = pageHost;
+const nt = new NT4Client(connectedHost);
 const values = new Map();
 const ntState = document.querySelector("#nt-state");
 const ds = document.querySelector("#driver-station");
+const dsPlaceholder = document.querySelector("#driver-station-placeholder");
 const topicsElement = document.querySelector("#topics");
 const filterElement = document.querySelector("#topic-filter");
 const diagnosticsElement = document.querySelector("#diagnostics");
@@ -14,14 +16,15 @@ const appVersion = document.querySelector("#app-version");
 const autoSelect = document.querySelector("#auto-selector");
 const camerasElement = document.querySelector("#cameras");
 const cameraHostInput = document.querySelector("#camera-host");
+const teamNumberInput = document.querySelector("#team-number");
+const findRobotsButton = document.querySelector("#find-robots");
+const robotTarget = document.querySelector("#robot-target");
 const fieldCanvas = document.querySelector("#field-canvas");
 const fieldView = document.querySelector("#field-view");
 const fieldAlliance = document.querySelector("#field-alliance");
 const fieldPose = document.querySelector("#field-pose");
 const gamepadState = document.querySelector("#gamepad-state");
-const gamepadAxes = document.querySelector("#gamepad-axes");
-const gamepadButtons = document.querySelector("#gamepad-buttons");
-const gamepadPov = document.querySelector("#gamepad-pov");
+const gamepadsElement = document.querySelector("#gamepads");
 const axisNames = ["LX", "LY", "LT", "RT", "RX", "RY"];
 const buttonNames = ["A", "B", "X", "Y", "LB", "RB", "Back", "Start", "LS", "RS"];
 const diagnosticPrefix = "/SmartDashboard/HardwareMonitor/FaultStatus/";
@@ -41,30 +44,9 @@ let heartbeat = 0;
 let renderPending = false;
 let fieldRenderPending = false;
 let ntConnected = false;
-let lastGamepadEvent = null;
+let discoveryPromise = null;
 
-window.addEventListener("gamepadconnected", (event) => {
-  lastGamepadEvent = event.gamepad;
-  gamepadState.textContent = event.gamepad.id;
-});
-window.addEventListener("gamepaddisconnected", (event) => {
-  if (lastGamepadEvent?.index === event.gamepad.index) lastGamepadEvent = null;
-});
-
-const axisElements = axisNames.map((label) => {
-  const element = document.createElement("div");
-  element.className = "axis";
-  element.innerHTML = `<span>${label}</span><span class="axis-track"><span class="axis-fill"></span></span><span class="axis-value">0.00</span>`;
-  gamepadAxes.append(element);
-  return element;
-});
-const buttonElements = buttonNames.map((label) => {
-  const element = document.createElement("div");
-  element.className = "gamepad-button";
-  element.textContent = label;
-  gamepadButtons.append(element);
-  return element;
-});
+const gamepadViews = [0, 1].map(createGamepadView);
 const cameraElements = cameraDefinitions.map((definition) => {
   const card = document.createElement("article");
   card.className = "camera";
@@ -78,15 +60,17 @@ const cameraElements = cameraDefinitions.map((definition) => {
   return { ...definition, image, status, placeholder };
 });
 cameraHostInput.value = localStorage.getItem("photonvision-host") || "photonvision.local";
+teamNumberInput.value = localStorage.getItem("frc-team-number") || "8048";
+setRobotOptions([{ host: connectedHost, label: `Current · ${connectedHost}` }]);
 
 nt.addEventListener("connected", () => {
   ntConnected = true;
-  ntState.textContent = `NT connected · ${host}`;
+  ntState.textContent = `Connected · ${connectedHost}`;
   ntState.classList.add("connected");
 });
 nt.addEventListener("disconnected", () => {
   ntConnected = false;
-  ntState.textContent = "NT disconnected";
+  ntState.textContent = `Disconnected · ${connectedHost}`;
   ntState.classList.remove("connected");
   enabled = false;
   updateButtons();
@@ -123,6 +107,14 @@ cameraHostInput.addEventListener("change", () => {
   localStorage.setItem("photonvision-host", cameraHostInput.value.trim());
   updateCameraStreams(true);
 });
+findRobotsButton.addEventListener("click", discoverRobots);
+teamNumberInput.addEventListener("input", () => {
+  localStorage.setItem("frc-team-number", teamNumberInput.value.trim());
+});
+teamNumberInput.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") discoverRobots();
+});
+robotTarget.addEventListener("change", () => connectToRobot(robotTarget.value));
 document.querySelectorAll("[data-tab]").forEach((button) => {
   button.addEventListener("click", () => {
     document.querySelectorAll("[data-tab]").forEach((tab) => tab.classList.toggle("selected", tab === button));
@@ -280,7 +272,7 @@ new ResizeObserver(scheduleFieldRender).observe(fieldView);
 function updateCameraStreams(force = false) {
   const panelOpen = !document.querySelector("#cameras-panel").hidden;
   const simulation = values.get("/SimSupervisor/Available")?.value === true;
-  const cameraHost = simulation ? host : cameraHostInput.value.trim();
+  const cameraHost = simulation ? connectedHost : cameraHostInput.value.trim();
   for (const camera of cameraElements) {
     if (!panelOpen || !cameraHost) {
       if (camera.image.src) camera.image.removeAttribute("src");
@@ -298,6 +290,69 @@ function updateCameraStreams(force = false) {
       camera.image.src = `${source}&view=${Date.now()}`;
     }
   }
+}
+
+function setRobotOptions(targets) {
+  robotTarget.replaceChildren(...targets.map((target) => {
+    const option = document.createElement("option");
+    option.value = target.host;
+    option.textContent = target.label;
+    option.selected = target.host === connectedHost;
+    return option;
+  }));
+}
+
+function connectionCandidates(teamNumber) {
+  const team = Number.parseInt(teamNumber, 10);
+  const candidates = [
+    { host: "localhost", label: "Simulation · localhost" },
+    { host: pageHost, label: `Page host · ${pageHost}` },
+  ];
+  if (Number.isInteger(team) && team > 0 && team <= 99999) {
+    candidates.push(
+      { host: `roborio-${team}-frc.local`, label: `roboRIO ${team} · mDNS` },
+      { host: `10.${Math.floor(team / 100)}.${team % 100}.2`, label: `roboRIO ${team} · team IP` },
+    );
+  }
+  return candidates.filter((candidate, index, all) => all.findIndex((item) => item.host === candidate.host) === index);
+}
+
+async function discoverRobots() {
+  if (discoveryPromise) return discoveryPromise;
+  discoveryPromise = (async () => {
+    const teamNumber = teamNumberInput.value.trim();
+    localStorage.setItem("frc-team-number", teamNumber);
+    findRobotsButton.disabled = true;
+    findRobotsButton.textContent = "Finding…";
+    const candidates = connectionCandidates(teamNumber);
+    const results = await Promise.all(candidates.map(async (candidate) => ({
+      ...candidate,
+      available: await probeNT4(candidate.host, 800),
+    })));
+    const available = results.filter((candidate) => candidate.available);
+    setRobotOptions(available.length ? available : [{ host: connectedHost, label: `No robot found · ${connectedHost}` }]);
+    if (!available.some((candidate) => candidate.host === connectedHost) && available.length) {
+      connectToRobot(available[0].host);
+    }
+  })().finally(() => {
+    findRobotsButton.disabled = false;
+    findRobotsButton.textContent = "Find";
+    discoveryPromise = null;
+  });
+  return discoveryPromise;
+}
+
+function connectToRobot(host) {
+  if (!host || host === connectedHost) return;
+  connectedHost = host;
+  values.clear();
+  enabled = false;
+  updateButtons();
+  ntState.textContent = `Connecting · ${host}`;
+  ntState.classList.remove("connected");
+  nt.setHost(host);
+  scheduleRender();
+  scheduleFieldRender();
 }
 
 function renderAutoChooser() {
@@ -457,9 +512,31 @@ function formatValue(value) {
   return String(value);
 }
 
-function readGamepad() {
-  const gamepad = [...(navigator.getGamepads?.() ?? [])].find((candidate) => candidate?.connected)
-    ?? (lastGamepadEvent?.connected ? lastGamepadEvent : null);
+function createGamepadView(port) {
+  const monitor = document.createElement("div");
+  monitor.className = "gamepad-monitor";
+  monitor.innerHTML = `<div class="gamepad-title"><strong>Gamepad ${port + 1}</strong><span>No controller</span></div><div class="gamepad-axes"></div><div class="gamepad-digital"><div class="gamepad-buttons"></div><div class="pov-readout"><span>POV</span><strong>—</strong></div></div>`;
+  const axesContainer = monitor.querySelector(".gamepad-axes");
+  const buttonsContainer = monitor.querySelector(".gamepad-buttons");
+  const axes = axisNames.map((label) => {
+    const element = document.createElement("div");
+    element.className = "axis";
+    element.innerHTML = `<span>${label}</span><span class="axis-track"><span class="axis-fill"></span></span><span class="axis-value">0.00</span>`;
+    axesContainer.append(element);
+    return element;
+  });
+  const buttons = buttonNames.map((label) => {
+    const element = document.createElement("div");
+    element.className = "gamepad-button";
+    element.textContent = label;
+    buttonsContainer.append(element);
+    return element;
+  });
+  gamepadsElement.append(monitor);
+  return { port, name: monitor.querySelector(".gamepad-title span"), axes, buttons, pov: monitor.querySelector(".pov-readout strong") };
+}
+
+function readGamepad(gamepad) {
   if (!gamepad) {
     let name = "No gamepad — press a button";
     if (!("getGamepads" in navigator)) name = "Gamepad API unavailable";
@@ -485,8 +562,9 @@ function readGamepad() {
   };
 }
 
-function renderGamepad(gamepad) {
-  axisElements.forEach((element, index) => {
+function renderGamepad(view, gamepad) {
+  view.name.textContent = gamepad.name;
+  view.axes.forEach((element, index) => {
     const value = gamepad.axes[index] ?? 0;
     const fill = element.querySelector(".axis-fill");
     const trigger = index === 2 || index === 3;
@@ -495,29 +573,36 @@ function renderGamepad(gamepad) {
     fill.style.width = trigger ? `${normalized * 100}%` : `${Math.abs(value) * 50}%`;
     element.querySelector(".axis-value").textContent = value.toFixed(2);
   });
-  buttonElements.forEach((element, index) => element.classList.toggle("pressed", gamepad.buttons[index] === true));
-  gamepadPov.textContent = gamepad.pov < 0 ? "—" : `${gamepad.pov}°`;
+  view.buttons.forEach((element, index) => element.classList.toggle("pressed", gamepad.buttons[index] === true));
+  view.pov.textContent = gamepad.pov < 0 ? "—" : `${gamepad.pov}°`;
 }
 
 setInterval(() => {
   const simulationAvailable = ntConnected && values.get("/SimSupervisor/Available")?.value === true;
   ds.hidden = !simulationAvailable;
+  dsPlaceholder.hidden = simulationAvailable;
   if (!simulationAvailable) return;
 
-  const gamepad = readGamepad();
-  gamepadState.textContent = gamepad.connected ? gamepad.name : "No gamepad";
-  renderGamepad(gamepad);
+  const browserGamepads = [...(navigator.getGamepads?.() ?? [])].filter((gamepad) => gamepad?.connected).slice(0, 2);
+  const gamepads = gamepadViews.map((view, index) => readGamepad(browserGamepads[index]));
+  const connectedCount = gamepads.filter((gamepad) => gamepad.connected).length;
+  gamepadState.textContent = `${connectedCount} gamepad${connectedCount === 1 ? "" : "s"}`;
   nt.publish("/SimSupervisor/Heartbeat", "int", ++heartbeat);
   nt.publish("/SimSupervisor/Mode", "string", enabled ? selectedMode : "disabled");
   nt.publish("/SimSupervisor/Alliance", "string", selectedAlliance);
-  nt.publish("/SimSupervisor/Joystick0/Connected", "boolean", gamepad.connected);
-  nt.publish("/SimSupervisor/Joystick0/Name", "string", gamepad.name);
-  nt.publish("/SimSupervisor/Joystick0/Axes", "double[]", gamepad.axes);
-  nt.publish("/SimSupervisor/Joystick0/Buttons", "boolean[]", gamepad.buttons);
-  nt.publish("/SimSupervisor/Joystick0/POV", "int", gamepad.pov);
+  gamepads.forEach((gamepad, port) => {
+    renderGamepad(gamepadViews[port], gamepad);
+    nt.publish(`/SimSupervisor/Joystick${port}/Connected`, "boolean", gamepad.connected);
+    nt.publish(`/SimSupervisor/Joystick${port}/Name`, "string", gamepad.name);
+    nt.publish(`/SimSupervisor/Joystick${port}/Axes`, "double[]", gamepad.axes);
+    nt.publish(`/SimSupervisor/Joystick${port}/Buttons`, "boolean[]", gamepad.buttons);
+    nt.publish(`/SimSupervisor/Joystick${port}/POV`, "int", gamepad.pov);
+  });
 }, 20);
 
 updateButtons();
 renderTopics();
 nt.connect();
+discoverRobots();
+setInterval(() => { if (!ntConnected) discoverRobots(); }, 1000);
 startOfflineUpdates();

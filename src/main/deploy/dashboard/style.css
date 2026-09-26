@@ -14,15 +14,31 @@
 html, body { width: 100%; height: 100%; overflow: hidden; }
 body { margin: 0; display: flex; flex-direction: column; }
 button, input, select { font: inherit; }
+.ds-zone { flex: none; height: 300px; min-height: 300px; position: relative; overflow: hidden; }
+.driver-station-placeholder {
+  width: min(480px, calc(100% - 16px));
+  height: calc(100% - 16px);
+  margin: 8px;
+  margin-inline: auto;
+  display: grid;
+  place-items: center;
+  color: #626e81;
+  border: 1px dashed #465166;
+  border-radius: 9px;
+  font-size: .78rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.driver-station-placeholder[hidden] { display: none; }
 
 #driver-station {
-  flex: none;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  min-height: 58px;
+  width: 100%;
+  height: 100%;
   padding: 9px 18px;
-  display: block;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow: hidden;
   background: #181e29;
   border-bottom: 1px solid var(--line);
   box-shadow: 0 6px 20px #0008;
@@ -52,30 +68,37 @@ button.enable { margin-left: auto; background: #153d27; border-color: #268c4e; }
 button.enable.active { color: #dffff0; background: #19733b; border-color: var(--green); box-shadow: 0 0 14px #38d97788; }
 button.disable { background: #491d24; border-color: #a63d4b; }
 #gamepad-state { min-width: 0; max-width: 260px; overflow: hidden; color: #aeb8c8; font-size: .85rem; text-overflow: ellipsis; white-space: nowrap; }
+.gamepads { flex: 1; min-height: 0; display: grid; grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 7px; }
 .gamepad-monitor {
-  flex-basis: 100%;
   width: 100%;
   min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding-top: 8px;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 105px minmax(0, 1fr);
+  grid-template-rows: 1fr 1fr;
+  gap: 5px 10px;
+  padding-top: 6px;
   border-top: 1px solid var(--line);
 }
+.gamepad-title { grid-row: 1 / 3; display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+.gamepad-title strong { font-size: .76rem; }
+.gamepad-title span { overflow: hidden; color: #7f8a9c; font-size: .65rem; text-overflow: ellipsis; white-space: nowrap; }
 .gamepad-axes { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; width: 100%; min-width: 0; }
-.axis { min-width: 0; display: grid; grid-template-columns: 25px minmax(0, 1fr) 42px; align-items: center; gap: 6px; padding: 5px 7px; border: 1px solid #303a4c; border-radius: 6px; font: .74rem ui-monospace, SFMono-Regular, Menlo, monospace; }
+.axis { min-width: 0; display: grid; grid-template-columns: 21px minmax(0, 1fr) 35px; align-items: center; gap: 4px; padding: 3px 5px; border: 1px solid #303a4c; border-radius: 6px; font: .66rem ui-monospace, SFMono-Regular, Menlo, monospace; }
 .axis-track { position: relative; height: 9px; overflow: hidden; border-radius: 9px; background: #090c11; }
 .axis-track::after { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: #667084; }
 .axis-fill { position: absolute; top: 0; bottom: 0; background: var(--blue); }
 .axis-value { color: #b9c3d3; text-align: right; }
 .gamepad-digital { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: stretch; font-size: .72rem; }
 .gamepad-buttons { min-width: 0; display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 7px; }
-.gamepad-button { padding: 5px 6px; text-align: center; color: #7f8999; background: #0d1118; border: 1px solid #303849; border-radius: 5px; font: 700 .7rem ui-monospace, SFMono-Regular, Menlo, monospace; }
+.gamepad-button { padding: 3px 4px; text-align: center; color: #7f8999; background: #0d1118; border: 1px solid #303849; border-radius: 5px; font: 700 .64rem ui-monospace, SFMono-Regular, Menlo, monospace; }
 .gamepad-button.pressed { color: #07130c; background: var(--green); border-color: #76f5a4; box-shadow: 0 0 9px #38d97799; }
-.pov-readout { min-width: 88px; padding: 5px 9px; display: flex; justify-content: space-between; gap: 9px; align-items: center; border: 1px solid #303849; border-radius: 5px; }
+.pov-readout { min-width: 78px; padding: 3px 7px; display: flex; justify-content: space-between; gap: 7px; align-items: center; border: 1px solid #303849; border-radius: 5px; }
 .pov-readout span { color: #8994a6; }
 .pov-readout strong { color: #f2d278; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
 
+.connectivity { flex: none; min-height: 50px; padding: 7px 18px; display: flex; align-items: center; gap: 10px; background: #10151e; border-block: 1px solid var(--line); }
+.connectivity > strong { font-size: .8rem; }
 nav { flex: none; height: 64px; padding: 0 24px; display: flex; align-items: center; border-bottom: 1px solid var(--line); }
 nav h1 { font-size: 1.15rem; margin: 0; }
 .tabs { display: flex; align-self: stretch; margin-left: 32px; }
@@ -84,6 +107,10 @@ nav h1 { font-size: 1.15rem; margin: 0; }
 .auto-selector { margin-left: auto; display: flex; align-items: center; gap: 8px; color: #8f9bad; font-size: .72rem; }
 .auto-selector select { max-width: 260px; padding: 6px 28px 6px 9px; color: #edf2f7; background: #0d1118; border: 1px solid #354055; border-radius: 6px; }
 .auto-selector select:disabled { color: #738096; }
+.robot-discovery { margin-left: auto; display: flex; gap: 5px; align-items: center; }
+.robot-discovery input { margin: 0; width: 76px; padding: 6px 7px; }
+.robot-discovery button { padding: 6px 9px; }
+.robot-discovery select { max-width: 190px; padding: 6px 7px; color: #edf2f7; background: #0d1118; border: 1px solid #354055; border-radius: 6px; }
 .app-version { margin-left: 14px; color: #778397; font: .7rem ui-monospace, SFMono-Regular, Menlo, monospace; }
 .status { margin-left: 12px; padding: 5px 9px; border-radius: 99px; font-size: .78rem; background: #3a2026; color: #ff98a3; }
 .status.connected { background: #173b27; color: #84f0ab; }
@@ -137,22 +164,23 @@ input { margin-left: auto; width: min(340px, 50vw); padding: 8px 11px; color: in
 
 @media (max-width: 1050px) {
   .ds-controls { flex-wrap: wrap; }
-  .gamepad-axes { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .gamepad-buttons { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 }
 
 @media (max-width: 720px) {
-  #driver-station { flex-wrap: wrap; }
   .ds-brand { width: 100%; }
   button.enable { margin-left: 0; }
-  .gamepad-axes { grid-template-columns: repeat(2, 1fr); }
-  .gamepad-digital { grid-template-columns: 1fr; }
+  .gamepad-monitor { grid-template-columns: 70px minmax(0, 1fr); }
+  .gamepad-axes { grid-template-columns: repeat(3, 1fr); }
   .gamepad-buttons { grid-template-columns: repeat(5, 1fr); }
+  .gamepad-digital { grid-template-columns: 1fr auto; }
   .topic { grid-template-columns: 1fr; gap: 4px; }
   nav { height: auto; min-height: 64px; flex-wrap: wrap; padding-top: 8px; }
   .tabs { order: 3; width: 100%; height: 46px; margin-left: 0; }
   .auto-selector { order: 2; width: 100%; margin: 8px 0 0; }
   .auto-selector select { flex: 1; min-width: 0; }
+  .connectivity { flex-wrap: wrap; }
+  .robot-discovery { width: 100%; margin: 0; }
+  .robot-discovery select { flex: 1; min-width: 0; max-width: none; }
   .cameras { grid-template-columns: 1fr; }
   .camera-host-label { width: 100%; margin-left: 0; }
   .camera-host-label input { flex: 1; min-width: 0; }

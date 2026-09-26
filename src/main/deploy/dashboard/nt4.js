@@ -13,14 +13,17 @@ export class NT4Client extends EventTarget {
     this.published = new Map();
     this.nextUid = 1;
     this.reconnectTimer = 0;
+    this.shouldReconnect = true;
   }
 
   connect() {
     clearTimeout(this.reconnectTimer);
     const url = `ws://${this.host}:5810/nt/chur-dashboard`;
-    this.socket = new WebSocket(url, "v4.1.networktables.first.wpi.edu");
-    this.socket.binaryType = "arraybuffer";
-    this.socket.addEventListener("open", () => {
+    const socket = new WebSocket(url, "v4.1.networktables.first.wpi.edu");
+    this.socket = socket;
+    socket.binaryType = "arraybuffer";
+    socket.addEventListener("open", () => {
+      if (this.socket !== socket) return;
       this.sendControl("subscribe", { subuid: 1, topics: ["/"], options: { prefix: true, periodic: 0.1 } });
       this.sendControl("subscribe", {
         subuid: 2,
@@ -30,12 +33,24 @@ export class NT4Client extends EventTarget {
       for (const topic of this.published.values()) this.announce(topic);
       this.dispatchEvent(new Event("connected"));
     });
-    this.socket.addEventListener("message", (event) => this.onMessage(event));
-    this.socket.addEventListener("close", () => {
+    socket.addEventListener("message", (event) => this.onMessage(event));
+    socket.addEventListener("close", () => {
+      if (this.socket !== socket) return;
       this.dispatchEvent(new Event("disconnected"));
-      this.reconnectTimer = setTimeout(() => this.connect(), 1000);
+      if (this.shouldReconnect) this.reconnectTimer = setTimeout(() => this.connect(), 1000);
     });
-    this.socket.addEventListener("error", () => this.socket.close());
+    socket.addEventListener("error", () => socket.close());
+  }
+
+  setHost(host) {
+    if (!host || host === this.host) return;
+    this.shouldReconnect = false;
+    clearTimeout(this.reconnectTimer);
+    this.socket?.close();
+    this.topics.clear();
+    this.host = host;
+    this.shouldReconnect = true;
+    this.connect();
   }
 
   publish(name, type, value) {
@@ -83,4 +98,28 @@ export class NT4Client extends EventTarget {
       console.warn("Could not decode NT4 value", error);
     }
   }
+}
+
+export function probeNT4(host, timeoutMs = 1500) {
+  return new Promise((resolve) => {
+    let settled = false;
+    const finish = (available) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeout);
+      try { socket.close(); } catch { /* Already closed. */ }
+      resolve(available);
+    };
+    let socket;
+    try {
+      socket = new WebSocket(`ws://${host}:5810/nt/chur-dashboard-probe-${Date.now()}`, "v4.1.networktables.first.wpi.edu");
+      socket.addEventListener("open", () => finish(true));
+      socket.addEventListener("error", () => finish(false));
+      socket.addEventListener("close", () => finish(false));
+    } catch {
+      resolve(false);
+      return;
+    }
+    const timeout = setTimeout(() => finish(false), timeoutMs);
+  });
 }

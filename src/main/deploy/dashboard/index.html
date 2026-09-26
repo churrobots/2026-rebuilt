@@ -11,30 +11,37 @@
     <link id="dashboard-style" rel="stylesheet" href="style.css">
   </head>
   <body>
-    <header id="driver-station" hidden>
-      <div class="ds-controls">
-        <div class="ds-brand">SIM DRIVER STATION</div>
-        <div class="modes" role="group" aria-label="Robot mode">
-          <button data-mode="teleop">Teleop</button>
-          <button data-mode="auto">Autonomous</button>
-          <button data-mode="test">Test</button>
+    <section class="ds-zone" aria-label="Driver Station zone">
+      <div id="driver-station-placeholder" class="driver-station-placeholder">Driver Station floats here</div>
+      <header id="driver-station" hidden>
+        <div class="ds-controls">
+          <div class="ds-brand">SIM DRIVER STATION</div>
+          <div class="modes" role="group" aria-label="Robot mode">
+            <button data-mode="teleop">Teleop</button>
+            <button data-mode="auto">Autonomous</button>
+            <button data-mode="test">Test</button>
+          </div>
+          <div class="alliances" role="group" aria-label="Alliance">
+            <button data-alliance="blue">Blue</button>
+            <button data-alliance="red">Red</button>
+          </div>
+          <button id="enable" class="enable">Enable</button>
+          <button id="disable" class="disable">Disable</button>
+          <span id="gamepad-state">No gamepads</span>
         </div>
-        <div class="alliances" role="group" aria-label="Alliance">
-          <button data-alliance="blue">Blue</button>
-          <button data-alliance="red">Red</button>
-        </div>
-        <button id="enable" class="enable">Enable</button>
-        <button id="disable" class="disable">Disable</button>
-        <span id="gamepad-state">No gamepad</span>
+        <div id="gamepads" class="gamepads" aria-label="Live gamepad inputs"></div>
+      </header>
+    </section>
+
+    <section class="connectivity" aria-label="NetworkTables connectivity">
+      <strong>NetworkTables</strong>
+      <span id="nt-state" class="status disconnected">Disconnected</span>
+      <div class="robot-discovery">
+        <input id="team-number" inputmode="numeric" aria-label="FRC team number" placeholder="Team #">
+        <button id="find-robots">Find</button>
+        <select id="robot-target" aria-label="Robot connection"></select>
       </div>
-      <div id="gamepad-monitor" class="gamepad-monitor" aria-label="Live gamepad inputs">
-        <div id="gamepad-axes" class="gamepad-axes"></div>
-        <div class="gamepad-digital">
-          <div id="gamepad-buttons" class="gamepad-buttons"></div>
-          <div class="pov-readout"><span>POV</span><strong id="gamepad-pov">—</strong></div>
-        </div>
-      </div>
-    </header>
+    </section>
 
     <nav>
       <h1>Churrobots</h1>
@@ -50,7 +57,6 @@
         </select>
       </label>
       <span id="app-version" class="app-version">Web</span>
-      <span id="nt-state" class="status disconnected">NT disconnected</span>
     </nav>
 
     <main>
