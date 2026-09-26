@@ -21,7 +21,12 @@ export class NT4Client extends EventTarget {
     this.socket = new WebSocket(url, "v4.1.networktables.first.wpi.edu");
     this.socket.binaryType = "arraybuffer";
     this.socket.addEventListener("open", () => {
-      this.sendControl("subscribe", { subuid: 1, topics: ["/"], options: { prefix: true, all: true } });
+      this.sendControl("subscribe", { subuid: 1, topics: ["/"], options: { prefix: true, periodic: 0.1 } });
+      this.sendControl("subscribe", {
+        subuid: 2,
+        topics: ["/AdvantageKit/RealOutputs/Odometry/Robot"],
+        options: { prefix: false, all: true, periodic: 0.02 },
+      });
       for (const topic of this.published.values()) this.announce(topic);
       this.dispatchEvent(new Event("connected"));
     });

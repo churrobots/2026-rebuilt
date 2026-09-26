@@ -33,6 +33,7 @@ opened from a roboRIO's plain-HTTP IP address; telemetry and controls still work
 | `Joystick0/Connected` | `boolean` | Gamepad connection state |
 | `Joystick0/Name` | `string` | Display name |
 | `Mode` | `string` | `disabled`, `teleop`, `auto`, or `test` |
+| `Alliance` | `string` | `blue` or `red` |
 | `Heartbeat` | `int` | Increment continuously, ideally at 50 Hz |
 
 The robot-side `SimulationControllerBridge` copies these values into `DriverStationSim`. If the heartbeat stops for approximately half a second, it clears all controls and disables the simulated robot.

@@ -1,5 +1,6 @@
 package frc.robot.sim;
 
+import edu.wpi.first.hal.AllianceStationID;
 import edu.wpi.first.networktables.BooleanArraySubscriber;
 import edu.wpi.first.networktables.BooleanPublisher;
 import edu.wpi.first.networktables.BooleanSubscriber;
@@ -23,6 +24,7 @@ public final class SimulationControllerBridge {
   private final BooleanSubscriber connected;
   private final StringSubscriber name;
   private final StringSubscriber mode;
+  private final StringSubscriber alliance;
   private final IntegerSubscriber heartbeat;
   private final BooleanPublisher available;
 
@@ -37,6 +39,7 @@ public final class SimulationControllerBridge {
     connected = table.getBooleanTopic("Joystick0/Connected").subscribe(false);
     name = table.getStringTopic("Joystick0/Name").subscribe("Simulation Controller");
     mode = table.getStringTopic("Mode").subscribe("disabled");
+    alliance = table.getStringTopic("Alliance").subscribe("blue");
     heartbeat = table.getIntegerTopic("Heartbeat").subscribe(-1);
     available = table.getBooleanTopic("Available").publish();
     available.set(true);
@@ -76,6 +79,8 @@ public final class SimulationControllerBridge {
         JOYSTICK_PORT, isConnected ? name.get() : "Simulation Controller (disconnected)");
 
     String selectedMode = mode.get();
+    DriverStationSim.setAllianceStationId(
+        alliance.get().equals("red") ? AllianceStationID.Red1 : AllianceStationID.Blue1);
     boolean enabled = !selectedMode.equals("disabled") && staleCycles < STALE_CYCLES;
     DriverStationSim.setDsAttached(staleCycles < STALE_CYCLES);
     DriverStationSim.setAutonomous(selectedMode.equals("auto"));

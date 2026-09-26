@@ -12,6 +12,12 @@ const diagnosticsElement = document.querySelector("#diagnostics");
 const diagnosticSummary = document.querySelector("#diagnostic-summary");
 const appVersion = document.querySelector("#app-version");
 const autoSelect = document.querySelector("#auto-selector");
+const camerasElement = document.querySelector("#cameras");
+const cameraHostInput = document.querySelector("#camera-host");
+const fieldCanvas = document.querySelector("#field-canvas");
+const fieldView = document.querySelector("#field-view");
+const fieldAlliance = document.querySelector("#field-alliance");
+const fieldPose = document.querySelector("#field-pose");
 const gamepadState = document.querySelector("#gamepad-state");
 const gamepadAxes = document.querySelector("#gamepad-axes");
 const gamepadButtons = document.querySelector("#gamepad-buttons");
@@ -21,10 +27,19 @@ const buttonNames = ["A", "B", "X", "Y", "LB", "RB", "Back", "Start", "LS", "RS"
 const diagnosticPrefix = "/SmartDashboard/HardwareMonitor/FaultStatus/";
 const autoPrefix = "/SmartDashboard/Auto Choices/";
 const watchedAssets = ["index.html", "style.css", "app.js", "nt4.js", "msgpack.js", "manifest.webmanifest", "icon.svg"];
+const cameraDefinitions = [
+  { name: "Front left", camera: "camera_frontleft", port: 1185 },
+  { name: "Front right", camera: "camera_frontright", port: 1181 },
+  { name: "Back left", camera: "camera_backleft", port: 1187 },
+  { name: "Back right", camera: "camera_backright", port: 1183 },
+];
+const field = { length: 17.548, width: 8.052 };
 let selectedMode = "teleop";
+let selectedAlliance = "blue";
 let enabled = false;
 let heartbeat = 0;
 let renderPending = false;
+let fieldRenderPending = false;
 let ntConnected = false;
 let lastGamepadEvent = null;
 
@@ -50,6 +65,19 @@ const buttonElements = buttonNames.map((label) => {
   gamepadButtons.append(element);
   return element;
 });
+const cameraElements = cameraDefinitions.map((definition) => {
+  const card = document.createElement("article");
+  card.className = "camera";
+  card.innerHTML = `<div class="camera-header"><span>${definition.name}</span><span class="camera-status">Paused</span></div><div class="camera-frame"><img alt="${definition.name} camera"><span class="camera-placeholder">Open the Cameras tab to stream</span></div>`;
+  const image = card.querySelector("img");
+  const status = card.querySelector(".camera-status");
+  const placeholder = card.querySelector(".camera-placeholder");
+  image.addEventListener("load", () => { status.textContent = "Live"; status.className = "camera-status live"; placeholder.hidden = true; });
+  image.addEventListener("error", () => { status.textContent = "Unavailable"; status.className = "camera-status offline"; });
+  camerasElement.append(card);
+  return { ...definition, image, status, placeholder };
+});
+cameraHostInput.value = localStorage.getItem("photonvision-host") || "photonvision.local";
 
 nt.addEventListener("connected", () => {
   ntConnected = true;
@@ -65,6 +93,9 @@ nt.addEventListener("disconnected", () => {
 });
 nt.addEventListener("value", ({ detail: topic }) => {
   values.set(topic.name, topic);
+  if (topic.name === "/AdvantageKit/RealOutputs/Odometry/Robot" || topic.name === "/FMSInfo/IsRedAlliance") {
+    scheduleFieldRender();
+  }
   scheduleRender();
 });
 
@@ -75,21 +106,34 @@ document.querySelectorAll("[data-mode]").forEach((button) => {
     updateButtons();
   });
 });
+document.querySelectorAll("[data-alliance]").forEach((button) => {
+  button.addEventListener("click", () => {
+    selectedAlliance = button.dataset.alliance;
+    enabled = false;
+    updateButtons();
+  });
+});
 document.querySelector("#enable").addEventListener("click", () => { enabled = true; updateButtons(); });
 document.querySelector("#disable").addEventListener("click", () => { enabled = false; updateButtons(); });
 filterElement.addEventListener("input", scheduleRender);
 autoSelect.addEventListener("change", () => {
   nt.publish(`${autoPrefix}selected`, "string", autoSelect.value);
 });
+cameraHostInput.addEventListener("change", () => {
+  localStorage.setItem("photonvision-host", cameraHostInput.value.trim());
+  updateCameraStreams(true);
+});
 document.querySelectorAll("[data-tab]").forEach((button) => {
   button.addEventListener("click", () => {
     document.querySelectorAll("[data-tab]").forEach((tab) => tab.classList.toggle("selected", tab === button));
     document.querySelectorAll(".tab-panel").forEach((panel) => { panel.hidden = panel.id !== `${button.dataset.tab}-panel`; });
+    updateCameraStreams();
   });
 });
 
 function updateButtons() {
   document.querySelectorAll("[data-mode]").forEach((button) => button.classList.toggle("selected", button.dataset.mode === selectedMode));
+  document.querySelectorAll("[data-alliance]").forEach((button) => button.classList.toggle("selected", button.dataset.alliance === selectedAlliance));
   ds.classList.toggle("robot-enabled", enabled);
   document.querySelector("#enable").classList.toggle("active", enabled);
 }
@@ -104,6 +148,7 @@ function renderTopics() {
   renderPending = false;
   renderAutoChooser();
   renderDiagnostics();
+  updateCameraStreams();
   const filter = filterElement.value.toLowerCase();
   const topics = [...values.values()].filter((topic) => topic.name.toLowerCase().includes(filter)).sort((a, b) => a.name.localeCompare(b.name));
   if (!topics.length) {
@@ -123,6 +168,136 @@ function renderTopics() {
     row.append(name, value);
     return row;
   }));
+}
+
+function scheduleFieldRender() {
+  if (fieldRenderPending) return;
+  fieldRenderPending = true;
+  requestAnimationFrame(() => {
+    fieldRenderPending = false;
+    renderField();
+  });
+}
+
+function renderField() {
+  const ratio = window.devicePixelRatio || 1;
+  const bounds = fieldView.getBoundingClientRect();
+  const width = Math.max(1, Math.round(bounds.width * ratio));
+  const height = Math.max(1, Math.round(bounds.height * ratio));
+  if (fieldCanvas.width !== width || fieldCanvas.height !== height) {
+    fieldCanvas.width = width;
+    fieldCanvas.height = height;
+  }
+  const context = fieldCanvas.getContext("2d");
+  context.setTransform(ratio, 0, 0, ratio, 0, 0);
+  const canvasWidth = bounds.width;
+  const canvasHeight = bounds.height;
+  context.clearRect(0, 0, canvasWidth, canvasHeight);
+
+  const padding = 10;
+  const usableWidth = canvasWidth - padding * 2;
+  const usableHeight = canvasHeight - padding * 2;
+  const scale = Math.min(usableWidth / field.width, usableHeight / field.length);
+  const drawnWidth = field.width * scale;
+  const drawnHeight = field.length * scale;
+  const left = (canvasWidth - drawnWidth) / 2;
+  const top = (canvasHeight - drawnHeight) / 2;
+  const red = values.get("/FMSInfo/IsRedAlliance")?.value === true;
+
+  context.fillStyle = "#18251d";
+  context.strokeStyle = "#758274";
+  context.lineWidth = 1;
+  context.fillRect(left, top, drawnWidth, drawnHeight);
+  context.strokeRect(left, top, drawnWidth, drawnHeight);
+
+  context.setLineDash([4, 5]);
+  context.strokeStyle = "#9ca89b66";
+  for (const fraction of [0.25, 0.5, 0.75]) {
+    const y = top + drawnHeight * fraction;
+    context.beginPath(); context.moveTo(left, y); context.lineTo(left + drawnWidth, y); context.stroke();
+  }
+  context.setLineDash([]);
+  context.fillStyle = red ? "#b52c3c" : "#2879cf";
+  context.fillRect(left, top + drawnHeight - 7, drawnWidth, 7);
+  context.fillStyle = red ? "#2879cf" : "#b52c3c";
+  context.fillRect(left, top, drawnWidth, 7);
+
+  const pose = decodePose2d(values.get("/AdvantageKit/RealOutputs/Odometry/Robot")?.value);
+  fieldAlliance.textContent = `${red ? "Red" : "Blue"} alliance · station at bottom`;
+  fieldAlliance.className = `field-alliance ${red ? "red" : "blue"}`;
+  if (!pose) {
+    fieldPose.textContent = "Waiting for pose…";
+    return;
+  }
+  const { x, y, heading } = pose;
+
+  const project = (fieldX, fieldY) => ({
+    x: left + (red ? fieldY : field.width - fieldY) * scale,
+    y: top + (red ? fieldX : field.length - fieldX) * scale,
+  });
+  const position = project(x, y);
+  const front = project(x + Math.cos(heading), y + Math.sin(heading));
+  const screenHeading = Math.atan2(front.y - position.y, front.x - position.x);
+  const robotSize = Math.max(10, 0.7112 * scale);
+  context.save();
+  context.translate(position.x, position.y);
+  context.rotate(screenHeading);
+  context.shadowColor = red ? "#ff5264" : "#57a6ff";
+  context.shadowBlur = 10;
+  context.fillStyle = red ? "#d83b4c" : "#3287df";
+  context.strokeStyle = "#f3f7fb";
+  context.lineWidth = 2;
+  context.fillRect(-robotSize / 2, -robotSize / 2, robotSize, robotSize);
+  context.strokeRect(-robotSize / 2, -robotSize / 2, robotSize, robotSize);
+  context.beginPath();
+  context.moveTo(robotSize / 2, 0);
+  context.lineTo(robotSize / 4, -robotSize / 4);
+  context.lineTo(robotSize / 4, robotSize / 4);
+  context.closePath();
+  context.fillStyle = "#ffffff";
+  context.fill();
+  context.restore();
+  fieldPose.textContent = `x ${x.toFixed(2)} · y ${y.toFixed(2)} · ${Math.round(heading * 180 / Math.PI)}°`;
+}
+
+function decodePose2d(value) {
+  if (Array.isArray(value) && value.length >= 3) {
+    const pose = { x: Number(value[0]), y: Number(value[1]), heading: Number(value[2]) };
+    return Object.values(pose).every(Number.isFinite) ? pose : null;
+  }
+  if (!(value instanceof Uint8Array) || value.byteLength < 24) return null;
+  const view = new DataView(value.buffer, value.byteOffset, value.byteLength);
+  const pose = {
+    x: view.getFloat64(0, true),
+    y: view.getFloat64(8, true),
+    heading: view.getFloat64(16, true),
+  };
+  return Object.values(pose).every(Number.isFinite) ? pose : null;
+}
+
+new ResizeObserver(scheduleFieldRender).observe(fieldView);
+
+function updateCameraStreams(force = false) {
+  const panelOpen = !document.querySelector("#cameras-panel").hidden;
+  const simulation = values.get("/SimSupervisor/Available")?.value === true;
+  const cameraHost = simulation ? host : cameraHostInput.value.trim();
+  for (const camera of cameraElements) {
+    if (!panelOpen || !cameraHost) {
+      if (camera.image.src) camera.image.removeAttribute("src");
+      camera.status.textContent = "Paused";
+      camera.status.className = "camera-status";
+      camera.placeholder.hidden = false;
+      continue;
+    }
+    const source = `http://${cameraHost}:${camera.port}/?action=stream`;
+    if (force || camera.image.dataset.source !== source || !camera.image.hasAttribute("src")) {
+      camera.image.dataset.source = source;
+      camera.status.textContent = "Connecting…";
+      camera.status.className = "camera-status";
+      camera.placeholder.hidden = false;
+      camera.image.src = `${source}&view=${Date.now()}`;
+    }
+  }
 }
 
 function renderAutoChooser() {
@@ -334,6 +509,7 @@ setInterval(() => {
   renderGamepad(gamepad);
   nt.publish("/SimSupervisor/Heartbeat", "int", ++heartbeat);
   nt.publish("/SimSupervisor/Mode", "string", enabled ? selectedMode : "disabled");
+  nt.publish("/SimSupervisor/Alliance", "string", selectedAlliance);
   nt.publish("/SimSupervisor/Joystick0/Connected", "boolean", gamepad.connected);
   nt.publish("/SimSupervisor/Joystick0/Name", "string", gamepad.name);
   nt.publish("/SimSupervisor/Joystick0/Axes", "double[]", gamepad.axes);
