@@ -46,28 +46,31 @@
     </nav>
 
     <main>
-      <section id="diagnostics-panel" class="card tab-panel main-dashboard">
-        <div class="dashboard-column field-section">
-          <div class="auto-bar">
-            <label for="auto-selector">Autonomous</label>
-            <select id="auto-selector" disabled>
-              <option>Waiting for chooser…</option>
-            </select>
+      <div class="aim-lock-frame">
+        <div class="aim-lock-label" aria-label="Aim lock active"><span></span>AIM LOCK<span></span></div>
+        <section id="diagnostics-panel" class="card tab-panel main-dashboard">
+          <div class="dashboard-column field-section">
+            <div class="auto-bar">
+              <label for="auto-selector">Autonomous</label>
+              <select id="auto-selector" disabled>
+                <option>Waiting for chooser…</option>
+              </select>
+            </div>
+            <div class="section-title">
+              <h2>Field</h2>
+              <span id="field-pose" class="field-pose">Waiting for pose…</span>
+            </div>
+            <div id="field-view" class="field-view"><canvas id="field-canvas"></canvas></div>
           </div>
-          <div class="section-title">
-            <h2>Field</h2>
-            <span id="field-pose" class="field-pose">Waiting for pose…</span>
+          <div class="dashboard-column faults-column">
+            <div class="section-title faults-title">
+              <h2>Faults</h2>
+              <span id="diagnostic-summary" class="diagnostic-summary">Waiting for devices…</span>
+            </div>
+            <div id="diagnostics" class="diagnostics"></div>
           </div>
-          <div id="field-view" class="field-view"><canvas id="field-canvas"></canvas></div>
-        </div>
-        <div class="dashboard-column faults-column">
-          <div class="section-title faults-title">
-            <h2>Faults</h2>
-            <span id="diagnostic-summary" class="diagnostic-summary">Waiting for devices…</span>
-          </div>
-          <div id="diagnostics" class="diagnostics"></div>
-        </div>
-      </section>
+        </section>
+      </div>
 
       <section id="networktables-panel" class="card tab-panel" hidden>
         <div class="section-title">

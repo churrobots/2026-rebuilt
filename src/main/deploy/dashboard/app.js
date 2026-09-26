@@ -21,10 +21,13 @@ const fieldCanvas = document.querySelector("#field-canvas");
 const fieldView = document.querySelector("#field-view");
 const fieldPose = document.querySelector("#field-pose");
 const gamepadsElement = document.querySelector("#gamepads");
+const aimLockFrame = document.querySelector(".aim-lock-frame");
 const axisNames = ["LX", "LY", "LT", "RT", "RX", "RY"];
 const buttonNames = ["A", "B", "X", "Y", "LB", "RB", "Back", "Start", "LS", "RS"];
 const diagnosticPrefix = "/SmartDashboard/HardwareMonitor/FaultStatus/";
 const autoPrefix = "/SmartDashboard/Auto Choices/";
+const aimLockTopic = "/SmartDashboard/aimLocked";
+const resumeTeleopKey = "resume-teleop-after-dashboard-reload";
 const watchedAssets = ["index.html", "style.css", "app.js", "nt4.js", "msgpack.js", "manifest.webmanifest", "icon.svg"];
 const cameraDefinitions = [
   { name: "Front left", camera: "camera_frontleft", port: 1185, flipped: true },
@@ -35,7 +38,8 @@ const cameraDefinitions = [
 const field = { length: 17.548, width: 8.052 };
 let selectedMode = "teleop";
 let selectedAlliance = localStorage.getItem("sim-alliance") === "red" ? "red" : "blue";
-let enabled = false;
+let enabled = sessionStorage.getItem(resumeTeleopKey) === "true";
+sessionStorage.removeItem(resumeTeleopKey);
 let heartbeat = 0;
 let renderPending = false;
 let fieldRenderPending = false;
@@ -78,6 +82,7 @@ nt.addEventListener("disconnected", () => {
 });
 nt.addEventListener("value", ({ detail: topic }) => {
   values.set(topic.name, topic);
+  if (topic.name === aimLockTopic) updateAimLock();
   if (topic.name === "/AdvantageKit/RealOutputs/Odometry/Robot" || topic.name === "/FMSInfo/IsRedAlliance" || topic.name === "/FMSInfo/StationNumber") {
     scheduleFieldRender();
   }
@@ -122,6 +127,7 @@ document.querySelectorAll("[data-tab]").forEach((button) => {
   button.addEventListener("click", () => {
     document.querySelectorAll("[data-tab]").forEach((tab) => tab.classList.toggle("selected", tab === button));
     document.querySelectorAll(".tab-panel").forEach((panel) => { panel.hidden = panel.id !== `${button.dataset.tab}-panel`; });
+    aimLockFrame.hidden = button.dataset.tab !== "diagnostics";
     updateCameraStreams();
   });
 });
@@ -135,6 +141,16 @@ function updateButtons() {
   enableToggle.textContent = enabled ? "Disable" : "Enable";
 }
 
+function updateAimLock() {
+  aimLockFrame.classList.toggle("aim-locked", values.get(aimLockTopic)?.value === true);
+}
+
+function reloadDashboard(url) {
+  if (enabled && selectedMode === "teleop") sessionStorage.setItem(resumeTeleopKey, "true");
+  else sessionStorage.removeItem(resumeTeleopKey);
+  location.replace(url);
+}
+
 function scheduleRender() {
   if (renderPending) return;
   renderPending = true;
@@ -143,6 +159,7 @@ function scheduleRender() {
 
 function renderTopics() {
   renderPending = false;
+  updateAimLock();
   renderAutoChooser();
   renderDiagnostics();
   updateCameraStreams();
@@ -552,8 +569,7 @@ async function watchDashboardSource() {
     try {
       const current = await readDashboardSource();
       if (current !== previous) {
-        enabled = false;
-        location.replace(`${location.pathname}?v=${Date.now()}`);
+        reloadDashboard(`${location.pathname}?v=${Date.now()}`);
       }
     } catch {
       // The server disappears briefly while HALSim restarts. Retry next tick.
@@ -573,14 +589,12 @@ async function startOfflineUpdates() {
       if (event.data?.type === "SNAPSHOT_STATUS") {
         const loadedVersion = new URLSearchParams(location.search).get("v");
         if (event.data.version && loadedVersion !== event.data.version) {
-          enabled = false;
-          location.replace(`${location.pathname}?v=${event.data.version}`);
+          reloadDashboard(`${location.pathname}?v=${event.data.version}`);
         }
         return;
       }
       if (event.data?.type !== "SNAPSHOT_UPDATED") return;
-      enabled = false;
-      location.replace(`${location.pathname}?v=${event.data.version}`);
+      reloadDashboard(`${location.pathname}?v=${event.data.version}`);
     });
     const check = () => (registration.active ?? navigator.serviceWorker.controller)?.postMessage({ type: "CHECK_UPDATE" });
     check();
