@@ -45,6 +45,7 @@ let ntConnected = false;
 let discoveryPromise = null;
 let teamDiscoveryTimer = 0;
 const connectionAvailability = new Map();
+const previousShortcutPovs = [-1, -1];
 
 const gamepadViews = [0, 1].map(createGamepadView);
 const cameraElements = cameraDefinitions.map((definition) => {
@@ -638,6 +639,28 @@ function renderGamepad(view, gamepad) {
   view.pov.textContent = gamepad.pov < 0 ? "—" : `${gamepad.pov}°`;
 }
 
+function applyGamepadModeShortcut(gamepad, port) {
+  const armed = gamepad.connected && gamepad.buttons[7] === true;
+  const newlyPressed = armed && gamepad.pov >= 0 && gamepad.pov !== previousShortcutPovs[port];
+  if (newlyPressed && (gamepad.pov === 0 || gamepad.pov === 180) && !autoSelect.disabled && autoSelect.options.length) {
+    const step = gamepad.pov === 0 ? -1 : 1;
+    const nextIndex = (autoSelect.selectedIndex + step + autoSelect.options.length) % autoSelect.options.length;
+    autoSelect.selectedIndex = nextIndex;
+    nt.publish(`${autoPrefix}selected`, "string", autoSelect.value);
+  } else if (newlyPressed && gamepad.pov === 270) {
+    const alreadyRunning = enabled && selectedMode === "auto";
+    selectedMode = "auto";
+    enabled = !alreadyRunning;
+    updateButtons();
+  } else if (newlyPressed && gamepad.pov === 90) {
+    const alreadyRunning = enabled && selectedMode === "teleop";
+    selectedMode = "teleop";
+    enabled = !alreadyRunning;
+    updateButtons();
+  }
+  previousShortcutPovs[port] = armed ? gamepad.pov : -1;
+}
+
 setInterval(() => {
   const simulationAvailable = ntConnected && values.get("/SimSupervisor/Available")?.value === true;
   ds.hidden = !simulationAvailable;
@@ -646,6 +669,7 @@ setInterval(() => {
 
   const browserGamepads = [...(navigator.getGamepads?.() ?? [])].filter((gamepad) => gamepad?.connected).slice(0, 2);
   const gamepads = gamepadViews.map((view, index) => readGamepad(browserGamepads[index]));
+  gamepads.forEach(applyGamepadModeShortcut);
   const connectedCount = gamepads.filter((gamepad) => gamepad.connected).length;
   gamepadState.textContent = `${connectedCount} gamepad${connectedCount === 1 ? "" : "s"}`;
   nt.publish("/SimSupervisor/Heartbeat", "int", ++heartbeat);
