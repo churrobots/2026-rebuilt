@@ -1,23 +1,53 @@
-const assetVersion = new URL(import.meta.url).searchParams.get("v") ?? "initial";
-await import(`./core/dashboard-core.js?v=${assetVersion}`);
+import "./core/dashboard-core.js";
 
-const core = document.querySelector("dashboard-core").core;
+/** Owns the editable dashboard UI and its connection to the protected core API. */
+export class CustomDashboard extends HTMLElement {
+  #core;
+  #started = false;
+
+  connectedCallback() {
+    if (this.shadowRoot) return;
+    const root = this.attachShadow({ mode: "open" });
+    const version = new URL(import.meta.url).searchParams.get("v") ?? "initial";
+    root.innerHTML = `<link rel="stylesheet" href="custom-dashboard.css?v=${version}"><style>:host { flex: 1; min-height: 0; display: flex; flex-direction: column; }</style>
+      <nav><div class="tabs" role="tablist"><button class="tab selected" data-tab="diagnostics">Main</button><button class="tab" data-tab="cameras">Cameras</button><button class="tab" data-tab="networktables">NetworkTables</button></div></nav>
+      <main id="app-root"><div class="aim-lock-frame"><div class="aim-lock-label" aria-label="Aim lock active"><span></span>AIM LOCK<span></span></div><section id="diagnostics-panel" class="card tab-panel main-dashboard"><div class="dashboard-column field-section"><div class="auto-bar"><label for="auto-selector">Autonomous</label><select id="auto-selector" disabled><option>Waiting for chooser…</option></select></div><div class="section-title"><h2>Field</h2><span id="field-pose" class="field-pose">Waiting for pose…</span></div><div id="field-view" class="field-view"><canvas id="field-canvas"></canvas></div></div><div class="dashboard-column faults-column"><div class="section-title faults-title"><h2>Faults</h2><span id="diagnostic-summary" class="diagnostic-summary">Waiting for devices…</span></div><div id="diagnostics" class="diagnostics"></div></div></section></div>
+      <section id="networktables-panel" class="card tab-panel" hidden><div class="section-title"><h2>NetworkTables</h2><input id="topic-filter" type="search" placeholder="Filter topics" autocomplete="off"></div><div id="topics" class="topics"></div></section>
+      <section id="cameras-panel" class="card tab-panel" hidden><div class="section-title"><h2>Camera streams</h2><label class="camera-host-label">PhotonVision host <input id="camera-host" value="photonvision.local" spellcheck="false"></label></div><div id="cameras" class="cameras"></div></section></main>`;
+    this.core = document.querySelector("dashboard-core").core;
+  }
+
+  set core(core) {
+    this.#core = core;
+    if (!this.#started && this.shadowRoot) {
+      this.#started = true;
+      startCustomDashboard(core, this);
+    }
+    this.dispatchEvent(new CustomEvent("core-ready", { detail: core }));
+  }
+
+  get core() { return this.#core; }
+}
+
+customElements.define("custom-dashboard", CustomDashboard);
+
+export function startCustomDashboard(core, dashboard) {
+const ui = dashboard.shadowRoot;
 const values = core.values;
-const topicsElement = document.querySelector("#topics");
-const filterElement = document.querySelector("#topic-filter");
-const diagnosticsElement = document.querySelector("#diagnostics");
-const diagnosticSummary = document.querySelector("#diagnostic-summary");
-const autoSelect = document.querySelector("#auto-selector");
-const camerasElement = document.querySelector("#cameras");
-const cameraHostInput = document.querySelector("#camera-host");
-const fieldCanvas = document.querySelector("#field-canvas");
-const fieldView = document.querySelector("#field-view");
-const fieldPose = document.querySelector("#field-pose");
-const aimLockFrame = document.querySelector(".aim-lock-frame");
+const topicsElement = ui.querySelector("#topics");
+const filterElement = ui.querySelector("#topic-filter");
+const diagnosticsElement = ui.querySelector("#diagnostics");
+const diagnosticSummary = ui.querySelector("#diagnostic-summary");
+const autoSelect = ui.querySelector("#auto-selector");
+const camerasElement = ui.querySelector("#cameras");
+const cameraHostInput = ui.querySelector("#camera-host");
+const fieldCanvas = ui.querySelector("#field-canvas");
+const fieldView = ui.querySelector("#field-view");
+const fieldPose = ui.querySelector("#field-pose");
+const aimLockFrame = ui.querySelector(".aim-lock-frame");
 const diagnosticPrefix = "/SmartDashboard/HardwareMonitor/FaultStatus/";
 const autoPrefix = "/SmartDashboard/Auto Choices/";
 const aimLockTopic = "/SmartDashboard/aimLocked";
-const watchedAssets = ["index.html", "index.css", "app.css", "app.js", "core/dashboard-core.js", "core/networktables.js", "core/nt-connectivity.js", "core/sim-driver-station.js", "core/msgpack.js", "core/icon.svg", "manifest.webmanifest"];
 const cameraDefinitions = [
   { name: "Front left", camera: "camera_frontleft", port: 1185, flipped: true },
   { name: "Front right", camera: "camera_frontright", port: 1181, flipped: true },
@@ -57,10 +87,10 @@ cameraHostInput.addEventListener("change", () => {
   localStorage.setItem("photonvision-host", cameraHostInput.value.trim());
   updateCameraStreams(true);
 });
-document.querySelectorAll("[data-tab]").forEach((button) => {
+ui.querySelectorAll("[data-tab]").forEach((button) => {
   button.addEventListener("click", () => {
-    document.querySelectorAll("[data-tab]").forEach((tab) => tab.classList.toggle("selected", tab === button));
-    document.querySelectorAll(".tab-panel").forEach((panel) => { panel.hidden = panel.id !== `${button.dataset.tab}-panel`; });
+    ui.querySelectorAll("[data-tab]").forEach((tab) => tab.classList.toggle("selected", tab === button));
+    ui.querySelectorAll(".tab-panel").forEach((panel) => { panel.hidden = panel.id !== `${button.dataset.tab}-panel`; });
     aimLockFrame.hidden = button.dataset.tab !== "diagnostics";
     updateCameraStreams();
   });
@@ -68,11 +98,6 @@ document.querySelectorAll("[data-tab]").forEach((button) => {
 
 function updateAimLock() {
   aimLockFrame.classList.toggle("aim-locked", values.get(aimLockTopic)?.value === true);
-}
-
-function reloadDashboard(url) {
-  document.querySelector("sim-driver-station").prepareForReload();
-  location.replace(url);
 }
 
 function scheduleRender() {
@@ -224,7 +249,7 @@ function decodePose2d(value) {
 new ResizeObserver(scheduleFieldRender).observe(fieldView);
 
 function updateCameraStreams(force = false) {
-  const panelOpen = !document.querySelector("#cameras-panel").hidden;
+  const panelOpen = !ui.querySelector("#cameras-panel").hidden;
   const simulation = values.get("/SimSupervisor/Available")?.value === true;
   const cameraHost = simulation ? core.connection.host : cameraHostInput.value.trim();
   for (const camera of cameraElements) {
@@ -266,7 +291,7 @@ function renderAutoChooser() {
   const active = values.get(`${autoPrefix}active`)?.value;
   const defaultOption = values.get(`${autoPrefix}default`)?.value;
   const current = selected || active || defaultOption;
-  if (typeof current === "string" && options.includes(current) && document.activeElement !== autoSelect) {
+  if (typeof current === "string" && options.includes(current) && ui.activeElement !== autoSelect) {
     autoSelect.value = current;
   }
   autoSelect.disabled = false;
@@ -401,62 +426,6 @@ function humanizeDeviceName(name) {
   return name.replace(/([a-z0-9])([A-Z])/g, "$1 $2").replace(/[_-]+/g, " ");
 }
 
-async function readDashboardSource() {
-  const contents = await Promise.all(watchedAssets.map(async (path) => {
-    const response = await fetch(`${path}?source-check=${Date.now()}`, { cache: "no-store" });
-    if (!response.ok) throw new Error(`${path}: HTTP ${response.status}`);
-    return response.text();
-  }));
-  return contents.join("\n---dashboard-asset---\n");
-}
-
-async function watchDashboardSource() {
-  let previous;
-  try {
-    previous = await readDashboardSource();
-  } catch {
-    setTimeout(watchDashboardSource, 1000);
-    return;
-  }
-  setInterval(async () => {
-    try {
-      const current = await readDashboardSource();
-      if (current !== previous) {
-        reloadDashboard(`${location.pathname}?v=${Date.now()}`);
-      }
-    } catch {
-      // The server disappears briefly while HALSim restarts. Retry next tick.
-    }
-  }, 1000);
-}
-
-async function startOfflineUpdates() {
-  if (!("serviceWorker" in navigator) || !window.isSecureContext) {
-    watchDashboardSource();
-    return;
-  }
-  try {
-    await navigator.serviceWorker.register("./service-worker.js", { scope: "./" });
-    const registration = await navigator.serviceWorker.ready;
-    navigator.serviceWorker.addEventListener("message", (event) => {
-      if (event.data?.type === "SNAPSHOT_STATUS") {
-        const loadedVersion = new URLSearchParams(location.search).get("v");
-        if (event.data.version && loadedVersion !== event.data.version) {
-          reloadDashboard(`${location.pathname}?v=${event.data.version}`);
-        }
-        return;
-      }
-      if (event.data?.type !== "SNAPSHOT_UPDATED") return;
-      reloadDashboard(`${location.pathname}?v=${event.data.version}`);
-    });
-    const check = () => (registration.active ?? navigator.serviceWorker.controller)?.postMessage({ type: "CHECK_UPDATE" });
-    check();
-    setInterval(check, 3000);
-  } catch {
-    watchDashboardSource();
-  }
-}
-
 function formatValue(value) {
   if (value instanceof Uint8Array) return `<${value.length} bytes>`;
   if (Array.isArray(value)) return JSON.stringify(value);
@@ -465,4 +434,4 @@ function formatValue(value) {
 }
 
 renderTopics();
-startOfflineUpdates();
+}

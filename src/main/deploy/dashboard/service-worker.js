@@ -4,10 +4,11 @@ const ACTIVE_KEY = new URL("__active_snapshot__", self.registration.scope).href;
 const ASSETS = [
   "index.html",
   "index.css",
-  "app.css",
-  "app.js",
+  "custom-dashboard.css",
+  "custom-dashboard.js",
   "core/networktables.js",
   "core/dashboard-core.js",
+  "core/dashboard-runtime.js",
   "core/nt-connectivity.js",
   "core/sim-driver-station.js",
   "core/msgpack.js",

@@ -117,6 +117,8 @@
     // Churrobots: Sim Driver Station, NetworkTables protocol, and PWA metadata are
     // stable infrastructure. Keep them out of routine dashboard UI work.
     "src/main/deploy/dashboard/core/**": true,
+    "src/main/deploy/dashboard/index.html": true,
+    "src/main/deploy/dashboard/index.css": true,
     "src/main/deploy/dashboard/manifest.webmanifest": true,
     "src/main/deploy/dashboard/service-worker.js": true,
     // Churrobots: hide junk files

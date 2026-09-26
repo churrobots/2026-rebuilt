@@ -1,6 +1,7 @@
 import { NT4Client } from "./networktables.js";
 import "./nt-connectivity.js";
 import "./sim-driver-station.js";
+import { startDashboardRuntime } from "./dashboard-runtime.js";
 
 /**
  * Protected coordination layer for core dashboard services.
@@ -76,7 +77,10 @@ export class DashboardCoreElement extends HTMLElement {
   }
 
   get core() { return this.#core; }
-  connectedCallback() { this.#core.connect(); }
+  connectedCallback() {
+    this.#core.connect();
+    startDashboardRuntime();
+  }
 }
 
 customElements.define("dashboard-core", DashboardCoreElement);
