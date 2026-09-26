@@ -163,8 +163,15 @@ public class DriveCommands {
         },
         drive)
 
-        // Reset PID controller when command starts
-        .beforeStarting(() -> angleController.reset(drive.getRotation().getRadians()));
+        // Reset the controller and dashboard state when angle drive begins.
+        .beforeStarting(
+            () -> {
+              angleController.reset(drive.getRotation().getRadians());
+              SmartDashboard.putBoolean("aimLocked", false);
+            })
+
+        // Commands may be cancelled before another drive command gets a chance to publish.
+        .finallyDo(() -> SmartDashboard.putBoolean("aimLocked", false));
   }
 
   /**
