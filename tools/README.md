@@ -1,45 +1,31 @@
-# Simulation supervisor
+# Simulation tools
 
-`sim_supervisor.py` runs the WPILib Java simulator without SimGUI and restarts it after robot code, deploy files, vendor dependencies, or Gradle configuration changes.
+## Java simulator supervisor
 
-From the repository root:
+`SimSupervisor.java` keeps the latest robot code running in HALSim. It watches Java sources, deploy files, vendor dependencies, and Gradle configuration; save bursts are debounced into one clean restart. SimGUI remains disabled and AdvantageKit publishes NT4 for AdvantageScope and browser clients.
 
-```bash
-uv run --script tools/sim_supervisor.py
-```
-
-The script contains its own uv metadata and requires Python 3.10 or newer. It has no third-party dependencies. On macOS and Linux it can also be launched directly:
+Run from the repository root with the WPILib JDK:
 
 ```bash
-./tools/sim_supervisor.py
+~/wpilib/2026/jdk/bin/java tools/SimSupervisor.java
 ```
 
-The supervisor automatically uses the JDK installed at `~/wpilib/2026/jdk`. A custom installation can be selected explicitly:
+An alternate project directory can be supplied as the first argument. Stop the supervisor and simulator with Ctrl-C.
 
-```bash
-uv run --script tools/sim_supervisor.py --java-home /path/to/jdk
-```
+The supervisor uses `--no-daemon` so the simulator remains in a process tree that can be terminated reliably during restarts. Gradle's normal incremental build cache is still used.
 
-Connect AdvantageScope to `localhost`. Stop the supervisor and its simulator with Ctrl-C.
+## PWA NetworkTables contract
 
-The first SDL-compatible game controller is mapped to WPILib Xbox controller port 0. Simulation starts disabled. Press **Start** to enable teleop or **Select/Back** to enable autonomous; the selected mode persists after the button is released. A different initial Driver Station mode can be selected with:
+A separate PWA can connect directly to the simulator's NT4 server at `localhost:5810`. It should publish these topics under the `SimSupervisor` table:
 
-```bash
-uv run --script tools/sim_supervisor.py --mode disabled
-uv run --script tools/sim_supervisor.py --mode auto
-uv run --script tools/sim_supervisor.py --mode test
-```
+| Topic | NT type | Value |
+| --- | --- | --- |
+| `Joystick0/Axes` | `double[]` | WPILib Xbox order: LX, LY, LT, RT, RX, RY |
+| `Joystick0/Buttons` | `boolean[]` | A, B, X, Y, LB, RB, Back, Start, LS, RS |
+| `Joystick0/POV` | `int` | Degrees clockwise from up, or `-1` |
+| `Joystick0/Connected` | `boolean` | Gamepad connection state |
+| `Joystick0/Name` | `string` | Display name |
+| `Mode` | `string` | `disabled`, `teleop`, `auto`, or `test` |
+| `Heartbeat` | `int` | Increment continuously, ideally at 50 Hz |
 
-The gamepad can be connected or disconnected while the supervisor is running. A heartbeat clears the simulated controls and disables the robot if the Python input process stops responding.
-
-The console logs button presses, D-pad changes, and axis movement. Axis logs use a 0.05 change threshold and are limited to ten updates per second per axis to suppress stick noise.
-
-Extra Gradle arguments can be passed after `--`:
-
-```bash
-uv run --script tools/sim_supervisor.py -- --offline
-```
-
-The watcher uses polling deliberately, so it has no third-party Python dependencies and behaves consistently on macOS, Windows, Linux, network drives, and mounted workspaces. Its defaults can be adjusted with `--debounce` and `--poll-interval`; run with `--help` for details.
-
-SimGUI is disabled by default in `build.gradle`. The simulated Driver Station extension remains enabled.
+The robot-side `SimulationControllerBridge` copies these values into `DriverStationSim`. If the heartbeat stops for approximately half a second, it clears all controls and disables the simulated robot.
