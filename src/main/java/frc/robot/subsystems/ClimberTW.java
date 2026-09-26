@@ -17,6 +17,8 @@ import static edu.wpi.first.units.Units.Volts;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.math.controller.ElevatorFeedforward;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
@@ -29,6 +31,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.util.HardwareMonitor;
 import frc.robot.util.YAMSUtil;
+import org.littletonrobotics.junction.Logger;
 import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;
 import yams.mechanisms.config.ElevatorConfig;
@@ -163,5 +166,13 @@ public class ClimberTW extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     elevator.updateTelemetry();
+    double heightMeters = elevator.getHeight().in(Meters);
+    Logger.recordOutput("Mechanisms/Climber/HeightMeters", heightMeters);
+    Logger.recordOutput(
+        "Mechanisms/Climber/VelocityMetersPerSecond",
+        elevator.getVelocity().in(MetersPerSecond));
+    Logger.recordOutput(
+        "Mechanisms/Climber/ComponentPose",
+        new Pose3d(0.0, 0.0, heightMeters, new Rotation3d()));
   }
 }

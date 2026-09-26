@@ -39,6 +39,7 @@ import frc.robot.subsystems.ControlsConstants;
 import frc.robot.subsystems.Feeder;
 import frc.robot.subsystems.IntakeArm;
 import frc.robot.subsystems.IntakeRoller;
+import frc.robot.subsystems.MechanismVisualizer;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Spindexer;
 import frc.robot.subsystems.drive.Drive;
@@ -71,6 +72,7 @@ public class RobotContainer {
   private final IntakeArm intakeArm;
   private final Shooter shooter = new Shooter();
   private final Feeder feeder = new Feeder();
+  private final MechanismVisualizer mechanismVisualizer;
 
   // Make xlock work.
   private boolean isRequestingXLock = false;
@@ -148,7 +150,9 @@ public class RobotContainer {
     }
 
     intakeArm = new IntakeArm(drive);
-    intakeRoller = new IntakeRoller(drive);
+    intakeRoller = new IntakeRoller(drive, intakeArm);
+    mechanismVisualizer =
+        new MechanismVisualizer(intakeArm, intakeRoller, spindexer, feeder, shooter);
     bindCommandsForTeleop();
     bindCommandsForAuto();
   }

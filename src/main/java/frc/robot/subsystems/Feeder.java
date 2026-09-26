@@ -8,10 +8,13 @@ import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.Radians;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import java.util.function.Supplier;
 
@@ -25,6 +28,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.HardwareMonitor;
 
 import frc.robot.util.YAMSUtil;
+import org.littletonrobotics.junction.Logger;
 import yams.mechanisms.config.FlyWheelConfig;
 import yams.mechanisms.velocity.FlyWheel;
 import yams.motorcontrollers.SmartMotorController;
@@ -97,6 +101,18 @@ public class Feeder extends SubsystemBase {
     return feeder.getSpeed();
   }
 
+  public Pose3d getComponentPose() {
+    return new Pose3d(
+        MechanismVisualizationConstants.FEEDER_X_METERS,
+        MechanismVisualizationConstants.FEEDER_Y_METERS,
+        MechanismVisualizationConstants.FEEDER_Z_METERS,
+        new Rotation3d(
+            0.0,
+            controller.getMechanismPosition().in(Radians)
+                / MechanismVisualizationConstants.SPIN_VISUALIZATION_REDUCTION,
+            0.0));
+  }
+
   /**
    * Set the intake velocity.
    *
@@ -124,6 +140,8 @@ public class Feeder extends SubsystemBase {
   @Override
   public void periodic() {
     feeder.updateTelemetry();
+    Logger.recordOutput("Mechanisms/Feeder/VelocityRPM", feeder.getSpeed().in(RPM));
+    Logger.recordOutput("Mechanisms/Feeder/ComponentPose", getComponentPose());
   }
 
   @Override

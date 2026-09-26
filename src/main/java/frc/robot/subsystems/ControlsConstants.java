@@ -13,12 +13,14 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.wpilibj.RobotBase;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 
 public class ControlsConstants {
 
   // TODO: reduce this for competition
-  public static final TelemetryVerbosity YAMS_VERBOSITY = HardwareConstants.REDUCE_ROBORIO_RESOURCE_USAGE
+  public static final TelemetryVerbosity YAMS_VERBOSITY = RobotBase.isReal()
+      && HardwareConstants.REDUCE_ROBORIO_RESOURCE_USAGE
       ? TelemetryVerbosity.LOW
       : TelemetryVerbosity.HIGH;
 

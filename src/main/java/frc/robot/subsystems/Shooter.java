@@ -8,10 +8,13 @@ import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.Radians;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import java.util.function.Supplier;
 
@@ -25,6 +28,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.HardwareMonitor;
 import frc.robot.util.TunableNumber;
 import frc.robot.util.YAMSUtil;
+import org.littletonrobotics.junction.Logger;
 import yams.mechanisms.config.FlyWheelConfig;
 import yams.mechanisms.velocity.FlyWheel;
 import yams.motorcontrollers.SmartMotorController;
@@ -99,6 +103,18 @@ public class Shooter extends SubsystemBase {
     return shooter.getSpeed();
   }
 
+  public Pose3d getComponentPose() {
+    return new Pose3d(
+        MechanismVisualizationConstants.SHOOTER_X_METERS,
+        MechanismVisualizationConstants.SHOOTER_Y_METERS,
+        MechanismVisualizationConstants.SHOOTER_Z_METERS,
+        new Rotation3d(
+            controller.getMechanismPosition().in(Radians)
+                / MechanismVisualizationConstants.SPIN_VISUALIZATION_REDUCTION,
+            0.0,
+            0.0));
+  }
+
   /**
    * Set the shooter velocity.
    *
@@ -126,6 +142,8 @@ public class Shooter extends SubsystemBase {
   @Override
   public void periodic() {
     shooter.updateTelemetry();
+    Logger.recordOutput("Mechanisms/Shooter/VelocityRPM", shooter.getSpeed().in(RPM));
+    Logger.recordOutput("Mechanisms/Shooter/ComponentPose", getComponentPose());
   }
 
   @Override

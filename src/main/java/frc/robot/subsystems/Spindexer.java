@@ -8,6 +8,7 @@ import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.Radians;
 
 import java.util.function.Supplier;
 
@@ -15,6 +16,8 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
@@ -28,6 +31,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.HardwareMonitor;
 import frc.robot.util.TunableNumber;
 import frc.robot.util.YAMSUtil;
+import org.littletonrobotics.junction.Logger;
 import yams.mechanisms.config.FlyWheelConfig;
 import yams.mechanisms.velocity.FlyWheel;
 import yams.motorcontrollers.SmartMotorController;
@@ -107,6 +111,18 @@ public class Spindexer extends SubsystemBase {
     return spindexer.getSpeed();
   }
 
+  public Pose3d getComponentPose() {
+    return new Pose3d(
+        MechanismVisualizationConstants.SPINDEXER_X_METERS,
+        MechanismVisualizationConstants.SPINDEXER_Y_METERS,
+        MechanismVisualizationConstants.SPINDEXER_Z_METERS,
+        new Rotation3d(
+            0.0,
+            0.0,
+            controller.getMechanismPosition().in(Radians)
+                / MechanismVisualizationConstants.SPIN_VISUALIZATION_REDUCTION));
+  }
+
   public Command spinToShooter() {
     // TODO: try setSpeedPulsed?
     return spindexer.setSpeed(() -> RPM.of(tunableSpindexerRpm.getLatest()));
@@ -130,6 +146,8 @@ public class Spindexer extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     spindexer.updateTelemetry();
+    Logger.recordOutput("Mechanisms/Spindexer/VelocityRPM", spindexer.getSpeed().in(RPM));
+    Logger.recordOutput("Mechanisms/Spindexer/ComponentPose", getComponentPose());
   }
 
   @Override

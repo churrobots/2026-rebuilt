@@ -8,6 +8,7 @@ import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.Radians;
 
 import java.util.function.Supplier;
 
@@ -16,6 +17,8 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.spark.SparkMax;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -30,6 +33,7 @@ import frc.robot.subsystems.drive.Drive;
 import frc.robot.util.HardwareMonitor;
 import frc.robot.util.SemiAutoHelper;
 import frc.robot.util.YAMSUtil;
+import org.littletonrobotics.junction.Logger;
 import yams.mechanisms.config.FlyWheelConfig;
 import yams.mechanisms.velocity.FlyWheel;
 import yams.motorcontrollers.SmartMotorController;
@@ -84,10 +88,12 @@ public class IntakeRoller extends SubsystemBase {
   // Intake Roller Mechanism
   private FlyWheel roller = new FlyWheel(rollerConfig);
   private Drive drive;
+  private IntakeArm intakeArm;
 
   /** Creates a new IntakeRoller. */
-  public IntakeRoller(Drive drive) {
+  public IntakeRoller(Drive drive, IntakeArm intakeArm) {
     this.drive = drive;
+    this.intakeArm = intakeArm;
     setDefaultCommand(keepFuelInside());
     HardwareMonitor.registerHardware("intakeRollerMotor", motor);
   }
@@ -99,6 +105,29 @@ public class IntakeRoller extends SubsystemBase {
    */
   public AngularVelocity getVelocity() {
     return roller.getSpeed();
+  }
+
+  public double getVisualizationSpinRadians() {
+    return controller.getMechanismPosition().in(Radians)
+        / MechanismVisualizationConstants.SPIN_VISUALIZATION_REDUCTION;
+  }
+
+  public Pose3d getComponentPose() {
+    double armAngleRadians = intakeArm.getVisualizationAngle().in(Radians);
+    double rollerX =
+        MechanismVisualizationConstants.INTAKE_X_METERS
+            + MechanismVisualizationConstants.INTAKE_ARM_LENGTH_METERS
+                * Math.cos(armAngleRadians);
+    double rollerZ =
+        MechanismVisualizationConstants.INTAKE_Z_METERS
+            + MechanismVisualizationConstants.INTAKE_ARM_LENGTH_METERS
+                * Math.sin(armAngleRadians);
+    double rollerSpin = getVisualizationSpinRadians();
+    return new Pose3d(
+        rollerX,
+        MechanismVisualizationConstants.INTAKE_Y_METERS,
+        rollerZ,
+        new Rotation3d(0.0, rollerSpin - armAngleRadians, 0.0));
   }
 
   /**
@@ -151,6 +180,8 @@ public class IntakeRoller extends SubsystemBase {
   @Override
   public void periodic() {
     roller.updateTelemetry();
+    Logger.recordOutput("Mechanisms/IntakeRoller/VelocityRPM", roller.getSpeed().in(RPM));
+    Logger.recordOutput("Mechanisms/IntakeRoller/ComponentPose", getComponentPose());
 
     // Do the autonomous state.
     if (DriverStation.isAutonomous()) {

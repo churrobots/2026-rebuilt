@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Feet;
 import static edu.wpi.first.units.Units.Pounds;
+import static edu.wpi.first.units.Units.Radians;
 
 import java.util.function.Supplier;
 
@@ -12,9 +13,12 @@ import com.revrobotics.spark.SparkMax;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ArmFeedforward;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -23,6 +27,7 @@ import frc.robot.util.HardwareMonitor;
 import frc.robot.util.SemiAutoHelper;
 import frc.robot.util.TunableNumber;
 import frc.robot.util.YAMSUtil;
+import org.littletonrobotics.junction.Logger;
 import yams.mechanisms.config.ArmConfig;
 import yams.mechanisms.positional.Arm;
 import yams.motorcontrollers.SmartMotorController;
@@ -100,6 +105,7 @@ public class IntakeArm extends SubsystemBase {
   // Arm Mechanism
   private Arm arm = new Arm(armMechanismConfig);
   private Drive drive;
+  private double simulationVisualizationDegrees = 90.0;
 
   /**
    * Creates a new ExampleSubsystem.
@@ -124,6 +130,34 @@ public class IntakeArm extends SubsystemBase {
 
   public Command setAngle(Angle angle) {
     return arm.setAngle(angle);
+  }
+
+  public Angle getAngle() {
+    return arm.getAngle();
+  }
+
+  private static double mapToVisualizationDegrees(Angle angle) {
+    double fraction =
+        (angle.in(Degrees) - EXTENDED_ANGLE.in(Degrees))
+            / (STOWED_ANGLE.in(Degrees) - EXTENDED_ANGLE.in(Degrees));
+    return MathUtil.clamp(fraction, 0.0, 1.0) * 90.0;
+  }
+
+  /** Returns the display angle where extended is 0 degrees and stowed is 90 degrees. */
+  public Angle getVisualizationAngle() {
+    return Degrees.of(
+        RobotBase.isSimulation()
+            ? simulationVisualizationDegrees
+            : mapToVisualizationDegrees(getAngle()));
+  }
+
+  public Pose3d getComponentPose() {
+    Angle visualizationAngle = getVisualizationAngle();
+    return new Pose3d(
+        MechanismVisualizationConstants.INTAKE_X_METERS,
+        MechanismVisualizationConstants.INTAKE_Y_METERS,
+        MechanismVisualizationConstants.INTAKE_Z_METERS,
+        new Rotation3d(0.0, -visualizationAngle.in(Radians), 0.0));
   }
 
   public Command pulseArm() {
@@ -158,6 +192,28 @@ public class IntakeArm extends SubsystemBase {
   @Override
   public void periodic() {
     arm.updateTelemetry();
+    if (RobotBase.isSimulation()) {
+      double targetDegrees =
+          armMotorController
+              .getMechanismPositionSetpoint()
+              .map(IntakeArm::mapToVisualizationDegrees)
+              .orElseGet(() -> mapToVisualizationDegrees(getAngle()));
+      // Animate at 180 degrees/second instead of snapping directly to the target.
+      simulationVisualizationDegrees +=
+          MathUtil.clamp(targetDegrees - simulationVisualizationDegrees, -3.6, 3.6);
+    }
+    Angle measuredAngle = getAngle();
+    Logger.recordOutput("Mechanisms/IntakeArm/AngleDegrees", measuredAngle.in(Degrees));
+    Logger.recordOutput(
+        "Mechanisms/IntakeArm/VisualizationAngleDegrees",
+        getVisualizationAngle().in(Degrees));
+    Logger.recordOutput(
+        "Mechanisms/IntakeArm/TargetAngleDegrees",
+        armMotorController
+            .getMechanismPositionSetpoint()
+            .map((angle) -> angle.in(Degrees))
+            .orElse(Double.NaN));
+    Logger.recordOutput("Mechanisms/IntakeArm/ComponentPose", getComponentPose());
 
     // Do the autonomous state.
     if (DriverStation.isAutonomous()) {

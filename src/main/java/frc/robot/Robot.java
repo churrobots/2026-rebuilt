@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.HardwareConstants;
+import frc.robot.sim.SimulationControllerBridge;
 import frc.robot.util.HardwareMonitor;
 
 import static edu.wpi.first.units.Units.RPM;
@@ -42,6 +43,7 @@ public class Robot extends LoggedRobot {
   private Command autonomousCommand;
   private RobotContainer robotContainer;
   private Field2d field = null;
+  private SimulationControllerBridge simulationControllerBridge = null;
 
   public Robot() {
     // Record metadata
@@ -95,6 +97,10 @@ public class Robot extends LoggedRobot {
     // Start AdvantageKit logger
     Logger.start();
 
+    if (Constants.currentMode == Constants.Mode.SIM) {
+      simulationControllerBridge = new SimulationControllerBridge();
+    }
+
     // Instantiate our RobotContainer. This will perform all our button bindings,
     // and put our autonomous chooser on the dashboard.
     robotContainer = new RobotContainer();
@@ -103,6 +109,10 @@ public class Robot extends LoggedRobot {
   /** This function is called periodically during all modes. */
   @Override
   public void robotPeriodic() {
+    if (simulationControllerBridge != null) {
+      simulationControllerBridge.update();
+    }
+
     // Optionally switch the thread to high priority to improve loop
     // timing (see the template project documentation for details)
     // Threads.setCurrentThreadPriority(true, 99);
