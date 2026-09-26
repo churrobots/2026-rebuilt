@@ -307,7 +307,7 @@ function updateCameraStreams(force = false) {
 function connectionCandidates(teamNumber) {
   const team = Number.parseInt(teamNumber, 10);
   const candidates = [
-    { id: "sim", host: "localhost", label: "localhost" },
+    { id: "sim", host: "localhost", label: "Simulator" },
   ];
   if (Number.isInteger(team) && team > 0 && team <= 99999) {
     candidates.push(
@@ -649,11 +649,15 @@ function renderGamepad(view, gamepad) {
 }
 
 function updateDriverStationPlaceholder() {
-  const state = ntConnected ? "connected" : "offline";
+  const state = ntConnected ? "connected" : activeConnectionId === "sim" ? "simulator-offline" : "robot-offline";
   if (dsPlaceholder.dataset.state === state) return;
   dsPlaceholder.dataset.state = state;
   if (ntConnected) {
     dsPlaceholder.textContent = "Driver Station floats here";
+    return;
+  }
+  if (activeConnectionId !== "sim") {
+    dsPlaceholder.textContent = "Robot offline · Check robot power and network connection";
     return;
   }
   const callout = document.createElement("div");

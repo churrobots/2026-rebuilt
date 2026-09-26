@@ -133,6 +133,7 @@ public final class SimSupervisor {
         List.of(
             root.resolve(gradleWrapper()).toString(),
             "--no-daemon",
+            "-PsupervisorHeadless=true",
             "simulateJava",
             "--console=plain");
     System.out.println("\n[sim] starting: " + String.join(" ", command));
