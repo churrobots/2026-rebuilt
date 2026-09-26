@@ -134,9 +134,6 @@ input { margin-left: auto; width: min(340px, 50vw); padding: 8px 11px; color: in
 .auto-bar select:disabled { color: #738096; }
 .field-view { flex: 1; min-height: 0; padding: 12px; background: #0c1017; }
 .field-view canvas { display: block; width: 100%; height: 100%; }
-.field-alliance { margin-left: 10px; font-size: .76rem; font-weight: 700; }
-.field-alliance.blue { color: #65adff; }
-.field-alliance.red { color: #ff6f7d; }
 .field-pose { margin-left: auto; color: #8f9bad; font: .72rem ui-monospace, SFMono-Regular, Menlo, monospace; }
 .diagnostics { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 16px; padding: 12px; overflow: auto; }
 .diagnostic-group h3 { margin: 0 0 9px; color: #abb7c9; font-size: .78rem; letter-spacing: .09em; text-transform: uppercase; }

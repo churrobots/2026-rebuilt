@@ -19,7 +19,6 @@ const teamNumberInput = document.querySelector("#team-number");
 const connectionPoints = document.querySelector("#connection-points");
 const fieldCanvas = document.querySelector("#field-canvas");
 const fieldView = document.querySelector("#field-view");
-const fieldAlliance = document.querySelector("#field-alliance");
 const fieldPose = document.querySelector("#field-pose");
 const gamepadState = document.querySelector("#gamepad-state");
 const gamepadsElement = document.querySelector("#gamepads");
@@ -36,7 +35,7 @@ const cameraDefinitions = [
 ];
 const field = { length: 17.548, width: 8.052 };
 let selectedMode = "teleop";
-let selectedAlliance = "blue";
+let selectedAlliance = localStorage.getItem("sim-alliance") === "red" ? "red" : "blue";
 let enabled = false;
 let heartbeat = 0;
 let renderPending = false;
@@ -78,7 +77,7 @@ nt.addEventListener("disconnected", () => {
 });
 nt.addEventListener("value", ({ detail: topic }) => {
   values.set(topic.name, topic);
-  if (topic.name === "/AdvantageKit/RealOutputs/Odometry/Robot" || topic.name === "/FMSInfo/IsRedAlliance") {
+  if (topic.name === "/AdvantageKit/RealOutputs/Odometry/Robot" || topic.name === "/FMSInfo/IsRedAlliance" || topic.name === "/FMSInfo/StationNumber") {
     scheduleFieldRender();
   }
   scheduleRender();
@@ -94,6 +93,7 @@ document.querySelectorAll("[data-mode]").forEach((button) => {
 document.querySelectorAll("[data-alliance]").forEach((button) => {
   button.addEventListener("click", () => {
     selectedAlliance = button.dataset.alliance;
+    localStorage.setItem("sim-alliance", selectedAlliance);
     enabled = false;
     updateButtons();
   });
@@ -190,17 +190,19 @@ function renderField() {
   context.clearRect(0, 0, canvasWidth, canvasHeight);
 
   const padding = 10;
+  const allianceZoneHeight = 30;
+  const allianceZoneGap = 5;
   const usableWidth = canvasWidth - padding * 2;
   const usableHeight = canvasHeight - padding * 2;
-  const scale = Math.min(usableWidth / field.width, usableHeight / field.length);
+  const scale = Math.min(usableWidth / field.width, (usableHeight - allianceZoneHeight - allianceZoneGap) / field.length);
   const drawnWidth = field.width * scale;
   const drawnHeight = field.length * scale;
   const left = (canvasWidth - drawnWidth) / 2;
-  const top = (canvasHeight - drawnHeight) / 2;
+  const top = (canvasHeight - drawnHeight - allianceZoneGap - allianceZoneHeight) / 2;
   const red = values.get("/FMSInfo/IsRedAlliance")?.value === true;
 
-  context.fillStyle = "#18251d";
-  context.strokeStyle = "#758274";
+  context.fillStyle = "#202630";
+  context.strokeStyle = "#7c8798";
   context.lineWidth = 1;
   context.fillRect(left, top, drawnWidth, drawnHeight);
   context.strokeRect(left, top, drawnWidth, drawnHeight);
@@ -212,14 +214,20 @@ function renderField() {
     context.beginPath(); context.moveTo(left, y); context.lineTo(left + drawnWidth, y); context.stroke();
   }
   context.setLineDash([]);
+  const allianceZoneTop = top + drawnHeight + allianceZoneGap;
   context.fillStyle = red ? "#b52c3c" : "#2879cf";
-  context.fillRect(left, top + drawnHeight - 7, drawnWidth, 7);
-  context.fillStyle = red ? "#2879cf" : "#b52c3c";
-  context.fillRect(left, top, drawnWidth, 7);
+  context.fillRect(left, allianceZoneTop, drawnWidth, allianceZoneHeight);
+  context.strokeStyle = red ? "#ff6877" : "#63b2ff";
+  context.strokeRect(left, allianceZoneTop, drawnWidth, allianceZoneHeight);
+  const stationValue = Number(values.get("/FMSInfo/StationNumber")?.value);
+  const station = Number.isInteger(stationValue) && stationValue >= 1 && stationValue <= 3 ? stationValue : null;
+  context.fillStyle = "#ffffff";
+  context.font = "700 10px Inter, ui-sans-serif, system-ui, sans-serif";
+  context.textAlign = "center";
+  context.textBaseline = "middle";
+  context.fillText(`YOUR ALLIANCE${station ? ` · STATION ${station}` : ""}`, left + drawnWidth / 2, allianceZoneTop + allianceZoneHeight / 2);
 
   const pose = decodePose2d(values.get("/AdvantageKit/RealOutputs/Odometry/Robot")?.value);
-  fieldAlliance.textContent = `${red ? "Red" : "Blue"} alliance · station at bottom`;
-  fieldAlliance.className = `field-alliance ${red ? "red" : "blue"}`;
   if (!pose) {
     fieldPose.textContent = "Waiting for pose…";
     return;
