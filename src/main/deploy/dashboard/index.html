@@ -11,13 +11,14 @@
     <link rel="stylesheet" href="index.css">
   </head>
   <body>
-    <dashboard-core></dashboard-core>
-
-    <custom-dashboard></custom-dashboard>
+    <dashboard-core>
+      <custom-dashboard></custom-dashboard>
+    </dashboard-core>
 
     <script type="module">
       const version = new URLSearchParams(location.search).get("v") ?? "initial";
-      import(`./custom-dashboard.js?v=${version}`);
+      await import(`./core/dashboard-core.js?v=${version}`);
+      await import(`./custom-dashboard.js?v=${version}`);
     </script>
   </body>
 </html>

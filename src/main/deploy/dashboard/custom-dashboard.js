@@ -1,19 +1,26 @@
-import "./core/dashboard-core.js";
-
 /** Owns the editable dashboard UI and its connection to the protected core API. */
 export class CustomDashboard extends HTMLElement {
   #core;
   #started = false;
+  #cleanup = [];
 
   connectedCallback() {
-    if (this.shadowRoot) return;
-    const root = this.attachShadow({ mode: "open" });
-    const version = new URL(import.meta.url).searchParams.get("v") ?? "initial";
-    root.innerHTML = `<link rel="stylesheet" href="custom-dashboard.css?v=${version}"><style>:host { flex: 1; min-height: 0; display: flex; flex-direction: column; }</style>
+    if (!this.shadowRoot) {
+      const root = this.attachShadow({ mode: "open" });
+      const version = new URL(import.meta.url).searchParams.get("v") ?? "initial";
+      root.innerHTML = `<link rel="stylesheet" href="custom-dashboard.css?v=${version}"><style>:host { flex: 1; min-height: 0; display: flex; flex-direction: column; }</style>
       <nav><div class="tabs" role="tablist"><button class="tab selected" data-tab="diagnostics">Main</button><button class="tab" data-tab="cameras">Cameras</button><button class="tab" data-tab="networktables">NetworkTables</button></div></nav>
       <main id="app-root"><div class="aim-lock-frame"><div class="aim-lock-label" aria-label="Aim lock active"><span></span>AIM LOCK<span></span></div><section id="diagnostics-panel" class="card tab-panel main-dashboard"><div class="dashboard-column field-section"><div class="auto-bar"><label for="auto-selector">Autonomous</label><select id="auto-selector" disabled><option>Waiting for chooser…</option></select></div><div class="section-title"><h2>Field</h2><span id="field-pose" class="field-pose">Waiting for pose…</span></div><div id="field-view" class="field-view"><canvas id="field-canvas"></canvas></div></div><div class="dashboard-column faults-column"><div class="section-title faults-title"><h2>Faults</h2><span id="diagnostic-summary" class="diagnostic-summary">Waiting for devices…</span></div><div id="diagnostics" class="diagnostics"></div></div></section></div>
       <section id="networktables-panel" class="card tab-panel" hidden><div class="section-title"><h2>NetworkTables</h2><input id="topic-filter" type="search" placeholder="Filter topics" autocomplete="off"></div><div id="topics" class="topics"></div></section>
       <section id="cameras-panel" class="card tab-panel" hidden><div class="section-title"><h2>Camera streams</h2><label class="camera-host-label">PhotonVision host <input id="camera-host" value="photonvision.local" spellcheck="false"></label></div><div id="cameras" class="cameras"></div></section></main>`;
+    }
+    if (this.#core && !this.#started) { this.#started = true; this.#start(this.#core); }
+  }
+
+  disconnectedCallback() {
+    this.#cleanup.forEach((cleanup) => cleanup());
+    this.#cleanup = [];
+    this.#started = false;
   }
 
   set core(core) {
@@ -68,13 +75,15 @@ const cameraElements = cameraDefinitions.map((definition) => {
   return { ...definition, image, status, placeholder };
 });
 cameraHostInput.value = localStorage.getItem("photonvision-host") || "photonvision.local";
-core.addEventListener("topic", ({ detail: topic }) => {
+const topicListener = ({ detail: topic }) => {
   if (topic.name === aimLockTopic) updateAimLock();
   if (topic.name === "/AdvantageKit/RealOutputs/Odometry/Robot" || topic.name === "/FMSInfo/IsRedAlliance" || topic.name === "/FMSInfo/StationNumber") {
     scheduleFieldRender();
   }
   scheduleRender();
-});
+};
+core.addEventListener("topic", topicListener);
+this.#cleanup.push(() => core.removeEventListener("topic", topicListener));
 
 filterElement.addEventListener("input", scheduleRender);
 autoSelect.addEventListener("change", () => {
@@ -243,7 +252,9 @@ function decodePose2d(value) {
   return Object.values(pose).every(Number.isFinite) ? pose : null;
 }
 
-new ResizeObserver(scheduleFieldRender).observe(fieldView);
+const fieldObserver = new ResizeObserver(scheduleFieldRender);
+fieldObserver.observe(fieldView);
+this.#cleanup.push(() => fieldObserver.disconnect());
 
 function updateCameraStreams(force = false) {
   const panelOpen = !ui.querySelector("#cameras-panel").hidden;

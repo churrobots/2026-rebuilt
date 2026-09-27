@@ -68,12 +68,14 @@ export class DashboardCoreElement extends HTMLElement {
 
   constructor() {
     super();
+    const customDashboard = this.querySelector("custom-dashboard");
     const connectivity = document.createElement("nt-connectivity");
     const driverStation = document.createElement("sim-driver-station");
     connectivity.core = this.#core;
     driverStation.core = this.#core;
     connectivity.addEventListener("connection-request", ({ detail }) => this.#core.setHost(detail.host, detail.id));
-    this.replaceChildren(driverStation, connectivity);
+    this.style.cssText = "flex: 1; min-height: 0; display: flex; flex-direction: column;";
+    this.replaceChildren(driverStation, connectivity, ...(customDashboard ? [customDashboard] : []));
   }
 
   get core() { return this.#core; }
@@ -81,7 +83,7 @@ export class DashboardCoreElement extends HTMLElement {
     this.#core.connect();
     startDashboardRuntime();
     customElements.whenDefined("custom-dashboard").then(() => {
-      document.querySelector("custom-dashboard")?.core = this.#core;
+      this.querySelector("custom-dashboard")?.core = this.#core;
     });
   }
 }
