@@ -1,7 +1,13 @@
+/** @typedef {import("./core/dashboard-core.js").DashboardCore} DashboardCore */
+/** @typedef {import("./core/dashboard-core.js").DashboardTopic} DashboardTopic */
+
 /** Owns the editable dashboard UI and its connection to the protected core API. */
 export class CustomDashboard extends HTMLElement {
+  /** @type {DashboardCore | undefined} */
   #core;
+  /** @type {boolean} */
   #started = false;
+  /** @type {Array<() => void>} */
   #cleanup = [];
 
   connectedCallback() {
@@ -23,6 +29,7 @@ export class CustomDashboard extends HTMLElement {
     this.#started = false;
   }
 
+  /** @param {DashboardCore} core The shared protected core API. */
   set core(core) {
     this.#core = core;
     if (!this.#started && this.shadowRoot) {
@@ -32,8 +39,10 @@ export class CustomDashboard extends HTMLElement {
     this.dispatchEvent(new CustomEvent("core-ready", { detail: core }));
   }
 
+  /** @returns {DashboardCore | undefined} */
   get core() { return this.#core; }
 
+  /** @param {DashboardCore} core The shared protected core API. */
   #start(core) {
 const dashboard = this;
 const ui = dashboard.shadowRoot;
@@ -75,6 +84,7 @@ const cameraElements = cameraDefinitions.map((definition) => {
   return { ...definition, image, status, placeholder };
 });
 cameraHostInput.value = localStorage.getItem("photonvision-host") || "photonvision.local";
+/** @param {CustomEvent<DashboardTopic>} event */
 const topicListener = ({ detail: topic }) => {
   if (topic.name === aimLockTopic) updateAimLock();
   if (topic.name === "/AdvantageKit/RealOutputs/Odometry/Robot" || topic.name === "/FMSInfo/IsRedAlliance" || topic.name === "/FMSInfo/StationNumber") {
