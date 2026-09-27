@@ -49,8 +49,9 @@ export class DashboardCore extends EventTarget {
     this.#nt.addEventListener("connected", () => this.#setConnection(true));
     this.#nt.addEventListener("disconnected", () => this.#setConnection(false));
     this.#nt.addEventListener("value", ({ detail: topic }) => {
-      this.#values.set(topic.name, topic);
-      this.dispatchEvent(new CustomEvent("topic", { detail: topic }));
+      const storedTopic = this.#copyTopic(topic);
+      this.#values.set(storedTopic.name, storedTopic);
+      this.dispatchEvent(new CustomEvent("topic", { detail: this.#copyTopic(storedTopic) }));
     });
   }
 
@@ -79,13 +80,13 @@ export class DashboardCore extends EventTarget {
 
   /**
    * Looks up the latest value for one NetworkTables topic.
-   * The returned object is a copy, so callers cannot replace core's topic fields.
+   * The returned object and mutable value are copies.
    * @param {string} name
    * @returns {Readonly<DashboardTopic> | undefined}
    */
   getTopic(name) {
     const topic = this.#values.get(name);
-    return topic && { ...topic };
+    return topic && this.#copyTopic(topic);
   }
 
   /**
@@ -93,7 +94,7 @@ export class DashboardCore extends EventTarget {
    * @returns {ReadonlyArray<Readonly<DashboardTopic>>}
    */
   getTopics() {
-    return [...this.#values.values()].map((topic) => ({ ...topic }));
+    return [...this.#values.values()].map((topic) => this.#copyTopic(topic));
   }
 
   /**
@@ -110,6 +111,14 @@ export class DashboardCore extends EventTarget {
   #setConnection(connected) {
     this.#state = { ...this.#state, connected };
     this.#emitConnection();
+  }
+
+  /** @param {DashboardTopic} topic @returns {DashboardTopic} */
+  #copyTopic(topic) {
+    const value = Array.isArray(topic.value)
+      ? [...topic.value]
+      : topic.value instanceof Uint8Array ? topic.value.slice() : topic.value;
+    return { ...topic, value };
   }
 
   #emitConnection() {
