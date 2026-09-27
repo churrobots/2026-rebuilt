@@ -37,6 +37,7 @@ export async function startDashboardRuntime() {
       if (event.data?.type === "SNAPSHOT_STATUS" && event.data.version) {
         if (new URLSearchParams(location.search).get("v") !== event.data.version) reload(`${location.pathname}?v=${event.data.version}`);
       } else if (event.data?.type === "SNAPSHOT_UPDATED") reload(`${location.pathname}?v=${event.data.version}`);
+      else if (event.data?.type === "SNAPSHOT_ROLLED_BACK") reload(`${location.pathname}?v=${event.data.version}`);
     });
     const check = () => (registration.active ?? navigator.serviceWorker.controller)?.postMessage({ type: "CHECK_UPDATE" });
     check();

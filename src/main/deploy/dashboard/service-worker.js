@@ -37,8 +37,8 @@ self.addEventListener("activate", (event) => {
 });
 
 self.addEventListener("message", (event) => {
-  if (event.data?.type !== "CHECK_UPDATE") return;
-  event.waitUntil(checkForUpdate(event.source));
+  if (event.data?.type === "CHECK_UPDATE") event.waitUntil(checkForUpdate(event.source));
+  if (event.data?.type === "ROLLBACK_SNAPSHOT") event.waitUntil(rollbackSnapshot(event.data.version, event.source));
 });
 
 self.addEventListener("fetch", (event) => {
@@ -87,6 +87,7 @@ async function buildSnapshot() {
   const version = await digest(downloaded);
   const active = await getActive();
   if (active?.version === version) return { changed: false, version };
+  if (active?.rejectedVersion === version) return { changed: false, version: active.version };
 
   const cacheName = `${SNAPSHOT_PREFIX}${version}`;
   const snapshot = await caches.open(cacheName);
@@ -94,9 +95,24 @@ async function buildSnapshot() {
     snapshot.put(new URL(asset, self.registration.scope).href, response)));
 
   const meta = await caches.open(META_CACHE);
-  await meta.put(ACTIVE_KEY, new Response(JSON.stringify({ cache: cacheName, version })));
+  const previous = active && { cache: active.cache, version: active.version };
+  await meta.put(ACTIVE_KEY, new Response(JSON.stringify({ cache: cacheName, version, previous })));
   await retainCurrentAndPrevious(cacheName, active?.cache);
   return { changed: Boolean(active), version };
+}
+
+/** Restores the previous snapshot after the page reports a failed module load. */
+async function rollbackSnapshot(version, requestingClient) {
+  const active = await getActive();
+  if (active?.version !== version || !active.previous) {
+    requestingClient?.postMessage({ type: "SNAPSHOT_ROLLBACK_UNAVAILABLE" });
+    return;
+  }
+  const restored = { ...active.previous, rejectedVersion: active.version };
+  const meta = await caches.open(META_CACHE);
+  await meta.put(ACTIVE_KEY, new Response(JSON.stringify(restored)));
+  await retainCurrentAndPrevious(restored.cache, active.cache);
+  requestingClient?.postMessage({ type: "SNAPSHOT_ROLLED_BACK", version: restored.version });
 }
 
 async function getActive() {
