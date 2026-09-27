@@ -122,7 +122,7 @@ public class DriveConstants {
   //   kV is volts per (wheel rotation / sec), kS is volts, kP/kD act on rotation error.
   // These are seeded from the old rad-based Vortex gains (kVnative = kVrad * 2*pi) and
   // MUST be re-tuned for the Kraken. kP starts at 0 like the previous drive config.
-  public static final double driveKrakenKp = 0.0;
+  public static final double driveKrakenKp = 0.5;
   public static final double driveKrakenKd = 0.0;
   public static final double driveKrakenKs = driveKs;
   public static final double driveKrakenKv = driveKv * 2.0 * Math.PI;
