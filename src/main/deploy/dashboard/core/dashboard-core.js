@@ -149,7 +149,8 @@ export class DashboardCoreElement extends HTMLElement {
     this.#core.connect();
     startDashboardRuntime();
     customElements.whenDefined("custom-dashboard").then(() => {
-      this.querySelector("custom-dashboard")?.core = this.#core;
+      const customDashboard = this.querySelector("custom-dashboard");
+      if (customDashboard) customDashboard.core = this.#core;
     });
   }
 }
