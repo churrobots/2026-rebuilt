@@ -14,24 +14,21 @@ export class CustomDashboard extends HTMLElement {
       <main id="app-root"><div class="aim-lock-frame"><div class="aim-lock-label" aria-label="Aim lock active"><span></span>AIM LOCK<span></span></div><section id="diagnostics-panel" class="card tab-panel main-dashboard"><div class="dashboard-column field-section"><div class="auto-bar"><label for="auto-selector">Autonomous</label><select id="auto-selector" disabled><option>Waiting for chooser…</option></select></div><div class="section-title"><h2>Field</h2><span id="field-pose" class="field-pose">Waiting for pose…</span></div><div id="field-view" class="field-view"><canvas id="field-canvas"></canvas></div></div><div class="dashboard-column faults-column"><div class="section-title faults-title"><h2>Faults</h2><span id="diagnostic-summary" class="diagnostic-summary">Waiting for devices…</span></div><div id="diagnostics" class="diagnostics"></div></div></section></div>
       <section id="networktables-panel" class="card tab-panel" hidden><div class="section-title"><h2>NetworkTables</h2><input id="topic-filter" type="search" placeholder="Filter topics" autocomplete="off"></div><div id="topics" class="topics"></div></section>
       <section id="cameras-panel" class="card tab-panel" hidden><div class="section-title"><h2>Camera streams</h2><label class="camera-host-label">PhotonVision host <input id="camera-host" value="photonvision.local" spellcheck="false"></label></div><div id="cameras" class="cameras"></div></section></main>`;
-    this.core = document.querySelector("dashboard-core").core;
   }
 
   set core(core) {
     this.#core = core;
     if (!this.#started && this.shadowRoot) {
       this.#started = true;
-      startCustomDashboard(core, this);
+      this.#start(core);
     }
     this.dispatchEvent(new CustomEvent("core-ready", { detail: core }));
   }
 
   get core() { return this.#core; }
-}
 
-customElements.define("custom-dashboard", CustomDashboard);
-
-export function startCustomDashboard(core, dashboard) {
+  #start(core) {
+const dashboard = this;
 const ui = dashboard.shadowRoot;
 const values = core.values;
 const topicsElement = ui.querySelector("#topics");
@@ -435,3 +432,7 @@ function formatValue(value) {
 
 renderTopics();
 }
+
+}
+
+customElements.define("custom-dashboard", CustomDashboard);

@@ -80,6 +80,9 @@ export class DashboardCoreElement extends HTMLElement {
   connectedCallback() {
     this.#core.connect();
     startDashboardRuntime();
+    customElements.whenDefined("custom-dashboard").then(() => {
+      document.querySelector("custom-dashboard")?.core = this.#core;
+    });
   }
 }
 
