@@ -1,6 +1,13 @@
+/** @typedef {import("./dashboard-core.js").DashboardCore} DashboardCore */
+
 /** A Shadow-DOM simulated Driver Station and `/SimSupervisor/*` publisher. */
 export class SimDriverStation extends HTMLElement {
-  #core; #mode = "teleop"; #alliance = localStorage.getItem("sim-alliance") === "red" ? "red" : "blue"; #enabled = false; #heartbeat = 0; #timer;
+  /** @type {DashboardCore | undefined} */ #core;
+  /** @type {"teleop" | "auto" | "test"} */ #mode = "teleop";
+  /** @type {"red" | "blue"} */ #alliance = localStorage.getItem("sim-alliance") === "red" ? "red" : "blue";
+  /** @type {boolean} */ #enabled = false;
+  /** @type {number} */ #heartbeat = 0;
+  /** @type {number | undefined} */ #timer;
   constructor() {
     super();
     const root = this.attachShadow({ mode: "open" });
@@ -11,6 +18,7 @@ export class SimDriverStation extends HTMLElement {
     [1, 2].forEach((number) => root.querySelector(".pads").insertAdjacentHTML("beforeend", `<div class="pad"><b>Gamepad ${number}</b><span class="name">No controller</span><span class="values">Waiting…</span></div>`));
     this.#render();
   }
+  /** @param {DashboardCore} core The protected shared core service. */
   set core(core) { this.#core = core; }
   prepareForReload() { sessionStorage.setItem("resume-teleop-after-dashboard-reload", this.#enabled && this.#mode === "teleop" ? "true" : "false"); }
   connectedCallback() { this.#timer ??= setInterval(() => this.#tick(), 20); }

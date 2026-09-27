@@ -1,5 +1,16 @@
+/** @typedef {import("./dashboard-core.js").DashboardCore} DashboardCore */
+
+/**
+ * One NetworkTables server the driver can select.
+ * @typedef {Object} ConnectionCandidate
+ * @property {string} id
+ * @property {string} host
+ * @property {string} label
+ */
+
 /** NetworkTables connection picker with fully isolated markup and styles. */
 export class NtConnectivity extends HTMLElement {
+  /** @type {DashboardCore | null} */
   #core = null;
 
   constructor() {
@@ -16,18 +27,21 @@ export class NtConnectivity extends HTMLElement {
     this.shadowRoot.querySelector("input").addEventListener("change", () => this.render());
   }
 
+  /** @param {DashboardCore | null} core The protected shared core service. */
   set core(core) {
     this.#core = core;
     core?.addEventListener("connection", () => this.render());
     this.render();
   }
 
+  /** @returns {DashboardCore | null} */
   get core() { return this.#core; }
 
   render() {
     const input = this.shadowRoot.querySelector("input");
     const team = Number.parseInt(input.value, 10);
     localStorage.setItem("frc-team-number", input.value.trim());
+    /** @type {ConnectionCandidate[]} */
     const candidates = [{ id:"sim", host:"localhost", label:"Simulator" }];
     if (Number.isInteger(team) && team > 0 && team <= 99999) candidates.push(
       { id:"team-ip", host:`10.${Math.floor(team / 100)}.${team % 100}.2`, label:`10.${Math.floor(team / 100)}.${team % 100}.2` },
