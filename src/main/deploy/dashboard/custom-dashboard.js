@@ -11,8 +11,8 @@ export class CustomDashboard extends HTMLElement {
   #cleanup = [];
 
   connectedCallback() {
-    if (!this.shadowRoot) {
-      const root = this.attachShadow({ mode: "open" });
+    const root = this.shadowRoot ?? this.attachShadow({ mode: "open" });
+    if (!root.hasChildNodes()) {
       const version = new URL(import.meta.url).searchParams.get("v") ?? "initial";
       root.innerHTML = `<link rel="stylesheet" href="custom-dashboard.css?v=${version}"><style>:host { flex: 1; min-height: 0; display: flex; flex-direction: column; }</style>
       <nav><div class="tabs" role="tablist"><button class="tab selected" data-tab="diagnostics">Main</button><button class="tab" data-tab="cameras">Cameras</button><button class="tab" data-tab="networktables">NetworkTables</button></div></nav>
@@ -27,12 +27,13 @@ export class CustomDashboard extends HTMLElement {
     this.#cleanup.forEach((cleanup) => cleanup());
     this.#cleanup = [];
     this.#started = false;
+    this.shadowRoot?.replaceChildren();
   }
 
   /** @param {DashboardCore} core The shared protected core API. */
   set core(core) {
     this.#core = core;
-    if (!this.#started && this.shadowRoot) {
+    if (!this.#started && this.isConnected && this.shadowRoot?.hasChildNodes()) {
       this.#started = true;
       this.#start(core);
     }
@@ -71,6 +72,8 @@ const cameraDefinitions = [
 const field = { length: 17.548, width: 8.052 };
 let renderPending = false;
 let fieldRenderPending = false;
+let renderTimer = 0;
+let fieldFrame = 0;
 const cameraElements = cameraDefinitions.map((definition) => {
   const card = document.createElement("article");
   card.className = "camera";
@@ -120,7 +123,10 @@ function updateAimLock() {
 function scheduleRender() {
   if (renderPending) return;
   renderPending = true;
-  setTimeout(renderTopics, 100);
+  renderTimer = setTimeout(() => {
+    renderTimer = 0;
+    renderTopics();
+  }, 100);
 }
 
 function renderTopics() {
@@ -153,7 +159,8 @@ function renderTopics() {
 function scheduleFieldRender() {
   if (fieldRenderPending) return;
   fieldRenderPending = true;
-  requestAnimationFrame(() => {
+  fieldFrame = requestAnimationFrame(() => {
+    fieldFrame = 0;
     fieldRenderPending = false;
     renderField();
   });
@@ -265,7 +272,11 @@ function decodePose2d(value) {
 
 const fieldObserver = new ResizeObserver(scheduleFieldRender);
 fieldObserver.observe(fieldView);
-this.#cleanup.push(() => fieldObserver.disconnect());
+this.#cleanup.push(() => {
+  fieldObserver.disconnect();
+  clearTimeout(renderTimer);
+  cancelAnimationFrame(fieldFrame);
+});
 
 function updateCameraStreams(force = false) {
   const panelOpen = !ui.querySelector("#cameras-panel").hidden;
