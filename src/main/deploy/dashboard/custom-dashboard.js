@@ -16,7 +16,8 @@ export class CustomDashboard extends HTMLElement {
   connectedCallback() {
     const root = this.shadowRoot ?? this.attachShadow({ mode: "open" });
     if (!root.hasChildNodes()) {
-      const version = new URL(import.meta.url).searchParams.get("v") ?? "initial";
+      const version =
+        new URL(import.meta.url).searchParams.get("v") ?? "initial";
       root.innerHTML = `<link rel="stylesheet" href="custom-dashboard.css?v=${version}">
         <main>
           <section class="card alliance-card" aria-labelledby="alliance-heading">
@@ -46,11 +47,14 @@ export class CustomDashboard extends HTMLElement {
   /** @param {DashboardCore} core The shared protected core API. */
   set core(core) {
     this.#core = core;
-    if (!this.#started && this.isConnected && this.shadowRoot?.hasChildNodes()) this.#start(core);
+    if (!this.#started && this.isConnected && this.shadowRoot?.hasChildNodes())
+      this.#start(core);
   }
 
   /** @returns {DashboardCore | undefined} */
-  get core() { return this.#core; }
+  get core() {
+    return this.#core;
+  }
 
   /** @param {DashboardCore} core The shared protected core API. */
   #start(core) {
@@ -62,18 +66,30 @@ export class CustomDashboard extends HTMLElement {
 
     const render = () => {
       const isRed = core.getTopic(ALLIANCE_TOPIC)?.value;
-      alliance.textContent = isRed === true ? "Red" : isRed === false ? "Blue" : "Waiting for alliance…";
-      alliance.dataset.alliance = isRed === true ? "red" : isRed === false ? "blue" : "unknown";
+      alliance.textContent =
+        isRed === true
+          ? "Red"
+          : isRed === false
+            ? "Blue"
+            : "Waiting for alliance…";
+      alliance.dataset.alliance =
+        isRed === true ? "red" : isRed === false ? "blue" : "unknown";
 
       const mechanisms = core.getTopics().filter(isMechanismTopic);
       const broken = mechanisms.filter((topic) => topic.value === false);
-      faultCount.textContent = mechanisms.length === 0 ? "Waiting…" : broken.length === 0 ? "All clear" : `${broken.length} fault${broken.length === 1 ? "" : "s"}`;
+      faultCount.textContent =
+        mechanisms.length === 0
+          ? "Waiting…"
+          : broken.length === 0
+            ? "All clear"
+            : `${broken.length} fault${broken.length === 1 ? "" : "s"}`;
       faults.replaceChildren(...createFaultContent(broken, mechanisms.length));
     };
 
     /** @param {CustomEvent<DashboardTopic>} event */
     const topicListener = ({ detail: topic }) => {
-      if (topic.name === ALLIANCE_TOPIC || topic.name.startsWith(FAULT_PREFIX)) render();
+      if (topic.name === ALLIANCE_TOPIC || topic.name.startsWith(FAULT_PREFIX))
+        render();
     };
     core.addEventListener("topic", topicListener);
     this.#cleanup.push(() => core.removeEventListener("topic", topicListener));
@@ -83,22 +99,32 @@ export class CustomDashboard extends HTMLElement {
 
 /** @param {DashboardTopic} topic */
 function isMechanismTopic(topic) {
-  if (!topic.name.startsWith(FAULT_PREFIX) || typeof topic.value !== "boolean") return false;
+  if (!topic.name.startsWith(FAULT_PREFIX) || typeof topic.value !== "boolean")
+    return false;
   const name = topic.name.slice(FAULT_PREFIX.length).toLowerCase();
-  return !["camera", "vision", "limelight", "pigeon", "gyro"].some((part) => name.includes(part))
-    && !name.endsWith("drive") && !name.endsWith("turn");
+  return (
+    !["camera", "vision", "limelight", "pigeon", "gyro"].some((part) =>
+      name.includes(part),
+    ) &&
+    !name.endsWith("drive") &&
+    !name.endsWith("turn")
+  );
 }
 
 /** @param {DashboardTopic[]} faults @param {number} mechanismCount */
 function createFaultContent(faults, mechanismCount) {
-  if (mechanismCount === 0) return [makeMessage("Waiting for HardwareMonitor data…")];
-  if (faults.length === 0) return [makeMessage("No mechanism faults reported.", "healthy")];
-  return faults.sort((a, b) => a.name.localeCompare(b.name)).map((topic) => {
-    const item = document.createElement("div");
-    item.className = "fault";
-    item.textContent = humanize(topic.name.slice(FAULT_PREFIX.length));
-    return item;
-  });
+  if (mechanismCount === 0)
+    return [makeMessage("Waiting for HardwareMonitor data…")];
+  if (faults.length === 0)
+    return [makeMessage("No mechanism faults reported.", "healthy")];
+  return faults
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map((topic) => {
+      const item = document.createElement("div");
+      item.className = "fault";
+      item.textContent = humanize(topic.name.slice(FAULT_PREFIX.length));
+      return item;
+    });
 }
 
 /** @param {string} text @param {string} [kind] */

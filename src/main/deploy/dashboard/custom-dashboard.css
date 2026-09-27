@@ -3,7 +3,9 @@
   min-height: 0;
   display: block;
   color: #edf2f7;
-  font: 14px system-ui, sans-serif;
+  font:
+    14px system-ui,
+    sans-serif;
 }
 
 main {
@@ -11,7 +13,7 @@ main {
   min-height: 100%;
   padding: 24px;
   display: grid;
-  grid-template-columns: minmax(220px, .7fr) minmax(320px, 1.3fr);
+  grid-template-columns: minmax(220px, 0.7fr) minmax(320px, 1.3fr);
   gap: 18px;
   align-content: start;
 }
@@ -26,31 +28,57 @@ main {
 .eyebrow {
   margin: 0 0 5px;
   color: #93a0b4;
-  font-size: .72rem;
+  font-size: 0.72rem;
   font-weight: 800;
-  letter-spacing: .1em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
-h1, h2 { margin: 0; font-size: 1.1rem; }
+h1,
+h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
 
 .alliance {
   display: block;
   margin-top: 22px;
   font-size: clamp(2rem, 6vw, 4rem);
   font-weight: 900;
-  letter-spacing: -.04em;
+  letter-spacing: -0.04em;
 }
 
-.alliance[data-alliance="red"] { color: #ff7783; }
-.alliance[data-alliance="blue"] { color: #70b5ff; }
-.alliance[data-alliance="unknown"] { color: #98a4b7; font-size: 1.1rem; letter-spacing: 0; }
+.alliance[data-alliance="red"] {
+  color: #ff7783;
+}
+.alliance[data-alliance="blue"] {
+  color: #70b5ff;
+}
+.alliance[data-alliance="unknown"] {
+  color: #98a4b7;
+  font-size: 1.1rem;
+  letter-spacing: 0;
+}
 
-.section-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-.fault-count { color: #ff9ca5; font-size: .82rem; font-weight: 800; }
-.faults { display: grid; gap: 8px; margin-top: 18px; }
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.fault-count {
+  color: #ff9ca5;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+.faults {
+  display: grid;
+  gap: 8px;
+  margin-top: 18px;
+}
 
-.fault, .message {
+.fault,
+.message {
   margin: 0;
   padding: 12px 14px;
   border: 1px solid #90404a;
@@ -60,9 +88,21 @@ h1, h2 { margin: 0; font-size: 1.1rem; }
   font-weight: 700;
 }
 
-.message { color: #aeb8c8; background: transparent; border-color: #384356; font-weight: 400; }
-.message.healthy { color: #94edb1; border-color: #287f4b; background: #102d1d; }
+.message {
+  color: #aeb8c8;
+  background: transparent;
+  border-color: #384356;
+  font-weight: 400;
+}
+.message.healthy {
+  color: #94edb1;
+  border-color: #287f4b;
+  background: #102d1d;
+}
 
 @media (max-width: 680px) {
-  main { grid-template-columns: 1fr; padding: 14px; }
+  main {
+    grid-template-columns: 1fr;
+    padding: 14px;
+  }
 }

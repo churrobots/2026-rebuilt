@@ -1,0 +1,90 @@
+:host {
+  display: block;
+  flex: 0 0 300px;
+  min-height: 300px;
+  height: 300px;
+  overflow: hidden;
+  color: #edf2f7;
+  background: #171423;
+  font: 14px system-ui;
+}
+
+.offline {
+  display: grid;
+  height: 100%;
+  place-items: center;
+  color: #aeb8c8;
+}
+
+.ds {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 8px;
+  padding: 9px 18px;
+}
+.offline[hidden],
+.ds[hidden] {
+  display: none;
+}
+.controls,
+.modes,
+.alliances {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.brand {
+  margin-right: 10px;
+  color: #d8b4fe;
+  font-weight: 800;
+}
+.alliances {
+  margin-left: 6px;
+}
+
+button {
+  padding: 8px 13px;
+  color: inherit;
+  background: #2b203c;
+  border: 1px solid #59436f;
+  border-radius: 7px;
+}
+
+.selected,
+.enabled {
+  background: #5c347d !important;
+  border-color: #c084fc !important;
+}
+.enable {
+  margin-left: auto;
+}
+.pads {
+  display: grid;
+  gap: 7px;
+}
+
+.pad {
+  display: grid;
+  grid-template-columns: 100px 1fr 1fr;
+  gap: 8px;
+  padding: 7px;
+  border: 1px solid #543d6d;
+  border-radius: 7px;
+}
+
+.pad.connected {
+  background: #2a1b3b;
+  border-color: #a855f7;
+}
+.name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.values {
+  color: #d8b4fe;
+  font:
+    11px ui-monospace,
+    monospace;
+}

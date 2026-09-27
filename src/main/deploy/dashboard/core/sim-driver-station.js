@@ -12,7 +12,25 @@ export class SimDriverStation extends HTMLElement {
   constructor() {
     super();
     const root = this.attachShadow({ mode: "open" });
-    root.innerHTML = `<style>:host{display:block;flex:0 0 300px;min-height:300px;height:300px;background:#171423;color:#edf2f7;font:14px system-ui;overflow:hidden}.offline{height:100%;display:grid;place-items:center;color:#aeb8c8}.ds{height:100%;padding:9px 18px;display:flex;flex-direction:column;gap:8px}.offline[hidden],.ds[hidden]{display:none}.controls{display:flex;gap:8px;align-items:center}.brand{margin-right:10px;font-weight:800;color:#d8b4fe}.modes,.alliances{display:flex;gap:6px}.alliances{margin-left:6px}button{padding:8px 13px;border:1px solid #59436f;border-radius:7px;color:inherit;background:#2b203c}.selected,.enabled{background:#5c347d!important;border-color:#c084fc!important}.enable{margin-left:auto}.pads{display:grid;gap:7px}.pad{display:grid;grid-template-columns:100px 1fr 1fr;gap:8px;padding:7px;border:1px solid #543d6d;border-radius:7px}.pad.connected{background:#2a1b3b;border-color:#a855f7}.name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.values{font:11px ui-monospace,monospace;color:#d8b4fe}</style><div class="offline">Driver Station floats here</div><div class="ds" hidden><div class="controls"><b class="brand">SIM DRIVER STATION</b><div class="modes"><button data-mode="teleop">Teleop</button><button data-mode="auto">Autonomous</button><button data-mode="test">Test</button></div><div class="alliances"><button data-alliance="blue">Blue</button><button data-alliance="red">Red</button></div><button class="enable">Enable</button></div><div class="pads"></div></div>`;
+    const version = new URL(import.meta.url).searchParams.get("v") ?? "initial";
+    root.innerHTML = `<link rel="stylesheet" href="core/sim-driver-station.css?v=${version}">
+      <div class="offline">Driver Station floats here</div>
+      <div class="ds" hidden>
+        <div class="controls">
+          <b class="brand">SIM DRIVER STATION</b>
+          <div class="modes">
+            <button data-mode="teleop">Teleop</button>
+            <button data-mode="auto">Autonomous</button>
+            <button data-mode="test">Test</button>
+          </div>
+          <div class="alliances">
+            <button data-alliance="blue">Blue</button>
+            <button data-alliance="red">Red</button>
+          </div>
+          <button class="enable">Enable</button>
+        </div>
+        <div class="pads"></div>
+      </div>`;
     root.querySelectorAll("[data-mode]").forEach(
       (b) =>
         (b.onclick = () => {
