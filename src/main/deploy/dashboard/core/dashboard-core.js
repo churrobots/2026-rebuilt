@@ -17,6 +17,7 @@ import { startDashboardRuntime } from "./dashboard-runtime.js";
  * @property {string} host
  * @property {string} id
  * @property {boolean} connected
+ * @property {boolean} isSimulation
  */
 
 /**
@@ -73,16 +74,26 @@ export class DashboardCore extends EventTarget {
 
   /** @returns {DashboardConnection} A copy that callers cannot use to change core state. */
   get connection() {
-    return { ...this.#state };
+    return { ...this.#state, isSimulation: this.#state.id === "sim" };
   }
 
   /**
-   * Values received from NetworkTables, keyed by topic name.
-   * Treat this map as read-only; only core updates it.
-   * @returns {Map<string, DashboardTopic>}
+   * Looks up the latest value for one NetworkTables topic.
+   * The returned object is a copy, so callers cannot replace core's topic fields.
+   * @param {string} name
+   * @returns {Readonly<DashboardTopic> | undefined}
    */
-  get values() {
-    return this.#values;
+  getTopic(name) {
+    const topic = this.#values.get(name);
+    return topic && { ...topic };
+  }
+
+  /**
+   * Returns copies of all latest NetworkTables topic objects.
+   * @returns {ReadonlyArray<Readonly<DashboardTopic>>}
+   */
+  getTopics() {
+    return [...this.#values.values()].map((topic) => ({ ...topic }));
   }
 
   /**

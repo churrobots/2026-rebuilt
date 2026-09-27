@@ -46,7 +46,8 @@ export class CustomDashboard extends HTMLElement {
   #start(core) {
 const dashboard = this;
 const ui = dashboard.shadowRoot;
-const values = core.values;
+const getTopic = (name) => core.getTopic(name);
+const getTopics = () => core.getTopics();
 const topicsElement = ui.querySelector("#topics");
 const filterElement = ui.querySelector("#topic-filter");
 const diagnosticsElement = ui.querySelector("#diagnostics");
@@ -113,7 +114,7 @@ ui.querySelectorAll("[data-tab]").forEach((button) => {
 });
 
 function updateAimLock() {
-  aimLockFrame.classList.toggle("aim-locked", values.get(aimLockTopic)?.value === true);
+  aimLockFrame.classList.toggle("aim-locked", getTopic(aimLockTopic)?.value === true);
 }
 
 function scheduleRender() {
@@ -129,7 +130,7 @@ function renderTopics() {
   renderDiagnostics();
   updateCameraStreams();
   const filter = filterElement.value.toLowerCase();
-  const topics = [...values.values()].filter((topic) => topic.name.toLowerCase().includes(filter)).sort((a, b) => a.name.localeCompare(b.name));
+  const topics = getTopics().filter((topic) => topic.name.toLowerCase().includes(filter)).sort((a, b) => a.name.localeCompare(b.name));
   if (!topics.length) {
     topicsElement.innerHTML = '<div class="empty">Waiting for NetworkTables data…</div>';
     return;
@@ -183,7 +184,7 @@ function renderField() {
   const drawnHeight = field.length * scale;
   const left = (canvasWidth - drawnWidth) / 2;
   const top = (canvasHeight - drawnHeight - allianceZoneGap - allianceZoneHeight) / 2;
-  const red = values.get("/FMSInfo/IsRedAlliance")?.value === true;
+  const red = getTopic("/FMSInfo/IsRedAlliance")?.value === true;
 
   context.fillStyle = "#202630";
   context.strokeStyle = "#7c8798";
@@ -203,7 +204,7 @@ function renderField() {
   context.fillRect(left, allianceZoneTop, drawnWidth, allianceZoneHeight);
   context.strokeStyle = red ? "#ff6877" : "#63b2ff";
   context.strokeRect(left, allianceZoneTop, drawnWidth, allianceZoneHeight);
-  const stationValue = Number(values.get("/FMSInfo/StationNumber")?.value);
+  const stationValue = Number(getTopic("/FMSInfo/StationNumber")?.value);
   const station = Number.isInteger(stationValue) && stationValue >= 1 && stationValue <= 3 ? stationValue : null;
   context.fillStyle = "#ffffff";
   context.font = "700 10px Inter, ui-sans-serif, system-ui, sans-serif";
@@ -211,7 +212,7 @@ function renderField() {
   context.textBaseline = "middle";
   context.fillText(`YOUR ALLIANCE${station ? ` · STATION ${station}` : ""}`, left + drawnWidth / 2, allianceZoneTop + allianceZoneHeight / 2);
 
-  const pose = decodePose2d(values.get("/AdvantageKit/RealOutputs/Odometry/Robot")?.value);
+  const pose = decodePose2d(getTopic("/AdvantageKit/RealOutputs/Odometry/Robot")?.value);
   if (!pose) {
     fieldPose.textContent = "Waiting for pose…";
     return;
@@ -268,8 +269,8 @@ this.#cleanup.push(() => fieldObserver.disconnect());
 
 function updateCameraStreams(force = false) {
   const panelOpen = !ui.querySelector("#cameras-panel").hidden;
-  const simulation = values.get("/SimSupervisor/Available")?.value === true;
-  const cameraHost = simulation ? core.connection.host : cameraHostInput.value.trim();
+  const connection = core.connection;
+  const cameraHost = connection.isSimulation ? connection.host : cameraHostInput.value.trim();
   for (const camera of cameraElements) {
     if (!panelOpen || !cameraHost) {
       if (camera.image.src) camera.image.removeAttribute("src");
@@ -290,7 +291,7 @@ function updateCameraStreams(force = false) {
 }
 
 function renderAutoChooser() {
-  const options = values.get(`${autoPrefix}options`)?.value;
+  const options = getTopic(`${autoPrefix}options`)?.value;
   if (!Array.isArray(options) || !options.length) {
     autoSelect.disabled = true;
     return;
@@ -305,9 +306,9 @@ function renderAutoChooser() {
     }));
     autoSelect.dataset.options = signature;
   }
-  const selected = values.get(`${autoPrefix}selected`)?.value;
-  const active = values.get(`${autoPrefix}active`)?.value;
-  const defaultOption = values.get(`${autoPrefix}default`)?.value;
+  const selected = getTopic(`${autoPrefix}selected`)?.value;
+  const active = getTopic(`${autoPrefix}active`)?.value;
+  const defaultOption = getTopic(`${autoPrefix}default`)?.value;
   const current = selected || active || defaultOption;
   if (typeof current === "string" && options.includes(current) && ui.activeElement !== autoSelect) {
     autoSelect.value = current;
@@ -316,7 +317,7 @@ function renderAutoChooser() {
 }
 
 function renderDiagnostics() {
-  const devices = [...values.values()]
+  const devices = getTopics()
     .filter((topic) => topic.name.startsWith(diagnosticPrefix) && typeof topic.value === "boolean")
     .map((topic) => ({ name: topic.name.slice(diagnosticPrefix.length), good: topic.value }))
     .sort((a, b) => a.name.localeCompare(b.name));
