@@ -26,17 +26,13 @@ Your code does not have to match the reference line-for-line. If it works and yo
    - right stick turns it
    - hold A to face 0°
    - press X to lock the wheels in an X
-5. Explain that this dashboard is where they'll see the results of everything they build from here on (C42). Right now it only shows the alliance, so let's make it show the robot.
-6. **First code edit:** in `Drive.periodic()`, log the pose as simple numbers:
-   - `Logger.recordOutput("Tutorial/Drive/X", getPose().getX())`
-   - `Tutorial/Drive/Y`
-   - `Tutorial/Drive/HeadingDegrees`
+5. Watch the robot move on the dashboard's **Field** card. It's drawn from the driver's point of view: your alliance wall is at the bottom, and it flips when you switch alliance in the Sim Driver Station. Explain that this dashboard is where they'll see the results of everything they build from here on (C42), and that they can change anything about it.
+6. **First code edit (robot):** in `Drive.periodic()`, log the robot's speed as a simple number, for example `Logger.recordOutput("Tutorial/Drive/SpeedMetersPerSec", ...)` using `getChassisSpeeds()`. Save, and watch the sim restart by itself (C41, C13).
+7. **First code edit (dashboard):** show that speed on the Field card, next to the pose readout. Then let them change something just for fun, like the robot's color or size in `drawRobot`.
+8. Make your first commit (C05).
 
-   Save, and watch the sim restart by itself (C41).
-7. Make your first commit (C05).
-
-**Dashboard milestone:** A "Drivetrain" card with x, y (meters), and heading (degrees) that changes live as you drive. Stretch: a small top-down field dot with a heading arrow.
-**Done when:** The student can drive in sim with the controller, and the dashboard numbers change the way they expect (forward is +X, turning left increases heading, C04).
+**Dashboard milestone:** The Field card shows the robot moving live, plus the student's own speed readout.
+**Done when:** The student can drive in sim with the controller, and the robot moves on the Field card the way they expect (pushing forward drives away from your alliance wall, C04).
 
 ---
 
@@ -103,7 +99,7 @@ Your code does not have to match the reference line-for-line. If it works and yo
 7. Add a "reset heading" button (reference: `resetPoseFacingAway()` on `main`).
 8. 🧑‍🏫 Do the real-robot arm check from Phase 2, step 9.
 
-**Dashboard milestone:** The Drivetrain card from Phase 0 now tracks the *real* robot (connect the dashboard to the robot's address). Add a "module health" row showing each module's measured wheel angle, which makes a mis-zeroed module obvious.
+**Dashboard milestone:** The Field card now tracks the *real* robot (connect the dashboard to the robot's address). Add a "module health" row showing each module's measured wheel angle, which makes a mis-zeroed module obvious.
 **Done when:** The robot drives field-relative smoothly on carpet, and the dashboard pose tracks the real movement.
 
 ---

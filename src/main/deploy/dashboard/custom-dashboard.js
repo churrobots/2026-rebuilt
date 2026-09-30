@@ -1,7 +1,13 @@
 /** @typedef {import("./core/dashboard-core.js").DashboardCore} DashboardCore */
 /** @typedef {import("./core/dashboard-core.js").DashboardTopic} DashboardTopic */
 
+const POSE_TOPIC = "/AdvantageKit/RealOutputs/Odometry/Robot";
 const ALLIANCE_TOPIC = "/FMSInfo/IsRedAlliance";
+const STATION_TOPIC = "/FMSInfo/StationNumber";
+
+// 2026 field size and robot bumper size, in meters.
+const FIELD = { length: 17.548, width: 8.052 };
+const ROBOT_SIZE_METERS = 0.7112;
 
 /** A fresh, editable dashboard. Add a card here for everything you want to see. */
 export class CustomDashboard extends HTMLElement {
@@ -19,10 +25,12 @@ export class CustomDashboard extends HTMLElement {
         new URL(import.meta.url).searchParams.get("v") ?? "initial";
       root.innerHTML = `<link rel="stylesheet" href="custom-dashboard.css?v=${version}">
         <main>
-          <section class="card alliance-card" aria-labelledby="alliance-heading">
-            <p class="eyebrow">Match status</p>
-            <h1 id="alliance-heading">Current alliance</h1>
-            <output class="alliance" aria-live="polite">Waiting for alliance…</output>
+          <section class="card field-card" aria-labelledby="field-heading">
+            <div class="card-heading">
+              <div><p class="eyebrow">Drivetrain</p><h1 id="field-heading">Field</h1></div>
+              <output class="field-pose" aria-live="polite">Waiting for pose…</output>
+            </div>
+            <div class="field-view"><canvas></canvas></div>
           </section>
         </main>`;
     }
@@ -51,28 +59,178 @@ export class CustomDashboard extends HTMLElement {
   /** @param {DashboardCore} core The shared protected core API. */
   #start(core) {
     this.#started = true;
-    const alliance = this.shadowRoot.querySelector(".alliance");
+    this.#startFieldCard(core);
+  }
+
+  /** Draws the field from the driver's point of view, with the robot on it. */
+  #startFieldCard(core) {
+    const root = this.shadowRoot;
+    const view = root.querySelector(".field-view");
+    const canvas = root.querySelector(".field-view canvas");
+    const poseText = root.querySelector(".field-pose");
+    let frame = 0;
 
     const render = () => {
-      const isRed = core.getTopic(ALLIANCE_TOPIC)?.value;
-      alliance.textContent =
-        isRed === true
-          ? "Red"
-          : isRed === false
-            ? "Blue"
-            : "Waiting for alliance…";
-      alliance.dataset.alliance =
-        isRed === true ? "red" : isRed === false ? "blue" : "unknown";
+      frame = 0;
+      const isRed = core.getTopic(ALLIANCE_TOPIC)?.value === true;
+      const station = Number(core.getTopic(STATION_TOPIC)?.value);
+      const pose = decodePose2d(core.getTopic(POSE_TOPIC)?.value);
+      drawField(canvas, view.getBoundingClientRect(), { isRed, station, pose });
+      poseText.textContent = pose
+        ? `x ${pose.x.toFixed(2)} · y ${pose.y.toFixed(2)} · ${Math.round((pose.heading * 180) / Math.PI)}°`
+        : "Waiting for pose…";
+    };
+    // Pose updates arrive very often, so draw at most once per screen refresh.
+    const scheduleRender = () => {
+      if (!frame) frame = requestAnimationFrame(render);
     };
 
     /** @param {CustomEvent<DashboardTopic>} event */
     const topicListener = ({ detail: topic }) => {
-      if (topic.name === ALLIANCE_TOPIC) render();
+      if ([POSE_TOPIC, ALLIANCE_TOPIC, STATION_TOPIC].includes(topic.name))
+        scheduleRender();
     };
     core.addEventListener("topic", topicListener);
-    this.#cleanup.push(() => core.removeEventListener("topic", topicListener));
-    render();
+    const resizeObserver = new ResizeObserver(scheduleRender);
+    resizeObserver.observe(view);
+    this.#cleanup.push(() => {
+      core.removeEventListener("topic", topicListener);
+      resizeObserver.disconnect();
+      cancelAnimationFrame(frame);
+    });
+    scheduleRender();
   }
+}
+
+/**
+ * Draws the field so your alliance wall is at the bottom, like standing behind the glass.
+ * @param {HTMLCanvasElement} canvas
+ * @param {DOMRect} bounds
+ * @param {{ isRed: boolean, station: number, pose: { x: number, y: number, heading: number } | null }} state
+ */
+function drawField(canvas, bounds, { isRed, station, pose }) {
+  const ratio = window.devicePixelRatio || 1;
+  const width = Math.max(1, Math.round(bounds.width * ratio));
+  const height = Math.max(1, Math.round(bounds.height * ratio));
+  if (canvas.width !== width || canvas.height !== height) {
+    canvas.width = width;
+    canvas.height = height;
+  }
+  const context = canvas.getContext("2d");
+  context.setTransform(ratio, 0, 0, ratio, 0, 0);
+  context.clearRect(0, 0, bounds.width, bounds.height);
+
+  const padding = 10;
+  const bandHeight = 30;
+  const bandGap = 5;
+  const scale = Math.min(
+    (bounds.width - padding * 2) / FIELD.width,
+    (bounds.height - padding * 2 - bandHeight - bandGap) / FIELD.length,
+  );
+  const drawnWidth = FIELD.width * scale;
+  const drawnHeight = FIELD.length * scale;
+  const left = (bounds.width - drawnWidth) / 2;
+  const top = (bounds.height - drawnHeight - bandGap - bandHeight) / 2;
+
+  // Carpet and quarter lines.
+  context.fillStyle = "#202630";
+  context.strokeStyle = "#7c8798";
+  context.lineWidth = 1;
+  context.fillRect(left, top, drawnWidth, drawnHeight);
+  context.strokeRect(left, top, drawnWidth, drawnHeight);
+  context.setLineDash([4, 5]);
+  context.strokeStyle = "#9ca89b66";
+  for (const fraction of [0.25, 0.5, 0.75]) {
+    const y = top + drawnHeight * fraction;
+    context.beginPath();
+    context.moveTo(left, y);
+    context.lineTo(left + drawnWidth, y);
+    context.stroke();
+  }
+  context.setLineDash([]);
+
+  // "Your alliance" band below the field.
+  const bandTop = top + drawnHeight + bandGap;
+  context.fillStyle = isRed ? "#b52c3c" : "#2879cf";
+  context.fillRect(left, bandTop, drawnWidth, bandHeight);
+  context.strokeStyle = isRed ? "#ff6877" : "#63b2ff";
+  context.strokeRect(left, bandTop, drawnWidth, bandHeight);
+  const stationLabel =
+    Number.isInteger(station) && station >= 1 && station <= 3
+      ? ` · STATION ${station}`
+      : "";
+  context.fillStyle = "#ffffff";
+  context.font = "700 10px system-ui, sans-serif";
+  context.textAlign = "center";
+  context.textBaseline = "middle";
+  context.fillText(
+    `YOUR ALLIANCE${stationLabel}`,
+    left + drawnWidth / 2,
+    bandTop + bandHeight / 2,
+  );
+
+  if (pose) drawRobot(context, pose, { isRed, left, top, scale });
+}
+
+/** Converts field meters to screen pixels, flipping the view for the red alliance. */
+function fieldToScreen(fieldX, fieldY, { isRed, left, top, scale }) {
+  return {
+    x: left + (isRed ? fieldY : FIELD.width - fieldY) * scale,
+    y: top + (isRed ? fieldX : FIELD.length - fieldX) * scale,
+  };
+}
+
+/** Draws the robot as a square with an arrow pointing where its front faces. */
+function drawRobot(context, pose, view) {
+  const center = fieldToScreen(pose.x, pose.y, view);
+  const front = fieldToScreen(
+    pose.x + Math.cos(pose.heading),
+    pose.y + Math.sin(pose.heading),
+    view,
+  );
+  const size = Math.max(10, ROBOT_SIZE_METERS * view.scale);
+  context.save();
+  context.translate(center.x, center.y);
+  context.rotate(Math.atan2(front.y - center.y, front.x - center.x));
+  context.shadowColor = view.isRed ? "#ff5264" : "#57a6ff";
+  context.shadowBlur = 10;
+  context.fillStyle = view.isRed ? "#d83b4c" : "#3287df";
+  context.strokeStyle = "#f3f7fb";
+  context.lineWidth = 2;
+  context.fillRect(-size / 2, -size / 2, size, size);
+  context.strokeRect(-size / 2, -size / 2, size, size);
+  context.beginPath();
+  context.moveTo(size / 2, 0);
+  context.lineTo(size / 4, -size / 4);
+  context.lineTo(size / 4, size / 4);
+  context.closePath();
+  context.fillStyle = "#ffffff";
+  context.fill();
+  context.restore();
+}
+
+/**
+ * AdvantageKit publishes a Pose2d as 24 bytes: x, y, and heading (radians) as doubles.
+ * @param {unknown} value
+ * @returns {{ x: number, y: number, heading: number } | null}
+ */
+function decodePose2d(value) {
+  if (Array.isArray(value) && value.length >= 3) {
+    const pose = {
+      x: Number(value[0]),
+      y: Number(value[1]),
+      heading: Number(value[2]),
+    };
+    return Object.values(pose).every(Number.isFinite) ? pose : null;
+  }
+  if (!(value instanceof Uint8Array) || value.byteLength < 24) return null;
+  const bytes = new DataView(value.buffer, value.byteOffset, value.byteLength);
+  const pose = {
+    x: bytes.getFloat64(0, true),
+    y: bytes.getFloat64(8, true),
+    heading: bytes.getFloat64(16, true),
+  };
+  return Object.values(pose).every(Number.isFinite) ? pose : null;
 }
 
 customElements.define("custom-dashboard", CustomDashboard);

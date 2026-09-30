@@ -128,7 +128,8 @@ The custom dashboard is how students will *see* the results of almost everything
 
 - Only edit `src/main/deploy/dashboard/custom-dashboard.js` and `custom-dashboard.css`. `core/` and `service-worker.js` are protected (see Protected code).
 - Robot side: publish values with `Logger.recordOutput("Some/Key", value)`. Dashboard side: read `core.getTopic("/AdvantageKit/RealOutputs/Some/Key")?.value`, and listen for `"topic"` events (see the pattern already in `custom-dashboard.js`).
-- Prefer logging simple numbers and booleans for the dashboard (for example `Tutorial/Drive/X`) over structs like `Pose2d`, which would need decoding.
+- Prefer logging simple numbers and booleans for the dashboard (for example `Tutorial/Drive/SpeedMetersPerSec`). Structs like `Pose2d` arrive as raw bytes; `decodePose2d` in `custom-dashboard.js` shows how to read one, so reuse it for other poses (for example, vision poses or targets on the Field card).
+- The **Field** card comes pre-built on `fresh-start`: a top-down view that puts the student's alliance wall at the bottom and draws the robot from `Odometry/Robot`. Students are encouraged to modify it: add targets, vision poses, paths, or a hub marker as the phases go.
 - Keep the dashboard growing: every phase adds at least one permanent card, and earlier permanent cards stay unless the student wants them gone. Explain the robot → NetworkTables → dashboard flow the first time (C13, C42).
 - The dashboard files come with the `fresh-start` branch. If they're missing, stop and get a coach. Don't recreate them from memory.
 
