@@ -216,7 +216,7 @@ Good feedforward does most of the work, and PID just cleans up the rest.
 
 ### C27 · Mechanism libraries (YAMS) vs. writing it yourself
 **Level:** Deeper
-**The idea:** For mechanisms, we use **YAMS**, a library that bundles the motor controller, PID, feedforward, limits, simulation, and telemetry into ready-made `Arm`, `FlyWheel`, and `Elevator` objects. That's less code, but more hidden. Write one mechanism by hand first so you understand what YAMS does for you, then switch to it. It's a real engineering trade-off: control vs. convenience.
+**The idea:** For mechanisms, we use **YAMS**, a library that bundles the motor controller, PID, feedforward, limits, simulation, and telemetry into ready-made `Arm`, `FlyWheel`, and `Elevator` objects. That's less code, but more hidden. You'll build the intake arm with YAMS first, so you can see a mechanism moving in simulation quickly. Then you'll write the intake roller by hand to see what YAMS was doing for you. It's a real engineering trade-off: control vs. convenience.
 **In our robot:** `Shooter.java` (`FlyWheel`), `IntakeArm.java` (`Arm`), `ClimberTW.java` (`Elevator`), `util/YAMSUtil.java` (handles unplugged motors safely)
 
 ### C28 · Driver input shaping

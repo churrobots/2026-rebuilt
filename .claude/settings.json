@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Edit(**/TUTORIAL_PROGRESS.md)",
+      "Edit(**/LEARNINGS.md)"
+    ]
+  }
+}

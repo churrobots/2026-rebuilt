@@ -1,6 +1,6 @@
 # Guided Tutorial Plan: Build Our Robot From Scratch
 
-This is the roadmap for building our **new robot** from a blank AdvantageKit template: a **Kraken swerve drivetrain** with a **turret** shooter. The AI assistant follows it in **Guided Tutorial Mode** (see `AGENTS.md`), and a student or coach can follow it by hand.
+This is the roadmap for building our **new robot** starting from a bare AdvantageKit swerve template (the `fresh-start` branch): a **Kraken swerve drivetrain** with a **turret** shooter. The AI assistant follows it in **Guided Tutorial Mode** (see `AGENTS.md`), and a student or coach can follow it by hand.
 
 - Concept IDs like **C19** refer to [CONCEPTS.md](CONCEPTS.md).
 - "Reference" means our existing code on the reference branches listed in `AGENTS.md`. Peek at a file with `git show <branch>:<path>`. The drivetrain reference is `unleash-the-kraken`, the turret reference is `churret` (unfinished), and most other mechanisms come from the 2026 competition robot on `main`. If the new robot's mechanisms differ, measure the real robot. The phases still apply.
@@ -12,94 +12,116 @@ Your code does not have to match the reference line-for-line. If it works and yo
 
 ---
 
-## Phase 0: Setup and your first program
+## Phase 0: Drive the robot in simulation
 
-**Goal:** Tools installed, a fresh project running in simulation, and the dashboard showing something.
-**Concepts:** C01, C02, C05, C41, C42, C44
-**Zero to Robot:** Step 2 (`zero-to-robot/step-2/wpilib-setup.html`, `frc-game-tools.html`) and Step 4 (`creating-test-drivetrain-program-cpp-java-python.html`)
+**Goal:** Within the first session, the student is driving our swerve robot around a simulated field with a real controller and watching it on the dashboard.
+**Concepts:** C02, C05, C41, C42, C13 (lightly; details come in Phase 1)
+**Zero to Robot:** Step 2 (`zero-to-robot/step-2/wpilib-setup.html`) for installing WPILib
 
-1. Install WPILib 2026, the FRC Game Tools if you're on Windows, and the vendor tools: **Phoenix Tuner X** (Krakens and TalonFX) and the **REV Hardware Client** (SPARK MAX). Open the project in WPILib VS Code.
-2. Tour the control system hardware on the real robot with a coach: roboRIO, radio, PDH, CAN chain, and motor controllers (C01).
-3. Check out the tutorial starting branch (`fresh-start`) and make your own branch from it. It's the **AdvantageKit Spark Swerve template** already adapted for our Kraken MAXSwerve modules (`ModuleIOKraken`). It already includes the team's tooling: the browser dashboard, `SimSupervisor`, the Sim Driver Station bridge, and every vendor library we use (YAMS, PhotonVision, PathPlanner, and so on). There are no mechanisms yet. You'll build those.
-4. Look at what's there with a coach: `Robot.java`, `RobotContainer.java` (drive only), the `drive/` folder, and the starter dashboard card.
-5. Click **ChurroSim** (or press ⌘⇧B) to start the simulator, then **ChurroDashboard** to open `http://localhost:5800`. Use the Sim Driver Station there to enable teleop. Explain that this dashboard is where they'll see the results of everything they build from here on (C42).
-6. Make your first commit on your own branch (C05).
+1. Install WPILib 2026 and open the project in WPILib VS Code. (The vendor tools, Phoenix Tuner X and the REV Hardware Client, can wait until Phase 3.)
+2. Check out the tutorial starting branch (`fresh-start`) and make your own branch from it (C05). It's the **AdvantageKit Spark Swerve template** already adapted for our Kraken MAXSwerve modules (`ModuleIOKraken`). It also includes the team's tooling: the browser dashboard, `SimSupervisor`, the Sim Driver Station bridge, and every vendor library we use (YAMS, PhotonVision, PathPlanner, and so on). There are no mechanisms yet. You'll build those.
+3. Plug an Xbox-style controller into the laptop. Click **ChurroSim** (or press ⌘⇧B) to start the simulator, then **ChurroDashboard** to open `http://localhost:5800`.
+4. In the dashboard's Sim Driver Station, check that the controller shows as connected, then enable **teleop** and **drive**. The template already has the controls:
+   - left stick moves the robot
+   - right stick turns it
+   - hold A to face 0°
+   - press X to lock the wheels in an X
+5. Explain that this dashboard is where they'll see the results of everything they build from here on (C42). Right now it only shows the alliance, so let's make it show the robot.
+6. **First code edit:** in `Drive.periodic()`, log the pose as simple numbers:
+   - `Logger.recordOutput("Tutorial/Drive/X", getPose().getX())`
+   - `Tutorial/Drive/Y`
+   - `Tutorial/Drive/HeadingDegrees`
 
-**Dashboard milestone:** Replace the starter card with a "Hello, robot" card that shows whether the dashboard is connected and the current alliance (the existing `/FMSInfo/IsRedAlliance` pattern).
-**Done when:** Saving a Java file restarts the sim automatically, and the dashboard shows the alliance change when you switch it in the Sim Driver Station.
+   Save, and watch the sim restart by itself (C41).
+7. Make your first commit (C05).
 
----
-
-## Phase 1: How robot code is organized
-
-**Goal:** Understand the template before changing it.
-**Concepts:** C02, C03, C06–C11, C12, C13, C45
-
-1. Walk through `Robot.java` (modes, `robotPeriodic`, the command scheduler), then `RobotContainer.java`, `Constants.java`, and the `drive/` folder at a high level.
-2. Explain IO layers using `ModuleIO` / `ModuleIOKraken` / `ModuleIOSim` (C12): `RobotContainer` picks Kraken hardware on the real robot and physics simulation on a laptop, and `Drive.java` never knows the difference.
-3. **Exercise:** In `robotPeriodic()`, log a loop counter with `Logger.recordOutput("Tutorial/LoopCount", count)`.
-4. **Exercise:** Bind a controller button to a `Commands.runOnce(...)` that logs a message. See how `onTrue` and `whileTrue` behave differently (C08).
-
-**Dashboard milestone:** Show `Tutorial/LoopCount`. The topic is `/AdvantageKit/RealOutputs/Tutorial/LoopCount`. It should count up at about 50 per second, which proves the 20 ms loop (C02).
-**Done when:** The student can explain, in their own words, what runs every 20 ms and what a command is.
+**Dashboard milestone:** A "Drivetrain" card with x, y (meters), and heading (degrees) that changes live as you drive. Stretch: a small top-down field dot with a heading arrow.
+**Done when:** The student can drive in sim with the controller, and the dashboard numbers change the way they expect (forward is +X, turning left increases heading, C04).
 
 ---
 
-## Phase 2: Kraken swerve drivetrain
+## Phase 1: How that just worked
 
-**Goal:** Drive our Kraken swerve robot, first in sim, then for real.
-**Concepts:** C04, C12, C15, C17, C24, C25, C26, C28, C22
-**Reference:** `unleash-the-kraken`: `drive/ModuleIOKraken.java`, `drive/DriveConstants.java` (the Kraken section), `util/PhoenixUtil.java`, and the `RobotContainer` swap from `ModuleIOSpark` to `ModuleIOKraken`. Also `DriveCommands.java`.
+**Goal:** Understand the code behind what the student just did, so they can change it.
+**Concepts:** C02, C03, C04, C06–C11, C12, C13, C25, C28, C45
 
-1. Review `DriveConstants` against the new robot: CAN IDs, track width and wheelbase, wheel radius, drive gearing, current limits, and inversions. They start with values from the old robot. Note `driveGearbox = DCMotor.getKrakenX60(1)`, which makes the simulation model a Kraken. Explain every number and verify it on the real robot. Don't trust it blindly: *where does each value come from?* (C17)
-2. Set the drivetrain's default command to joystick driving. Explain the deadband, input squaring, and negated Y (C28). Drive in sim and compare field-relative with robot-relative driving (C25).
-3. Watch odometry build up in AdvantageScope's 2D field (C26).
-4. **The IO layer lesson (C12).** Read through `ModuleIOKraken` together. The team wrote it to swap the template's NEO Vortex drive motors for Krakens:
+1. **Follow the stick press through the code:** controller → `RobotContainer`'s default command → `DriveCommands.joystickDrive` → `Drive.runVelocity` → each module. Along the way, explain the command-based pieces: subsystem, command, default command, and trigger (C06–C11).
+2. In `joystickDrive`, explain the deadband, input squaring, and why Y is negated (C28). Explain field-relative driving (C25): spin the robot in sim and push forward. It still goes "up the field."
+3. Walk through `Robot.java`: the modes, `robotPeriodic`, and the command scheduler running every 20 ms (C02).
+4. Explain IO layers using `ModuleIO` / `ModuleIOKraken` / `ModuleIOSim` (C12). `RobotContainer` picks Kraken hardware on the real robot and physics simulation on a laptop, and `Drive.java` never knows the difference. That's why they could drive without a robot.
+5. **Exercise:** Change the deadband or max speed, save, and *feel* the difference with the controller.
+6. **Exercise:** Bind a new button to a `Commands.runOnce(...)` that logs a message. Try `onTrue` vs. `whileTrue` and watch the difference on the dashboard (C08).
+
+**Dashboard milestone:** Add the button exercise's value (for example a press counter, or "held/not held") to the dashboard.
+**Done when:** The student can explain, in their own words, the path from stick to wheels, and what a command and a subsystem are.
+
+---
+
+## Phase 2: First mechanism, the intake arm (in simulation)
+
+**Goal:** Build a real mechanism early, and *see* it move in simulation: an arm that goes to exact angles and holds them against gravity.
+**Concepts:** C06, C07, C09, C15, C16, C17, C19, C20, C21, C27, C36, C45
+**Reference:** `main`: `subsystems/IntakeArm.java` (YAMS `Arm`, `ArmFeedforward`, soft/hard limits); `sandbox-sim`: `subsystems/MechanismVisualizer.java` (AdvantageScope visualization)
+
+1. Show what the intake arm does on the real robot, or in a match video. Name its positions: stowed, retracted, and extended.
+2. Introduce YAMS (C27): one config object describes the motor, gearing, limits, PID, and feedforward, and YAMS simulates the arm's physics for free.
+3. Create an `IntakeArm` subsystem with a YAMS `Arm`: the SPARK MAX CAN ID, gear reduction, a current limit, soft limits inside hard limits, and the arm's length and mass (so the simulation behaves like the real thing). Put the numbers in constants (C16, C17, C45). Call `simIterate()` in `simulationPeriodic()`.
+4. Add `extend()`, `retract()`, and `stow()` angle commands, with `retract()` as the default command (C07, C09). Bind them to the D-pad, since A and X are already used by the drivetrain.
+5. Log the target angle, measured angle, and "at target" (for example `Tutorial/Arm/TargetDegrees`) (C13).
+6. **Build the arm visualization on the dashboard** (see the milestone). Let the student design how it looks.
+7. **Tuning lesson, the fun part (C19–C21).** All in sim, watching the dashboard. Change one gain at a time and save; the sim restarts in seconds:
+   - All gains at 0 → the arm **droops** under gravity.
+   - Add **kG** until it holds still wherever it is (C20).
+   - Add **P** → it moves to the target, but too much P makes it **wobble** (C19).
+   - Add a little **D** to calm the wobble.
+
+   A live setpoint vs. measured graph makes this obvious.
+8. Optional: show the same arm in AdvantageScope with a `LoggedMechanism2d` (C14).
+9. 🧑‍🏫 **Later, on the real robot** (after Phase 3): verify the absolute encoder direction and zero *before* closing the loop, then re-tune the gains. Mention the reference's comment about measuring angles empirically (C17).
+
+**Dashboard milestone:** An "Intake arm" card with a side-view drawing: a pivot point, a solid line for where the arm *is*, and a faint "ghost" line for where it's *trying to go*. Also show the two angles as numbers and an **AT TARGET** light. Stretch: a small live graph of target vs. measured.
+**Done when:** Pressing the D-pad swings the arm on the dashboard to each position without drooping or wobbling, and the student can explain what kG and P each do.
+
+---
+
+## Phase 3: Drivetrain on the real robot
+
+**Goal:** Everything that worked in sim now works on carpet with the Krakens.
+**Concepts:** C01, C04, C12, C15, C17, C22, C24, C26, C44
+**Reference:** `unleash-the-kraken`: `drive/ModuleIOKraken.java`, `drive/DriveConstants.java` (the Kraken section), `util/PhoenixUtil.java`
+**Zero to Robot:** Step 2 (`frc-game-tools.html`) and Step 4 (`running-test-program.html`)
+
+1. Install the FRC Game Tools (Driver Station) on Windows, plus **Phoenix Tuner X** and the **REV Hardware Client**. Tour the control system hardware on the robot with a coach: roboRIO, radio, PDH, CAN chain, and motor controllers (C01).
+2. Review `DriveConstants` against the new robot: CAN IDs, track width and wheelbase, wheel radius, drive gearing, current limits, and inversions. They start with values from the old robot. Note that `driveGearbox = DCMotor.getKrakenX60(1)` is what makes the simulation model a Kraken. Explain every number and verify it on the real robot. Don't trust it blindly: *where does each value come from?* (C17)
+3. **The IO layer lesson (C12).** Read through `ModuleIOKraken` together. The team wrote it to swap the template's NEO Vortex drive motors for Krakens:
    - **Drive:** a TalonFX using Phoenix 6: `TalonFXConfiguration` for inversion, brake mode, stator and supply current limits, and `SensorToMechanismRatio` (so the closed loop works in *wheel* rotations). It uses `VelocityVoltage` and `VoltageOut` control requests, and status signals for position and velocity.
    - **Turn:** a SPARK MAX + absolute encoder, the same as the template.
    - Compare it with the template's original `ModuleIOSpark` (`git show main:src/main/java/frc/robot/subsystems/drive/ModuleIOSpark.java`). Point out that `Drive.java` didn't have to change at all.
-5. Explain why the Kraken gains are in different units (TalonFX native: volts per wheel rotation/second) and must be re-tuned. Don't just convert them.
-6. 🧑‍🏫 **Real robot:** robot on blocks first. Check the CAN IDs in Phoenix Tuner X and the REV Hardware Client. Set the module zero rotations, check that each module turns and drives the right way, and check the gyro direction (counter-clockwise positive, C04).
-7. 🧑‍🏫 Run the template's wheel radius and feedforward characterization from the auto chooser to find the Kraken kS and kV (C22).
-8. Add a "reset heading" button (reference: `resetPoseFacingAway()` on `main`).
+4. Explain why the Kraken gains are in different units (TalonFX native: volts per wheel rotation/second) and must be re-tuned. Don't just convert them.
+5. 🧑‍🏫 Deploy, with the robot on blocks first (C44). Check the CAN IDs in Phoenix Tuner X and the REV Hardware Client. Set the module zero rotations, check that each module turns and drives the right way, and check the gyro direction (counter-clockwise positive, C04).
+6. 🧑‍🏫 Run the template's wheel radius and feedforward characterization from the auto chooser to find the Kraken kS and kV (C22).
+7. Add a "reset heading" button (reference: `resetPoseFacingAway()` on `main`).
+8. 🧑‍🏫 Do the real-robot arm check from Phase 2, step 9.
 
-**Dashboard milestone:** A "Drivetrain" card with the robot's x, y (meters), and heading (degrees). Log them as simple numbers (for example `Tutorial/Drive/X`) so the dashboard doesn't have to decode `Pose2d` structs. Stretch: a small top-down field view.
-**Done when:** The robot drives field-relative smoothly in sim *and* on carpet with the Krakens, and the dashboard pose tracks the real movement.
+**Dashboard milestone:** The Drivetrain card from Phase 0 now tracks the *real* robot (connect the dashboard to the robot's address). Add a "module health" row showing each module's measured wheel angle, which makes a mis-zeroed module obvious.
+**Done when:** The robot drives field-relative smoothly on carpet, and the dashboard pose tracks the real movement.
 
 ---
 
-## Phase 3: First mechanism, the intake roller
+## Phase 4: Under the hood, the intake roller by hand
 
-**Goal:** Write a subsystem from scratch, by hand.
-**Concepts:** C06, C07, C09, C15, C16, C18, C34, C45
-**Reference:** `main`: `subsystems/IntakeRoller.java`, `HardwareConstants.java`, `ControlsConstants.java` (see the roller RPM math comment)
+**Goal:** Write a simple mechanism *without* YAMS, to see what YAMS was doing for you. Then combine it with the arm into one intake action.
+**Concepts:** C06, C07, C09, C10, C15, C16, C18, C27, C34, C45
+**Reference:** `main`: `subsystems/IntakeRoller.java`, `ControlsConstants.java` (see the roller RPM math comment)
 
-1. Create `IntakeRoller` with a raw vendor motor controller object. Set the CAN ID, inversion, idle mode, and current limit in a constants file (C16, C45).
+1. Create `IntakeRoller` with a raw vendor motor controller object: CAN ID, inversion, idle mode, and current limit in constants (C15, C16, C45). Compare it with how much YAMS handled for the arm (C27).
 2. Add `runRoller(double percent)` and `stop()` as **commands**, and a default command that stops it (C09).
-3. Bind the left trigger to intake (`whileTrue`) and the left bumper to outtake.
-4. Test in sim, then 🧑‍🏫 on the robot.
-5. Discuss why open-loop speed changes with battery voltage and game pieces, and how the team chose its target RPM (C18, C34). Keep this open-loop for now. Closed-loop comes in Phase 5.
+3. Combine them into one intake command in `RobotContainer`: extend the arm *and* spin the roller together (`Commands.parallel`, C10). Bind it to the left trigger (`whileTrue`), with outtake on the left bumper.
+4. Discuss why open-loop speed changes with battery voltage and game pieces, and how the team chose its target RPM (C18, C34). Keep it open-loop for now. Closed-loop comes in Phase 5.
+5. 🧑‍🏫 Test on the real robot.
 
-**Dashboard milestone:** An "Intake" card showing the roller's commanded output and whether it's running (a colored status pill).
-**Done when:** The student wrote most of the subsystem themselves and can explain why `RobotContainer` doesn't touch the motor directly.
-
----
-
-## Phase 4: Position control, the intake arm
-
-**Goal:** Move an arm to exact angles and hold them against gravity.
-**Concepts:** C17, C19, C20, C21, C23, C27, C36
-**Reference:** `main`: `subsystems/IntakeArm.java` (YAMS `Arm`, absolute encoder, `ArmFeedforward`)
-
-1. Explain absolute encoders, zero offsets, and gear ratios using our arm (C17). Mention the reference's comment about measuring angles empirically.
-2. Introduce YAMS (C27): compare what the hand-written roller needed with what `SmartMotorControllerConfig` + `Arm` provide.
-3. Build `IntakeArm` with `extend`, `retract`, and `stow` angle commands, soft limits, and a current limit. Default command: retract.
-4. **Tuning lesson in sim:** start with all gains at 0 and add kG until the arm holds its position, then add P, then D if it overshoots (C19–C21). Use `TunableNumber`s and an AdvantageScope graph of setpoint vs. measured.
-5. Update the intake command in `RobotContainer`: extend the arm *and* spin the roller together (`Commands.parallel`, C10).
-6. 🧑‍🏫 Real robot: verify the encoder direction and zero *before* closing the loop, then re-tune the gains on the real arm.
-
-**Dashboard milestone:** An arm card with target angle vs. measured angle (two numbers, or a simple gauge) and an "at target" indicator.
-**Done when:** The arm reaches each angle without oscillating, and the student can explain what kG and P each do.
+**Dashboard milestone:** Add the roller to the intake arm card: the commanded output and a spinning/stopped indicator, so the whole intake is on one card.
+**Done when:** One trigger pull extends the arm and runs the roller, the student wrote most of the roller themselves, and they can explain why `RobotContainer` doesn't touch the motor directly.
 
 ---
 
@@ -113,7 +135,7 @@ Your code does not have to match the reference line-for-line. If it works and yo
 2. Tune the flywheel: kV first (the feedforward does most of the work), then P for recovery after each shot (C21, `tuning-flywheel.html`).
 3. Build `Feeder` and `Spindexer` (velocity rollers). Go back and switch the intake roller to closed-loop too (C18).
 4. Compose the shoot command: spin up → wait until at speed → feed + index (C10, C37). Discuss why feeding early wastes shots.
-5. Add `MechanismVisualizer` (from `sandbox-sim`) so AdvantageScope shows the mechanisms moving (C14).
+5. Add `MechanismVisualizer` (from `sandbox-sim`) so AdvantageScope shows all the mechanisms moving together: arm, roller, and flywheel (C14).
 
 **Dashboard milestone:** A "Shooter" card: target RPM, actual RPM, and a big **READY** light when within tolerance.
 **Done when:** In sim, pressing shoot waits for READY before feeding, every time.
