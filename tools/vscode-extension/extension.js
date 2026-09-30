@@ -22,18 +22,23 @@ function activate(context) {
   });
 }
 
+/** @type {vscode.Terminal | undefined} */
+let claudeTerminal;
+
 function startClaude() {
-  const existing = vscode.window.terminals.find((terminal) => terminal.name === CLAUDE_TERMINAL);
-  if (existing) {
-    existing.show();
+  // Only reuse a terminal we started this session. Terminals VS Code restores after a restart
+  // are plain shells with the same name, and Claude isn't running in them.
+  if (claudeTerminal && claudeTerminal.exitStatus === undefined && vscode.window.terminals.includes(claudeTerminal)) {
+    claudeTerminal.show();
     return;
   }
-  const terminal = vscode.window.createTerminal({
+  claudeTerminal = vscode.window.createTerminal({
     name: CLAUDE_TERMINAL,
     cwd: vscode.workspace.workspaceFolders?.[0]?.uri,
+    isTransient: true,
   });
-  terminal.show();
-  terminal.sendText("sbx run claude");
+  claudeTerminal.show();
+  claudeTerminal.sendText("sbx run claude");
 }
 
 async function startSimulator() {

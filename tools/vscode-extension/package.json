@@ -3,7 +3,7 @@
   "displayName": "Churrobots Robot Buttons",
   "description": "Status bar buttons to start Claude, the robot simulator, and the dashboard.",
   "publisher": "churrobots",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "private": true,
   "engines": {
     "vscode": "^1.90.0"
