@@ -12,17 +12,26 @@
 export class NtConnectivity extends HTMLElement {
   /** @type {DashboardCore | null} */
   #core = null;
+  /** @type {ReturnType<typeof setTimeout> | undefined} */
+  #simHintTimer;
 
   constructor() {
     super();
     this.attachShadow({ mode: "open" });
     const version = new URL(import.meta.url).searchParams.get("v") ?? "initial";
+    const isMac = /Mac|iPhone|iPad/.test(navigator.platform);
+    const keys = isMac ? ["⌘ Cmd", "⇧ Shift", "B"] : ["Ctrl", "Shift", "B"];
     this.shadowRoot.innerHTML = `<link rel="stylesheet" href="core/nt-connectivity.css?v=${version}">
       <section aria-label="NetworkTables connectivity">
         <strong>NetworkTables</strong>
         <input inputmode="numeric" aria-label="Team number" placeholder="Team #">
         <div id="points"></div>
-      </section>`;
+      </section>
+      <p id="sim-hint" role="status" hidden>
+        <strong>The simulator isn't running.</strong>
+        In VS Code, press ${keys.map((key) => `<kbd>${key}</kbd>`).join(" + ")} to start it.
+        <small>Just saved a file? Wait a few seconds while it restarts.</small>
+      </p>`;
     this.shadowRoot.querySelector("input").value =
       localStorage.getItem("frc-team-number") || "8048";
     this.shadowRoot
@@ -62,6 +71,7 @@ export class NtConnectivity extends HTMLElement {
         },
       );
     const state = this.#core?.connection;
+    this.#updateSimHint(state);
     const points = this.shadowRoot.querySelector("#points");
     points.replaceChildren(
       ...candidates.map((candidate) => {
@@ -85,6 +95,18 @@ export class NtConnectivity extends HTMLElement {
         return button;
       }),
     );
+  }
+
+  /** @param {import("./dashboard-core.js").DashboardConnection | undefined} state */
+  #updateSimHint(state) {
+    const hint = this.shadowRoot.querySelector("#sim-hint");
+    clearTimeout(this.#simHintTimer);
+    if (state?.isSimulation && !state.connected) {
+      // Wait briefly so the hint doesn't flash while the page reconnects after a reload.
+      this.#simHintTimer = setTimeout(() => (hint.hidden = false), 1000);
+    } else {
+      hint.hidden = true;
+    }
   }
 }
 

@@ -51,3 +51,33 @@ button.offline {
   background: #421d24;
   border-color: #dc4c5c;
 }
+
+#sim-hint {
+  margin: 6px 0 2px;
+  padding: 12px 16px;
+  color: #1a0017;
+  background: #ff2bd6;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+#sim-hint[hidden] {
+  display: none;
+}
+#sim-hint strong {
+  font-size: inherit;
+}
+#sim-hint small {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+kbd {
+  display: inline-block;
+  padding: 2px 8px;
+  color: #ff2bd6;
+  background: #1a0017;
+  border-radius: 6px;
+  font: 700 0.9rem ui-monospace, monospace;
+}
