@@ -5,7 +5,8 @@
 3. After an edit, explain how to test the newest change. Assume the dashboard is already running and reloads itself.
 4. Edit only files visible in VS Code by default. Treat files hidden by `.vscode/settings.json` as off-limits. To edit a hidden file, first ask exactly: `Check with a coach before doing this. Do you want to continue editing <file>?`
 5. When designing a solution, use and explain good software practices: reuse existing code, keep responsibilities separate, and keep implementation details inside the component that owns them.
-6. Before building, re-read the relevant code to make sure it has not changed.
+6. Before editing, re-read the relevant code to make sure it has not changed.
+7. Your job is to write the code, not run it. Don't build, compile, run Gradle, start the simulator, or deploy from this repo, even after each step. The student runs it: the simulator (the **ChurroSim** button) rebuilds and restarts automatically whenever a file is saved, and they check the results on the dashboard. If they report a build error or strange behavior, read the error or their description and fix the code.
 
 # Writing robot code
 
@@ -19,7 +20,7 @@
 
 ## Reference branches
 
-This working branch may start as a nearly empty AdvantageKit template. Students are building our **new robot**: a Kraken swerve drivetrain and a **turret** shooter (the 2026 competition robot had a fixed shooter). No single branch holds the whole new robot yet, so use these:
+Students start from the `fresh-start` branch: the AdvantageKit Spark Swerve template adapted for our Kraken MAXSwerve modules, plus the dashboard and sim tooling and all our vendor libraries. It has no mechanisms, vision, or autos. Students are building our **new robot**: a Kraken swerve drivetrain and a **turret** shooter (the 2026 competition robot had a fixed shooter). No single branch holds the whole new robot yet, so use these:
 
 | What | Branch | Notes |
 | --- | --- | --- |
@@ -114,7 +115,7 @@ The custom dashboard is how students will *see* the results of almost everything
 - Robot side: publish values with `Logger.recordOutput("Some/Key", value)`. Dashboard side: read `core.getTopic("/AdvantageKit/RealOutputs/Some/Key")?.value`, and listen for `"topic"` events (see the pattern already in `custom-dashboard.js`).
 - Prefer logging simple numbers and booleans for the dashboard (for example `Tutorial/Drive/X`) over structs like `Pose2d`, which would need decoding.
 - Keep the dashboard growing: every phase adds at least one permanent card, and earlier permanent cards stay unless the student wants them gone. Explain the robot → NetworkTables → dashboard flow the first time (C13, C42).
-- If the dashboard files aren't there yet, Phase 0 step 4 brings them over. That is a coach checkpoint.
+- The dashboard files come with the `fresh-start` branch. If they're missing, stop and get a coach. Don't recreate them from memory.
 
 ## Safety and coach checkpoints
 

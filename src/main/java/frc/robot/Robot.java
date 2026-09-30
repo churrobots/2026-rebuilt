@@ -12,15 +12,9 @@ import com.revrobotics.util.StatusLogger;
 
 import edu.wpi.first.net.WebServer;
 import edu.wpi.first.wpilibj.Filesystem;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.subsystems.HardwareConstants;
 import frc.robot.sim.SimulationControllerBridge;
-import frc.robot.util.HardwareMonitor;
-
-import static edu.wpi.first.units.Units.RPM;
 
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
@@ -42,7 +36,6 @@ import org.littletonrobotics.urcl.URCL;
 public class Robot extends LoggedRobot {
   private Command autonomousCommand;
   private RobotContainer robotContainer;
-  private Field2d field = null;
   private SimulationControllerBridge simulationControllerBridge = null;
 
   public Robot() {
@@ -69,9 +62,7 @@ public class Robot extends LoggedRobot {
         // TODO: somehow /home/lvuser/logs still gets new logfiles (ssh
         // admin@roboRIO-8048-frc.local)
         // Logger.addDataReceiver(new WPILOGWriter());
-        if (!HardwareConstants.REDUCE_ROBORIO_RESOURCE_USAGE) {
-          Logger.addDataReceiver(new NT4Publisher());
-        }
+        Logger.addDataReceiver(new NT4Publisher());
         break;
 
       case SIM:
@@ -129,10 +120,6 @@ public class Robot extends LoggedRobot {
 
     // Return to non-RT thread priority (do not modify the first argument)
     // Threads.setCurrentThreadPriority(false, 10);
-
-    // Monitor highlevel hardware faults during a match.
-    HardwareMonitor.dumpHardwareStatusToNetworkTables(Constants.debugMemoryUsage);
-
   }
 
   /** This function is called once when the robot is disabled. */
@@ -162,9 +149,6 @@ public class Robot extends LoggedRobot {
   /** This function is called periodically during autonomous. */
   @Override
   public void autonomousPeriodic() {
-    if (HardwareConstants.ENABLE_DIAGNOSTIC_POSES && field != null) {
-      field.setRobotPose(robotContainer.getPose());
-    }
   }
 
   /** This function is called once when teleop is enabled. */
@@ -177,18 +161,11 @@ public class Robot extends LoggedRobot {
     if (autonomousCommand != null) {
       autonomousCommand.cancel();
     }
-    if (HardwareConstants.ENABLE_DIAGNOSTIC_POSES) {
-      field = new Field2d();
-      SmartDashboard.putData("DiagnosticField", field);
-    }
   }
 
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-    if (HardwareConstants.ENABLE_DIAGNOSTIC_POSES && field != null) {
-      field.setRobotPose(robotContainer.getPose());
-    }
   }
 
   /** This function is called once when test mode is enabled. */
@@ -206,17 +183,10 @@ public class Robot extends LoggedRobot {
   /** This function is called once when the robot is first started up. */
   @Override
   public void simulationInit() {
-    field = new Field2d();
-    SmartDashboard.putData(field);
   }
 
   /** This function is called periodically whilst in simulation. */
   @Override
   public void simulationPeriodic() {
-    field.setRobotPose(robotContainer.getPose());
-    SmartDashboard.putNumber("getExpectedShooterVelocityForHub",
-        robotContainer.getExpectedShooterVelocityForHub().in(RPM));
-    SmartDashboard.putNumber("getActualShooterVelocity",
-        robotContainer.getActualShooterVelocity().in(RPM));
   }
 }

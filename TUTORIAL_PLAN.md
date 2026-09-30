@@ -20,13 +20,8 @@ Your code does not have to match the reference line-for-line. If it works and yo
 
 1. Install WPILib 2026, the FRC Game Tools if you're on Windows, and the vendor tools: **Phoenix Tuner X** (Krakens and TalonFX) and the **REV Hardware Client** (SPARK MAX). Open the project in WPILib VS Code.
 2. Tour the control system hardware on the real robot with a coach: roboRIO, radio, PDH, CAN chain, and motor controllers (C01).
-3. Create the project from the **AdvantageKit Spark Swerve template**. Our turn motors are SPARK MAX with absolute encoders, like that template. In Phase 2 you'll swap the drive motors to Krakens yourself.
-4. 🧑‍🏫 Bring over the team's simulation and dashboard tooling, if it isn't already there. The template doesn't include it. From `sandbox-sim`:
-   - `src/main/deploy/dashboard/` (the whole folder; `core/` is protected)
-   - `tools/SimSupervisor.java`, `tools/README.md`
-   - `src/main/java/frc/robot/sim/SimulationControllerBridge.java`
-   - In `Robot.java`: the `WebServer.start(5800, ...)` line, and creating and updating `SimulationControllerBridge` in SIM mode
-   - `.vscode/settings.json` (hides plumbing files) and `.vscode/tasks.json` (the **Start Supervised Robot Simulation** task)
+3. Check out the tutorial starting branch (`fresh-start`) and make your own branch from it. It's the **AdvantageKit Spark Swerve template** already adapted for our Kraken MAXSwerve modules (`ModuleIOKraken`). It already includes the team's tooling: the browser dashboard, `SimSupervisor`, the Sim Driver Station bridge, and every vendor library we use (YAMS, PhotonVision, PathPlanner, and so on). There are no mechanisms yet. You'll build those.
+4. Look at what's there with a coach: `Robot.java`, `RobotContainer.java` (drive only), the `drive/` folder, and the starter dashboard card.
 5. Click **ChurroSim** (or press ⌘⇧B) to start the simulator, then **ChurroDashboard** to open `http://localhost:5800`. Use the Sim Driver Station there to enable teleop. Explain that this dashboard is where they'll see the results of everything they build from here on (C42).
 6. Make your first commit on your own branch (C05).
 
@@ -41,7 +36,7 @@ Your code does not have to match the reference line-for-line. If it works and yo
 **Concepts:** C02, C03, C06–C11, C12, C13, C45
 
 1. Walk through `Robot.java` (modes, `robotPeriodic`, the command scheduler), then `RobotContainer.java`, `Constants.java`, and the `drive/` folder at a high level.
-2. Explain IO layers using the drive template's `ModuleIO` / `ModuleIOSpark` / `ModuleIOSim` (C12). Mention that in Phase 2 we'll *add* an IO implementation for Krakens. That's exactly what IO layers are for.
+2. Explain IO layers using `ModuleIO` / `ModuleIOKraken` / `ModuleIOSim` (C12): `RobotContainer` picks Kraken hardware on the real robot and physics simulation on a laptop, and `Drive.java` never knows the difference.
 3. **Exercise:** In `robotPeriodic()`, log a loop counter with `Logger.recordOutput("Tutorial/LoopCount", count)`.
 4. **Exercise:** Bind a controller button to a `Commands.runOnce(...)` that logs a message. See how `onTrue` and `whileTrue` behave differently (C08).
 
@@ -56,13 +51,13 @@ Your code does not have to match the reference line-for-line. If it works and yo
 **Concepts:** C04, C12, C15, C17, C24, C25, C26, C28, C22
 **Reference:** `unleash-the-kraken`: `drive/ModuleIOKraken.java`, `drive/DriveConstants.java` (the Kraken section), `util/PhoenixUtil.java`, and the `RobotContainer` swap from `ModuleIOSpark` to `ModuleIOKraken`. Also `DriveCommands.java`.
 
-1. Fill in `DriveConstants` for our robot: CAN IDs, track width and wheelbase, wheel radius, drive gearing, current limits, and inversions. Set `driveGearbox = DCMotor.getKrakenX60(1)` so the simulation models a Kraken. Explain every number. Don't copy blindly: *where does each value come from?* (C17)
+1. Review `DriveConstants` against the new robot: CAN IDs, track width and wheelbase, wheel radius, drive gearing, current limits, and inversions. They start with values from the old robot. Note `driveGearbox = DCMotor.getKrakenX60(1)`, which makes the simulation model a Kraken. Explain every number and verify it on the real robot. Don't trust it blindly: *where does each value come from?* (C17)
 2. Set the drivetrain's default command to joystick driving. Explain the deadband, input squaring, and negated Y (C28). Drive in sim and compare field-relative with robot-relative driving (C25).
 3. Watch odometry build up in AdvantageScope's 2D field (C26).
-4. **The IO layer lesson (C12).** Write `ModuleIOKraken`, a new `ModuleIO` implementation:
-   - **Drive:** a TalonFX using Phoenix 6: `TalonFXConfiguration` for inversion, brake mode, stator and supply current limits, and `SensorToMechanismRatio` (so the closed loop works in *wheel* rotations). Use `VelocityVoltage` and `VoltageOut` control requests, and status signals for position and velocity.
-   - **Turn:** a SPARK MAX + absolute encoder. Reuse the turn half of `ModuleIOSpark`.
-   - Swap `ModuleIOSpark` → `ModuleIOKraken` in `RobotContainer`'s REAL case. Point out that `Drive.java` didn't change at all.
+4. **The IO layer lesson (C12).** Read through `ModuleIOKraken` together. The team wrote it to swap the template's NEO Vortex drive motors for Krakens:
+   - **Drive:** a TalonFX using Phoenix 6: `TalonFXConfiguration` for inversion, brake mode, stator and supply current limits, and `SensorToMechanismRatio` (so the closed loop works in *wheel* rotations). It uses `VelocityVoltage` and `VoltageOut` control requests, and status signals for position and velocity.
+   - **Turn:** a SPARK MAX + absolute encoder, the same as the template.
+   - Compare it with the template's original `ModuleIOSpark` (`git show main:src/main/java/frc/robot/subsystems/drive/ModuleIOSpark.java`). Point out that `Drive.java` didn't have to change at all.
 5. Explain why the Kraken gains are in different units (TalonFX native: volts per wheel rotation/second) and must be re-tuned. Don't just convert them.
 6. 🧑‍🏫 **Real robot:** robot on blocks first. Check the CAN IDs in Phoenix Tuner X and the REV Hardware Client. Set the module zero rotations, check that each module turns and drives the right way, and check the gyro direction (counter-clockwise positive, C04).
 7. 🧑‍🏫 Run the template's wheel radius and feedforward characterization from the auto chooser to find the Kraken kS and kV (C22).
@@ -150,7 +145,7 @@ Your code does not have to match the reference line-for-line. If it works and yo
 **Goal:** Make the robot competition-safe and easy to drive.
 **Concepts:** C43, C16, C45, C28
 
-1. Add `HardwareMonitor` fault reporting and `YAMSUtil`'s safe motor creation (C43). Unplug a motor in sim (or give it a wrong CAN ID) and watch the fault appear.
+1. Add `HardwareMonitor` fault reporting and `YAMSUtil`'s safe motor creation (C43), from `main`. Register every motor controller, including the drive modules and the gyro. Unplug a motor in sim (or give it a wrong CAN ID) and watch the fault appear.
 2. Review every button binding with a driver. Put controller constants in `DriveTeamConstants`.
 3. Review the default commands so the robot, including the turret, is in a safe state when no buttons are pressed.
 

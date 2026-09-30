@@ -13,7 +13,7 @@ main {
   min-height: 100%;
   padding: 24px;
   display: grid;
-  grid-template-columns: minmax(220px, 0.7fr) minmax(320px, 1.3fr);
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 18px;
   align-content: start;
 }
@@ -60,49 +60,8 @@ h2 {
   letter-spacing: 0;
 }
 
-.section-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
-.fault-count {
-  color: #ff9ca5;
-  font-size: 0.82rem;
-  font-weight: 800;
-}
-.faults {
-  display: grid;
-  gap: 8px;
-  margin-top: 18px;
-}
-
-.fault,
-.message {
-  margin: 0;
-  padding: 12px 14px;
-  border: 1px solid #90404a;
-  border-radius: 8px;
-  color: #ffd7dc;
-  background: #3a1b22;
-  font-weight: 700;
-}
-
-.message {
-  color: #aeb8c8;
-  background: transparent;
-  border-color: #384356;
-  font-weight: 400;
-}
-.message.healthy {
-  color: #94edb1;
-  border-color: #287f4b;
-  background: #102d1d;
-}
-
 @media (max-width: 680px) {
   main {
-    grid-template-columns: 1fr;
     padding: 14px;
   }
 }

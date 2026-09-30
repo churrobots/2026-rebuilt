@@ -43,17 +43,4 @@ public final class Constants {
       .getDefault()
       .getEntry("robotName")
       .getString(RobotBase.isSimulation() ? ROBOT_SIMULATION : ROBOT_COMP);
-
-  public static final CalibrationMode calibrationMode = CalibrationMode.ENABLED;
-
-  /** Calibrating AdvantageKit Constants **/
-  public static enum CalibrationMode {
-    /** Not in calibration mode. */
-    DISABLED,
-
-    /** In calibration mode. */
-    ENABLED
-  }
-
-  public static final boolean debugMemoryUsage = false;
 }
