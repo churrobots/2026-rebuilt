@@ -101,7 +101,7 @@ Each concept has:
 ### C12 · IO layers (hardware abstraction)
 **Level:** Core
 **The idea:** AdvantageKit splits a subsystem into **logic** (for example `Drive.java`) and **IO** (the part that talks to hardware). The IO is an interface with several versions: `ModuleIOSpark` for the real robot, `ModuleIOSim` for simulation, and an empty one for replay. The logic doesn't know or care which one it has. That's how the same code runs in simulation and on the robot.
-**In our robot:** `drive/ModuleIO.java`, `ModuleIOSpark.java`, `ModuleIOSim.java`; `vision/VisionIO*.java`. A real example of why this matters: our new robot switched to Kraken drive motors by adding `ModuleIOKraken.java` (branch `unleash-the-kraken`). `Drive.java` didn't change at all. Our mechanisms (shooter, intake) use the YAMS library instead of IO layers; see C27.
+**In our robot:** `drive/ModuleIO.java`, `ModuleIOSpark.java`, `ModuleIOSim.java`; `vision/VisionIO*.java`. A real example of why this matters: our new robot switched to Kraken drive motors by adding `ModuleIOKraken.java` (branch `unleash-the-kraken`). `Drive.java` didn't change at all. On the new robot, every mechanism (intake, shooter, turret, climber) gets its own IO layer in exactly the same way. The 2026 robot used the YAMS library for mechanisms instead; see C27.
 **Check yourself:** You want to test a new drive feature at home without the robot. Which IO does `RobotContainer` pick, and how does it know?
 **Learn more:** https://docs.advantagekit.org (start with the Spark Swerve template)
 
@@ -214,10 +214,12 @@ Good feedforward does most of the work, and PID just cleans up the rest.
 **In our robot:** `Drive.periodic()`; the high-rate `SparkOdometryThread.java`
 **Learn more:** `software/kinematics-and-odometry/swerve-drive-odometry.html`
 
-### C27 · Mechanism libraries (YAMS) vs. writing it yourself
+### C27 · Writing IO layers vs. using a mechanism library
 **Level:** Deeper
-**The idea:** For mechanisms, we use **YAMS**, a library that bundles the motor controller, PID, feedforward, limits, simulation, and telemetry into ready-made `Arm`, `FlyWheel`, and `Elevator` objects. That's less code, but more hidden. You'll build the intake arm with YAMS first, so you can see a mechanism moving in simulation quickly. Then you'll write the intake roller by hand to see what YAMS was doing for you. It's a real engineering trade-off: control vs. convenience.
-**In our robot:** `Shooter.java` (`FlyWheel`), `IntakeArm.java` (`Arm`), `ClimberTW.java` (`Elevator`), `util/YAMSUtil.java` (handles unplugged motors safely)
+**The idea:** Some teams use a mechanism library like **YAMS**, which bundles the motor controller, PID, feedforward, limits, simulation, and telemetry into ready-made `Arm`, `FlyWheel`, and `Elevator` objects. Our 2026 robot did. That's less code, but more is hidden, and the sensor readings don't go through `Logger.processInputs`, so AdvantageKit can't replay them. On the new robot, **we write every mechanism ourselves as an AdvantageKit IO layer** (C12): an `XxxIO` interface, a real-hardware IO class, and an `XxxIOSim` built on WPILib's physics simulators (`DCMotorSim`, `FlywheelSim`, `SingleJointedArmSim`, `ElevatorSim`). It's more code, but every line is visible, every mechanism follows the same pattern as the drivetrain, and replay works. It's a real engineering trade-off: control vs. convenience.
+**In our robot:** the new robot's mechanism `*IO.java` / `*IOSim.java` files (you'll write them), following `drive/ModuleIO*.java`. The 2026 YAMS versions on `main`: `Shooter.java` (`FlyWheel`), `IntakeArm.java` (`Arm`), `ClimberTW.java` (`Elevator`). Public AdvantageKit mechanism examples: team 6328's robot code (https://github.com/Mechanical-Advantage) and other teams' code on chiefdelphi.com.
+**Check yourself:** Your arm works in sim but not on the real robot. Which file is most likely wrong, and why doesn't `IntakeArm.java` need to change?
+**Learn more:** https://docs.advantagekit.org (IO interfaces), `software/wpilib-tools/robot-simulation/physics-sim.html`
 
 ### C28 · Driver input shaping
 **Level:** Core
@@ -291,7 +293,7 @@ Good feedforward does most of the work, and PID just cleans up the rest.
 - **Limited range.** Wires and hard stops mean most turrets can't spin forever (ours is planned for 180°). When the target is out of range, decide what to do: go to the *nearest* limit, or rotate the drivetrain to help.
 - **Knowing where zero is.** At power-on the code must know which way the turret points, using an absolute encoder or by always starting it in a known position (C17).
 
-**In our robot:** `subsystems/Churret.java` on the `churret` branch, an *unfinished* prototype. It uses a YAMS `Pivot` with a 100:1 reduction, TalonFX, brake mode, a max-velocity/acceleration profile, and `aimAtHub(...)`.
+**In our robot:** `subsystems/Churret.java` on the `churret` branch, an *unfinished* prototype. It uses a YAMS `Pivot` with a 100:1 reduction, TalonFX, brake mode, a max-velocity/acceleration profile, and `aimAtHub(...)`. The new robot's turret will be built with an AdvantageKit IO layer instead (C27), so use the prototype for its ideas and numbers, not its structure.
 **Check yourself:** The robot is facing 90° and the hub is at a field angle of 30°. What turret angle do you need? If the turret can only reach 0–180°, what should it do?
 **Learn more:** `software/advanced-controls/introduction/tuning-turret.html`
 
@@ -338,8 +340,8 @@ Good feedforward does most of the work, and PID just cleans up the rest.
 
 ### C43 · Fault detection and alerts
 **Level:** Deeper
-**The idea:** At competition, a loose CAN wire can silently kill a mechanism. Our code checks that each motor controller is really connected and reports faults to the dashboard. If one is missing, it swaps in a safe "disconnected" controller so the rest of the robot still works.
-**In our robot:** `util/HardwareMonitor.java`, `util/YAMSUtil.java`, `util/DisconnectedMotorController.java`, the "Mechanism faults" dashboard card
+**The idea:** At competition, a loose CAN wire can silently kill a mechanism. Our code checks that each motor controller is really connected and reports faults to the dashboard. With AdvantageKit, each IO layer reports a `connected` input, and the subsystem raises a WPILib `Alert` when it's false, so the rest of the robot keeps working and the drive team sees the problem.
+**In our robot:** `driveConnected` / `turnConnected` in `drive/ModuleIO.java` and the alerts in `Module.java`; the "Mechanism faults" dashboard card. The 2026 robot did this with YAMS-specific helpers on `main`: `util/HardwareMonitor.java`, `util/YAMSUtil.java`, `util/DisconnectedMotorController.java`.
 
 ### C44 · Deploying and the Driver Station
 **Level:** Core

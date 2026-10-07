@@ -7,6 +7,9 @@ This is the roadmap for building our **new robot** starting from a bare Advantag
 - Every phase ends with a **dashboard milestone**, so you can *see* the new feature working at `http://localhost:5800`.
 - 🧑‍🏫 marks a **coach checkpoint**: stop and get a coach before continuing.
 - Always get each feature working in **simulation first**, then on the real robot.
+- **Every mechanism is built with AdvantageKit IO layers (C12, C27), not YAMS.** It's the same pattern the drivetrain already uses (`ModuleIO` → `ModuleIOKraken` / `ModuleIOSim`). Each mechanism gets an `XxxIO` interface with `@AutoLog` inputs, a real-hardware IO class, and an `XxxIOSim` built on WPILib's physics simulators (`DCMotorSim`, `FlywheelSim`, `SingleJointedArmSim`, `ElevatorSim`).
+  - The reference mechanisms on `main` and `churret` use YAMS. Take **hardware numbers** from them (CAN IDs, gear ratios, limits, starting gains), not their structure.
+  - For structure, use our drivetrain IO files first, then public AdvantageKit mechanism examples: the AdvantageKit docs (https://docs.advantagekit.org, "IO interfaces"), team 6328 Mechanical Advantage's public robot code (https://github.com/Mechanical-Advantage), and other teams' AdvantageKit code found on chiefdelphi.com. When a mechanism step starts, look up a matching example (an AdvantageKit roller, arm, flywheel, turret, or elevator) and tell the student where it came from.
 
 Your code does not have to match the reference line-for-line. If it works and you can explain why, that's a win.
 
@@ -19,7 +22,7 @@ Your code does not have to match the reference line-for-line. If it works and yo
 **Zero to Robot:** Step 2 (`zero-to-robot/step-2/wpilib-setup.html`) for installing WPILib
 
 1. Install WPILib 2026 and open the project in WPILib VS Code. (The vendor tools, Phoenix Tuner X and the REV Hardware Client, can wait until Phase 3.)
-2. Check out the tutorial starting branch (`fresh-start`) and make your own branch from it (C05). It's the **AdvantageKit Spark Swerve template** already adapted for our Kraken MAXSwerve modules (`ModuleIOKraken`). It also includes the team's tooling: the browser dashboard, `SimSupervisor`, the Sim Driver Station bridge, and every vendor library we use (YAMS, PhotonVision, PathPlanner, and so on). There are no mechanisms yet. You'll build those.
+2. Check out the tutorial starting branch (`fresh-start`) and make your own branch from it (C05). It's the **AdvantageKit Spark Swerve template** already adapted for our Kraken MAXSwerve modules (`ModuleIOKraken`). It also includes the team's tooling: the browser dashboard, `SimSupervisor`, the Sim Driver Station bridge, and every vendor library we use (Phoenix 6, REVLib, PhotonVision, PathPlanner, and so on). There are no mechanisms yet. You'll build those.
 3. Plug an Xbox-style controller into the laptop. Click **ChurroSim** (or press ⌘⇧B) to start the simulator, then **ChurroDashboard** to open `http://localhost:5800`.
 4. In the dashboard's Sim Driver Station, check that the controller shows as connected, then enable **teleop** and **drive**. The template already has the controls:
    - left stick moves the robot
@@ -44,7 +47,7 @@ Your code does not have to match the reference line-for-line. If it works and yo
 1. **Follow the stick press through the code:** controller → `RobotContainer`'s default command → `DriveCommands.joystickDrive` → `Drive.runVelocity` → each module. Along the way, explain the command-based pieces: subsystem, command, default command, and trigger (C06–C11).
 2. In `joystickDrive`, explain the deadband, input squaring, and why Y is negated (C28). Explain field-relative driving (C25): spin the robot in sim and push forward. It still goes "up the field."
 3. Walk through `Robot.java`: the modes, `robotPeriodic`, and the command scheduler running every 20 ms (C02).
-4. Explain IO layers using `ModuleIO` / `ModuleIOKraken` / `ModuleIOSim` (C12). `RobotContainer` picks Kraken hardware on the real robot and physics simulation on a laptop, and `Drive.java` never knows the difference. That's why they could drive without a robot.
+4. Explain IO layers using `ModuleIO` / `ModuleIOKraken` / `ModuleIOSim` (C12). `RobotContainer` picks Kraken hardware on the real robot and physics simulation on a laptop, and `Drive.java` never knows the difference. That's why they could drive without a robot. Point out that every mechanism they build from here on will follow this same pattern.
 5. **Exercise:** Change the deadband or max speed, save, and *feel* the difference with the controller.
 6. **Exercise:** Bind a new button to a `Commands.runOnce(...)` that logs a message. Try `onTrue` vs. `whileTrue` and watch the difference on the dashboard (C08).
 
@@ -53,30 +56,23 @@ Your code does not have to match the reference line-for-line. If it works and yo
 
 ---
 
-## Phase 2: First mechanism, the intake arm (in simulation)
+## Phase 2: First mechanism, the intake roller (in simulation)
 
-**Goal:** Build a real mechanism early, and *see* it move in simulation: an arm that goes to exact angles and holds them against gravity.
-**Concepts:** C06, C07, C09, C15, C16, C17, C19, C20, C21, C27, C36, C45
-**Reference:** `main`: `subsystems/IntakeArm.java` (YAMS `Arm`, `ArmFeedforward`, soft/hard limits); `sandbox-sim`: `subsystems/MechanismVisualizer.java` (AdvantageScope visualization)
+**Goal:** Write your first AdvantageKit IO layer from scratch, for the simplest mechanism there is: one motor spinning a roller. Then watch it spin in simulation.
+**Concepts:** C06, C07, C09, C12, C13, C15, C16, C18, C27, C34, C41, C45
+**Reference:** structure: `drive/ModuleIO.java`, `ModuleIOSim.java`, `ModuleIOKraken.java`, plus a public AdvantageKit roller example; hardware values: `main`: `subsystems/IntakeRoller.java`, `ControlsConstants.java` (see the roller RPM math comment)
 
-1. Show what the intake arm does on the real robot, or in a match video. Name its positions: stowed, retracted, and extended.
-2. Introduce YAMS (C27): one config object describes the motor, gearing, limits, PID, and feedforward, and YAMS simulates the arm's physics for free.
-3. Create an `IntakeArm` subsystem with a YAMS `Arm`: the SPARK MAX CAN ID, gear reduction, a current limit, soft limits inside hard limits, and the arm's length and mass (so the simulation behaves like the real thing). Put the numbers in constants (C16, C17, C45). Call `simIterate()` in `simulationPeriodic()`.
-4. Add `extend()`, `retract()`, and `stow()` angle commands, with `retract()` as the default command (C07, C09). Bind them to the D-pad, since A and X are already used by the drivetrain.
-5. Log the target angle, measured angle, and "at target" (for example `Tutorial/Arm/TargetDegrees`) (C13).
-6. **Build the arm visualization on the dashboard** (see the milestone). Let the student design how it looks.
-7. **Tuning lesson, the fun part (C19–C21).** All in sim, watching the dashboard. Change one gain at a time and save; the sim restarts in seconds:
-   - All gains at 0 → the arm **droops** under gravity.
-   - Add **kG** until it holds still wherever it is (C20).
-   - Add **P** → it moves to the target, but too much P makes it **wobble** (C19).
-   - Add a little **D** to calm the wobble.
+1. Show what the intake does on the real robot, or in a match video. The roller is the part that grabs game pieces.
+2. **Design the IO layer on paper first (C12).** What does the robot need to *read* (inputs: connected, velocity, applied volts, current) and what does it need to *do* (outputs: `setVoltage`)? Compare with `ModuleIO`, and with a public AdvantageKit roller example.
+3. Write `IntakeRollerIO` (the interface, with an `@AutoLog` inputs class and do-nothing default methods) and `IntakeRollerIOSim`, using WPILib's `DCMotorSim` with the right `DCMotor` model and gear ratio.
+4. Write the real-hardware IO (`IntakeRollerIOSpark` or `IntakeRollerIOTalonFX`, depending on the motor; check the reference). Put the CAN ID, inversion, idle mode, and current limit in constants (C15, C16, C45). It can't be tested until Phase 3, but writing it now shows that only this file knows about the vendor library.
+5. Create the `IntakeRoller` subsystem: `periodic()` calls `io.updateInputs(...)` and `Logger.processInputs(...)` (C13). In `RobotContainer`, pick the real or sim IO the same way `Drive` does.
+6. Add `intake()` and `outtake()` **commands**, and a default command that stops the roller (C07, C09). Bind intake to the left trigger (`whileTrue`) and outtake to the left bumper.
+7. Discuss why open-loop voltage control means the speed changes with battery voltage and game pieces, and how the team chose its target RPM (C18, C34). Keep it open-loop for now. Closed-loop comes in Phase 5.
+8. Discuss C27: the 2026 robot used a library (YAMS) for mechanisms. What do we gain by writing the IO layer ourselves, and what does it cost?
 
-   A live setpoint vs. measured graph makes this obvious.
-8. Optional: show the same arm in AdvantageScope with a `LoggedMechanism2d` (C14).
-9. 🧑‍🏫 **Later, on the real robot** (after Phase 3): verify the absolute encoder direction and zero *before* closing the loop, then re-tune the gains. Mention the reference's comment about measuring angles empirically (C17).
-
-**Dashboard milestone:** An "Intake arm" card with a side-view drawing: a pivot point, a solid line for where the arm *is*, and a faint "ghost" line for where it's *trying to go*. Also show the two angles as numbers and an **AT TARGET** light. Stretch: a small live graph of target vs. measured.
-**Done when:** Pressing the D-pad swings the arm on the dashboard to each position without drooping or wobbling, and the student can explain what kG and P each do.
+**Dashboard milestone:** An "Intake" card: the commanded volts, the measured RPM, and a spinning/stopped light. The arm joins this card in Phase 4.
+**Done when:** Holding the trigger spins the roller on the dashboard in sim, and the student can explain which file would have to change to run it on different hardware (only the IO class), and why `RobotContainer` doesn't touch the motor directly.
 
 ---
 
@@ -97,39 +93,51 @@ Your code does not have to match the reference line-for-line. If it works and yo
 5. 🧑‍🏫 Deploy, with the robot on blocks first (C44). Check the CAN IDs in Phoenix Tuner X and the REV Hardware Client. Set the module zero rotations, check that each module turns and drives the right way, and check the gyro direction (counter-clockwise positive, C04).
 6. 🧑‍🏫 Run the template's wheel radius and feedforward characterization from the auto chooser to find the Kraken kS and kV (C22).
 7. Add a "reset heading" button (reference: `resetPoseFacingAway()` on `main`).
-8. 🧑‍🏫 Do the real-robot arm check from Phase 2, step 9.
+8. 🧑‍🏫 Test the intake roller from Phase 2 on the real robot: check the CAN ID, spin direction, and current limit. This is the first time its real-hardware IO class runs.
 
 **Dashboard milestone:** The Field card now tracks the *real* robot (connect the dashboard to the robot's address). Add a "module health" row showing each module's measured wheel angle, which makes a mis-zeroed module obvious.
 **Done when:** The robot drives field-relative smoothly on carpet, and the dashboard pose tracks the real movement.
 
 ---
 
-## Phase 4: Under the hood, the intake roller by hand
+## Phase 4: The intake arm (position control)
 
-**Goal:** Write a simple mechanism *without* YAMS, to see what YAMS was doing for you. Then combine it with the arm into one intake action.
-**Concepts:** C06, C07, C09, C10, C15, C16, C18, C27, C34, C45
-**Reference:** `main`: `subsystems/IntakeRoller.java`, `ControlsConstants.java` (see the roller RPM math comment)
+**Goal:** An arm that goes to exact angles and holds them against gravity, built as your second IO layer. Then combine it with the roller into one intake action.
+**Concepts:** C06, C07, C09, C10, C12, C15, C16, C17, C19, C20, C21, C36, C45
+**Reference:** structure: your `IntakeRollerIO` from Phase 2, plus a public AdvantageKit arm example; hardware values: `main`: `subsystems/IntakeArm.java` (YAMS: take its CAN ID, gearing, limits, and starting gains, not its structure); `sandbox-sim`: `subsystems/MechanismVisualizer.java` (AdvantageScope visualization)
 
-1. Create `IntakeRoller` with a raw vendor motor controller object: CAN ID, inversion, idle mode, and current limit in constants (C15, C16, C45). Compare it with how much YAMS handled for the arm (C27).
-2. Add `runRoller(double percent)` and `stop()` as **commands**, and a default command that stops it (C09).
-3. Combine them into one intake command in `RobotContainer`: extend the arm *and* spin the roller together (`Commands.parallel`, C10). Bind it to the left trigger (`whileTrue`), with outtake on the left bumper.
-4. Discuss why open-loop speed changes with battery voltage and game pieces, and how the team chose its target RPM (C18, C34). Keep it open-loop for now. Closed-loop comes in Phase 5.
-5. 🧑‍🏫 Test on the real robot.
+1. Show what the intake arm does on the real robot, or in a match video. Name its positions: stowed, retracted, and extended.
+2. **Design the IO layer.** Start from the roller's IO: what's the same, and what's new? (Position in radians, and the absolute encoder.)
+3. Write `IntakeArmIO`, `IntakeArmIOSim`, and the real-hardware IO. The sim uses WPILib's `SingleJointedArmSim` with the gear ratio, the arm's length and mass, the min/max angles, and gravity turned on, so the simulated arm droops like the real one. The real IO gets the SPARK MAX CAN ID, gear reduction, current limit, and absolute encoder. Put the numbers in constants (C16, C17, C45).
+4. **Control in the subsystem.** `IntakeArm` uses a WPILib `PIDController` plus an `ArmFeedforward` to compute volts, then calls `io.setVoltage(...)`. That way the same control code runs in sim and on the robot. Clamp every target inside soft limits that sit inside the hard limits (C16). Mention the other option: running PID on the motor controller itself. What's the trade-off?
+5. Add `extend()`, `retract()`, and `stow()` angle commands, with `retract()` as the default command (C07, C09). Bind them to the D-pad, since A and X are already used by the drivetrain.
+6. Log the target angle, measured angle, and "at target" (for example `Tutorial/Arm/TargetDegrees`) (C13).
+7. **Build the arm visualization on the dashboard** (see the milestone). Let the student design how it looks.
+8. **Tuning lesson, the fun part (C19–C21).** All in sim, watching the dashboard. Change one gain at a time and save; the sim restarts in seconds:
+   - All gains at 0 → the arm **droops** under gravity.
+   - Add **kG** until it holds still wherever it is (C20).
+   - Add **P** → it moves to the target, but too much P makes it **wobble** (C19).
+   - Add a little **D** to calm the wobble.
 
-**Dashboard milestone:** Add the roller to the intake arm card: the commanded output and a spinning/stopped indicator, so the whole intake is on one card.
-**Done when:** One trigger pull extends the arm and runs the roller, the student wrote most of the roller themselves, and they can explain why `RobotContainer` doesn't touch the motor directly.
+   A live setpoint vs. measured graph makes this obvious.
+9. **One intake action:** in `RobotContainer`, make the left trigger extend the arm *and* spin the roller together (`Commands.parallel`, C10). Neither subsystem reaches into the other.
+10. Optional: show the same arm in AdvantageScope with a `LoggedMechanism2d` (C14).
+11. 🧑‍🏫 Real robot: verify the absolute encoder direction and zero *before* closing the loop, start with low gains, then re-tune. Mention the reference's comment about measuring angles empirically (C17).
+
+**Dashboard milestone:** Add the arm to the "Intake" card: a side-view drawing with a pivot point, a solid line for where the arm *is*, and a faint "ghost" line for where it's *trying to go*. Also show the two angles as numbers and an **AT TARGET** light, next to the roller's spinning light. Stretch: a small live graph of target vs. measured.
+**Done when:** Pressing the D-pad swings the arm on the dashboard to each position without drooping or wobbling, one trigger pull extends the arm and runs the roller, and the student can explain what kG and P each do.
 
 ---
 
 ## Phase 5: Flywheel and indexing
 
 **Goal:** A velocity-controlled flywheel and indexing, fed only when the flywheel is ready. (For now the turret stays still. It comes next.)
-**Concepts:** C18, C20, C21, C35, C34, C10, C37
-**Reference:** `main`: `Shooter.java` (TalonFX `FlyWheel`), `Feeder.java`, `Spindexer.java`, `ControlsConstants.java`, `RobotContainer.autoShoot()`
+**Concepts:** C12, C18, C20, C21, C35, C34, C10, C37
+**Reference:** structure: `drive/ModuleIOKraken.java` (TalonFX velocity control) plus a public AdvantageKit flywheel example; hardware values and gains: `main`: `Shooter.java` (YAMS `FlyWheel`), `Feeder.java`, `Spindexer.java`, `ControlsConstants.java`; command flow: `RobotContainer.autoShoot()`
 
-1. Build `Shooter` as a YAMS `FlyWheel`. Idle speed is the default command. Explain why coast mode is used (C15).
+1. Build `Shooter` with its own IO layer: `ShooterIO`, `ShooterIOTalonFX` (coast mode, current limit, Phoenix 6 `VelocityVoltage` running on the motor controller), and `ShooterIOSim` (WPILib `FlywheelSim` + a `PIDController`). It's the same split `ModuleIOKraken` / `ModuleIOSim` use for drive velocity. Idle speed is the default command. Explain why coast mode is used (C15).
 2. Tune the flywheel: kV first (the feedforward does most of the work), then P for recovery after each shot (C21, `tuning-flywheel.html`).
-3. Build `Feeder` and `Spindexer` (velocity rollers). Go back and switch the intake roller to closed-loop too (C18).
+3. Build `Feeder` and `Spindexer` (velocity rollers), each with its own IO layer. Reuse what you learned writing the intake roller. Then go back and switch the intake roller to closed-loop too, by adding a `setVelocity(...)` to its IO (C18).
 4. Compose the shoot command: spin up → wait until at speed → feed + index (C10, C37). Discuss why feeding early wastes shots.
 5. Add `MechanismVisualizer` (from `sandbox-sim`) so AdvantageScope shows all the mechanisms moving together: arm, roller, and flywheel (C14).
 
@@ -141,11 +149,11 @@ Your code does not have to match the reference line-for-line. If it works and yo
 ## Phase 6: The turret
 
 **Goal:** A turret that moves safely to any angle in its range, then holds a *field-relative* direction while the robot spins.
-**Concepts:** C46, C04, C16, C17, C19, C20, C23, C27, C45
-**Reference:** `churret`: `subsystems/Churret.java`. It's an unfinished prototype, so read the "Turret prototype caveats" in `AGENTS.md` first.
+**Concepts:** C46, C04, C12, C16, C17, C19, C20, C23, C45
+**Reference:** `churret`: `subsystems/Churret.java`. It's an unfinished prototype built on YAMS, so read the "Turret prototype caveats" in `AGENTS.md` first, and take only its ideas and numbers. For structure, use your arm IO from Phase 4 plus a public AdvantageKit turret example.
 
 1. 🧑‍🏫 **Measure the real turret with the mechanical team:** gear reduction, range of travel and hard stops, which way 0° points relative to the robot's front, and how the code will know the turret's position at power-on (absolute encoder vs. "always start centered") (C17, C46).
-2. Build `Turret` with a YAMS `Pivot`: brake mode, a current limit, soft limits *inside* the hard stops, and a motion profile (max velocity and acceleration, C23). Discuss why there's no kG (C20).
+2. Build `Turret` with its own IO layer: `TurretIO`, the real-hardware IO (brake mode, a current limit), and `TurretIOSim` (WPILib `DCMotorSim`, with no gravity). Compare it with the arm's IO: what can be reused? In the subsystem, add soft limits *inside* the hard stops and a motion profile (max velocity and acceleration, using WPILib `TrapezoidProfile` or TalonFX Motion Magic, C23). Discuss why there's no kG (C20).
 3. Add manual commands: face front, face left, and D-pad nudges. Tune in sim: kS for friction, then P, then adjust the profile (C21, `tuning-turret.html`).
 4. **Angle math, on paper first:** `turretAngle = fieldAngleToTarget − robotHeading`, wrapped to the turret's range, with out-of-range targets going to the **nearest** limit. Put it in its own small method.
 5. **Good practice:** write a JUnit test for that method using a few cases, including the out-of-range ones (C45). Then have the student find the clamp bug in `Churret.java` and explain why the test would catch it.
@@ -163,11 +171,11 @@ Your code does not have to match the reference line-for-line. If it works and yo
 **Goal:** Make the robot competition-safe and easy to drive.
 **Concepts:** C43, C16, C45, C28
 
-1. Add `HardwareMonitor` fault reporting and `YAMSUtil`'s safe motor creation (C43), from `main`. Register every motor controller, including the drive modules and the gyro. Unplug a motor in sim (or give it a wrong CAN ID) and watch the fault appear.
+1. Add fault reporting the AdvantageKit way (C43). Every IO's inputs should already have a `connected` value, like `driveConnected` in `ModuleIO`. Have each subsystem raise a WPILib `Alert` when a motor is disconnected, the way `Module.java` already does for the drive motors. (The 2026 robot used `HardwareMonitor` and `YAMSUtil` on `main` instead; compare the two approaches.) Give a motor a wrong CAN ID and watch the fault appear.
 2. Review every button binding with a driver. Put controller constants in `DriveTeamConstants`.
 3. Review the default commands so the robot, including the turret, is in a safe state when no buttons are pressed.
 
-**Dashboard milestone:** Bring back the "Mechanism faults" card from the `sandbox-sim` `custom-dashboard.js`, but have the student rebuild it step by step.
+**Dashboard milestone:** A "Mechanism faults" card that lists the active alerts. Use the card in the `sandbox-sim` `custom-dashboard.js` as inspiration, but have the student rebuild it step by step (that version read YAMS-era fault data).
 **Done when:** A deliberately broken CAN ID shows up clearly on the dashboard, and the rest of the robot still works.
 
 ---
@@ -228,9 +236,9 @@ Your code does not have to match the reference line-for-line. If it works and yo
 
 **Goal:** A linear mechanism with motion profiling.
 **Concepts:** C23, C20, C36
-**Reference:** `main`: `subsystems/ClimberTW.java` (YAMS `Elevator`, `ElevatorFeedforward`, max velocity/acceleration)
+**Reference:** structure: your arm IO from Phase 4 plus a public AdvantageKit elevator example; hardware values: `main`: `subsystems/ClimberTW.java` (YAMS `Elevator`, `ElevatorFeedforward`, max velocity/acceleration)
 
-Build it like the arm, but with height instead of angle. Use kG for gravity, and a trapezoid profile so it moves smoothly.
+Build it like the arm, with its own IO layer, but with height instead of angle. The sim uses WPILib's `ElevatorSim`. Use kG for gravity (`ElevatorFeedforward`), and a trapezoid profile so it moves smoothly.
 **Dashboard milestone:** Climber height and state.
 
 ---
