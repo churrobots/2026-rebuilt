@@ -5,6 +5,8 @@ const POSE_TOPIC = "/AdvantageKit/RealOutputs/Odometry/Robot";
 const SPEED_TOPIC = "/AdvantageKit/RealOutputs/Tutorial/Drive/SpeedMetersPerSec";
 const ALLIANCE_TOPIC = "/FMSInfo/IsRedAlliance";
 const STATION_TOPIC = "/FMSInfo/StationNumber";
+const B_COUNT_TOPIC = "/AdvantageKit/RealOutputs/Tutorial/BPressCount";
+const B_HELD_TOPIC = "/AdvantageKit/RealOutputs/Tutorial/BHeld";
 
 // 2026 field size and robot bumper size, in meters.
 const FIELD = { length: 17.548, width: 8.052 };
@@ -32,6 +34,15 @@ export class CustomDashboard extends HTMLElement {
               <output class="field-pose" aria-live="polite">Waiting for pose…</output>
             </div>
             <div class="field-view"><canvas></canvas></div>
+          </section>
+          <section class="card" aria-labelledby="buttons-heading">
+            <div class="card-heading">
+              <div><p class="eyebrow">Tutorial</p><h1 id="buttons-heading">B Button</h1></div>
+            </div>
+            <div class="button-stats">
+              <div><p class="eyebrow">Presses (onTrue)</p><output class="big-number b-count">0</output></div>
+              <div><p class="eyebrow">Held (whileTrue)</p><output class="status-light b-held">NOT HELD</output></div>
+            </div>
           </section>
         </main>`;
     }
@@ -61,6 +72,30 @@ export class CustomDashboard extends HTMLElement {
   #start(core) {
     this.#started = true;
     this.#startFieldCard(core);
+    this.#startButtonCard(core);
+  }
+
+  /** Shows the B press counter and whether B is held right now. */
+  #startButtonCard(core) {
+    const root = this.shadowRoot;
+    const countText = root.querySelector(".b-count");
+    const heldLight = root.querySelector(".b-held");
+
+    const render = () => {
+      const count = Number(core.getTopic(B_COUNT_TOPIC)?.value);
+      const held = core.getTopic(B_HELD_TOPIC)?.value === true;
+      countText.textContent = Number.isFinite(count) ? String(count) : "0";
+      heldLight.textContent = held ? "HELD" : "NOT HELD";
+      heldLight.classList.toggle("on", held);
+    };
+
+    /** @param {CustomEvent<DashboardTopic>} event */
+    const topicListener = ({ detail: topic }) => {
+      if ([B_COUNT_TOPIC, B_HELD_TOPIC].includes(topic.name)) render();
+    };
+    core.addEventListener("topic", topicListener);
+    this.#cleanup.push(() => core.removeEventListener("topic", topicListener));
+    render();
   }
 
   /** Draws the field from the driver's point of view, with the robot on it. */

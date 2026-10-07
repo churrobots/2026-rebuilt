@@ -71,6 +71,33 @@ h2 {
   height: 100%;
 }
 
+.button-stats {
+  margin-top: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 32px;
+}
+.big-number {
+  display: block;
+  font-size: 2.6rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.status-light {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #2a3240;
+  color: #93a0b4;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+.status-light.on {
+  background: #1f9d55;
+  color: #fff;
+}
+
 @media (max-width: 680px) {
   main {
     padding: 14px;

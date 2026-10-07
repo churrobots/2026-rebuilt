@@ -20,17 +20,24 @@ import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOKraken;
 import frc.robot.subsystems.drive.ModuleIOSim;
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
- * This class is where the bulk of the robot should be declared. Since Command-based is a
- * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
- * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
+ * This class is where the bulk of the robot should be declared. Since
+ * Command-based is a
+ * "declarative" paradigm, very little robot logic should actually be handled in
+ * the {@link Robot}
+ * periodic methods (other than the scheduler calls). Instead, the structure of
+ * the robot (including
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
+
+  // Tutorial: how many times B has been pressed
+  private int bPressCount = 0;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -38,40 +45,45 @@ public class RobotContainer {
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
 
-  /** The container for the robot. Contains subsystems, OI devices, and commands. */
+  /**
+   * The container for the robot. Contains subsystems, OI devices, and commands.
+   */
   public RobotContainer() {
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
-        drive =
-            new Drive(
-                new GyroIOPigeon2(),
-                new ModuleIOKraken(0, "FrontLeft"),
-                new ModuleIOKraken(1, "FrontRight"),
-                new ModuleIOKraken(2, "BackLeft"),
-                new ModuleIOKraken(3, "BackRight"));
+        drive = new Drive(
+            new GyroIOPigeon2(),
+            new ModuleIOKraken(0, "FrontLeft"),
+            new ModuleIOKraken(1, "FrontRight"),
+            new ModuleIOKraken(2, "BackLeft"),
+            new ModuleIOKraken(3, "BackRight"));
         break;
 
       case SIM:
         // Sim robot, instantiate physics sim IO implementations
-        drive =
-            new Drive(
-                new GyroIO() {},
-                new ModuleIOSim(),
-                new ModuleIOSim(),
-                new ModuleIOSim(),
-                new ModuleIOSim());
+        drive = new Drive(
+            new GyroIO() {
+            },
+            new ModuleIOSim(),
+            new ModuleIOSim(),
+            new ModuleIOSim(),
+            new ModuleIOSim());
         break;
 
       default:
         // Replayed robot, disable IO implementations
-        drive =
-            new Drive(
-                new GyroIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {});
+        drive = new Drive(
+            new GyroIO() {
+            },
+            new ModuleIO() {
+            },
+            new ModuleIO() {
+            },
+            new ModuleIO() {
+            },
+            new ModuleIO() {
+            });
         break;
     }
 
@@ -120,6 +132,24 @@ public class RobotContainer {
 
     // Switch to X pattern when X button is pressed
     controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+
+    // Tutorial: count B presses (onTrue runs once per press)
+    controller
+        .b()
+        .onTrue(
+            Commands.runOnce(
+                () -> {
+                  bPressCount++;
+                  Logger.recordOutput("Tutorial/BPressCount", bPressCount);
+                }));
+
+    // Tutorial: show whether B is held (whileTrue runs until release)
+    controller
+        .b()
+        .whileTrue(
+            Commands.startEnd(
+                () -> Logger.recordOutput("Tutorial/BHeld", true),
+                () -> Logger.recordOutput("Tutorial/BHeld", false)));
   }
 
   /**
