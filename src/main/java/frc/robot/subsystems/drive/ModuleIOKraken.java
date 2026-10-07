@@ -43,7 +43,8 @@ import java.util.Queue;
 import java.util.function.DoubleSupplier;
 
 /**
- * Module IO implementation for a Kraken drive motor on a TalonFX, a Neo 550 turn
+ * Module IO implementation for a Kraken drive motor on a TalonFX, a Neo 550
+ * turn
  * motor on a Spark Max, and a duty cycle absolute encoder.
  *
  * <p>
@@ -113,8 +114,8 @@ public class ModuleIOKraken implements ModuleIO {
     // SensorToMechanismRatio, so position/velocity come out in wheel rotations.
     var driveConfig = new TalonFXConfiguration();
     driveConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-    driveConfig.MotorOutput.Inverted =
-        driveInverted ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
+    driveConfig.MotorOutput.Inverted = driveInverted ? InvertedValue.Clockwise_Positive
+        : InvertedValue.CounterClockwise_Positive;
     driveConfig.Feedback.SensorToMechanismRatio = driveMotorReduction;
     driveConfig.CurrentLimits.StatorCurrentLimit = driveMotorCurrentLimit;
     driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
@@ -181,8 +182,7 @@ public class ModuleIOKraken implements ModuleIO {
   @Override
   public void updateInputs(ModuleIOInputs inputs) {
     // Update drive inputs
-    var driveStatus =
-        BaseStatusSignal.refreshAll(drivePosition, driveVelocity, driveAppliedVolts, driveCurrent);
+    var driveStatus = BaseStatusSignal.refreshAll(drivePosition, driveVelocity, driveAppliedVolts, driveCurrent);
     inputs.driveConnected = driveConnectedDebounce.calculate(driveStatus.isOK());
     inputs.drivePositionRad = Units.rotationsToRadians(drivePosition.getValueAsDouble());
     inputs.driveVelocityRadPerSec = Units.rotationsToRadians(driveVelocity.getValueAsDouble());

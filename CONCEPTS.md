@@ -101,7 +101,7 @@ Each concept has:
 ### C12 · IO layers (hardware abstraction)
 **Level:** Core
 **The idea:** AdvantageKit splits a subsystem into **logic** (for example `Drive.java`) and **IO** (the part that talks to hardware). The IO is an interface with several versions: `ModuleIOSpark` for the real robot, `ModuleIOSim` for simulation, and an empty one for replay. The logic doesn't know or care which one it has. That's how the same code runs in simulation and on the robot.
-**In our robot:** `drive/ModuleIO.java`, `ModuleIOSpark.java`, `ModuleIOSim.java`; `vision/VisionIO*.java`. A real example of why this matters: our new robot switched to Kraken drive motors by adding `ModuleIOKraken.java` (branch `unleash-the-kraken`). `Drive.java` didn't change at all. On the new robot, every mechanism (intake, shooter, turret, climber) gets its own IO layer in exactly the same way. The 2026 robot used the YAMS library for mechanisms instead; see C27.
+**In our robot:** `drive/ModuleIO.java`, `ModuleIOSpark.java`, `ModuleIOSim.java`; `vision/VisionIO*.java`. A real example of why this matters: our new robot switched to Kraken drive motors by adding `ModuleIOKraken.java` (branch `unleash-the-kraken`). `Drive.java` didn't change at all. On the new robot, every mechanism (intake, shooter, turret) gets its own IO layer in exactly the same way. The 2026 robot used the YAMS library for mechanisms instead; see C27.
 **Check yourself:** You want to test a new drive feature at home without the robot. Which IO does `RobotContainer` pick, and how does it know?
 **Learn more:** https://docs.advantagekit.org (start with the Spark Swerve template)
 
@@ -170,7 +170,7 @@ A car analogy: P is how hard you steer toward the lane, and D stops you from swe
 - **kG**: the voltage to hold against gravity (arms and elevators).
 
 Good feedforward does most of the work, and PID just cleans up the rest.
-**In our robot:** `SHOOTER_KV` (flywheel, `SimpleMotorFeedforward`); `KG` in `IntakeArm` (`ArmFeedforward`); `ElevatorFeedforward` in `ClimberTW`
+**In our robot:** `SHOOTER_KV` (flywheel, `SimpleMotorFeedforward`); `KG` in `IntakeArm` (`ArmFeedforward`)
 **Check yourself:** Why does an arm need kG but a flywheel doesn't? Why does the arm's gravity term depend on its angle?
 **Learn more:** `software/advanced-controls/introduction/introduction-to-feedforward.html`, `software/advanced-controls/controllers/feedforward.html`
 
@@ -189,7 +189,7 @@ Good feedforward does most of the work, and PID just cleans up the rest.
 ### C23 · Motion profiles
 **Level:** Deeper
 **The idea:** Jumping a setpoint straight from 0 to 90° slams the mechanism. A **trapezoidal motion profile** ramps the setpoint up to a max velocity, cruises, then slows down, respecting max velocity and max acceleration. It's smoother, safer, and more repeatable.
-**In our robot:** `CLIMBER_MAX_VEL` / `CLIMBER_MAX_ACCEL` in `ControlsConstants.java`
+**In our robot:** the new robot's turret (you'll add its max velocity and acceleration in the turret phase, using WPILib `TrapezoidProfile` or TalonFX Motion Magic)
 **Learn more:** `software/advanced-controls/controllers/trapezoidal-profiles.html`
 
 ---
@@ -217,7 +217,7 @@ Good feedforward does most of the work, and PID just cleans up the rest.
 ### C27 · Writing IO layers vs. using a mechanism library
 **Level:** Deeper
 **The idea:** Some teams use a mechanism library like **YAMS**, which bundles the motor controller, PID, feedforward, limits, simulation, and telemetry into ready-made `Arm`, `FlyWheel`, and `Elevator` objects. Our 2026 robot did. That's less code, but more is hidden, and the sensor readings don't go through `Logger.processInputs`, so AdvantageKit can't replay them. On the new robot, **we write every mechanism ourselves as an AdvantageKit IO layer** (C12): an `XxxIO` interface, a real-hardware IO class, and an `XxxIOSim` built on WPILib's physics simulators (`DCMotorSim`, `FlywheelSim`, `SingleJointedArmSim`, `ElevatorSim`). It's more code, but every line is visible, every mechanism follows the same pattern as the drivetrain, and replay works. It's a real engineering trade-off: control vs. convenience.
-**In our robot:** the new robot's mechanism `*IO.java` / `*IOSim.java` files (you'll write them), following `drive/ModuleIO*.java`. The 2026 YAMS versions on `main`: `Shooter.java` (`FlyWheel`), `IntakeArm.java` (`Arm`), `ClimberTW.java` (`Elevator`). Public AdvantageKit mechanism examples: team 6328's robot code (https://github.com/Mechanical-Advantage) and other teams' code on chiefdelphi.com.
+**In our robot:** the new robot's mechanism `*IO.java` / `*IOSim.java` files (you'll write them), following `drive/ModuleIO*.java`. The 2026 YAMS versions on `main`: `Shooter.java` (`FlyWheel`), `IntakeArm.java` (`Arm`). Public AdvantageKit mechanism examples: team 6328's robot code (https://github.com/Mechanical-Advantage) and other teams' code on chiefdelphi.com.
 **Check yourself:** Your arm works in sim but not on the real robot. Which file is most likely wrong, and why doesn't `IntakeArm.java` need to change?
 **Learn more:** https://docs.advantagekit.org (IO interfaces), `software/wpilib-tools/robot-simulation/physics-sim.html`
 
@@ -279,7 +279,7 @@ Good feedforward does most of the work, and PID just cleans up the rest.
 ### C36 · Arms and elevators (position control)
 **Level:** Core
 **The idea:** Position mechanisms move to an angle (arm) or a height (elevator) and hold it against gravity. They need kG feedforward, soft limits, and usually an absolute encoder or a **homing** routine, so the code knows where "zero" is.
-**In our robot:** `IntakeArm.java` (arm), `ClimberTW.java` (elevator)
+**In our robot:** `IntakeArm.java` (arm)
 
 ### C37 · Superstructure coordination
 **Level:** Deeper
@@ -331,7 +331,7 @@ Good feedforward does most of the work, and PID just cleans up the rest.
 
 ### C42 · NetworkTables and dashboards
 **Level:** Core
-**The idea:** **NetworkTables** is a shared set of named values (**topics**) that the robot and laptops can publish and subscribe to, like a group chat for numbers. Dashboards read these topics to show what the robot is thinking. We have our own browser dashboard at `http://localhost:5800` (sim) or `http://10.TE.AM.2:5800` (robot). In VS Code, the **ChurroDashboard** button opens it. You edit only `custom-dashboard.js` and `.css`.
+**The idea:** **NetworkTables** is a shared set of named values (**topics**) that the robot and laptops can publish and subscribe to, like a group chat for numbers. Dashboards read these topics to show what the robot is thinking. We have our own browser dashboard at `http://localhost:5800` (sim) or `http://10.TE.AM.2:5800` (robot). In VS Code, the **ChurroDashboard** button opens it. Only `custom-dashboard.js` and `.css` change. You decide what goes on the dashboard and publish the values from Java; an AI assistant like Claude writes the dashboard code for you.
 
 **The dashboard is how you see your work.** Anything the robot knows can go on it: the target and actual speed of a flywheel, whether the arm is at its angle, which command is running, what the cameras see, which motors are faulted. You can show it as numbers, lights, dials, live graphs, or a map of the field. When something doesn't work, your first move should be "let's put that on the dashboard" to see what the robot is *actually* doing. Guessing comes second.
 **In our robot:** `src/main/deploy/dashboard/custom-dashboard.js` (on `sandbox-sim`)

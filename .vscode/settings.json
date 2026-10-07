@@ -121,8 +121,9 @@
     "src/main/deploy/dashboard/index.css": true,
     "src/main/deploy/dashboard/manifest.webmanifest": true,
     "src/main/deploy/dashboard/service-worker.js": true,
-    // Churrobots: coach-only VS Code extension that adds the Claude/Sim/Dashboard buttons.
-    "tools/vscode-extension/": true,
+    // Churrobots: coach-only tools, including the VS Code extension that adds the
+    // Claude/Sim/Dashboard buttons.
+    "tools/": true,
     // Churrobots: AI assistant instructions and tutorial materials. The assistant
     // reads these; students don't need to see them in the Explorer.
     "**/AGENTS.md": true,
@@ -132,6 +133,8 @@
     "TUTORIAL_PLAN.md": true,
     "TUTORIAL_PROGRESS.md": true,
     "LEARNINGS.md": true,
+    // Churrobots: tutorial session transcripts for coaches.
+    "learning/": true,
     // Churrobots: hide junk files
     "**/deploy/example.txt": true,
   },

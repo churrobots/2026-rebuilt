@@ -170,7 +170,8 @@ public class DriveCommands {
               SmartDashboard.putBoolean("aimLocked", false);
             })
 
-        // Commands may be cancelled before another drive command gets a chance to publish.
+        // Commands may be cancelled before another drive command gets a chance to
+        // publish.
         .finallyDo(() -> SmartDashboard.putBoolean("aimLocked", false));
   }
 

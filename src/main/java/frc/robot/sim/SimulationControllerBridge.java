@@ -43,7 +43,10 @@ public final class SimulationControllerBridge {
     available.set(true);
   }
 
-  /** Copies the newest supervisor state into HALSim, clearing stale input after 0.5 seconds. */
+  /**
+   * Copies the newest supervisor state into HALSim, clearing stale input after
+   * 0.5 seconds.
+   */
   public void update() {
     long currentHeartbeat = heartbeat.get();
     if (currentHeartbeat != previousHeartbeat) {

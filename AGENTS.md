@@ -82,6 +82,7 @@ Students never open `CONCEPTS.md`; they learn concepts by asking you. So keep th
    4. Show a small snippet (a few lines), possibly adapted from the reference.
    5. Offer to write it (following Working agreement rule 2). Then walk through what you wrote, line by line.
    If the student asks you to just write it, that's fine: write it, then explain it.
+   The hint ladder is for **Java robot code only**. Don't use it for dashboard code (see "Dashboard updates").
 5. **Test it and see it.** Test in simulation first, and *watch* it work on the dashboard. If the dashboard doesn't show what's needed to confirm the step works, add it now, not only at the phase's **dashboard milestone** (see "The dashboard is the student's window into the robot").
 6. **Check understanding.** Ask the concept's "Check yourself" question. If the answer is shaky, re-explain differently, with a new analogy or a picture made of dashboard numbers. Don't just repeat yourself. Then record the concept in `LEARNINGS.md` (see "Learnings file").
 7. **Commit and record.** Suggest a git commit with a clear message, then update `TUTORIAL_PROGRESS.md`.
@@ -109,7 +110,7 @@ The custom dashboard is how students will *see* the results of almost everything
   - which command each subsystem is running (log `getCurrentCommand()`'s name)
   - whether a sensor is tripped
   - whether a condition like "at speed" is true
-- **Let the student design it.** Before building a card, ask: "What would you want to see to know this works?" Choosing what to measure is part of the engineering, so let them pick. Fill in gaps with suggestions.
+- **Let the student design it; you write it.** Before building a card, ask: "What would you want to see to know this works?" Choosing what to measure is part of the engineering, so let them pick. Fill in gaps with suggestions. Then write the dashboard code yourself (see "Dashboard updates").
 - **Offer a menu of visualizations.** Match the display to the question:
   - **Big numbers**, for exact values like RPM, angle, or distance.
   - **Status lights**, for yes/no conditions (READY, AT TARGET, IN RANGE, FAULT).
@@ -126,6 +127,7 @@ The custom dashboard is how students will *see* the results of almost everything
 
 ## Dashboard updates
 
+- **Students don't write dashboard code by hand.** Coaches want student effort on the Java robot code. The student picks *what* to show and writes the robot-side `Logger.recordOutput` calls; you write the `custom-dashboard.js` / `.css` code directly (no hint ladder), following Working agreement rule 2. Afterward, explain it in a sentence or two, especially which topic name it reads.
 - Only edit `src/main/deploy/dashboard/custom-dashboard.js` and `custom-dashboard.css`. `core/` and `service-worker.js` are protected (see Protected code).
 - Robot side: publish values with `Logger.recordOutput("Some/Key", value)`. Dashboard side: read `core.getTopic("/AdvantageKit/RealOutputs/Some/Key")?.value`, and listen for `"topic"` events (see the pattern already in `custom-dashboard.js`).
 - Prefer logging simple numbers and booleans for the dashboard (for example `Tutorial/Drive/SpeedMetersPerSec`). Structs like `Pose2d` arrive as raw bytes; `decodePose2d` in `custom-dashboard.js` shows how to read one, so reuse it for other poses (for example, vision poses or targets on the Field card).
