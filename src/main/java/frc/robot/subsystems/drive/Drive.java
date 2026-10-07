@@ -178,7 +178,11 @@ public class Drive extends SubsystemBase {
 
     // Update gyro alert
     gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.currentMode != Mode.SIM);
+    ChassisSpeeds speeds = getChassisSpeeds();
+    double speed = Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
+    Logger.recordOutput("Tutorial/Drive/SpeedMetersPerSec", speed);
   }
+
 
   /**
    * Runs the drive at the desired velocity.

@@ -2,6 +2,7 @@
 /** @typedef {import("./core/dashboard-core.js").DashboardTopic} DashboardTopic */
 
 const POSE_TOPIC = "/AdvantageKit/RealOutputs/Odometry/Robot";
+const SPEED_TOPIC = "/AdvantageKit/RealOutputs/Tutorial/Drive/SpeedMetersPerSec";
 const ALLIANCE_TOPIC = "/FMSInfo/IsRedAlliance";
 const STATION_TOPIC = "/FMSInfo/StationNumber";
 
@@ -75,9 +76,11 @@ export class CustomDashboard extends HTMLElement {
       const isRed = core.getTopic(ALLIANCE_TOPIC)?.value === true;
       const station = Number(core.getTopic(STATION_TOPIC)?.value);
       const pose = decodePose2d(core.getTopic(POSE_TOPIC)?.value);
+      const speed = Number(core.getTopic(SPEED_TOPIC)?.value);
       drawField(canvas, view.getBoundingClientRect(), { isRed, station, pose });
+      const speedText = Number.isFinite(speed) ? ` · ${speed.toFixed(2)} m/s` : "";
       poseText.textContent = pose
-        ? `x ${pose.x.toFixed(2)} · y ${pose.y.toFixed(2)} · ${Math.round((pose.heading * 180) / Math.PI)}°`
+        ? `x ${pose.x.toFixed(2)} · y ${pose.y.toFixed(2)} · ${Math.round((pose.heading * 180) / Math.PI)}°${speedText}`
         : "Waiting for pose…";
     };
     // Pose updates arrive very often, so draw at most once per screen refresh.
@@ -87,7 +90,7 @@ export class CustomDashboard extends HTMLElement {
 
     /** @param {CustomEvent<DashboardTopic>} event */
     const topicListener = ({ detail: topic }) => {
-      if ([POSE_TOPIC, ALLIANCE_TOPIC, STATION_TOPIC].includes(topic.name))
+      if ([POSE_TOPIC, ALLIANCE_TOPIC, STATION_TOPIC, SPEED_TOPIC].includes(topic.name))
         scheduleRender();
     };
     core.addEventListener("topic", topicListener);
