@@ -68,10 +68,10 @@ Your code does not have to match the reference line-for-line. If it works and yo
 4. Write the real-hardware IO (`IntakeRollerIOSpark` or `IntakeRollerIOTalonFX`, depending on the motor; check the reference). Put the CAN ID, inversion, idle mode, and current limit in constants (C15, C16, C45). It can't be tested until Phase 3, but writing it now shows that only this file knows about the vendor library.
 5. Create the `IntakeRoller` subsystem: `periodic()` calls `io.updateInputs(...)` and `Logger.processInputs(...)` (C13). In `RobotContainer`, pick the real or sim IO the same way `Drive` does.
 6. Add `intake()` and `outtake()` **commands**, and a default command that stops the roller (C07, C09). Bind intake to the left trigger (`whileTrue`) and outtake to the left bumper.
-7. Discuss why open-loop voltage control means the speed changes with battery voltage and game pieces, and how the team chose its target RPM (C18, C34). Keep it open-loop for now. Closed-loop comes in Phase 5.
+7. Discuss why open-loop voltage control means the speed changes with battery voltage and game pieces, and how the team chose its target RPM (C18, C34). Keep it open-loop for now. Closed-loop comes in Phase 7.
 8. Discuss C27: the 2026 robot used a library (YAMS) for mechanisms. What do we gain by writing the IO layer ourselves, and what does it cost?
 
-**Dashboard milestone:** An "Intake" card: the commanded volts, the measured RPM, and a spinning/stopped light. The arm joins this card in Phase 4.
+**Dashboard milestone:** An "Intake" card: the commanded volts, the measured RPM, and a spinning/stopped light. The arm joins this card in Phase 6.
 **Done when:** Holding the trigger spins the roller on the dashboard in sim, and the student can explain which file would have to change to run it on different hardware (only the IO class), and why `RobotContainer` doesn't touch the motor directly.
 
 ---
@@ -100,7 +100,40 @@ Your code does not have to match the reference line-for-line. If it works and yo
 
 ---
 
-## Phase 4: The intake arm (position control)
+## Phase 4: Vision
+
+**Goal:** Use AprilTags to know exactly where the robot is on the field. Everything after this gets a more accurate pose, and later the turret needs a good pose to aim.
+**Concepts:** C29, C30, C31, C12, C26
+**Reference:** `main`: `subsystems/vision/` (AdvantageKit vision template), `VisionConstants.java`
+
+1. Explain AprilTags and why odometry drifts (C26, C29).
+2. Add the AdvantageKit `Vision` subsystem with `VisionIOPhotonVisionSim` for the new robot's cameras. Wire it to `drive::addVisionMeasurement`.
+3. Measure and enter each robot-to-camera transform on the new robot (C30). Discuss the old robot's lesson: "all cameras are flipped on this robot."
+4. In sim, drive around and watch accepted vs. rejected vision poses in AdvantageScope. Explain the standard deviations and rejection rules in `Vision.java`.
+5. 🧑‍🏫 Real robot: configure the PhotonVision coprocessor, and check the pose against a tape-measured position on the field.
+
+**Dashboard milestone:** A "Vision" card showing, per camera: connected, number of tags seen, and whether the last pose was accepted.
+**Done when:** Pushing the robot by hand (or "slipping" it in sim) is corrected by vision within about a second.
+
+---
+
+## Phase 5: Autonomous, part 1: follow a path
+
+**Goal:** The robot drives a PathPlanner path all by itself. No mechanisms yet, just the drivetrain, with vision keeping the pose accurate.
+**Concepts:** C32 (paths and the auto chooser; named commands come in Phase 9)
+**Reference:** `main`: `getAutonomousCommand()`, `deploy/pathplanner/`
+
+1. Install PathPlanner and configure the robot settings (mass, module config with the Kraken X60, and so on).
+2. Draw a simple "drive out of the starting zone" path and run it in sim.
+3. Pick it from the auto chooser. The template already has one (Phase 3 used it for characterization).
+4. 🧑‍🏫 Test the path on the real field at slow speed first.
+
+**Dashboard milestone:** Show the selected auto name and an auto timer. Stretch: draw the planned path on the field view.
+**Done when:** The drive-out path works 3 times in a row in sim.
+
+---
+
+## Phase 6: The intake arm (position control)
 
 **Goal:** An arm that goes to exact angles and holds them against gravity, built as your second IO layer. Then combine it with the roller into one intake action.
 **Concepts:** C06, C07, C09, C10, C12, C15, C16, C17, C19, C20, C21, C36, C45
@@ -129,7 +162,7 @@ Your code does not have to match the reference line-for-line. If it works and yo
 
 ---
 
-## Phase 5: Flywheel and indexing
+## Phase 7: Flywheel and indexing
 
 **Goal:** A velocity-controlled flywheel and indexing, fed only when the flywheel is ready. (For now the turret stays still. It comes next.)
 **Concepts:** C12, C18, C20, C21, C35, C34, C10, C37
@@ -146,11 +179,11 @@ Your code does not have to match the reference line-for-line. If it works and yo
 
 ---
 
-## Phase 6: The turret
+## Phase 8: The turret
 
 **Goal:** A turret that moves safely to any angle in its range, then holds a *field-relative* direction while the robot spins.
 **Concepts:** C46, C04, C12, C16, C17, C19, C20, C23, C45
-**Reference:** `churret`: `subsystems/Churret.java`. It's an unfinished prototype built on YAMS, so read the "Turret prototype caveats" in `AGENTS.md` first, and take only its ideas and numbers. For structure, use your arm IO from Phase 4 plus a public AdvantageKit turret example.
+**Reference:** `churret`: `subsystems/Churret.java`. It's an unfinished prototype built on YAMS, so read the "Turret prototype caveats" in `AGENTS.md` first, and take only its ideas and numbers. For structure, use your arm IO from Phase 6 plus a public AdvantageKit turret example.
 
 1. 🧑‍🏫 **Measure the real turret with the mechanical team:** gear reduction, range of travel and hard stops, which way 0° points relative to the robot's front, and how the code will know the turret's position at power-on (absolute encoder vs. "always start centered") (C17, C46).
 2. Build `Turret` with its own IO layer: `TurretIO`, the real-hardware IO (brake mode, a current limit), and `TurretIOSim` (WPILib `DCMotorSim`, with no gravity). Compare it with the arm's IO: what can be reused? In the subsystem, add soft limits *inside* the hard stops and a motion profile (max velocity and acceleration, using WPILib `TrapezoidProfile` or TalonFX Motion Magic, C23). Discuss why there's no kG (C20).
@@ -166,7 +199,56 @@ Your code does not have to match the reference line-for-line. If it works and yo
 
 ---
 
-## Phase 7: Robot health and driver polish
+## Phase 9: Autonomous, part 2: autos that score
+
+**Goal:** Score points with nobody driving, using the mechanisms from Phases 6–8. Shots use **preset** turret angles and flywheel speeds for now; live aiming comes in Phase 11.
+**Concepts:** C32 (named commands), C33, C10, C22
+**Reference:** `main`: `RobotContainer.bindCommandsForAuto()`, `deploy/pathplanner/`
+
+1. Register named commands (intake, prep flywheel, shoot) and build a 2-piece auto (C32). Each shot uses a preset turret angle and flywheel RPM for a known spot on the path. With a turret, the robot can aim while the path is still driving.
+2. Add mechanism safety for auto, like pulling the intake in near the trench (C33).
+3. Add the SysId routines behind calibration mode (C22).
+4. 🧑‍🏫 Test autos on the real field at slow speed first.
+
+**Dashboard milestone:** Add the running named command to the auto card, next to the auto name and timer.
+**Done when:** The 2-piece auto works 3 times in a row in sim.
+
+---
+
+## Phase 10: Driver assist, turret aim and shot distance
+
+**Goal:** One button aims at the hub and picks the right shooter speed, while the driver keeps driving.
+**Concepts:** C38, C39, C46, C19, C04, C37
+**Reference:** `main`: `util/SemiAutoHelper.java` (hub positions, the distance → RPM table); `churret`: `Churret.aimAtHub(...)`, `fullAutoAim(...)`
+
+1. Calculate the distance and field angle from the robot pose to the hub, using the alliance-correct field positions (C04).
+2. Aim the turret at the hub using the Phase 8 angle math (C46). Compare with the old robot's heading-lock approach (C38): which one lets the driver dodge defense?
+3. **Out-of-range fallback:** when the hub is outside the turret's range, use heading lock to rotate the drivetrain just enough to bring it back in range (C38).
+4. Build the distance → RPM lookup table. Collect real data points on a practice field, then interpolate (C39).
+5. Combine them (C37): while held, the turret aims and the flywheel spins up. The trigger feeds only when the turret is **AT TARGET** *and* the flywheel is **READY**.
+
+**Dashboard milestone:** An "Aim" card: distance to the hub, target RPM from the table, and an **AIM LOCKED** indicator (turret at target *and* flywheel ready).
+**Done when:** Auto-aim scores from 3 different distances in sim while the robot is facing 3 different directions.
+
+---
+
+## Phase 11: Autonomous, part 3: auto-aim in auto
+
+**Goal:** Autos shoot with the live auto-aim from Phase 10, so shots work from anywhere in range, not just the preset spots from Phase 9.
+**Concepts:** C32 (named commands), C37, C40 (preview only; shoot on the move is the Stretch)
+**Reference:** `main`: `RobotContainer.bindCommandsForAuto()`; `churret`: `Churret.fullAutoAim(...)`
+
+1. Swap the preset-shot named commands from Phase 9 for the Phase 10 auto-aim command. What can be reused as-is, and what has to change?
+2. Let the turret track the hub *while the path is driving*, and fire as soon as **AIM LOCKED** is true.
+3. Build a 3-piece auto that includes a shot from a spot you never preset.
+4. 🧑‍🏫 Test autos on the real field at slow speed first.
+
+**Dashboard milestone:** Show **AIM LOCKED** and the distance to the hub on the auto card while auto runs.
+**Done when:** The auto scores every piece 3 times in a row in sim, including the new spot.
+
+---
+
+## Phase 12: Robot health and driver polish
 
 **Goal:** Make the robot competition-safe and easy to drive.
 **Concepts:** C43, C16, C45, C28
@@ -180,70 +262,7 @@ Your code does not have to match the reference line-for-line. If it works and yo
 
 ---
 
-## Phase 8: Vision
-
-**Goal:** Use AprilTags to know exactly where the robot is on the field. The turret can only aim well if the pose is right.
-**Concepts:** C29, C30, C31, C12, C26
-**Reference:** `main`: `subsystems/vision/` (AdvantageKit vision template), `VisionConstants.java`
-
-1. Explain AprilTags and why odometry drifts (C26, C29).
-2. Add the AdvantageKit `Vision` subsystem with `VisionIOPhotonVisionSim` for the new robot's cameras. Wire it to `drive::addVisionMeasurement`.
-3. Measure and enter each robot-to-camera transform on the new robot (C30). Discuss the old robot's lesson: "all cameras are flipped on this robot."
-4. In sim, drive around and watch accepted vs. rejected vision poses in AdvantageScope. Explain the standard deviations and rejection rules in `Vision.java`.
-5. 🧑‍🏫 Real robot: configure the PhotonVision coprocessor, and check the pose against a tape-measured position on the field.
-
-**Dashboard milestone:** A "Vision" card showing, per camera: connected, number of tags seen, and whether the last pose was accepted.
-**Done when:** Pushing the robot by hand (or "slipping" it in sim) is corrected by vision within about a second.
-
----
-
-## Phase 9: Driver assist, turret aim and shot distance
-
-**Goal:** One button aims at the hub and picks the right shooter speed, while the driver keeps driving.
-**Concepts:** C38, C39, C46, C19, C04, C37
-**Reference:** `main`: `util/SemiAutoHelper.java` (hub positions, the distance → RPM table); `churret`: `Churret.aimAtHub(...)`, `fullAutoAim(...)`
-
-1. Calculate the distance and field angle from the robot pose to the hub, using the alliance-correct field positions (C04).
-2. Aim the turret at the hub using the Phase 6 angle math (C46). Compare with the old robot's heading-lock approach (C38): which one lets the driver dodge defense?
-3. **Out-of-range fallback:** when the hub is outside the turret's range, use heading lock to rotate the drivetrain just enough to bring it back in range (C38).
-4. Build the distance → RPM lookup table. Collect real data points on a practice field, then interpolate (C39).
-5. Combine them (C37): while held, the turret aims and the flywheel spins up. The trigger feeds only when the turret is **AT TARGET** *and* the flywheel is **READY**.
-
-**Dashboard milestone:** An "Aim" card: distance to the hub, target RPM from the table, and an **AIM LOCKED** indicator (turret at target *and* flywheel ready).
-**Done when:** Auto-aim scores from 3 different distances in sim while the robot is facing 3 different directions.
-
----
-
-## Phase 10: Autonomous
-
-**Goal:** Score points with nobody driving.
-**Concepts:** C32, C33, C10, C22
-**Reference:** `main`: `RobotContainer.bindCommandsForAuto()`, `getAutonomousCommand()`, `deploy/pathplanner/`
-
-1. Install PathPlanner and configure the robot settings (mass, module config with the Kraken X60, and so on).
-2. Draw a simple "drive out of the starting zone" path and run it in sim.
-3. Register named commands (intake, prep flywheel, aim + shoot) and build a 2-piece auto (C32). With a turret, the robot can aim while the path is still driving.
-4. Add mechanism safety for auto, like pulling the intake in near the trench (C33).
-5. Add the auto chooser, plus the SysId routines behind calibration mode (C22).
-6. 🧑‍🏫 Test autos on the real field at slow speed first.
-
-**Dashboard milestone:** Show the selected auto name and an auto timer. Stretch: draw the planned path on the field view.
-**Done when:** The 2-piece auto works 3 times in a row in sim.
-
----
-
-## Phase 11: Climber (bonus, if the new robot has one)
-
-**Goal:** A linear mechanism with motion profiling.
-**Concepts:** C23, C20, C36
-**Reference:** structure: your arm IO from Phase 4 plus a public AdvantageKit elevator example; hardware values: `main`: `subsystems/ClimberTW.java` (YAMS `Elevator`, `ElevatorFeedforward`, max velocity/acceleration)
-
-Build it like the arm, with its own IO layer, but with height instead of angle. The sim uses WPILib's `ElevatorSim`. Use kG for gravity (`ElevatorFeedforward`), and a trapezoid profile so it moves smoothly.
-**Dashboard milestone:** Climber height and state.
-
----
-
-## Phase 12: Competition readiness
+## Phase 13: Competition readiness
 
 **Concepts:** C43, C44, C14, C02
 
