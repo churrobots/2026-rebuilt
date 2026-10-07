@@ -1,0 +1,2272 @@
+ ▐▛███▛█   Claude Code v2.1.292
+▝▜██████▀  Opus 5.5 · Claude Team
+ ▝▝   ▝▝   /Users/admin/Documents/GitHub/2026-rebuilt
+
+
+❯ lets go                                                                       
+
+  Read 2 files, listed 1 directory, ran 3 shell commands (ctrl+o to expand)
+
+● Bash(cat > TUTORIAL_PROGRESS.md <<'EOF'
+      # Tutorial progress…)
+  ⎿  # Learnings
+     Student: (not given yet)
+     … +9 lines (ctrl+o to expand)
+  ⎿  Created LEARNINGS.md (+60 -0)
+       1 +# Learnings                                                    
+       2 +Student: (not given yet)                                       
+       3 +                                                               
+       4 +## Concept checklist                                           
+       5 +Legend: [ ] not yet · [~] seen, still shaky · [x] understood   
+       6 +                                                               
+       7 +- [ ] C01 · The FRC control system                             
+       8 +- [ ] C02 · Robot modes and the 20 ms loop                     
+       9 +- [ ] C03 · Java you'll see in robot code                      
+      10 +- [ ] C04 · Units and coordinates                              
+      11 +- [ ] C05 · Git and branches                                   
+      12 +- [ ] C06 · Subsystems                                         
+      13 +- [ ] C07 · Commands and requirements                          
+      14 +- [ ] C08 · Triggers and button bindings                       
+      15 +- [ ] C09 · Default commands                                   
+      16 +- [ ] C10 · Composing commands                                 
+      17 +- [ ] C11 · RobotContainer                                     
+      18 +- [ ] C12 · IO layers (hardware abstraction)                   
+      19 +- [ ] C13 · Logging inputs and outputs                         
+      20 +- [ ] C14 · AdvantageScope and log replay                      
+      21 +- [ ] C15 · Motors and motor controllers                       
+      22 +- [ ] C16 · Current limits and safety                          
+      23 +- [ ] C17 · Encoders, gear ratios, and zero offsets            
+      24 +- [ ] C18 · Open-loop vs. closed-loop control                  
+      25 +- [ ] C19 · PID feedback control                               
+      26 +- [ ] C20 · Feedforward                                        
+      27 +- [ ] C21 · Tuning a mechanism                                 
+      28 +- [ ] C22 · System identification (SysId)                      
+      29 +- [ ] C23 · Motion profiles                                    
+      30 +- [ ] C24 · Swerve drive                                       
+      31 +- [ ] C25 · Kinematics and field-relative driving              
+      32 +- [ ] C26 · Odometry                                           
+      33 +- [ ] C27 · Writing IO layers vs. using a mechanism library    
+      34 +- [ ] C28 · Driver input shaping                               
+      35 +- [ ] C29 · AprilTags                                          
+      36 +- [ ] C30 · Camera transforms and pose estimation              
+      37 +- [ ] C31 · PhotonVision                                       
+      38 +- [ ] C32 · PathPlanner and named commands                     
+      39 +- [ ] C33 · Mechanism state in autonomous                      
+      40 +- [ ] C34 · Rollers and indexers                               
+     … 20 more lines (ctrl+o to expand)
+  ⎿  Created TUTORIAL_PROGRESS.md (+8 -0)
+      1 +# Tutorial progress                                             
+      2 +Student: (not given yet)   Current phase: 0 – Drive the robot in
+        + simulation   Current step: 1                                   
+      3 +                                                                
+      4 +## Log                                                          
+      5 +- 2026-10-07: Started Guided Tutorial Mode. Beginning Phase 0.  
+      6 +                                                                
+      7 +## Where we differ from the reference (on purpose)              
+      8 +- (nothing yet)                                                 
+
+● Let's go! 🚀 I've turned on Guided Tutorial Mode. I'll be your mentor while
+  you build our new robot (a Kraken swerve drivetrain with a turret shooter) one
+  step at a time. If you ever just want me to write the code, say "just do it."
+
+  About my notes: I'll keep two notes files as we go. TUTORIAL_PROGRESS.md
+  tracks where you are in the tutorial. LEARNINGS.md tracks what you've learned
+  and what was confusing. They help coaches see your progress and make the
+  tutorial better. You can read them anytime or ask me what's in them. I just
+  created both.
+
+  Where we are: Phase 0, the very start. By the end of today's session you'll be
+  driving our swerve robot around a simulated field with a real controller, and
+  watching it move on our dashboard.
+
+  ▎ Coming up:
+  ▎ - Git branches (C05): your own copy of the code, so you can experiment 
+  ▎ without breaking anyone else's work.
+  ▎ - Simulation (C41): running the real robot code on your laptop, with physics
+  ▎ standing in for the motors.
+  ▎ - The 20 ms loop (C02): the robot doesn't run your code once. It runs it 50 
+  ▎ times a second, forever.
+  ▎ - The dashboard (C42): your window into what the robot is "thinking."
+  ▎
+  ▎ Ask me about any of these whenever you're curious.
+
+  Step 1: You're already on the fresh-start branch in VS Code, so WPILib looks
+  set up. ✅
+
+  Step 2 is making your own branch. Before we do it, a few quick questions:
+
+  1. What's your name? It goes in the notes so coaches know whose progress it
+     is.
+  2. Prediction: we're about to make a branch called something like
+     yourname-robot. What do you think happens to the fresh-start branch when
+     you change code on your branch?
+
+  When you're ready, make the branch by running this in the VS Code terminal
+  (swap in your name):
+
+  git checkout -b yourname-robot
+
+✻ Crunched for 31s · done 2:29 AM
+
+❯ skip this                                                                     
+
+● Bash(sed -i 's/Current step: 1/Current step: 3/' TUTORIAL_PROGRESS.md && sed
+      -i 's/^- 2026-10-07: Started Guided Tutorial Mode. Beginning Phase 0./-
+      2026-10-07: Star…)
+  ⎿  # Tutorial progress
+     Student: (not given yet)   Current phase: 0 – Drive the robot in simul
+     ation   Current step: 3
+     … +7 lines (ctrl+o to expand)
+  ⎿  Updated TUTORIAL_PROGRESS.md (+2 -2)
+      1  # Tutorial progress
+      2 -Student: (not given yet)   Current phase: 0 – Drive the robot in
+        - simulation   Current step: 1                                   
+      2 +Student: (not given yet)   Current phase: 0 – Drive the robot in
+        + simulation   Current step: 3                                   
+      3  
+      4  ## Log
+      5 -- 2026-10-07: Started Guided Tutorial Mode. Beginning Phase 0.  
+      5 +- 2026-10-07: Started Guided Tutorial Mode. Skipped making a per
+        +sonal branch (step 2) at student's request; still working on `fr
+        +esh-start`.                                                     
+      6  
+      7  ## Where we differ from the reference (on purpose)
+      8  - (nothing yet)
+
+● OK, we'll skip the branch and keep working on fresh-start. We can make one
+  later, before your first commit.
+
+  Step 3: Start the simulator 🎮
+
+  Now you'll run the real robot code on your laptop, with a physics model
+  playing the part of the motors.
+
+  1. Plug in an Xbox-style controller.
+  2. Click ChurroSim in VS Code (or press ⌘⇧B). The first build takes a minute.
+  3. Click ChurroDashboard to open http://localhost:5800.
+  4. In the dashboard's Sim Driver Station, check that your controller shows as
+     connected. Then enable Teleop.
+
+  Quick prediction before you drive: if you push the left stick forward, which
+  way will the robot move on the Field card? Toward the top or toward the
+  bottom?
+
+  Tell me what you see once it's running, or tell me if anything breaks.
+
+✻ Sautéed for 8s · done 2:29 AM
+
+❯ its already running                                                           
+
+● Great, then let's drive! 🏎️
+
+  Step 4: Drive
+
+  In the Sim Driver Station, enable Teleop and try these:
+
+  - Left stick: moves the robot
+  - Right stick: turns it
+  - Hold A: faces 0°
+  - Press X: locks the wheels in an X shape (good for not getting pushed)
+
+  Step 5: Watch the Field card
+
+  The Field card shows the field from the driver's point of view, so your 
+  alliance wall is at the bottom. Try switching alliance in the Sim Driver
+  Station and watch the field flip.
+
+  This dashboard is how we'll check everything we build from now on: speeds, arm
+  angles, whether the shooter is ready, and so on. You can show anything the
+  robot knows on it, and you can change how any of it looks.
+
+  Try this: spin the robot so it faces sideways, then push the left stick
+  forward. Which way does it go: "up the field" or the way the robot's front is
+  facing? Tell me what happens. It's a clue to how the drive code works.
+
+✻ Cogitated for 4s · done 2:31 AM
+
+❯ all good                                                                      
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● Bash(sed -i -e 's/^- \[ \] C41 · Simulation$/- [~] C41 · Simulation
+      (2026-10-07, Phase 0 step 3)/' -e 's/^- \[ \] C42 · NetworkTables and
+      dashboards$/- [~] C42 · Net…)
+  ⎿  Updated LEARNINGS.md (+8 -5)
+      45  - [ ] C38 · Heading lock and auto-aim
+      46  - [ ] C39 · Lookup tables and interpolation
+      47  - [ ] C40 · Shoot on the move
+      48 -- [ ] C41 · Simulation                                         
+      49 -- [ ] C42 · NetworkTables and dashboards                       
+      48 +- [~] C41 · Simulation (2026-10-07, Phase 0 step 3)            
+      49 +- [~] C42 · NetworkTables and dashboards (2026-10-07, Phase 0 s
+         +tep 5)                                                         
+      50  - [ ] C43 · Fault detection and alerts
+      51  - [ ] C44 · Deploying and the Driver Station
+      52  - [ ] C45 · Software design habits
+      53  
+      54  ## Notes by concept
+      55  
+      56 -(none yet)                                                     
+      56 +### C05 · Git and branches                                     
+      57 +- 2026-10-07 (Phase 0 step 2): Student chose to skip making a p
+         +ersonal branch for now. Revisit before the first commit (step 8
+         +).                                                             
+      58  
+      58 -## Tutorial feedback                                           
+      59 +### C41 · Simulation / C42 · Dashboards                        
+      60 +- 2026-10-07 (Phase 0 steps 3–5): Sim was already running. Stud
+         +ent drove in teleop and reported "all good." Didn't answer the 
+         +field-relative prediction question (push forward while robot fa
+         +ces sideways), so C25 is still untested.                       
+      61  
+      60 -(none yet)                                                     
+      62 +## Tutorial feedback                                           
+      63 +- 2026-10-07 (Phase 0): Student wanted to move fast through set
+         +up ("skip this," "its already running"). The setup steps could 
+         +be shorter for students who already have the sim running.      
+
+● Nice! Now for your first code edit. ✍️
+
+  Step 6: Show the robot's speed as a number
+
+  New idea: logging (C13)
+
+  The robot knows a lot: wheel speeds, angles, where it is. But we can't see any
+  of it unless the code publishes it. That's what this line does:
+
+  Logger.recordOutput("Some/Name", value);
+
+  Think of it like posting to a group chat. The robot posts a value under a name
+  50 times a second, and anyone listening (our dashboard, or AdvantageScope)
+  can read it. If you want to see something, recordOutput it.
+
+  Your mission: in Drive.java, inside periodic(), log the robot's speed in
+  meters per second under the name Tutorial/Drive/SpeedMetersPerSec.
+
+  Hint to get started: Drive.java already has a method that returns how fast the
+  robot is moving. Can you find it? Look around line 283. What does it give
+  back, and is that a single number?
+
+  Take a look and tell me what you find. Or try writing the line yourself and
+  I'll check it.
+
+✻ Crunched for 15s · done 2:31 AM
+
+❯ public chassisspeeds get chasisspeeds9) {                                     
+
+● You found it! 🎯 It's public ChassisSpeeds getChassisSpeeds().
+
+  Here's the catch: a ChassisSpeeds isn't one number. It's a bundle of three:
+
+  - vxMetersPerSecond: how fast the robot moves forward/back
+  - vyMetersPerSecond: how fast it moves sideways (swerve can do that!)
+  - omegaRadiansPerSecond: how fast it spins
+
+  We want one number: how fast the robot is moving overall, in any direction.
+
+  Puzzle: say the robot moves 3 m/s forward and 4 m/s sideways at the same time.
+  How fast is it actually going? 🤔 (Hint: think of the triangle you'd draw.)
+
+  Once you have the math, Java has a built-in helper for it: Math.hypot(a, b).
+  Try writing the full line in periodic() and paste it here. I'll check it
+  before you save.
+
+✻ Cooked for 4s · done 2:33 AM
+
+❯ 5m/s                                                                          
+
+● Exactly right! 🎉 It's 5 m/s, because 3² + 4² = 5². That's the Pythagorean
+  theorem, and it's what Math.hypot(a, b) does for you.
+
+  Now put it together. Here's the shape, with blanks for you to fill in:
+
+  ChassisSpeeds speeds = ________;
+  double speed = Math.hypot(speeds.________, speeds.________);
+  Logger.recordOutput("Tutorial/Drive/SpeedMetersPerSec", speed);
+
+  Where it goes: at the very end of periodic() in Drive.java, right after the
+  line with gyroDisconnectedAlert.set(...) (around line 182), before the closing
+  }.
+
+  Fill in the blanks and paste it here, or type it straight into the file and
+  save.
+
+✻ Cooked for 4s · done 2:34 AM
+
+※ recap: You're in Phase 0, logging the robot's speed so it shows up on the dashboard. Next, fill in the three blanks and add those lines at the end of periodic() in Drive.java. (disable recaps in /config)
+
+❯ Check it and whats next                                                       
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Bash(sed -i 's/^- \[ \] C13 · Logging inputs and outputs$/- [~] C13 · Logging
+      inputs and outputs (2026-10-07, Phase 0 step 6)/' LEARNINGS.md && python3
+      - <<'EOF'
+      p='…)
+  ⎿  236 src/main/deploy/dashboard/custom-dashboard.js
+     4:const POSE_TOPIC = "/AdvantageKit/RealOutputs/Odometry/Robot";
+     26:      root.innerHTML = `<link rel="stylesheet" href="custom-dashboa
+     … +26 lines (ctrl+o to expand)
+  ⎿  Updated LEARNINGS.md (+3 -1)
+      16  - [ ] C10 · Composing commands
+      17  - [ ] C11 · RobotContainer
+      18  - [ ] C12 · IO layers (hardware abstraction)
+      19 -- [ ] C13 · Logging inputs and outputs                         
+      19 +- [~] C13 · Logging inputs and outputs (2026-10-07, Phase 0 ste
+         +p 6)                                                           
+      20  - [ ] C14 · AdvantageScope and log replay
+      21  - [ ] C15 · Motors and motor controllers
+      22  - [ ] C16 · Current limits and safety
+     ...
+      58  
+      59  ### C41 · Simulation / C42 · Dashboards
+      60  - 2026-10-07 (Phase 0 steps 3–5): Sim was already running. Stud
+          ent drove in teleop and reported "all good." Didn't answer the 
+          field-relative prediction question (push forward while robot fa
+          ces sideways), so C25 is still untested.
+      61 +### C13 · Logging inputs and outputs                           
+      62 +- 2026-10-07 (Phase 0 step 6): Found `getChassisSpeeds()` on th
+         +eir own. Answered the 3-4-5 speed puzzle correctly ("5m/s"). Fi
+         +lled in the fill-in-the-blank snippet correctly (vx/vy with `Ma
+         +th.hypot`) and logged `Tutorial/Drive/SpeedMetersPerSec`. Hasn'
+         +t seen the dashboard side yet.                                 
+      63  
+      64  ## Tutorial feedback
+      65  - 2026-10-07 (Phase 0): Student wanted to move fast through set
+          up ("skip this," "its already running"). The setup steps could 
+          be shorter for students who already have the sim running.
+  ⎿  Updated TUTORIAL_PROGRESS.md (+1 -1)
+      1  # Tutorial progress
+      2 -Student: (not given yet)   Current phase: 0 – Drive the robot in
+        - simulation   Current step: 3                                   
+      2 +Student: (not given yet)   Current phase: 0 – Drive the robot in
+        + simulation   Current step: 7                                   
+      3  
+      4  ## Log
+      5  - 2026-10-07: Started Guided Tutorial Mode. Skipped making a per
+         sonal branch (step 2) at student's request; still working on `fr
+         esh-start`.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● ✅ Your code is correct! getChassisSpeeds(), then Math.hypot on vx and vy,
+  then recordOutput. Nice work. (There's one extra blank line after the }, but
+  it's harmless.)
+
+  How to test it: save the file and the sim restarts by itself. Your number is
+  being published now, but nothing on the dashboard shows it yet. That's the
+  next step.
+
+  ---
+
+  Step 7: Put your speed on the dashboard 📊
+
+  Your value travels like this:
+
+  ▎ robot code → recordOutput → NetworkTables → dashboard
+
+  On the dashboard side, everything AdvantageKit logs gets
+  /AdvantageKit/RealOutputs/ added to the front of its name.
+
+  Your file: src/main/deploy/dashboard/custom-dashboard.js
+
+  The Field card already reads the robot's pose (where it is) and shows it as
+  text (x 3.21 · y 4.05 · 90°). You'll copy that same pattern for speed. Look at
+  these spots:
+
+  - Line 4: POSE_TOPIC = "/AdvantageKit/RealOutputs/Odometry/Robot" names the
+    value it reads.
+  - Line 79: poseText.textContent = ... writes the text you see on the card.
+  - Line 90: a list of topic names. When any of them changes, the card redraws.
+
+  Guiding question: if you wanted the card to show speed too, what would you
+  need to add at each of those three spots? Make a guess for each one, even a
+  rough one, and I'll help you turn it into code.
+
+✻ Brewed for 16s · done 2:40 AM
+
+※ recap: You're getting your robot's speed to show on the simulated dashboard, and the robot code that publishes it already works. Next, guess what to add at lines 4, 79, and 90 of custom-dashboard.js so the Field card shows speed. (disable recaps in /config)
+
+❯ how is it now                                                                 
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Good progress! You've done 2 of the 3 spots. 👍
+
+  ✅ Spot 3 (line 91): you added your topic to the list, so the card will redraw
+  when speed changes. Nice.
+
+  🔧 Spot 1 (line 5): one bug. Your name is missing the prefix. Remember that
+  AdvantageKit adds something to the front of every name it logs. Compare your
+  line with POSE_TOPIC right above it: what's different?
+
+  Small style tip: the other names all end in _TOPIC (POSE_TOPIC,
+  ALLIANCE_TOPIC). Calling yours SPEED_TOPIC would match them. Matching the
+  surrounding code makes a file easier to read.
+
+  ⬜ Spot 2 (around line 80): not done yet. The card still only shows the pose
+  text. Look at how pose gets read:
+
+  const pose = decodePose2d(core.getTopic(POSE_TOPIC)?.value);
+
+  Speed is just a plain number, so you don't need decodePose2d. Question: how
+  would you read your speed value the same way, and then add it to the end of
+  the poseText.textContent string?
+
+  Fix the prefix, take a shot at spot 2, and ask me to check again.
+✻ Cogitated for 7s · done 2:44 AM
+
+❯ now?                                                                          
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Nice rename. SPEED_TOPIC matches the other names now. ✅
+
+  Two things are still left:
+
+  🔧 The prefix is still missing. Put the two lines side by side:
+
+  const POSE_TOPIC  = "/AdvantageKit/RealOutputs/Odometry/Robot";
+  const SPEED_TOPIC = "Tutorial/Drive/SpeedMetersPerSec";
+
+  The pose name starts with /AdvantageKit/RealOutputs/ and yours doesn't. Add
+  that to the front of yours. Without it, the dashboard looks for a topic that
+  doesn't exist.
+
+  ⬜ Spot 2 isn't done yet. Here's the shape. Put it in render(), right after
+  the const pose = ... line:
+
+  const speed = core.getTopic(SPEED_TOPIC)?.value;
+
+  Then change the end of the poseText.textContent line so it adds your speed.
+  For example, add this inside the backticks, after the °:
+
+   · ${speed?.toFixed(2)} m/s
+
+  toFixed(2) rounds the number to 2 decimal places, so you see 1.53 instead of
+  1.5312876….
+
+  Try both and ask me to check again!
+
+✻ Sautéed for 7s · done 2:46 AM
+
+❯ skip this part of the coding tutorial and write the dashboard code. we want   
+  to focus student effort on the Java code not dashboard                        
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Bash(python3 - <<'EOF'
+      p='src/main/deploy/dashboard/custom-dashboard.js';s=open(p).read()…)
+  ⎿  diff --git a/src/main/deploy/dashboard/custom-dashboard.js b/src/main/
+     deploy/dashboard/custom-dashboard.js
+     index ad3bb71..46cc647 100644
+     … +31 lines (ctrl+o to expand)
+  ⎿  Updated src/main/deploy/dashboard/custom-dashboard.js (+5 -2)
+      2  /** @typedef {import("./core/dashboard-core.js").DashboardTopic}
+          DashboardTopic */
+      3  
+      4  const POSE_TOPIC = "/AdvantageKit/RealOutputs/Odometry/Robot";
+      5 +const SPEED_TOPIC = "/AdvantageKit/RealOutputs/Tutorial/Drive/Sp
+        +eedMetersPerSec";                                               
+      6  const ALLIANCE_TOPIC = "/FMSInfo/IsRedAlliance";
+      7  const STATION_TOPIC = "/FMSInfo/StationNumber";
+      8  
+     ...
+      76        const isRed = core.getTopic(ALLIANCE_TOPIC)?.value === tr
+          ue;
+      77        const station = Number(core.getTopic(STATION_TOPIC)?.valu
+          e);
+      78        const pose = decodePose2d(core.getTopic(POSE_TOPIC)?.valu
+          e);
+      79 +      const speed = Number(core.getTopic(SPEED_TOPIC)?.value); 
+      80        drawField(canvas, view.getBoundingClientRect(), { isRed, 
+          station, pose });
+      81 +      const speedText = Number.isFinite(speed) ? ` · ${speed.to
+         +Fixed(2)} m/s` : "";                                           
+      82        poseText.textContent = pose
+      80 -        ? `x ${pose.x.toFixed(2)} · y ${pose.y.toFixed(2)} · ${
+         -Math.round((pose.heading * 180) / Math.PI)}°`                  
+      83 +        ? `x ${pose.x.toFixed(2)} · y ${pose.y.toFixed(2)} · ${
+         +Math.round((pose.heading * 180) / Math.PI)}°${speedText}`      
+      84          : "Waiting for pose…";
+      85      };
+      86      // Pose updates arrive very often, so draw at most once per
+           screen refresh.
+     ...
+      90  
+      91      /** @param {CustomEvent<DashboardTopic>} event */
+      92      const topicListener = ({ detail: topic }) => {
+      90 -      if ([POSE_TOPIC, ALLIANCE_TOPIC, STATION_TOPIC].includes(
+         -topic.name))                                                   
+      93 +      if ([POSE_TOPIC, ALLIANCE_TOPIC, STATION_TOPIC, SPEED_TOP
+         +IC].includes(topic.name))                                      
+      94          scheduleRender();
+      95      };
+      96      core.addEventListener("topic", topicListener);
+
+● Bash(M=/home/agent/.claude/projects/-Users-admin-Documents-GitHub-2026-rebuilt
+      /memory && cat > $M/tutorial-dashboard-code-by-claude.md <<'EOF'
+      ---…)
+  ⎿  Updated LEARNINGS.md (+4 -0)
+      56  ### C05 · Git and branches
+      57  - 2026-10-07 (Phase 0 step 2): Student chose to skip making a p
+          ersonal branch for now. Revisit before the first commit (step 8
+          ).
+      58  
+      59 +### C42 · Dashboards (Phase 0 step 7)                          
+      60 +- 2026-10-07 (Phase 0 step 7): Student added `SPEED_TOPIC` to t
+         +he redraw list and renamed it to match the other names. Missed 
+         +the `/AdvantageKit/RealOutputs/` prefix twice. A coach then ask
+         +ed Claude to write the rest of the dashboard code so students c
+         +an focus on Java.                                              
+      61 +                                                               
+      62  ### C41 · Simulation / C42 · Dashboards
+      63  - 2026-10-07 (Phase 0 steps 3–5): Sim was already running. Stud
+          ent drove in teleop and reported "all good." Didn't answer the 
+          field-relative prediction question (push forward while robot fa
+          ces sideways), so C25 is still untested.
+      64  ### C13 · Logging inputs and outputs
+     ...
+      66  
+      67  ## Tutorial feedback
+      68  - 2026-10-07 (Phase 0): Student wanted to move fast through set
+          up ("skip this," "its already running"). The setup steps could 
+          be shorter for students who already have the sim running.
+      69 +- 2026-10-07 (Phase 0 step 7): Coach direction: students should
+         + focus on Java. Claude writes the dashboard JS from now on (the
+         + student still picks what to show). Consider changing Phase 0 s
+         +tep 7 and the dashboard milestones in the plan to match.       
+  ⎿  Updated TUTORIAL_PROGRESS.md (+3 -2)
+      1  # Tutorial progress
+      2 -Student: (not given yet)   Current phase: 0 – Drive the robot in
+        - simulation   Current step: 7                                   
+      2 +Student: (not given yet)   Current phase: 0 – Drive the robot in
+        + simulation   Current step: 8                                   
+      3  
+      4  ## Log
+      5  - 2026-10-07: Started Guided Tutorial Mode. Skipped making a per
+         sonal branch (step 2) at student's request; still working on `fr
+         esh-start`.
+      6 +- 2026-10-07: Logged robot speed (`Tutorial/Drive/SpeedMetersPer
+        +Sec`) in `Drive.periodic()` (student wrote it). Claude added the
+        + speed readout to the Field card.                               
+      7  
+      8  ## Where we differ from the reference (on purpose)
+      8 -- (nothing yet)                                                 
+      9 +- Claude writes dashboard code (coach request, 2026-10-07): stud
+        +ents focus on Java.                                             
+
+● Done. The speed now shows on the Field card. 👍 I've also noted that from now
+  on I'll write the dashboard code and students will focus on Java. I saved that
+  in my memory and in the coach notes.
+
+  What I changed in custom-dashboard.js:
+  - Added the missing /AdvantageKit/RealOutputs/ prefix to SPEED_TOPIC.
+  - render() now reads the speed and adds it to the end of the pose text. If no
+    speed has arrived yet, it shows nothing instead of NaN.
+
+  How to test: the dashboard reloads by itself. Drive around in teleop and the
+  top of the Field card should show something like x 3.21 · y 4.05 · 90° · 2.47 
+  m/s. When you let go of the stick, the speed should drop to about 0.00.
+
+  Prediction: what speed do you think it shows if you only spin the robot in
+  place with the right stick, without moving it?
+
+  ---
+
+  Step 8 is your first commit. But we skipped making a branch earlier, so you're
+  still on fresh-start. That's the shared starting point for every student, so
+  it's better not to commit there. Should we make your own branch now and commit
+  on it? If yes, tell me a branch name, like yourname-robot.
+
+✻ Worked for 24s · done 2:47 AM
+
+❯ madtown                                                                       
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● Bash(python3 - <<'EOF'
+      p='TUTORIAL_PROGRESS.md';s=open(p).read()…)
+  ⎿  Updated TUTORIAL_PROGRESS.md (+2 -1)
+       1  # Tutorial progress
+       2 -Student: (not given yet)   Current phase: 0 – Drive the robot i
+         -n simulation   Current step: 8                                 
+       2 +Student: (not given yet)   Current phase: 1 – How that just wor
+         +ked   Current step: 1                                          
+       3  
+       4  ## Log
+       5  - 2026-10-07: Started Guided Tutorial Mode. Skipped making a pe
+          rsonal branch (step 2) at student's request; still working on `
+          fresh-start`.
+       6  - 2026-10-07: Logged robot speed (`Tutorial/Drive/SpeedMetersPe
+          rSec`) in `Drive.periodic()` (student wrote it). Claude added t
+          he speed readout to the Field card.
+       7 +- 2026-10-07: Made branch `madtown` from `fresh-start` and made
+         + the first commit. Phase 0 done.                               
+       8  
+       9  ## Where we differ from the reference (on purpose)
+      10  - Claude writes dashboard code (coach request, 2026-10-07): stu
+          dents focus on Java.
+  ⎿  Updated LEARNINGS.md (+2 -1)
+       8  - [ ] C02 · Robot modes and the 20 ms loop
+       9  - [ ] C03 · Java you'll see in robot code
+      10  - [ ] C04 · Units and coordinates
+      11 -- [ ] C05 · Git and branches                                   
+      11 +- [~] C05 · Git and branches (2026-10-07, Phase 0 step 8)      
+      12  - [ ] C06 · Subsystems
+      13  - [ ] C07 · Commands and requirements
+      14  - [ ] C08 · Triggers and button bindings
+     ...
+      55  
+      56  ### C05 · Git and branches
+      57  - 2026-10-07 (Phase 0 step 2): Student chose to skip making a p
+          ersonal branch for now. Revisit before the first commit (step 8
+          ).
+      58 +- 2026-10-07 (Phase 0 step 8): Chose the branch name `madtown`.
+         + Claude made the branch and the commit. The student hasn't run 
+         +git commands themselves yet or answered the "Check yourself" qu
+         +estion.                                                        
+      59  
+      60  ### C42 · Dashboards (Phase 0 step 7)
+      61  - 2026-10-07 (Phase 0 step 7): Student added `SPEED_TOPIC` to t
+          he redraw list and renamed it to match the other names. Missed 
+          the `/AdvantageKit/RealOutputs/` prefix twice. A coach then ask
+          ed Claude to write the rest of the dashboard code so students c
+          an focus on Java.
+
+● 🎉 Phase 0 is done! You're now on your own branch, madtown, and your first
+  commit is saved:
+
+  ▎ 933696b Log robot speed and show it on the Field card
+
+  The commit includes your speed logging in Drive.java, the dashboard readout,
+  and the tutorial notes. Coaches can now see your progress on this branch.
+  fresh-start didn't change, so other students still start from a clean copy.
+
+  ---
+
+  Phase 1: How that just worked 🔍
+
+  You drove the robot, but how does pushing a stick make the wheels move? In
+  this phase we follow that path through the code, so you can change it with
+  confidence.
+
+  ▎ Coming up:
+  ▎ - Subsystems (C06): a piece of the robot that owns its own motors, like 
+  ▎ "Drive."
+  ▎ - Commands (C07): an action the robot does, like "drive with the joystick."
+  ▎ - Default commands (C09): what a subsystem does when nobody asks it to do 
+  ▎ anything else.
+  ▎ - Triggers (C08): connecting a button press to a command.
+  ▎
+  ▎ Ask me about any of these whenever you're curious.
+
+  Step 1: Follow the stick press
+
+  The path looks like this:
+
+  ▎ controller → RobotContainer → DriveCommands.joystickDrive → 
+  ▎ Drive.runVelocity → each swerve module
+
+  We'll start at the beginning. Open RobotContainer.java and look for where the
+  controller's left stick gets used. Search for getLeftY.
+
+  Question: what method is that code inside of, and what does the name of that
+  method suggest it does?
+
+✻ Worked for 19s · done 2:48 AM
+
+❯ its in the method configure buttonbindings, maps the commands                 
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+● Exactly right. ✅ configureButtonBindings() connects controller inputs to
+  commands. Look at the first thing inside it (lines 103–108):
+
+  drive.setDefaultCommand(
+      DriveCommands.joystickDrive(
+          drive,
+          () -> -controller.getLeftY(),
+          () -> -controller.getLeftX(),
+          () -> -controller.getRightX()));
+
+  New idea: commands (C07)
+
+  A command is an action the robot does: "drive with the joystick," "spin the
+  intake," "lock the wheels in an X." DriveCommands.joystickDrive(...) doesn't
+  drive anything when it runs. It builds a driving action and hands it over, and
+  the robot runs that action every 20 ms.
+
+  Here's an analogy. drive is a worker (that's a subsystem, which owns the drive
+  motors). A command is a job you give that worker. A worker can only do one
+  job at a time, so if a new job comes in, the old one stops.
+
+  Prediction question: the method is called setDefaultCommand. Based on that
+  name, when do you think the joystick-driving job runs? Always? Only when a
+  button is held? Something else?
+
+✻ Cooked for 9s · done 2:50 AM
+
+❯ if its not doing another command it defaults to the setdegfaultcommand        
+
+● Bash(python3 - <<'EOF'
+      p='LEARNINGS.md';s=open(p).read()…)
+  ⎿  Updated LEARNINGS.md (+5 -3)
+      10  - [ ] C04 · Units and coordinates
+      11  - [~] C05 · Git and branches (2026-10-07, Phase 0 step 8)
+      12  - [ ] C06 · Subsystems
+      13 -- [ ] C07 · Commands and requirements                          
+      13 +- [~] C07 · Commands and requirements (2026-10-07, Phase 1 step
+         + 1)                                                            
+      14  - [ ] C08 · Triggers and button bindings
+      15 -- [ ] C09 · Default commands                                   
+      15 +- [x] C09 · Default commands (2026-10-07, Phase 1 step 1)      
+      16  - [ ] C10 · Composing commands
+      17 -- [ ] C11 · RobotContainer                                     
+      17 +- [~] C11 · RobotContainer (2026-10-07, Phase 1 step 1)        
+      18  - [ ] C12 · IO layers (hardware abstraction)
+      19  - [~] C13 · Logging inputs and outputs (2026-10-07, Phase 0 ste
+          p 6)
+      20  - [ ] C14 · AdvantageScope and log replay
+     ...
+      64  - 2026-10-07 (Phase 0 steps 3–5): Sim was already running. Stud
+          ent drove in teleop and reported "all good." Didn't answer the 
+          field-relative prediction question (push forward while robot fa
+          ces sideways), so C25 is still untested.
+      65  ### C13 · Logging inputs and outputs
+      66  - 2026-10-07 (Phase 0 step 6): Found `getChassisSpeeds()` on th
+          eir own. Answered the 3-4-5 speed puzzle correctly ("5m/s"). Fi
+          lled in the fill-in-the-blank snippet correctly (vx/vy with `Ma
+          th.hypot`) and logged `Tutorial/Drive/SpeedMetersPerSec`. Hasn'
+          t seen the dashboard side yet.
+      67 +### C07 · Commands / C09 · Default commands / C11 · RobotContai
+         +ner                                                            
+      68 +- 2026-10-07 (Phase 1 step 1): Found `getLeftY` inside `configu
+         +reButtonBindings()` and said it "maps the commands." Commands w
+         +ere explained with a worker/job analogy (subsystem = worker, co
+         +mmand = job). Predicted default commands correctly in their own
+         + words: "if its not doing another command it defaults to the se
+         +tdefaultcommand."                                              
+      69  
+      70  ## Tutorial feedback
+      71  - 2026-10-07 (Phase 0): Student wanted to move fast through set
+          up ("skip this," "its already running"). The setup steps could 
+          be shorter for students who already have the sim running.
+
+● Nailed it. ✅ The default command is the job the worker goes back to whenever
+  it has nothing else to do.
+
+  You can see this happen right below it, on lines 111–119. Holding A gives
+  drive a different job (joystickDriveAtAngle, which faces 0°). That job
+  interrupts the joystick driving. Because it uses whileTrue, it only lasts
+  while A is held.
+
+  Quick check: you hold A, so the robot snaps to face 0°. Then you let go of A.
+  What happens next, and why? Try it in the sim to see if you're right.
+
+  After that, we'll follow the next step in the chain: open DriveCommands.java
+  and see what joystickDrive does with those stick values.
+
+✻ Sautéed for 9s · done 2:52 AM
+
+❯ it stays ar 0 degrees                                                         
+
+● Good observation. That's what you'd see! But why does it stay at 0°? Here's
+  the trick:
+
+  - While A is held: joystickDriveAtAngle is running, and it actively steers the
+    robot to 0°.
+  - When you let go: that job ends, and drive goes back to its default command,
+    regular joystick driving. Nothing is holding the robot at 0° anymore. It
+    just isn't turning, because your right stick is centered, which means "turn
+    speed = 0."
+
+  It's like a car: when you let go of the steering wheel, it keeps pointing the
+  way it was pointing.
+
+  Test it: hold A, then let go and push the right stick. Does it turn freely?
+  (Now try pushing the right stick while holding A. What happens?)
+
+  Tell me what you see, then we'll open DriveCommands.java.
+
+✻ Brewed for 6s · done 2:53 AM
+
+❯ it sets it back to a certan angle                                             
+
+● Bash(python3 - <<'EOF'
+      p='LEARNINGS.md';s=open(p).read()…)
+  ⎿  68:  public static Command joystickDrive(
+     69-      Drive drive,
+     70-      DoubleSupplier xSupplier,
+     … +62 lines (ctrl+o to expand)
+  ⎿  Updated LEARNINGS.md (+1 -0)
+      66  - 2026-10-07 (Phase 0 step 6): Found `getChassisSpeeds()` on th
+          eir own. Answered the 3-4-5 speed puzzle correctly ("5m/s"). Fi
+          lled in the fill-in-the-blank snippet correctly (vx/vy with `Ma
+          th.hypot`) and logged `Tutorial/Drive/SpeedMetersPerSec`. Hasn'
+          t seen the dashboard side yet.
+      67  ### C07 · Commands / C09 · Default commands / C11 · RobotContai
+          ner
+      68  - 2026-10-07 (Phase 1 step 1): Found `getLeftY` inside `configu
+          reButtonBindings()` and said it "maps the commands." Commands w
+          ere explained with a worker/job analogy (subsystem = worker, co
+          mmand = job). Predicted default commands correctly in their own
+           words: "if its not doing another command it defaults to the se
+          tdefaultcommand."
+      69 +- 2026-10-07 (Phase 1 step 1): After releasing A, saw the robot
+         + "stays at 0 degrees" but didn't say why. Explained that the de
+         +fault command resumes and the right stick is centered, so there
+         +'s no rotation (steering-wheel analogy). When testing the right
+         + stick while holding A, said "it sets it back to a certain angl
+         +e." Seems to understand that the A command overrides the turn i
+         +nput. Not yet asked to explain interruption in their own words.
+      70  
+      71  ## Tutorial feedback
+      72  - 2026-10-07 (Phase 0): Student wanted to move fast through set
+          up ("skip this," "its already running"). The setup steps could 
+          be shorter for students who already have the sim running.
+
+● Yes! ✅ While A is held, the robot ignores your right stick and keeps steering
+  back to 0°. That's because A's job (joystickDriveAtAngle) took over drive
+  from the default job. Only one job at a time per worker.
+
+  ---
+
+  Next stop in the chain: DriveCommands.java
+
+  Open src/main/java/frc/robot/commands/DriveCommands.java and find
+  joystickDrive (line 68). Two things to notice:
+
+  - Line 73: Commands.run(() -> { ... }, drive) means "run this code every 20
+    ms." The drive at the very end (line 99) tells the scheduler which worker
+    this job needs.
+  - Line 92: drive.runVelocity(...). That's where the command hands the speeds
+    to the subsystem. It's the next stop on our path.
+
+  Before that, the stick values get "cleaned up." Look at line 80:
+
+  double omega = MathUtil.applyDeadband(omegaSupplier.getAsDouble(), DEADBAND);
+
+  and line 36: DEADBAND = 0.1.
+
+  Prediction question: real controller sticks never rest at exactly 0. They
+  might read 0.03 or -0.05 when you're not touching them. What do you think
+  would happen to the robot if we didn't have this deadband line? And what do
+  you think applyDeadband(..., 0.1) does to a reading of 0.05?
+
+✻ Baked for 11s · done 2:56 AM
+
+❯ if its close enough to zero, its basically zero                               
+
+● Bash(python3 - <<'EOF'
+      p='LEARNINGS.md';s=open(p).read()…)
+  ⎿  Updated LEARNINGS.md (+3 -1)
+      31  - [ ] C25 · Kinematics and field-relative driving
+      32  - [ ] C26 · Odometry
+      33  - [ ] C27 · Writing IO layers vs. using a mechanism library
+      34 -- [ ] C28 · Driver input shaping                               
+      34 +- [~] C28 · Driver input shaping (2026-10-07, Phase 1 step 2)  
+      35  - [ ] C29 · AprilTags
+      36  - [ ] C30 · Camera transforms and pose estimation
+      37  - [ ] C31 · PhotonVision
+     ...
+      67  ### C07 · Commands / C09 · Default commands / C11 · RobotContai
+          ner
+      68  - 2026-10-07 (Phase 1 step 1): Found `getLeftY` inside `configu
+          reButtonBindings()` and said it "maps the commands." Commands w
+          ere explained with a worker/job analogy (subsystem = worker, co
+          mmand = job). Predicted default commands correctly in their own
+           words: "if its not doing another command it defaults to the se
+          tdefaultcommand."
+      69  - 2026-10-07 (Phase 1 step 1): After releasing A, saw the robot
+           "stays at 0 degrees" but didn't say why. Explained that the de
+          fault command resumes and the right stick is centered, so there
+          's no rotation (steering-wheel analogy). When testing the right
+           stick while holding A, said "it sets it back to a certain angl
+          e." Seems to understand that the A command overrides the turn i
+          nput. Not yet asked to explain interruption in their own words.
+      70 +### C28 · Driver input shaping                                 
+      71 +- 2026-10-07 (Phase 1 step 2): Deadband in their own words: "if
+         + its close enough to zero, its basically zero." Didn't say what
+         + would happen without it (the robot creeping).                 
+      72  
+      73  ## Tutorial feedback
+      74  - 2026-10-07 (Phase 0): Student wanted to move fast through set
+          up ("skip this," "its already running"). The setup steps could 
+          be shorter for students who already have the sim running.
+  ⎿  Updated TUTORIAL_PROGRESS.md (+1 -1)
+      1  # Tutorial progress
+      2 -Student: (not given yet)   Current phase: 1 – How that just work
+        -ed   Current step: 1                                            
+      2 +Student: (not given yet)   Current phase: 1 – How that just work
+        +ed   Current step: 2                                            
+      3  
+      4  ## Log
+      5  - 2026-10-07: Started Guided Tutorial Mode. Skipped making a per
+         sonal branch (step 2) at student's request; still working on `fr
+         esh-start`.
+
+● That's the idea. ✅ Anything between −0.1 and 0.1 counts as zero, so 0.05
+  becomes 0. Without a deadband, the robot would slowly creep or spin on its own
+  while the controller sits on the table, because the stick never reads exactly
+  0. That's annoying in a match and dangerous in the pit.
+
+  (A small detail: values outside the deadband get rescaled, so the output still
+  goes smoothly from 0 to 1 instead of jumping from 0 straight to 0.1.)
+
+  ---
+
+  Next line: squaring (line 83)
+
+  omega = Math.copySign(omega * omega, omega);
+
+  This squares the stick value. copySign keeps the sign, so pushing left still
+  turns left.
+
+  Puzzle: push the stick halfway (0.5) and all the way (1.0). After squaring,
+  what do the two values become? Then guess why drivers would want that. Think
+  about lining up carefully for a shot vs. racing across the field.
+✻ Worked for 9s · done 2:59 AM
+
+❯ 0.25 and 1, more precise at slow speeds                                       
+
+● Bash(python3 - <<'EOF'
+      p='LEARNINGS.md';s=open(p).read()…)
+  ⎿  Updated LEARNINGS.md (+1 -0)
+      69  - 2026-10-07 (Phase 1 step 1): After releasing A, saw the robot
+           "stays at 0 degrees" but didn't say why. Explained that the de
+          fault command resumes and the right stick is centered, so there
+          's no rotation (steering-wheel analogy). When testing the right
+           stick while holding A, said "it sets it back to a certain angl
+          e." Seems to understand that the A command overrides the turn i
+          nput. Not yet asked to explain interruption in their own words.
+      70  ### C28 · Driver input shaping
+      71  - 2026-10-07 (Phase 1 step 2): Deadband in their own words: "if
+           its close enough to zero, its basically zero." Didn't say what
+           would happen without it (the robot creeping).
+      72 +- 2026-10-07 (Phase 1 step 2): Squaring: got 0.5→0.25 and 1→1 r
+         +ight, and explained why: "more precise at slow speeds." Y negat
+         +ion not covered yet.                                           
+      73  
+      74  ## Tutorial feedback
+      75  - 2026-10-07 (Phase 0): Student wanted to move fast through set
+          up ("skip this," "its already running"). The setup steps could 
+          be shorter for students who already have the sim running.
+
+● Perfect. ✅ Half-stick gives only a quarter of the speed, so small stick
+  movements are gentle and precise. Full stick still gives full speed. Drivers
+  get careful control for lining up and top speed for racing.
+
+  ---
+
+  One more mystery: the minus signs
+
+  Go back to RobotContainer.java, lines 106–108:
+
+  () -> -controller.getLeftY(),
+  () -> -controller.getLeftX(),
+  () -> -controller.getRightX()));
+
+  Every stick value gets a minus sign in front of it. Here are two facts:
+
+  1. On an Xbox controller, pushing the stick forward (up) gives a negative Y
+     value. (It's a leftover from old flight joysticks.)
+  2. On the robot, forward is positive X and left is positive Y. Turning
+     counter-clockwise is positive.
+
+  Question: why do you think we need the minus sign on getLeftY()? What would
+  happen when you push the stick forward if we removed it?
+
+✻ Churned for 7s · done 3:01 AM
+
+❯ so pushing forward drives forward, otherwise it goes backwards                
+
+● Bash(python3 - <<'EOF'
+      p='LEARNINGS.md';s=open(p).read()…)
+  ⎿  Updated LEARNINGS.md (+3 -2)
+      31  - [ ] C25 · Kinematics and field-relative driving
+      32  - [ ] C26 · Odometry
+      33  - [ ] C27 · Writing IO layers vs. using a mechanism library
+      34 -- [~] C28 · Driver input shaping (2026-10-07, Phase 1 step 2)  
+      34 +- [x] C28 · Driver input shaping (2026-10-07, Phase 1 step 2)  
+      35  - [ ] C29 · AprilTags
+      36  - [ ] C30 · Camera transforms and pose estimation
+      37  - [ ] C31 · PhotonVision
+     ...
+      69  - 2026-10-07 (Phase 1 step 1): After releasing A, saw the robot
+           "stays at 0 degrees" but didn't say why. Explained that the de
+          fault command resumes and the right stick is centered, so there
+          's no rotation (steering-wheel analogy). When testing the right
+           stick while holding A, said "it sets it back to a certain angl
+          e." Seems to understand that the A command overrides the turn i
+          nput. Not yet asked to explain interruption in their own words.
+      70  ### C28 · Driver input shaping
+      71  - 2026-10-07 (Phase 1 step 2): Deadband in their own words: "if
+           its close enough to zero, its basically zero." Didn't say what
+           would happen without it (the robot creeping).
+      72 -- 2026-10-07 (Phase 1 step 2): Squaring: got 0.5→0.25 and 1→1 r
+         -ight, and explained why: "more precise at slow speeds." Y negat
+         -ion not covered yet.                                           
+      72 +- 2026-10-07 (Phase 1 step 2): Squaring: got 0.5→0.25 and 1→1 r
+         +ight, and explained why: "more precise at slow speeds."        
+      73 +- 2026-10-07 (Phase 1 step 2): Y negation: "so pushing forward 
+         +drives forward, otherwise it goes backwards." Correct. C28 is u
+         +nderstood (deadband, squaring, and negation all explained in th
+         +eir own words).                                                
+      74  
+      75  ## Tutorial feedback
+      76  - 2026-10-07 (Phase 0): Student wanted to move fast through set
+          up ("skip this," "its already running"). The setup steps could 
+          be shorter for students who already have the sim running.
+
+● Exactly. ✅ The minus sign flips the controller's "forward = negative" into
+  the robot's "forward = positive." Without it, your driver would push forward
+  and the robot would back into the wall. You now understand all three ways the
+  stick gets cleaned up: deadband, squaring, and sign flips (C28). 🎉
+
+  ---
+
+  Last idea in this step: field-relative driving (C25)
+
+  Look at DriveCommands.java, line 93:
+
+  ChassisSpeeds.fromFieldRelativeSpeeds(speeds, drive.getRotation())
+
+  There are two ways a robot could understand "push the stick forward":
+
+  - Robot-relative: "drive the way the robot's front is pointing." Like an RC
+    car: if the car faces you, forward on the stick drives it toward you.
+    Confusing!
+  - Field-relative: "drive up the field, away from my wall, no matter which way
+    the robot faces." The code uses the gyro (drive.getRotation()) to do the
+    math.
+
+  Try it in the sim: spin the robot so it faces sideways (or backwards), then
+  push the left stick forward. Which way does it go on the Field card: up the
+  field, or the way the robot's front points? And based on line 93, which kind
+  of driving does our robot use?
+
+✻ Cooked for 9s · done 3:03 AM
+
+❯ field relative driving                                                        
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Bash(python3 - <<'EOF'
+      p='LEARNINGS.md';s=open(p).read()…)
+  ⎿  # Tutorial progress
+     Student: (not given yet)   Current phase: 1 – How that just worked   C
+     urrent step: 3
+     … +25 lines (ctrl+o to expand)
+  ⎿  Updated LEARNINGS.md (+3 -1)
+      28  - [ ] C22 · System identification (SysId)
+      29  - [ ] C23 · Motion profiles
+      30  - [ ] C24 · Swerve drive
+      31 -- [ ] C25 · Kinematics and field-relative driving              
+      31 +- [~] C25 · Kinematics and field-relative driving (2026-10-07, 
+         +Phase 1 step 2)                                                
+      32  - [ ] C26 · Odometry
+      33  - [ ] C27 · Writing IO layers vs. using a mechanism library
+      34  - [x] C28 · Driver input shaping (2026-10-07, Phase 1 step 2)
+     ...
+      71  - 2026-10-07 (Phase 1 step 2): Deadband in their own words: "if
+           its close enough to zero, its basically zero." Didn't say what
+           would happen without it (the robot creeping).
+      72  - 2026-10-07 (Phase 1 step 2): Squaring: got 0.5→0.25 and 1→1 r
+          ight, and explained why: "more precise at slow speeds." 
+      73  - 2026-10-07 (Phase 1 step 2): Y negation: "so pushing forward 
+          drives forward, otherwise it goes backwards." Correct. C28 is u
+          nderstood (deadband, squaring, and negation all explained in th
+          eir own words).
+      74 +### C25 · Kinematics and field-relative driving                
+      75 +- 2026-10-07 (Phase 1 step 2): Explained with the RC-car vs. "u
+         +p the field" comparison. Correctly said our robot uses "field r
+         +elative driving" (from the sim test and line 93). Kinematics (C
+         +hassisSpeeds → module states) only mentioned so far.           
+      76  
+      77  ## Tutorial feedback
+      78  - 2026-10-07 (Phase 0): Student wanted to move fast through set
+          up ("skip this," "its already running"). The setup steps could 
+          be shorter for students who already have the sim running.
+  ⎿  Updated TUTORIAL_PROGRESS.md (+1 -1)
+      1  # Tutorial progress
+      2 -Student: (not given yet)   Current phase: 1 – How that just work
+        -ed   Current step: 2                                            
+      2 +Student: (not given yet)   Current phase: 1 – How that just work
+        +ed   Current step: 3                                            
+      3  
+      4  ## Log
+      5  - 2026-10-07: Started Guided Tutorial Mode. Skipped making a per
+         sonal branch (step 2) at student's request; still working on `fr
+         esh-start`.
+
+● Right. ✅ Our robot drives field-relative. Pushing forward always goes up the
+  field, whichever way the robot faces. Drivers love it, because they never have
+  to think "which way is the robot facing right now?"
+
+  The rest of the path: drive.runVelocity(...) takes those field-relative
+  speeds, and kinematics math (C25) turns them into a speed and an angle for
+  each of the 4 wheels. Each module then spins its motors to match. That
+  completes the path:
+
+  ▎ stick → RobotContainer (sign flip) → joystickDrive (deadband, squaring, 
+  ▎ field-relative) → Drive.runVelocity (kinematics) → 4 modules → wheels 🛞
+
+  ---
+
+  Step 3: Who runs all this? Robot.java
+
+  New idea: the 20 ms loop (C02)
+
+  Robot code doesn't run once from top to bottom like a normal program. It runs
+  in a loop, 50 times a second, forever. Every 20 ms the robot reads its
+  sensors, decides what to do, and sets its motors. It's like a flipbook: each
+  page is one quick snapshot, and flipping fast makes it look like smooth
+  motion.
+
+  Open Robot.java and look at robotPeriodic() (line 105), especially line 119:
+
+  CommandScheduler.getInstance().run();
+
+  That one line is the heartbeat. Every 20 ms it checks buttons, starts and
+  stops commands, runs the active ones, and calls every subsystem's periodic().
+  That includes the Drive.periodic() where you logged speed!
+
+  Check yourself: say someone wrote this inside periodic() to wait for a button
+  press:
+
+  while (!controller.a().getAsBoolean()) { }
+
+  Why is that a really bad idea? (Hint: think about what happens to the other 49
+  "pages" that second.)
+
+✻ Cooked for 14s · done 3:06 AM
+
+※ recap: Goal: rebuild our robot step by step in Guided Tutorial Mode, and right now we're in Phase 1 learning how robot code runs every 20 ms. Next, answer why a while loop waiting for a button inside periodic() is a bad idea. (disable recaps in /config)
+
+❯ its a really bad idea, because that takes a lot of time you dont want to be   
+  waiting on it                                                                 
+
+● Bash(python3 - <<'EOF'
+      p='LEARNINGS.md';s=open(p).read()…)
+  ⎿  Updated LEARNINGS.md (+3 -1)
+       5  Legend: [ ] not yet · [~] seen, still shaky · [x] understood
+       6  
+       7  - [ ] C01 · The FRC control system
+       8 -- [ ] C02 · Robot modes and the 20 ms loop                     
+       8 +- [~] C02 · Robot modes and the 20 ms loop (2026-10-07, Phase 1
+         + step 3)                                                       
+       9  - [ ] C03 · Java you'll see in robot code
+      10  - [ ] C04 · Units and coordinates
+      11  - [~] C05 · Git and branches (2026-10-07, Phase 0 step 8)
+     ...
+      73  - 2026-10-07 (Phase 1 step 2): Y negation: "so pushing forward 
+          drives forward, otherwise it goes backwards." Correct. C28 is u
+          nderstood (deadband, squaring, and negation all explained in th
+          eir own words).
+      74  ### C25 · Kinematics and field-relative driving
+      75  - 2026-10-07 (Phase 1 step 2): Explained with the RC-car vs. "u
+          p the field" comparison. Correctly said our robot uses "field r
+          elative driving" (from the sim test and line 93). Kinematics (C
+          hassisSpeeds → module states) only mentioned so far.
+      76 +### C02 · Robot modes and the 20 ms loop                       
+      77 +- 2026-10-07 (Phase 1 step 3): Explained with a flipbook analog
+         +y and `CommandScheduler.run()` in `robotPeriodic()`. Check-your
+         +self answer: "that takes a lot of time you dont want to be wait
+         +ing on it." On the right track, but didn't say that the *whole 
+         +robot* freezes (no other subsystem or command runs, and the mot
+         +ors are stuck on their last output). Re-explained with a single
+         +-cashier analogy. Worth revisiting when they write their first 
+         +subsystem periodic().                                          
+      78  
+      79  ## Tutorial feedback
+      80  - 2026-10-07 (Phase 0): Student wanted to move fast through set
+          up ("skip this," "its already running"). The setup steps could 
+          be shorter for students who already have the sim running.
+
+● You're on the right track. ✅ Here's the full reason it's really bad, not just
+  slow.
+
+  The robot has one cashier handling everything: the drivetrain, the intake, the
+  shooter, the logging. Every 20 ms, the cashier serves each subsystem quickly
+  and moves on. A while loop that waits for a button is like one customer saying
+  "hold on, let me find my wallet…" while the line stops completely:
+
+  - The other subsystems' periodic() methods never run.
+  - No new commands start, and the dashboard stops updating.
+  - The motors are stuck doing whatever they were last told. If the robot was
+    driving at full speed, it keeps going. 😬
+
+  The fix is to check once each loop ("is A pressed? no? fine, check again next
+  loop") and never wait. That's what triggers like controller.a().whileTrue(...)
+  do for you.
+
+  ---
+
+  Step 4: Why could we drive without a robot? (IO layers, C12)
+
+  This is one of the most important ideas in the whole tutorial, because every
+  mechanism you build will use it.
+
+  Look in src/main/java/frc/robot/subsystems/drive/. You'll see three related
+  files:
+
+  - ModuleIO.java
+  - ModuleIOKraken.java
+  - ModuleIOSim.java
+
+  Guess from the names: what do you think each of these three files is for? And
+  why do you think there are two versions (Kraken and Sim)?
+
+✻ Worked for 13s · done 3:10 AM
+
+❯ they both us the ModuleIO since we want to simulate when we dont have the     
+  physcal robot, and want a different one for when we do have the physical      
+  robot                                                                         
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Bash(python3 - <<'EOF'
+      p='LEARNINGS.md';s=open(p).read()…)
+  ⎿  Updated LEARNINGS.md (+3 -1)
+      15  - [x] C09 · Default commands (2026-10-07, Phase 1 step 1)
+      16  - [ ] C10 · Composing commands
+      17  - [~] C11 · RobotContainer (2026-10-07, Phase 1 step 1)
+      18 -- [ ] C12 · IO layers (hardware abstraction)                   
+      18 +- [~] C12 · IO layers (hardware abstraction) (2026-10-07, Phase
+         + 1 step 4)                                                     
+      19  - [~] C13 · Logging inputs and outputs (2026-10-07, Phase 0 ste
+          p 6)
+      20  - [ ] C14 · AdvantageScope and log replay
+      21  - [ ] C15 · Motors and motor controllers
+     ...
+      75  - 2026-10-07 (Phase 1 step 2): Explained with the RC-car vs. "u
+          p the field" comparison. Correctly said our robot uses "field r
+          elative driving" (from the sim test and line 93). Kinematics (C
+          hassisSpeeds → module states) only mentioned so far.
+      76  ### C02 · Robot modes and the 20 ms loop
+      77  - 2026-10-07 (Phase 1 step 3): Explained with a flipbook analog
+          y and `CommandScheduler.run()` in `robotPeriodic()`. Check-your
+          self answer: "that takes a lot of time you dont want to be wait
+          ing on it." On the right track, but didn't say that the *whole 
+          robot* freezes (no other subsystem or command runs, and the mot
+          ors are stuck on their last output). Re-explained with a single
+          -cashier analogy. Worth revisiting when they write their first 
+          subsystem periodic().
+      78 +### C12 · IO layers                                            
+      79 +- 2026-10-07 (Phase 1 step 4): Guessed the purpose from the fil
+         +e names alone: "they both use the ModuleIO since we want to sim
+         +ulate when we dont have the physical robot, and want a differen
+         +t one for when we do." Good intuition before any explanation. N
+         +ext: the outlet/plug analogy and the RobotContainer switch.    
+      80  
+      81  ## Tutorial feedback
+      82  - 2026-10-07 (Phase 0): Student wanted to move fast through set
+          up ("skip this," "its already running"). The setup steps could 
+          be shorter for students who already have the sim running.
+  ⎿  Updated TUTORIAL_PROGRESS.md (+1 -1)
+      1  # Tutorial progress
+      2 -Student: (not given yet)   Current phase: 1 – How that just work
+        -ed   Current step: 3                                            
+      2 +Student: (not given yet)   Current phase: 1 – How that just work
+        +ed   Current step: 4                                            
+      3  
+      4  ## Log
+      5  - 2026-10-07: Started Guided Tutorial Mode. Skipped making a per
+         sonal branch (step 2) at student's request; still working on `fr
+         esh-start`.
+
+● That's a great guess, and you got it without any hints. ✅ Here's the idea
+  behind it.
+
+  New idea: IO layers (C12)
+
+  Think of a wall outlet. The outlet is a standard shape. You can plug in a
+  lamp, a phone charger, or a toaster, and the outlet doesn't care which one it
+  is, because they all fit the same plug.
+
+  - ModuleIO is the outlet. It's an interface, a list of what any swerve module
+    must be able to do: updateInputs (read sensors), setDriveVelocity,
+    setTurnPosition, and so on. It has no motor code at all.
+  - ModuleIOKraken is one plug: real Kraken and SPARK MAX motors.
+  - ModuleIOSim is another plug: a physics model pretending to be motors.
+
+  Now look at RobotContainer.java, lines 43–64:
+
+  case REAL:  new ModuleIOKraken(0, "FrontLeft"), ...
+  case SIM:   new ModuleIOSim(), ...
+
+  That's the only place that picks which plug to use. Drive.java never knows the
+  difference. It just calls io.setDriveVelocity(...). That's why you could
+  drive on a laptop with no robot.
+
+  Check yourself: say the team swaps the Kraken drive motors for a different
+  brand next year. Which file(s) would need to change, and which would stay
+  exactly the same: Drive.java, ModuleIO.java, ModuleIOKraken.java, or
+  DriveCommands.java?
+
+✻ Crunched for 13s · done 3:13 AM
+
+❯ ModuleIOKraken                                                                
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+● Bash(python3 - <<'EOF'
+      p='LEARNINGS.md';s=open(p).read()…)
+  ⎿  Updated LEARNINGS.md (+2 -2)
+      15  - [x] C09 · Default commands (2026-10-07, Phase 1 step 1)
+      16  - [ ] C10 · Composing commands
+      17  - [~] C11 · RobotContainer (2026-10-07, Phase 1 step 1)
+      18 -- [~] C12 · IO layers (hardware abstraction) (2026-10-07, Phase
+         - 1 step 4)                                                     
+      18 +- [x] C12 · IO layers (hardware abstraction) (2026-10-07, Phase
+         + 1 step 4)                                                     
+      19  - [~] C13 · Logging inputs and outputs (2026-10-07, Phase 0 ste
+          p 6)
+      20  - [ ] C14 · AdvantageScope and log replay
+      21  - [ ] C15 · Motors and motor controllers
+     ...
+      76  ### C02 · Robot modes and the 20 ms loop
+      77  - 2026-10-07 (Phase 1 step 3): Explained with a flipbook analog
+          y and `CommandScheduler.run()` in `robotPeriodic()`. Check-your
+          self answer: "that takes a lot of time you dont want to be wait
+          ing on it." On the right track, but didn't say that the *whole 
+          robot* freezes (no other subsystem or command runs, and the mot
+          ors are stuck on their last output). Re-explained with a single
+          -cashier analogy. Worth revisiting when they write their first 
+          subsystem periodic().
+      78  ### C12 · IO layers
+      79 -- 2026-10-07 (Phase 1 step 4): Guessed the purpose from the fil
+         -e names alone: "they both use the ModuleIO since we want to sim
+         -ulate when we dont have the physical robot, and want a differen
+         -t one for when we do." Good intuition before any explanation. N
+         -ext: the outlet/plug analogy and the RobotContainer switch.    
+      79 +- 2026-10-07 (Phase 1 step 4): Guessed the purpose from the fil
+         +e names alone: "they both use the ModuleIO since we want to sim
+         +ulate when we dont have the physical robot, and want a differen
+         +t one for when we do." Good intuition before any explanation. T
+         +aught with the outlet/plug analogy and the RobotContainer switc
+         +h. Check-yourself ("new motor brand, which file changes?"): ans
+         +wered "ModuleIOKraken." Correct. Added that in practice you'd w
+         +rite a new ModuleIO<Brand> and change the RobotContainer lines.
+      80  
+      81  ## Tutorial feedback
+      82  - 2026-10-07 (Phase 0): Student wanted to move fast through set
+          up ("skip this," "its already running"). The setup steps could 
+          be shorter for students who already have the sim running.
+  ⎿  Updated TUTORIAL_PROGRESS.md (+1 -1)
+      1  # Tutorial progress
+      2 -Student: (not given yet)   Current phase: 1 – How that just work
+        -ed   Current step: 4                                            
+      2 +Student: (not given yet)   Current phase: 1 – How that just work
+        +ed   Current step: 5                                            
+      3  
+      4  ## Log
+      5  - 2026-10-07: Started Guided Tutorial Mode. Skipped making a per
+         sonal branch (step 2) at student's request; still working on `fr
+         esh-start`.
+
+● Correct. ✅ Only the hardware "plug" changes. Usually you'd write a new
+  ModuleIO<NewBrand>.java next to the Kraken one, then change the 4 lines in
+  RobotContainer that pick it. Drive.java, ModuleIO.java, and DriveCommands.java
+  stay exactly the same. Every mechanism you build from now on (intake, arm,
+  shooter, turret) will follow this same pattern.
+
+  ---
+
+  Step 5: Feel the difference 🎮
+
+  Time to change some code and feel the result with the controller. Pick one, or
+  try both:
+
+  A. Deadband: DriveCommands.java, line 36
+
+  private static final double DEADBAND = 0.1;
+
+  Try a big value like 0.5.
+
+  B. Max speed: DriveConstants.java, line 31
+
+  public static final double maxSpeedMetersPerSec = 4.8;
+
+  Try a slow value like 1.5.
+
+  Before you save, predict:
+  - With DEADBAND = 0.5, how far do you have to push the stick before the robot
+    moves at all?
+  - With max speed 1.5, what top speed will your dashboard readout show at full
+    stick?
+
+  Save, wait for the sim to restart, and drive. Your speed readout on the Field
+  card will show whether you were right!
+
+  ⚠️ Change both back afterward. maxSpeedMetersPerSec is used in other places
+  too (autos, wheel-speed limits), so it's a real robot setting, not just a
+  joystick setting.
+
+✻ Brewed for 13s · done 3:15 AM
+
+❯ whats next                                                                    
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Bash(python3 - <<'EOF'
+      p='LEARNINGS.md';s=open(p).read()…)
+  ⎿  Updated LEARNINGS.md (+2 -0)
+      77  - 2026-10-07 (Phase 1 step 3): Explained with a flipbook analog
+          y and `CommandScheduler.run()` in `robotPeriodic()`. Check-your
+          self answer: "that takes a lot of time you dont want to be wait
+          ing on it." On the right track, but didn't say that the *whole 
+          robot* freezes (no other subsystem or command runs, and the mot
+          ors are stuck on their last output). Re-explained with a single
+          -cashier analogy. Worth revisiting when they write their first 
+          subsystem periodic().
+      78  ### C12 · IO layers
+      79  - 2026-10-07 (Phase 1 step 4): Guessed the purpose from the fil
+          e names alone: "they both use the ModuleIO since we want to sim
+          ulate when we dont have the physical robot, and want a differen
+          t one for when we do." Good intuition before any explanation. T
+          aught with the outlet/plug analogy and the RobotContainer switc
+          h. Check-yourself ("new motor brand, which file changes?"): ans
+          wered "ModuleIOKraken." Correct. Added that in practice you'd w
+          rite a new ModuleIO<Brand> and change the RobotContainer lines.
+      80 +### Phase 1 step 5 (deadband / max speed exercise)             
+      81 +- 2026-10-07: Asked "whats next" without changing any values (n
+         +o diff), so the exercise was skipped. Could come back to it whe
+         +n tuning drive feel with a driver (Phase 7).                   
+      82  
+      83  ## Tutorial feedback
+      84  - 2026-10-07 (Phase 0): Student wanted to move fast through set
+          up ("skip this," "its already running"). The setup steps could 
+          be shorter for students who already have the sim running.
+  ⎿  Updated TUTORIAL_PROGRESS.md (+2 -1)
+       1  # Tutorial progress
+       2 -Student: (not given yet)   Current phase: 1 – How that just wor
+         -ked   Current step: 5                                          
+       2 +Student: (not given yet)   Current phase: 1 – How that just wor
+         +ked   Current step: 6                                          
+       3  
+       4  ## Log
+       5  - 2026-10-07: Started Guided Tutorial Mode. Skipped making a pe
+          rsonal branch (step 2) at student's request; still working on `
+          fresh-start`.
+       6  - 2026-10-07: Logged robot speed (`Tutorial/Drive/SpeedMetersPe
+          rSec`) in `Drive.periodic()` (student wrote it). Claude added t
+          he speed readout to the Field card.
+       7  - 2026-10-07: Made branch `madtown` from `fresh-start` and made
+           the first commit. Phase 0 done.
+       8 +- 2026-10-07: Phase 1 steps 1–4: traced stick → wheels, default
+         + commands, deadband/squaring/negation, field-relative, the 20 m
+         +s loop, IO layers. Skipped the step 5 exercise.                
+       9  
+      10  ## Where we differ from the reference (on purpose)
+      11  - Claude writes dashboard code (coach request, 2026-10-07): stu
+          dents focus on Java.
+
+● No problem, we'll skip the feel test. (You can always come back to it when a
+  driver wants the robot to feel different.)
+
+  ---
+
+  Step 6: Your first button binding 🔘
+
+  Now you'll write a binding instead of just reading one.
+
+  New idea: triggers (C08)
+
+  A trigger connects a condition (like "B is pressed") to a command. The way you
+  connect it changes when the command runs:
+
+  - onTrue: runs the command once, at the moment you press. Like a doorbell: one
+    press, one ring.
+  - whileTrue: runs the command while you hold the button, and stops it when you
+    let go. Like a flashlight button you have to keep squeezing.
+
+  You've already seen both. X uses onTrue (one press locks the wheels), and A
+  uses whileTrue (hold to face 0°).
+
+  Your mission: make the B button count how many times it's been pressed, and
+  log the count so we can watch it.
+
+  You'll need three pieces in RobotContainer.java:
+  1. A variable to hold the count.
+  2. A binding on controller.b() that adds 1 to the count each time it's
+     pressed.
+  3. A Logger.recordOutput(...) that publishes the count, for example as
+     Tutorial/ButtonPresses.
+
+  First hint: look at how X is bound on line 122:
+
+  controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+
+  Commands.runOnce(...) runs some code one time. Question: if you wanted it to
+  run your code (add 1 and log it) instead of drive::stopWithX, what would you
+  put there? Take a shot. Rough code is fine, and I'll help fix it. I'll add the
+  counter to the dashboard once your Java works.
+✻ Churned for 14s · done 3:18 AM
+
+※ recap: You're rebuilding the robot code in Guided Tutorial Mode, and you're on Phase 1, step 6: making the B button count its presses. Next, write the B binding in RobotContainer.java with Commands.runOnce, and I'll check it.
+
+❯ write the rest of it for me                                                   
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● The student already started: private int COUNT_B; is there. I'll build on it.
+
+● Bash(python3 - <<'EOF'
+      p='src/main/java/frc/robot/RobotContainer.java';s=open(p).read()…)
+  ⎿  diff --git a/src/main/java/frc/robot/RobotContainer.java b/src/main/ja
+     va/frc/robot/RobotContainer.java
+     index dd1777e..839b6c9 100644
+     … +124 lines (ctrl+o to expand)
+  ⎿  Updated src/main/java/frc/robot/RobotContainer.java (+56 -25)
+      20  import frc.robot.subsystems.drive.ModuleIO;
+      21  import frc.robot.subsystems.drive.ModuleIOKraken;
+      22  import frc.robot.subsystems.drive.ModuleIOSim;
+      23 +import org.littletonrobotics.junction.Logger;                  
+      24  import org.littletonrobotics.junction.networktables.LoggedDashb
+          oardChooser;
+      25  
+      26  /**
+      26 - * This class is where the bulk of the robot should be declared
+         -. Since Command-based is a                                     
+      27 - * "declarative" paradigm, very little robot logic should actua
+         -lly be handled in the {@link Robot}                            
+      28 - * periodic methods (other than the scheduler calls). Instead, 
+         -the structure of the robot (including                          
+      27 + * This class is where the bulk of the robot should be declared
+         +. Since                                                        
+      28 + * Command-based is a                                          
+      29 + * "declarative" paradigm, very little robot logic should actua
+         +lly be handled in                                              
+      30 + * the {@link Robot}                                           
+      31 + * periodic methods (other than the scheduler calls). Instead, 
+         +the structure of                                               
+      32 + * the robot (including                                        
+      33   * subsystems, commands, and button mappings) should be declare
+          d here.
+      34   */
+      35  public class RobotContainer {
+      36    // Subsystems
+      37    private final Drive drive;
+      38  
+      39 +  // Tutorial: how many times B has been pressed               
+      40 +  private int bPressCount = 0;                                 
+      41 +                                                               
+      42    // Controller
+      43    private final CommandXboxController controller = new CommandX
+          boxController(0);
+      44  
+      45    // Dashboard inputs
+      46    private final LoggedDashboardChooser<Command> autoChooser;
+      47  
+      41 -  /** The container for the robot. Contains subsystems, OI devi
+         -ces, and commands. */                                          
+      48 +  /**                                                          
+      49 +   * The container for the robot. Contains subsystems, OI devic
+         +es, and commands.                                              
+      50 +   */                                                          
+      51    public RobotContainer() {
+      52      switch (Constants.currentMode) {
+      53        case REAL:
+      54          // Real robot, instantiate hardware IO implementations
+      46 -        drive =                                                
+     … 81 more lines (ctrl+o to expand)
+
+● The student also wrote a B binding that uses COUNT_B. I renamed that variable,
+  so their line would break the build. I'll fold it into the new code.
+
+● Bash(python3 - <<'EOF'
+      p='src/main/java/frc/robot/RobotContainer.java';s=open(p).read()…)
+  ⎿                  () -> Rotation2d.kZero,
+                     () -> false));
+     … +24 lines (ctrl+o to expand)
+  ⎿  Updated src/main/java/frc/robot/RobotContainer.java (+0 -1)
+      131                  () -> false));
+      132  
+      133      // Switch to X pattern when X button is pressed
+      134 -    controller.b().onTrue(Commands.runOnce(() -> COUNT_B++)); 
+      134      controller.x().onTrue(Commands.runOnce(drive::stopWithX, d
+           rive));
+      135  
+      136      // Tutorial: count B presses (onTrue runs once per press)
+
+● Now the dashboard card. First I'll check the existing styles so the new card
+  matches them.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Bash(python3 - <<'EOF'
+      p='src/main/deploy/dashboard/custom-dashboard.js';s=open(p).read()…)
+  ⎿  Updated src/main/deploy/dashboard/custom-dashboard.js (+35 -0)
+       5  const SPEED_TOPIC = "/AdvantageKit/RealOutputs/Tutorial/Drive/S
+          peedMetersPerSec";
+       6  const ALLIANCE_TOPIC = "/FMSInfo/IsRedAlliance";
+       7  const STATION_TOPIC = "/FMSInfo/StationNumber";
+       8 +const B_COUNT_TOPIC = "/AdvantageKit/RealOutputs/Tutorial/BPres
+         +sCount";                                                       
+       9 +const B_HELD_TOPIC = "/AdvantageKit/RealOutputs/Tutorial/BHeld"
+         +;                                                              
+      10  
+      11  // 2026 field size and robot bumper size, in meters.
+      12  const FIELD = { length: 17.548, width: 8.052 };
+     ...
+      35              </div>
+      36              <div class="field-view"><canvas></canvas></div>
+      37            </section>
+      38 +          <section class="card" aria-labelledby="buttons-headin
+         +g">                                                            
+      39 +            <div class="card-heading">                         
+      40 +              <div><p class="eyebrow">Tutorial</p><h1 id="butto
+         +ns-heading">B Button</h1></div>                                
+      41 +            </div>                                             
+      42 +            <div class="button-stats">                         
+      43 +              <div><p class="eyebrow">Presses (onTrue)</p><outp
+         +ut class="big-number b-count">0</output></div>                 
+      44 +              <div><p class="eyebrow">Held (whileTrue)</p><outp
+         +ut class="status-light b-held">NOT HELD</output></div>         
+      45 +            </div>                                             
+      46 +          </section>                                           
+      47          </main>`;
+      48      }
+      49      if (this.#core && !this.#started) this.#start(this.#core);
+     ...
+       72    #start(core) {
+       73      this.#started = true;
+       74      this.#startFieldCard(core);
+       75 +    this.#startButtonCard(core);                              
+       76    }
+       77  
+       78 +  /** Shows the B press counter and whether B is held right no
+          +w. */                                                         
+       79 +  #startButtonCard(core) {                                    
+       80 +    const root = this.shadowRoot;                             
+       81 +    const countText = root.querySelector(".b-count");         
+       82 +    const heldLight = root.querySelector(".b-held");          
+       83 +                                                              
+       84 +    const render = () => {                                    
+       85 +      const count = Number(core.getTopic(B_COUNT_TOPIC)?.value
+          +);                                                            
+       86 +      const held = core.getTopic(B_HELD_TOPIC)?.value === true
+          +;                                                             
+       87 +      countText.textContent = Number.isFinite(count) ? String(
+          +count) : "0";                                                 
+       88 +      heldLight.textContent = held ? "HELD" : "NOT HELD";     
+     … 15 more lines (ctrl+o to expand)
+  ⎿  Updated src/main/deploy/dashboard/custom-dashboard.css (+27 -0)
+       71    height: 100%;
+       72  }
+       73  
+       74 +.button-stats {                                               
+       75 +  margin-top: 16px;                                           
+       76 +  display: flex;                                              
+       77 +  align-items: flex-start;                                    
+       78 +  gap: 32px;                                                  
+       79 +}                                                             
+       80 +.big-number {                                                 
+       81 +  display: block;                                             
+       82 +  font-size: 2.6rem;                                          
+       83 +  font-weight: 800;                                           
+       84 +  font-variant-numeric: tabular-nums;                         
+       85 +}                                                             
+       86 +.status-light {                                               
+       87 +  display: inline-block;                                      
+       88 +  margin-top: 8px;                                            
+       89 +  padding: 6px 12px;                                          
+       90 +  border-radius: 999px;                                       
+       91 +  background: #2a3240;                                        
+       92 +  color: #93a0b4;                                             
+       93 +  font-weight: 800;                                           
+       94 +  letter-spacing: 0.06em;                                     
+       95 +}                                                             
+       96 +.status-light.on {                                            
+       97 +  background: #1f9d55;                                        
+       98 +  color: #fff;                                                
+       99 +}                                                             
+      100 +                                                              
+      101  @media (max-width: 680px) {
+      102    main {
+      103      padding: 14px;
+
+● Bash(python3 - <<'EOF'
+      p='LEARNINGS.md';s=open(p).read()…)
+  ⎿  Updated LEARNINGS.md (+3 -1)
+      11  - [~] C05 · Git and branches (2026-10-07, Phase 0 step 8)
+      12  - [ ] C06 · Subsystems
+      13  - [~] C07 · Commands and requirements (2026-10-07, Phase 1 step
+           1)
+      14 -- [ ] C08 · Triggers and button bindings                       
+      14 +- [~] C08 · Triggers and button bindings (2026-10-07, Phase 1 s
+         +tep 6)                                                         
+      15  - [x] C09 · Default commands (2026-10-07, Phase 1 step 1)
+      16  - [ ] C10 · Composing commands
+      17  - [~] C11 · RobotContainer (2026-10-07, Phase 1 step 1)
+     ...
+      79  - 2026-10-07 (Phase 1 step 4): Guessed the purpose from the fil
+          e names alone: "they both use the ModuleIO since we want to sim
+          ulate when we dont have the physical robot, and want a differen
+          t one for when we do." Good intuition before any explanation. T
+          aught with the outlet/plug analogy and the RobotContainer switc
+          h. Check-yourself ("new motor brand, which file changes?"): ans
+          wered "ModuleIOKraken." Correct. Added that in practice you'd w
+          rite a new ModuleIO<Brand> and change the RobotContainer lines.
+      80  ### Phase 1 step 5 (deadband / max speed exercise)
+      81  - 2026-10-07: Asked "whats next" without changing any values (n
+          o diff), so the exercise was skipped. Could come back to it whe
+          n tuning drive feel with a driver (Phase 7).
+      82 +### C08 · Triggers and button bindings                         
+      83 +- 2026-10-07 (Phase 1 step 6): Explained onTrue (doorbell) vs. 
+         +whileTrue (flashlight). Student started on their own: added `pr
+         +ivate int COUNT_B;` and `controller.b().onTrue(Commands.runOnce
+         +(() -> COUNT_B++))`, which is the right idea. Then asked Claude
+         + to "write the rest." Claude renamed the variable to `bPressCou
+         +nt` (camelCase for variables) and added logging plus a whileTru
+         +e/startEnd "held" binding. Still to check: can they predict wha
+         +t the counter and the held light do?                           
+      84  
+      85  ## Tutorial feedback
+      86  - 2026-10-07 (Phase 0): Student wanted to move fast through set
+          up ("skip this," "its already running"). The setup steps could 
+          be shorter for students who already have the sim running.
+  ⎿  Updated TUTORIAL_PROGRESS.md (+1 -0)
+       6  - 2026-10-07: Logged robot speed (`Tutorial/Drive/SpeedMetersPe
+          rSec`) in `Drive.periodic()` (student wrote it). Claude added t
+          he speed readout to the Field card.
+       7  - 2026-10-07: Made branch `madtown` from `fresh-start` and made
+           the first commit. Phase 0 done.
+       8  - 2026-10-07: Phase 1 steps 1–4: traced stick → wheels, default
+           commands, deadband/squaring/negation, field-relative, the 20 m
+          s loop, IO layers. Skipped the step 5 exercise.
+       9 +- 2026-10-07: Phase 1 step 6: B button press counter (onTrue) a
+         +nd held light (whileTrue) in RobotContainer, plus a "B Button" 
+         +dashboard card (Claude wrote the code at the student's request)
+         +.                                                              
+      10  
+      11  ## Where we differ from the reference (on purpose)
+      12  - Claude writes dashboard code (coach request, 2026-10-07): stu
+          dents focus on Java.
+
+● I wrote the rest. You had the right idea with COUNT_B++ inside an onTrue +
+  runOnce, so I built on it.
+
+  What I changed in RobotContainer.java:
+  - Renamed COUNT_B to bPressCount. In Java, ALL_CAPS names are for constants
+    that never change. A counter changes, so it uses camelCase. I also folded
+    your B binding into the new code so there's only one.
+  - B with onTrue: each press adds 1 to bPressCount and logs it as
+    Tutorial/BPressCount.
+  - B with whileTrue: uses Commands.startEnd(...). "Start" logs Tutorial/BHeld =
+    true when you press, and "end" logs false when you let go. This shows the
+    difference between the two trigger types side by side.
+
+  Dashboard: I added a "B Button" card with a big press counter and a HELD / NOT
+  HELD light that turns green.
+
+  Your editor also reformatted some of RobotContainer.java (line breaks in
+  comments and in the new Drive(...) calls). That's harmless, but it makes the
+  git diff look bigger.
+
+  How to test it: after the sim restarts, enable teleop and look for the B
+  Button card.
+  - Tap B a few times. The counter should go up by exactly 1 per tap.
+  - Hold B for 3 seconds. The light should stay green the whole time, and the
+    counter should go up by only 1.
+
+  Predict before you try: if you hold B for 3 seconds, the code runs 50 times a
+  second. So why does the counter only go up by 1 and not 150? 🤔
+
+✻ Worked for 50s · done 3:27 AM
+
+※ recap: You're building our new robot in Guided Tutorial Mode, on Phase 1 step 6: making the B button count presses and light up while held. Next, tap and hold B in the sim and watch the B Button card.
+
+❯ because of the runONCE command                                                
+
+● Bash(python3 - <<'EOF'
+      p='LEARNINGS.md';s=open(p).read()…)
+  ⎿  Updated LEARNINGS.md (+1 -1)
+      80  ### Phase 1 step 5 (deadband / max speed exercise)
+      81  - 2026-10-07: Asked "whats next" without changing any values (n
+          o diff), so the exercise was skipped. Could come back to it whe
+          n tuning drive feel with a driver (Phase 7).
+      82  ### C08 · Triggers and button bindings
+      83 -- 2026-10-07 (Phase 1 step 6): Explained onTrue (doorbell) vs. 
+         -whileTrue (flashlight). Student started on their own: added `pr
+         -ivate int COUNT_B;` and `controller.b().onTrue(Commands.runOnce
+         -(() -> COUNT_B++))`, which is the right idea. Then asked Claude
+         - to "write the rest." Claude renamed the variable to `bPressCou
+         -nt` (camelCase for variables) and added logging plus a whileTru
+         -e/startEnd "held" binding. Still to check: can they predict wha
+         -t the counter and the held light do?                           
+      83 +- 2026-10-07 (Phase 1 step 6): Explained onTrue (doorbell) vs. 
+         +whileTrue (flashlight). Student started on their own: added `pr
+         +ivate int COUNT_B;` and `controller.b().onTrue(Commands.runOnce
+         +(() -> COUNT_B++))`, which is the right idea. Then asked Claude
+         + to "write the rest." Claude renamed the variable to `bPressCou
+         +nt` (camelCase for variables) and added logging plus a whileTru
+         +e/startEnd "held" binding. Asked why holding B for 3 s only cou
+         +nts once: "because of the runONCE command." Half right. It's al
+         +so that onTrue fires only on the press (false→true). Explained 
+         +with a `whileTrue(Commands.run(...))` counter-example (that wou
+         +ld count about 150).                                           
+      84  
+      85  ## Tutorial feedback
+      86  - 2026-10-07 (Phase 0): Student wanted to move fast through set
+          up ("skip this," "its already running"). The setup steps could 
+          be shorter for students who already have the sim running.
+
+● That's half of it. ✅ Two things work together:
+
+  1. onTrue only fires at the moment B changes from "not pressed" to "pressed."
+     Holding it doesn't fire it again. It's a doorbell: holding the button still
+     gives one ring.
+  2. runOnce means that when the command does start, it runs its code one time
+     and finishes right away.
+
+  To get about 150, you'd need both changed: whileTrue(Commands.run(...)).
+  Commands.run repeats every 20 ms for as long as the command stays scheduled,
+  and whileTrue keeps it scheduled while you hold the button. (You can try it if
+  you're curious. Just change it back afterward!)
+
+  ---
+
+  🎉 Phase 1 is complete! Your dashboard milestone, the B Button card, is done
+  too.
+
+  One last check before we wrap up the phase. In your own words, in 2–3
+  sentences: when you push the left stick forward, what's the path from your
+  thumb to the wheels? Name the files or methods it goes through.
+
+  After that, I'll suggest a commit, and then we start Phase 2: your first 
+  mechanism, the intake roller. You'll write your first IO layer from scratch!
+  🛠️
+
+✻ Worked for 11s · done 3:31 AM
+
+❯ robotcontainer java file                                                      
+
+● That's the right starting point! ✅ RobotContainer is where the stick gets
+  read (and the sign gets flipped). Now keep going. Fill in the blanks:
+
+  ▎ Stick → RobotContainer (sign flip) → ________.joystickDrive (deadband, 
+  ▎ squaring, field-relative) → Drive.________ → 4 ________ → wheels
+
+  Hint: look back at line 92 in DriveCommands.java, and at the three files in
+  the drive/ folder we talked about.
+
+✻ Worked for 3s · done 3:33 AM
+
+※ recap: You're learning how the robot code works so you can build the robot from scratch, and you're on the last check of Phase 1. Next, fill in the blanks for the stick-to-wheels path: DriveCommands, runVelocity, and what comes last?
+
+❯ skoip                                                                         
+
+● Bash(python3 - <<'EOF'
+      p='LEARNINGS.md';s=open(p).read()…)
+  ⎿   M LEARNINGS.md
+      M TUTORIAL_PROGRESS.md
+      M src/main/deploy/dashboard/custom-dashboard.css
+     … +3 lines (ctrl+o to expand)
+  ⎿  Updated LEARNINGS.md (+3 -0)
+      81  - 2026-10-07: Asked "whats next" without changing any values (n
+          o diff), so the exercise was skipped. Could come back to it whe
+          n tuning drive feel with a driver (Phase 7).
+      82  ### C08 · Triggers and button bindings
+      83  - 2026-10-07 (Phase 1 step 6): Explained onTrue (doorbell) vs. 
+          whileTrue (flashlight). Student started on their own: added `pr
+          ivate int COUNT_B;` and `controller.b().onTrue(Commands.runOnce
+          (() -> COUNT_B++))`, which is the right idea. Then asked Claude
+           to "write the rest." Claude renamed the variable to `bPressCou
+          nt` (camelCase for variables) and added logging plus a whileTru
+          e/startEnd "held" binding. Asked why holding B for 3 s only cou
+          nts once: "because of the runONCE command." Half right. It's al
+          so that onTrue fires only on the press (false→true). Explained 
+          with a `whileTrue(Commands.run(...))` counter-example (that wou
+          ld count about 150).
+      84 +### Phase 1 "Done when" check                                  
+      85 +- 2026-10-07: Asked to explain the stick → wheels path in their
+         + own words. Answered only "robotcontainer java file," then skip
+         +ped the fill-in-the-blank. Phase 1 marked done, but the full pa
+         +th explanation was **not** confirmed. Revisit (e.g., ask where 
+         +intake commands go in Phase 2).                                
+      86  
+      87  ## Tutorial feedback
+      88  - 2026-10-07 (Phase 0): Student wanted to move fast through set
+          up ("skip this," "its already running"). The setup steps could 
+          be shorter for students who already have the sim running.
+      89  - 2026-10-07 (Phase 0 step 7): Coach direction: students should
+           focus on Java. Claude writes the dashboard JS from now on (the
+           student still picks what to show). Consider changing Phase 0 s
+          tep 7 and the dashboard milestones in the plan to match.
+      90 +- 2026-10-07 (Phase 1): Student answers in short phrases and of
+         +ten says "skip" or "whats next." Short, concrete questions (fil
+         +l-in-the-blank, puzzles with numbers) got real answers. Open-en
+         +ded "explain in your own words" questions got skipped.         
+  ⎿  Updated TUTORIAL_PROGRESS.md (+2 -1)
+      1  # Tutorial progress
+      2 -Student: (not given yet)   Current phase: 1 – How that just work
+        -ed   Current step: 6                                            
+      2 +Student: (not given yet)   Current phase: 2 – First mechanism, t
+        +he intake roller   Current step: 1                              
+      3  
+      4  ## Log
+      5  - 2026-10-07: Started Guided Tutorial Mode. Skipped making a per
+         sonal branch (step 2) at student's request; still working on `fr
+         esh-start`.
+     ...
+       7  - 2026-10-07: Made branch `madtown` from `fresh-start` and made
+           the first commit. Phase 0 done.
+       8  - 2026-10-07: Phase 1 steps 1–4: traced stick → wheels, default
+           commands, deadband/squaring/negation, field-relative, the 20 m
+          s loop, IO layers. Skipped the step 5 exercise.
+       9  - 2026-10-07: Phase 1 step 6: B button press counter (onTrue) a
+          nd held light (whileTrue) in RobotContainer, plus a "B Button" 
+          dashboard card (Claude wrote the code at the student's request)
+          .
+      10 +- 2026-10-07: Phase 1 done (the student skipped the final stick
+         +-to-wheels explanation).                                       
+      11  
+      12  ## Where we differ from the reference (on purpose)
+      13  - Claude writes dashboard code (coach request, 2026-10-07): stu
+          dents focus on Java.
+
+● Skipped. For the record, the full path is: stick → RobotContainer →
+  DriveCommands.joystickDrive → Drive.runVelocity → 4 Modules (each one talks to
+  its ModuleIO) → wheels. It'll come up again as we build.
+
+  Commit time 💾. Your B button work isn't saved in git yet. Suggested message:
+
+  ▎ Add B button press counter and held light (onTrue vs whileTrue)
+
+  Should I make the commit for you?
+
+  ---
+
+  Phase 2: Your first mechanism, the intake roller 🌀
+
+  The intake roller is the spinning part at the front of the robot that grabs 
+  game pieces off the floor. It's the simplest mechanism there is: one motor
+  spinning one roller. That makes it perfect for writing your first IO layer
+  from scratch.
+
+  ▎ Coming up:
+  ▎ - Motors and motor controllers (C15): the motor is the muscle, and the 
+  ▎ controller is the brain that tells it how hard to push.
+  ▎ - Current limits (C16): a safety cap, so a stuck roller doesn't burn out the
+  ▎ motor.
+  ▎ - Open-loop control (C18): "give it 6 volts and hope," vs. measuring the 
+  ▎ speed and correcting.
+  ▎ - Rollers (C34): how intakes and indexers move game pieces.
+  ▎
+  ▎ Ask me about any of these whenever you're curious.
+
+  Step 2: Design on paper first. You already know the outlet/plug idea from
+  ModuleIO. Before we write any code, let's decide what our intake's "outlet"
+  needs.
+
+  Question: for a roller with one motor, what are 2 or 3 things the code would
+  want to read from it (sensor values)? And what's the one thing it needs to
+  tell it to do?
+
+✻ Worked for 14s · done 3:37 AM
+
+❯ the code might want to read the limits and the time running and speed, and it 
+  might want to give the command of spinnign tho motor                          
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Bash(python3 - <<'EOF'
+      p='LEARNINGS.md';s=open(p).read()…)
+  ⎿  Updated LEARNINGS.md (+2 -0)
+      83  - 2026-10-07 (Phase 1 step 6): Explained onTrue (doorbell) vs. 
+          whileTrue (flashlight). Student started on their own: added `pr
+          ivate int COUNT_B;` and `controller.b().onTrue(Commands.runOnce
+          (() -> COUNT_B++))`, which is the right idea. Then asked Claude
+           to "write the rest." Claude renamed the variable to `bPressCou
+          nt` (camelCase for variables) and added logging plus a whileTru
+          e/startEnd "held" binding. Asked why holding B for 3 s only cou
+          nts once: "because of the runONCE command." Half right. It's al
+          so that onTrue fires only on the press (false→true). Explained 
+          with a `whileTrue(Commands.run(...))` counter-example (that wou
+          ld count about 150).
+      84  ### Phase 1 "Done when" check
+      85  - 2026-10-07: Asked to explain the stick → wheels path in their
+           own words. Answered only "robotcontainer java file," then skip
+          ped the fill-in-the-blank. Phase 1 marked done, but the full pa
+          th explanation was **not** confirmed. Revisit (e.g., ask where 
+          intake commands go in Phase 2).
+      86 +### C12 · IO layers: designing IntakeRollerIO (Phase 2 step 2) 
+      87 +- 2026-10-07: Asked what to read and what to command. Said read
+         + "the limits and the time running and speed," and command "spin
+         +ning the motor." Speed and spinning are right. "Time running" i
+         +sn't a sensor (the code can track it itself), and "limits" is c
+         +lose to current draw. Introduced the 4 standard inputs: connect
+         +ed, velocity, applied volts, current.                          
+      88  
+      89  ## Tutorial feedback
+      90  - 2026-10-07 (Phase 0): Student wanted to move fast through set
+          up ("skip this," "its already running"). The setup steps could 
+          be shorter for students who already have the sim running.
+  ⎿  Updated TUTORIAL_PROGRESS.md (+1 -1)
+      1  # Tutorial progress
+      2 -Student: (not given yet)   Current phase: 2 – First mechanism, t
+        -he intake roller   Current step: 1                              
+      2 +Student: (not given yet)   Current phase: 2 – First mechanism, t
+        +he intake roller   Current step: 3                              
+      3  
+      4  ## Log
+      5  - 2026-10-07: Started Guided Tutorial Mode. Skipped making a per
+         sonal branch (step 2) at student's request; still working on `fr
+         esh-start`.
+
+● Good thinking! ✅ Speed and spinning the motor are exactly right. Here's a
+  closer look at the other two:
+
+  - "Time running": the code can keep track of that itself with a timer, so the
+    motor doesn't need to tell us. IO inputs are only things that come from the
+    hardware.
+  - "Limits": you're close! The real-world value is current: how many amps the
+    motor is pulling. When a game piece jams the roller, the current spikes.
+    That's how we'd notice a jam.
+
+  So the standard roller "outlet" looks like this:
+
+  ┌────────────────────────────────────────┬────────────────────────────────┐
+  │             Read (inputs)              │         Tell (outputs)         │
+  ├────────────────────────────────────────┼────────────────────────────────┤
+  │ connected: is the motor even talking   │ setVoltage(volts): spin this   │
+  │ to us?                                 │ hard                           │
+  ├────────────────────────────────────────┼────────────────────────────────┤
+  │ velocityRadPerSec: how fast it's       │                                │
+  │ spinning                               │                                │
+  ├────────────────────────────────────────┼────────────────────────────────┤
+  │ appliedVolts: how hard we're pushing   │                                │
+  │ it                                     │                                │
+  ├────────────────────────────────────────┼────────────────────────────────┤
+  │ currentAmps: how much it's straining   │                                │
+  └────────────────────────────────────────┴────────────────────────────────┘
+
+  ---
+
+  Step 3: Write IntakeRollerIO.java
+
+  Open ModuleIO.java next to it. It's your template. Your new file has the same
+  shape, just smaller:
+
+  1. Where: a new folder, src/main/java/frc/robot/subsystems/intake/, with a new
+     file, IntakeRollerIO.java.
+  2. What: a public interface IntakeRollerIO, which contains:
+     - an @AutoLog class called IntakeRollerIOInputs with the 4 inputs from the
+       table (copy the style of driveConnected, driveVelocityRadPerSec, and so
+       on, minus the "drive" part)
+     - a do-nothing default method updateInputs(IntakeRollerIOInputs inputs)
+     - a do-nothing default method setVoltage(double volts)
+
+  Give it a try. Copying ModuleIO.java and deleting what you don't need is a
+  totally fine way to start. Tell me when to check it.
+
+  (Also: I haven't committed your B button work yet. Just say "commit" whenever 
+  you want it saved.)
+
+✻ Cogitated for 16s · done 3:39 AM
+
+※ recap: We're building the robot step by step, and right now you're writing your first mechanism, the intake roller. Next, create IntakeRollerIO.java in a new subsystems/intake folder, using ModuleIO.java as your template, then ask me to check it.
+❯ copy the template for a starting point                                        
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● I made a mistake. ⚠️ An IntakeRollerIO.java file already existed in that
+  folder (you must have just created it), and my copy command overwrote it
+  before I looked at what was in it. Sorry about that. I should have checked
+  first.
+
+  How to get your version back, if it had code you wrote:
+  - If the file is still open in VS Code, press ⌘Z in that tab to undo.
+  - Or right-click the file in the Explorer → Open Timeline. VS Code's Local 
+    History keeps earlier saved versions.
+
+  If it was empty or you hadn't written much yet, nothing was lost. Just tell me
+  which it was.
+
+  ---
+
+  What's in the file now: a copy of ModuleIO.java, renamed so it compiles in its
+  new home:
+  - package frc.robot.subsystems.intake;
+  - public interface IntakeRollerIO
+  - the inputs class is IntakeRollerIOInputs
+
+  Everything inside is still swerve-module stuff (drive and turn motors,
+  odometry). Your job is to trim it down to a roller:
+
+  1. In IntakeRollerIOInputs, keep only the 4 inputs from our table: connected,
+     velocity, applied volts, and current. Rename them without the drive part
+     (for example driveConnected → connected). Delete the turn and odometry
+     lines.
+  2. Keep updateInputs.
+  3. Replace the four set... methods with one: setVoltage(double volts).
+  4. Once nothing uses Rotation2d anymore, delete its import.
+
+  Tell me when to check it!
+
+✻ Cogitated for 16s · done 3:45 AM
+
+※ recap: We're building the robot's first mechanism, the intake roller, and you're trimming `IntakeRollerIO.java` down from a copy of the swerve template. Next: keep just the 4 roller inputs and one `setVoltage` method, then ask me to check it.
+
+❯ now                                                                           
+
+  Listed 1 directory (ctrl+o to expand)
+
+● Really close! ✅ The structure is exactly right: 4 inputs, updateInputs, one
+  setVoltage, and the Rotation2d import is gone. It will compile.
+
+  Two small polish items:
+
+  1. Drop the drive prefix: driveConnected → connected, driveVelocityRadPerSec →
+     velocityRadPerSec, and so on. This is a roller, not a drive motor. Someone
+     reading driveCurrentAmps in the intake logs would be confused. Names
+     should say what things are.
+  2. Add a comment on setVoltage like the one on updateInputs, for example /** 
+     Run the roller at the given voltage. */. While you're there, add a blank
+     line after the package line.
+
+  Fix those and you've written your first IO interface! 🎉
+
+  Coming next: IntakeRollerIOSim, the "fake motor" plug, so the roller can spin
+  in simulation. Here's a question to think about while you fix the names: when
+  we call setVoltage(6) on a simulated motor, what does the sim need to figure
+  out so it can report a velocityRadPerSec back?
+
+✻ Cooked for 8s · done 3:51 AM
+
+❯ do it                                                                         
+
+● Write(src/main/java/frc/robot/subsystems/intake/IntakeRollerIO.java)
+  ⎿  Added 7 lines, removed 8 lines
+       1  package frc.robot.subsystems.intake;
+       2 +                                                               
+       3  import org.littletonrobotics.junction.AutoLog;
+       4  
+       5  public interface IntakeRollerIO {
+       6    @AutoLog
+       7    public static class IntakeRollerIOInputs {
+       8      public boolean connected = false;
+       8 -    public double driveVelocityRadPerSec = 0.0;                
+       9 -    public double driveAppliedVolts = 0.0;                     
+      10 -    public double driveCurrentAmps = 0.0;                      
+       9 +    public double velocityRadPerSec = 0.0;                     
+      10 +    public double appliedVolts = 0.0;                          
+      11 +    public double currentAmps = 0.0;                           
+      12    }
+      13  
+      14    /** Updates the set of loggable inputs. */
+      14 -  public default void updateInputs(IntakeRollerIOInputs inputs)
+         - {                                                             
+      15 -  }                                                            
+      15 +  public default void updateInputs(IntakeRollerIOInputs inputs)
+         + {}                                                            
+      16  
+      17 -  public default void setVoltage(double volts) {               
+      18 -                                                               
+      19 - }                                                             
+      17 +  /** Run the roller at the given voltage. */                  
+      18 +  public default void setVoltage(double volts) {}              
+      19  }
+
+● Now I'll look up the real intake roller's motor and gearing for the sim step.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Bash(git show main:src/main/java/frc/robot/HardwareConstants.java | grep -n -i
+      intake; python3 - <<'EOF'
+      p='LEARNINGS.md';s=open(p).read()…)
+  ⎿  fatal: path 'src/main/java/frc/robot/HardwareConstants.java' does not
+     exist in 'main'
+  ⎿  Updated LEARNINGS.md (+1 -0)
+      85  - 2026-10-07: Asked to explain the stick → wheels path in their
+           own words. Answered only "robotcontainer java file," then skip
+          ped the fill-in-the-blank. Phase 1 marked done, but the full pa
+          th explanation was **not** confirmed. Revisit (e.g., ask where 
+          intake commands go in Phase 2).
+      86  ### C12 · IO layers: designing IntakeRollerIO (Phase 2 step 2)
+      87  - 2026-10-07: Asked what to read and what to command. Said read
+           "the limits and the time running and speed," and command "spin
+          ning the motor." Speed and spinning are right. "Time running" i
+          sn't a sensor (the code can track it itself), and "limits" is c
+          lose to current draw. Introduced the 4 standard inputs: connect
+          ed, velocity, applied volts, current.
+      88 +- 2026-10-07 (Phase 2 step 3): Asked Claude to copy ModuleIO as
+         + a starting point, then trimmed it to 4 inputs plus setVoltage 
+         +on their own. Structure correct. Claude did the final renames (
+         +drop the `drive` prefix) and comments when asked ("do it"). **N
+         +ote for coach:** Claude accidentally overwrote a pre-existing I
+         +ntakeRollerIO.java the student had just created. The student wa
+         +s told how to recover it.                                      
+      89  
+      90  ## Tutorial feedback
+      91  - 2026-10-07 (Phase 0): Student wanted to move fast through set
+          up ("skip this," "its already running"). The setup steps could 
+          be shorter for students who already have the sim running.
+  ⎿  Updated TUTORIAL_PROGRESS.md (+2 -0)
+       8  - 2026-10-07: Phase 1 steps 1–4: traced stick → wheels, default
+           commands, deadband/squaring/negation, field-relative, the 20 m
+          s loop, IO layers. Skipped the step 5 exercise.
+       9  - 2026-10-07: Phase 1 step 6: B button press counter (onTrue) a
+          nd held light (whileTrue) in RobotContainer, plus a "B Button" 
+          dashboard card (Claude wrote the code at the student's request)
+          .
+      10  - 2026-10-07: Phase 1 done (the student skipped the final stick
+          -to-wheels explanation).
+      11 +- 2026-10-07: Phase 2 step 3: wrote `subsystems/intake/IntakeRo
+         +llerIO.java` (4 inputs + setVoltage). Next: IntakeRollerIOSim. 
+      12 +- Hardware question to verify: on `main`, the intake roller use
+         +s a **TalonFX** (CAN ID 20, gearing 1, inverted, coast, 60 A st
+         +ator limit), but YAMS was given `DCMotor.getNEO(1)`. Probably a
+         + copy-paste mistake. Check which motor is really on the new rob
+         +ot before choosing the sim model.                              
+      13  
+      14  ## Where we differ from the reference (on purpose)
+      15  - Claude writes dashboard code (coach request, 2026-10-07): stu
+          dents focus on Java.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Done. ✅ IntakeRollerIO.java now has clean names (connected,
+  velocityRadPerSec, appliedVolts, currentAmps) and comments on both methods.
+  That's your first IO interface! 🎉
+
+  How to test: save, and the sim should restart without errors. Nothing new
+  shows up yet, because no code uses the interface.
+
+  ---
+
+  Step 3 (continued): IntakeRollerIOSim, the fake-motor plug
+
+  Back to my question: when we call setVoltage(6) on a simulated motor, the sim
+  has to work out how fast that voltage would make a real motor spin. That
+  depends on:
+  - which motor it is (each motor model is stronger or faster than others)
+  - the gear ratio (gearing trades speed for strength)
+  - how heavy the roller is (its moment of inertia, meaning how hard it is to
+    get spinning)
+
+  WPILib's DCMotorSim does that physics for us. Each loop we give it the volts,
+  tell it to step forward 20 ms, and read back the speed and current.
+
+  🔍 Hardware detective moment. I checked the 2026 robot's intake roller on
+  main:
+  - It uses a TalonFX controller (CAN ID 20), 1:1 gearing, coast mode, and a 60
+    A current limit.
+  - But its sim model says DCMotor.getNEO(1). A NEO is a REV motor that can't
+    run on a TalonFX! That's probably a copy-paste mistake.
+
+  TalonFX controllers come built into Kraken X60 (and older Falcon 500) motors.
+  Can you check with the mechanical team which motor is actually on the new 
+  robot's intake roller? We need it for the sim model, and we never guess
+  hardware facts. Until we know, we can start with Kraken X60 as a placeholder
+  and mark it // TODO: verify.
+
+  Want to try writing IntakeRollerIOSim yourself (ModuleIOSim.java is a good
+  template), or should I walk you through it piece by piece?
+
+✻ Crunched for 25s · done 3:52 AM
+
+※ recap: You're building the intake roller, your first mechanism, and just finished its IO interface. Next, find out which motor the new robot's intake uses, then choose whether to write IntakeRollerIOSim yourself or have me walk you through it.
