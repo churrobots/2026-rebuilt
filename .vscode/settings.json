@@ -121,6 +121,9 @@
     "src/main/deploy/dashboard/index.css": true,
     "src/main/deploy/dashboard/manifest.webmanifest": true,
     "src/main/deploy/dashboard/service-worker.js": true,
+    // Churrobots: sim plumbing that feeds dashboard controller input to the robot.
+    // Stable infrastructure, so keep it out of routine robot code work.
+    "src/main/java/frc/robot/sim/SimulationControllerBridge.java": true,
     // Churrobots: coach-only tools, including the VS Code extension that adds the
     // Claude/Sim/Dashboard buttons.
     "tools/": true,
