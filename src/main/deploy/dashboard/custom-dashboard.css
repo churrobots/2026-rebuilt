@@ -71,7 +71,7 @@ h2 {
   height: 100%;
 }
 
-.button-stats {
+.stat-row {
   margin-top: 16px;
   display: flex;
   align-items: flex-start;
@@ -92,6 +92,9 @@ h2 {
   color: #93a0b4;
   font-weight: 800;
   letter-spacing: 0.06em;
+}
+.stat-row + .status-light {
+  margin-top: 16px;
 }
 .status-light.on {
   background: #1f9d55;

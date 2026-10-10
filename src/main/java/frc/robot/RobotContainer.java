@@ -20,6 +20,10 @@ import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOKraken;
 import frc.robot.subsystems.drive.ModuleIOSim;
+import frc.robot.subsystems.intake.IntakeRoller;
+import frc.robot.subsystems.intake.IntakeRollerIO;
+import frc.robot.subsystems.intake.IntakeRollerIOSim;
+import frc.robot.subsystems.intake.IntakeRollerIOTalonFX;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -35,6 +39,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
+  private final IntakeRoller intakeRoller;
 
   // Tutorial: how many times B has been pressed
   private int bPressCount = 0;
@@ -58,6 +63,7 @@ public class RobotContainer {
             new ModuleIOKraken(1, "FrontRight"),
             new ModuleIOKraken(2, "BackLeft"),
             new ModuleIOKraken(3, "BackRight"));
+        intakeRoller = new IntakeRoller(new IntakeRollerIOTalonFX());
         break;
 
       case SIM:
@@ -69,6 +75,7 @@ public class RobotContainer {
             new ModuleIOSim(),
             new ModuleIOSim(),
             new ModuleIOSim());
+        intakeRoller = new IntakeRoller(new IntakeRollerIOSim());
         break;
 
       default:
@@ -84,6 +91,7 @@ public class RobotContainer {
             },
             new ModuleIO() {
             });
+        intakeRoller = new IntakeRoller(new IntakeRollerIO() {});
         break;
     }
 
@@ -132,6 +140,11 @@ public class RobotContainer {
 
     // Switch to X pattern when X button is pressed
     controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+
+    // Intake roller: stop by default, intake on left trigger, outtake on left bumper
+    intakeRoller.setDefaultCommand(intakeRoller.stop());
+    controller.leftTrigger().whileTrue(intakeRoller.intake());
+    controller.leftBumper().whileTrue(intakeRoller.outtake());
 
     // Tutorial: count B presses (onTrue runs once per press)
     controller

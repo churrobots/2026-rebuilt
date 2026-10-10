@@ -18,10 +18,10 @@ Legend: [ ] not yet · [~] seen, still shaky · [x] understood
 - [x] C12 · IO layers (hardware abstraction) (2026-10-07, Phase 1 step 4)
 - [~] C13 · Logging inputs and outputs (2026-10-07, Phase 0 step 6)
 - [ ] C14 · AdvantageScope and log replay
-- [ ] C15 · Motors and motor controllers
-- [ ] C16 · Current limits and safety
+- [~] C15 · Motors and motor controllers (2026-10-10, Phase 2 step 3)
+- [~] C16 · Current limits and safety (2026-10-10, Phase 2 step 4)
 - [ ] C17 · Encoders, gear ratios, and zero offsets
-- [ ] C18 · Open-loop vs. closed-loop control
+- [~] C18 · Open-loop vs. closed-loop control (2026-10-10, Phase 2 step 7)
 - [ ] C19 · PID feedback control
 - [ ] C20 · Feedforward
 - [ ] C21 · Tuning a mechanism
@@ -86,8 +86,21 @@ Legend: [ ] not yet · [~] seen, still shaky · [x] understood
 ### C12 · IO layers: designing IntakeRollerIO (Phase 2 step 2)
 - 2026-10-07: Asked what to read and what to command. Said read "the limits and the time running and speed," and command "spinning the motor." Speed and spinning are right. "Time running" isn't a sensor (the code can track it itself), and "limits" is close to current draw. Introduced the 4 standard inputs: connected, velocity, applied volts, current.
 - 2026-10-07 (Phase 2 step 3): Asked Claude to copy ModuleIO as a starting point, then trimmed it to 4 inputs plus setVoltage on their own. Structure correct. Claude did the final renames (drop the `drive` prefix) and comments when asked ("do it"). **Note for coach:** Claude accidentally overwrote a pre-existing IntakeRollerIO.java the student had just created. The student was told how to recover it.
+### C41 · Simulation: IntakeRollerIOSim (Phase 2 step 3)
+- 2026-10-10: Asked for a one-paragraph summary followed by detailed bullets. That format seemed to help. Then asked Claude to "make the file for us." Claude wrote it and walked through it. The student hasn't explained DCMotorSim in their own words yet.
+- 2026-10-10: Checked with mechanical and found the roller motor is a Falcon 500. Changed the sim model themselves. Predicted the Falcon would be "slower." Claude had wrongly said it was "weaker and slower." It's weaker (less torque) but has a *higher* free speed (6380 vs 6000 RPM). Corrected this and used it to teach speed vs. torque.
+- 2026-10-10: Didn't know which IO RobotContainer should create for the intake in sim mode ("idk"). Claude answered it (IntakeRollerIOSim). The C12 pattern may not be fully transferred to new mechanisms yet. Re-check when wiring up RobotContainer.
+- 2026-10-10 (Phase 2 step 4): Asked which ModuleIOKraken settings the roller needs, they said "all the driving ones and not the turning." Right direction. Claude pointed out the drive-only parts (odometry/position signal, closed-loop gains, brake mode). Didn't answer the coast vs. brake question. Asked Claude to write the TalonFX IO and constants. Asked for line numbers so they could read the code themselves (good sign). Understood that the TODO values get verified in Phase 3.
+- 2026-10-10 (Phase 2 step 5): Asked Claude to write the subsystem ("do the coding for us NOW!"). The student is eager for visible results. So far they've written very little Java themselves in Phase 2.
+- 2026-10-10 (Phase 2 step 6): Very excited to make it spin ("YES OFCCC I FEINING TO GO"). Claude wrote the commands, bindings, and Intake card.
+- 2026-10-10 (Phase 2 step 6): Tested in sim: the roller hits **3209 RPM** at 6 V. The dashboard milestone works. Didn't give a prediction first.
+### C18 · Open-loop vs. closed-loop control
+- 2026-10-10 (Phase 2 step 7): Explained open-loop with a bike analogy (same pedaling effort, slower uphill). Asked what happens to RPM when a piece jams, and they answered "if it gets stuck you push harder." That's the idea behind closed-loop control, found on their own! Clarified that our current open-loop code *doesn't* push harder, so the speed drops. Closed-loop comes in Phase 7.
 
 ## Tutorial feedback
 - 2026-10-07 (Phase 0): Student wanted to move fast through setup ("skip this," "its already running"). The setup steps could be shorter for students who already have the sim running.
 - 2026-10-07 (Phase 0 step 7): Coach direction: students should focus on Java. Claude writes the dashboard JS from now on (the student still picks what to show). Consider changing Phase 0 step 7 and the dashboard milestones in the plan to match.
 - 2026-10-07 (Phase 1): Student answers in short phrases and often says "skip" or "whats next." Short, concrete questions (fill-in-the-blank, puzzles with numbers) got real answers. Open-ended "explain in your own words" questions got skipped.
+- 2026-10-10 (Phase 2): Student asked for instructions as "one paragraph, then bullet points with more detail." Consider using that format for multi-part steps.
+- 2026-10-10 (Phase 2): Steps 3–5 produce nothing visible on the dashboard until step 6, and the student got impatient. Consider moving the subsystem and one command earlier (sim IO → subsystem → command → see it spin), and doing the real-hardware IO after that.
+- 2026-10-10 (Phase 2 step 7): Students asked Claude to "humanize" and "code switch": "we are not pros so we dont understand everything." Claude's messages had gotten too long and full of jargon (tables, line numbers, terms like stator/open-loop without explanation). Switched to a shorter, casual, plain-English style.

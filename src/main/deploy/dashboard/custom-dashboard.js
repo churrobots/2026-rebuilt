@@ -7,6 +7,9 @@ const ALLIANCE_TOPIC = "/FMSInfo/IsRedAlliance";
 const STATION_TOPIC = "/FMSInfo/StationNumber";
 const B_COUNT_TOPIC = "/AdvantageKit/RealOutputs/Tutorial/BPressCount";
 const B_HELD_TOPIC = "/AdvantageKit/RealOutputs/Tutorial/BHeld";
+const ROLLER_VOLTS_TOPIC = "/AdvantageKit/IntakeRoller/AppliedVolts";
+const ROLLER_VELOCITY_TOPIC = "/AdvantageKit/IntakeRoller/VelocityRadPerSec";
+const ROLLER_SPINNING_RPM = 100;
 
 // 2026 field size and robot bumper size, in meters.
 const FIELD = { length: 17.548, width: 8.052 };
@@ -35,11 +38,21 @@ export class CustomDashboard extends HTMLElement {
             </div>
             <div class="field-view"><canvas></canvas></div>
           </section>
+          <section class="card" aria-labelledby="intake-heading">
+            <div class="card-heading">
+              <div><p class="eyebrow">Mechanism</p><h1 id="intake-heading">Intake</h1></div>
+            </div>
+            <div class="stat-row">
+              <div><p class="eyebrow">Volts</p><output class="big-number roller-volts">0.0</output></div>
+              <div><p class="eyebrow">Roller RPM</p><output class="big-number roller-rpm">0</output></div>
+            </div>
+            <output class="status-light roller-spinning">STOPPED</output>
+          </section>
           <section class="card" aria-labelledby="buttons-heading">
             <div class="card-heading">
               <div><p class="eyebrow">Tutorial</p><h1 id="buttons-heading">B Button</h1></div>
             </div>
-            <div class="button-stats">
+            <div class="stat-row">
               <div><p class="eyebrow">Presses (onTrue)</p><output class="big-number b-count">0</output></div>
               <div><p class="eyebrow">Held (whileTrue)</p><output class="status-light b-held">NOT HELD</output></div>
             </div>
@@ -73,6 +86,34 @@ export class CustomDashboard extends HTMLElement {
     this.#started = true;
     this.#startFieldCard(core);
     this.#startButtonCard(core);
+    this.#startIntakeCard(core);
+  }
+
+  /** Shows the intake roller's volts, RPM, and whether it's spinning. */
+  #startIntakeCard(core) {
+    const root = this.shadowRoot;
+    const voltsText = root.querySelector(".roller-volts");
+    const rpmText = root.querySelector(".roller-rpm");
+    const spinningLight = root.querySelector(".roller-spinning");
+
+    const render = () => {
+      const volts = Number(core.getTopic(ROLLER_VOLTS_TOPIC)?.value) || 0;
+      const radPerSec = Number(core.getTopic(ROLLER_VELOCITY_TOPIC)?.value) || 0;
+      const rpm = (radPerSec * 60) / (2 * Math.PI);
+      const spinning = Math.abs(rpm) > ROLLER_SPINNING_RPM;
+      voltsText.textContent = volts.toFixed(1);
+      rpmText.textContent = String(Math.round(rpm));
+      spinningLight.textContent = !spinning ? "STOPPED" : rpm > 0 ? "INTAKING" : "OUTTAKING";
+      spinningLight.classList.toggle("on", spinning);
+    };
+
+    /** @param {CustomEvent<DashboardTopic>} event */
+    const topicListener = ({ detail: topic }) => {
+      if ([ROLLER_VOLTS_TOPIC, ROLLER_VELOCITY_TOPIC].includes(topic.name)) render();
+    };
+    core.addEventListener("topic", topicListener);
+    this.#cleanup.push(() => core.removeEventListener("topic", topicListener));
+    render();
   }
 
   /** Shows the B press counter and whether B is held right now. */
