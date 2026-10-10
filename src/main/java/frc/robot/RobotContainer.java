@@ -7,6 +7,8 @@
 
 package frc.robot;
 
+import static frc.robot.subsystems.vision.VisionConstants.*;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -14,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
+import frc.robot.sim.FieldBoundaries;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -24,6 +27,10 @@ import frc.robot.subsystems.intake.IntakeRoller;
 import frc.robot.subsystems.intake.IntakeRollerIO;
 import frc.robot.subsystems.intake.IntakeRollerIOSim;
 import frc.robot.subsystems.intake.IntakeRollerIOTalonFX;
+import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.VisionIO;
+import frc.robot.subsystems.vision.VisionIOPhotonVision;
+import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -40,9 +47,13 @@ public class RobotContainer {
   // Subsystems
   private final Drive drive;
   private final IntakeRoller intakeRoller;
+  private final Vision vision;
 
   // Tutorial: how many times B has been pressed
   private int bPressCount = 0;
+
+  // Sim-only walls around the field and hubs
+  private final FieldBoundaries fieldBoundaries = new FieldBoundaries();
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -64,6 +75,12 @@ public class RobotContainer {
             new ModuleIOKraken(2, "BackLeft"),
             new ModuleIOKraken(3, "BackRight"));
         intakeRoller = new IntakeRoller(new IntakeRollerIOTalonFX());
+        vision = new Vision(
+            drive::addVisionMeasurement,
+            new VisionIOPhotonVision(cameraFrontRight, robotToCameraFrontRight),
+            new VisionIOPhotonVision(cameraBackRight, robotToCameraBackRight),
+            new VisionIOPhotonVision(cameraFrontLeft, robotToCameraFrontLeft),
+            new VisionIOPhotonVision(cameraBackLeft, robotToCameraBackLeft));
         break;
 
       case SIM:
@@ -76,6 +93,12 @@ public class RobotContainer {
             new ModuleIOSim(),
             new ModuleIOSim());
         intakeRoller = new IntakeRoller(new IntakeRollerIOSim());
+        vision = new Vision(
+            drive::addVisionMeasurement,
+            new VisionIOPhotonVisionSim(cameraFrontRight, robotToCameraFrontRight, drive::getPose),
+            new VisionIOPhotonVisionSim(cameraBackRight, robotToCameraBackRight, drive::getPose),
+            new VisionIOPhotonVisionSim(cameraFrontLeft, robotToCameraFrontLeft, drive::getPose),
+            new VisionIOPhotonVisionSim(cameraBackLeft, robotToCameraBackLeft, drive::getPose));
         break;
 
       default:
@@ -92,6 +115,12 @@ public class RobotContainer {
             new ModuleIO() {
             });
         intakeRoller = new IntakeRoller(new IntakeRollerIO() {});
+        vision = new Vision(
+            drive::addVisionMeasurement,
+            new VisionIO() {},
+            new VisionIO() {},
+            new VisionIO() {},
+            new VisionIO() {});
         break;
     }
 
@@ -145,6 +174,9 @@ public class RobotContainer {
     intakeRoller.setDefaultCommand(intakeRoller.stop());
     controller.leftTrigger().whileTrue(intakeRoller.intake());
     controller.leftBumper().whileTrue(intakeRoller.outtake());
+    // Panic button: tap Y to spit for 1 second
+    controller.y().onTrue(intakeRoller.outtake().withTimeout(1.0));
+    
 
     // Tutorial: count B presses (onTrue runs once per press)
     controller
@@ -163,6 +195,11 @@ public class RobotContainer {
             Commands.startEnd(
                 () -> Logger.recordOutput("Tutorial/BHeld", true),
                 () -> Logger.recordOutput("Tutorial/BHeld", false)));
+  }
+
+  /** Called every loop, only in simulation. */
+  public void simulationPeriodic() {
+    fieldBoundaries.apply(drive);
   }
 
   /**

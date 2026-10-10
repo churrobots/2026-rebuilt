@@ -13,7 +13,7 @@ Legend: [ ] not yet · [~] seen, still shaky · [x] understood
 - [~] C07 · Commands and requirements (2026-10-07, Phase 1 step 1)
 - [~] C08 · Triggers and button bindings (2026-10-07, Phase 1 step 6)
 - [x] C09 · Default commands (2026-10-07, Phase 1 step 1)
-- [ ] C10 · Composing commands
+- [~] C10 · Composing commands (2026-10-10, side quest)
 - [~] C11 · RobotContainer (2026-10-07, Phase 1 step 1)
 - [x] C12 · IO layers (hardware abstraction) (2026-10-07, Phase 1 step 4)
 - [~] C13 · Logging inputs and outputs (2026-10-07, Phase 0 step 6)
@@ -29,11 +29,11 @@ Legend: [ ] not yet · [~] seen, still shaky · [x] understood
 - [ ] C23 · Motion profiles
 - [ ] C24 · Swerve drive
 - [~] C25 · Kinematics and field-relative driving (2026-10-07, Phase 1 step 2)
-- [ ] C26 · Odometry
-- [ ] C27 · Writing IO layers vs. using a mechanism library
+- [x] C26 · Odometry (2026-10-10, Phase 4 step 1)
+- [x] C27 · Writing IO layers vs. using a mechanism library (2026-10-10, Phase 2 step 8)
 - [x] C28 · Driver input shaping (2026-10-07, Phase 1 step 2)
-- [ ] C29 · AprilTags
-- [ ] C30 · Camera transforms and pose estimation
+- [~] C29 · AprilTags (2026-10-10, Phase 4 step 1)
+- [~] C30 · Camera transforms and pose estimation (2026-10-10, Phase 4 step 4)
 - [ ] C31 · PhotonVision
 - [ ] C32 · PathPlanner and named commands
 - [ ] C33 · Mechanism state in autonomous
@@ -96,6 +96,18 @@ Legend: [ ] not yet · [~] seen, still shaky · [x] understood
 - 2026-10-10 (Phase 2 step 6): Tested in sim: the roller hits **3209 RPM** at 6 V. The dashboard milestone works. Didn't give a prediction first.
 ### C18 · Open-loop vs. closed-loop control
 - 2026-10-10 (Phase 2 step 7): Explained open-loop with a bike analogy (same pedaling effort, slower uphill). Asked what happens to RPM when a piece jams, and they answered "if it gets stuck you push harder." That's the idea behind closed-loop control, found on their own! Clarified that our current open-loop code *doesn't* push harder, so the speed drops. Closed-loop comes in Phase 7.
+### C27 · Writing IO layers vs. using a library
+- 2026-10-10 (Phase 2 step 8): Pre-built vs. custom PC analogy. Pro, in their words: "we can change the values when something isnt working and know exactly whats going on because we know where the robot code is at." Con: "it would take long to search for the things" (more code to write and look through). Solid, own-words answer.
+- 2026-10-10 (Phase 2 done check): "New motor brand, which file?" They answered `IntakeRollerIOTalonFX` right away. C12 now transfers to their own mechanism.
+### C10 · Composing commands
+- 2026-10-10 (side quest after Phase 2): Panic button, `onTrue(outtake().withTimeout(1.0))`. Given 3 clues (existing command, onTrue, withTimeout as a microwave timer). Asked Claude to write the one line instead of trying. Not yet checked whether they understand why it stops on its own.
+### C26 · Odometry / C29 · AprilTags
+- 2026-10-10 (Phase 4 step 1): Odometry explained as "counting steps with your eyes closed," and AprilTags as "opening your eyes to check." Asked what happens to turret shots if the pose is wrong: "it wont shoot at the right place because its supposed to be somewhere else." Correct, own words.
+- 2026-10-10 (Phase 4 step 2): Came up with their own visualization idea: "ray cast vision," with cones green if accepted and red if rejected. Good instinct for using the dashboard to see what the robot sees (C42).
+### C30 · Pose estimation: rejection and trust
+- 2026-10-10 (Phase 4 step 4): Explained with the "asking for directions" analogy. Read the rejectPose rules in Vision.java and picked maxDistance on their own: "our cameras arent so good so i dont think we can see too far so rejecting the ones we cant see might be a smart move." Correct reasoning. Also suggested a different color for tags that are seen but too far to use, which Claude added (dashed yellow rays). Standard deviations ("how much to trust") not covered yet.
+- 2026-10-10: Asked "why do we want to make the distance smaller?" (good question). Changed maxDistance to 15 ft themselves (first code edit they typed in a while!) and saw the result: "it rejects too much, we need a sweet spot!" Found the idea of tuning a trade-off on their own (C21 preview).
+- 2026-10-10: Noticed on their own that poses get rejected near the hub. When asked to check the tag count, they reported "4 tags, 2 slanted, 2 straight on," which disproved Claude's first guess (single-tag ambiguity). Good habit: checking data instead of accepting a guess. Claude added a rejection-reason readout so they can find the real cause.
 
 ## Tutorial feedback
 - 2026-10-07 (Phase 0): Student wanted to move fast through setup ("skip this," "its already running"). The setup steps could be shorter for students who already have the sim running.
@@ -104,3 +116,4 @@ Legend: [ ] not yet · [~] seen, still shaky · [x] understood
 - 2026-10-10 (Phase 2): Student asked for instructions as "one paragraph, then bullet points with more detail." Consider using that format for multi-part steps.
 - 2026-10-10 (Phase 2): Steps 3–5 produce nothing visible on the dashboard until step 6, and the student got impatient. Consider moving the subsystem and one command earlier (sim IO → subsystem → command → see it spin), and doing the real-hardware IO after that.
 - 2026-10-10 (Phase 2 step 7): Students asked Claude to "humanize" and "code switch": "we are not pros so we dont understand everything." Claude's messages had gotten too long and full of jargon (tables, line numbers, terms like stator/open-loop without explanation). Switched to a shorter, casual, plain-English style.
+- 2026-10-10: Even a one-line exercise with all the pieces given got "write it for us." The students may need a stronger nudge, or a coach's expectation, to type code themselves. Consider asking them to type Claude's line by hand, or to predict before Claude writes.

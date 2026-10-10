@@ -101,7 +101,195 @@ h2 {
   color: #fff;
 }
 
+.vision-table {
+  width: 100%;
+  margin-top: 16px;
+  border-collapse: collapse;
+}
+.vision-table th {
+  color: #93a0b4;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-align: left;
+  text-transform: uppercase;
+}
+.vision-table th,
+.vision-table td {
+  padding: 6px 4px;
+  border-bottom: 1px solid var(--line, #303a4b);
+}
+.vision-table .tags {
+  font-variant-numeric: tabular-nums;
+}
+.dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #b83b3b;
+}
+.dot.on {
+  background: #1f9d55;
+}
+.vision-table {
+  table-layout: fixed;
+}
+.vision-table th:nth-child(1) {
+  width: 30%;
+}
+.vision-table th:nth-child(2),
+.vision-table th:nth-child(3) {
+  width: 18%;
+}
+.vision-table td {
+  vertical-align: top;
+}
+/* Last pose: a colored badge, with the reason in small text underneath. */
+.pose-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #2a3240;
+  color: #6b7686;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+.pose-reason {
+  display: block;
+  margin-top: 3px;
+  color: #c9a3a3;
+  font-size: 0.68rem;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+.pose-reason:empty {
+  display: none;
+}
+.last-pose[data-state="ACCEPTED"] .pose-badge {
+  background: #14532d;
+  color: #4ade80;
+}
+.last-pose[data-state="REJECTED"] .pose-badge {
+  background: #4c1d1d;
+  color: #f87171;
+}
+
+.camera-card {
+  grid-column: span 2;
+}
+.camera-grid {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+.camera-grid figure {
+  margin: 0;
+}
+.camera-view {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: #0c1017;
+  border-radius: 8px;
+}
+/* Our 3D field drawing sits behind the video. "screen" blending makes the video's
+   black background see-through, so only the tags and their boxes show on top. */
+.camera-view canvas,
+.camera-view img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.camera-view img {
+  mix-blend-mode: screen;
+}
+.copy-help {
+  margin: 10px 0 0;
+  color: #8f9bad;
+  font-size: 0.8rem;
+}
+.copy-row {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+}
+.copy-filter {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 10px;
+  color: inherit;
+  background: #0c1017;
+  border: 1px solid var(--line, #303a4b);
+  border-radius: 8px;
+  font: inherit;
+}
+.copy-button {
+  padding: 8px 16px;
+  color: #fff;
+  background: #2879cf;
+  border: 0;
+  border-radius: 8px;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+.copy-button:hover {
+  background: #3287df;
+}
+.copy-status {
+  display: block;
+  min-height: 1.2em;
+  margin-top: 8px;
+  color: #4ade80;
+  font-size: 0.8rem;
+}
+.camera-legend {
+  margin: 12px 0 0;
+  color: #93a0b4;
+  font-size: 0.72rem;
+}
+.swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin: 0 6px 0 14px;
+  border-radius: 2px;
+  vertical-align: -1px;
+}
+.swatch:first-child {
+  margin-left: 0;
+}
+.swatch.used {
+  background: #22d3ee;
+}
+.swatch.rejected {
+  background: #e879f9;
+}
+/* Upside-down cameras: spin the picture (video + field drawing together) 180°. */
+.camera-view.flipped {
+  transform: rotate(180deg);
+}
+.camera-grid figcaption {
+  margin-top: 4px;
+  color: #93a0b4;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.camera-empty {
+  color: #8f9bad;
+}
+
 @media (max-width: 680px) {
+  .camera-card {
+    grid-column: auto;
+  }
   main {
     padding: 14px;
   }
