@@ -24,7 +24,8 @@
   padding: 9px 18px;
 }
 .offline[hidden],
-.ds[hidden] {
+.ds[hidden],
+.take-over[hidden] {
   display: none;
 }
 .controls,
@@ -87,4 +88,15 @@ button {
   font:
     11px ui-monospace,
     monospace;
+}
+
+.take-over {
+  color: #fde68a;
+  background: #3b2f12;
+  border-color: #a16207;
+  font-weight: 700;
+  cursor: pointer;
+}
+.standby {
+  opacity: 0.45;
 }
