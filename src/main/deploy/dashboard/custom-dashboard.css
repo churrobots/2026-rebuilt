@@ -294,3 +294,24 @@ h2 {
     padding: 14px;
   }
 }
+
+.auto-pick {
+  display: block;
+  margin-top: 12px;
+}
+.auto-select {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  padding: 8px 10px;
+  color: inherit;
+  background: #0c1017;
+  border: 1px solid var(--line, #303a4b);
+  border-radius: 8px;
+  font: inherit;
+}
+.auto-active {
+  display: block;
+  margin-top: 8px;
+  font-weight: 800;
+}

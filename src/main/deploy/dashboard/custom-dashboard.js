@@ -5,6 +5,10 @@ const POSE_TOPIC = "/AdvantageKit/RealOutputs/Odometry/Robot";
 const SPEED_TOPIC = "/AdvantageKit/RealOutputs/Tutorial/Drive/SpeedMetersPerSec";
 // Hub boxes from FieldBoundaries.java: [minX, minY, maxX, maxY] for blue, then red.
 const HUBS_TOPIC = "/AdvantageKit/RealOutputs/Field/Hubs";
+// The auto chooser from RobotContainer ("Auto Choices"), and the robot's mode.
+const AUTO_CHOOSER = "/SmartDashboard/Auto Choices";
+const ENABLED_TOPIC = "/AdvantageKit/DriverStation/Enabled";
+const AUTONOMOUS_TOPIC = "/AdvantageKit/DriverStation/Autonomous";
 const ALLIANCE_TOPIC = "/FMSInfo/IsRedAlliance";
 const STATION_TOPIC = "/FMSInfo/StationNumber";
 const B_COUNT_TOPIC = "/AdvantageKit/RealOutputs/Tutorial/BPressCount";
@@ -81,6 +85,19 @@ export class CustomDashboard extends HTMLElement {
               <output class="field-pose" aria-live="polite">Waiting for pose…</output>
             </div>
             <div class="field-view"><canvas></canvas></div>
+          </section>
+          <section class="card" aria-labelledby="auto-heading">
+            <div class="card-heading">
+              <div><p class="eyebrow">Autonomous</p><h1 id="auto-heading">Auto</h1></div>
+            </div>
+            <label class="auto-pick">
+              <span class="eyebrow">Run this auto</span>
+              <select class="auto-select"><option>Waiting for robot…</option></select>
+            </label>
+            <div class="stat-row">
+              <div><p class="eyebrow">Robot will run</p><output class="auto-active">—</output></div>
+              <div><p class="eyebrow">Auto timer</p><output class="big-number auto-timer">0.0</output></div>
+            </div>
           </section>
           <section class="card" aria-labelledby="intake-heading">
             <div class="card-heading">
@@ -164,6 +181,58 @@ export class CustomDashboard extends HTMLElement {
     this.#startVisionCard(core);
     this.#startCameraCard(core);
     this.#startCopyCard(core);
+    this.#startAutoCard(core);
+  }
+
+  /** Picks the auto to run, shows which one the robot will run, and times auto. */
+  #startAutoCard(core) {
+    const root = this.shadowRoot;
+    const select = root.querySelector(".auto-select");
+    const activeText = root.querySelector(".auto-active");
+    const timerText = root.querySelector(".auto-timer");
+    let shownOptions = "";
+    let autoStartMs = 0;
+    let lastSeconds = 0;
+
+    const render = () => {
+      const options = core.getTopic(`${AUTO_CHOOSER}/options`)?.value;
+      const active = core.getTopic(`${AUTO_CHOOSER}/active`)?.value;
+      if (Array.isArray(options) && options.join("\n") !== shownOptions) {
+        shownOptions = options.join("\n");
+        select.replaceChildren(
+          ...options.map((name) => Object.assign(document.createElement("option"), { value: name, textContent: name })),
+        );
+      }
+      if (typeof active === "string" && document.activeElement !== select) select.value = active;
+      activeText.textContent = typeof active === "string" ? active : "—";
+
+      // The timer counts up while auto is running, and holds the last time after.
+      const running =
+        core.getTopic(ENABLED_TOPIC)?.value === true && core.getTopic(AUTONOMOUS_TOPIC)?.value === true;
+      if (running && !autoStartMs) autoStartMs = performance.now();
+      if (!running) autoStartMs = 0;
+      if (running) lastSeconds = (performance.now() - autoStartMs) / 1000;
+      timerText.textContent = lastSeconds.toFixed(1);
+    };
+
+    // Tell the robot which auto we picked (RobotContainer's chooser reads "selected").
+    const onChange = () => core.publish(`${AUTO_CHOOSER}/selected`, "string", select.value);
+    select.addEventListener("change", onChange);
+
+    /** @param {CustomEvent<DashboardTopic>} event */
+    const topicListener = ({ detail: topic }) => {
+      if (topic.name.startsWith(AUTO_CHOOSER) || topic.name === ENABLED_TOPIC || topic.name === AUTONOMOUS_TOPIC)
+        render();
+    };
+    core.addEventListener("topic", topicListener);
+    // Tick while auto runs so the timer counts smoothly.
+    const timer = setInterval(() => autoStartMs && render(), 100);
+    this.#cleanup.push(() => {
+      core.removeEventListener("topic", topicListener);
+      select.removeEventListener("change", onChange);
+      clearInterval(timer);
+    });
+    render();
   }
 
   /** Copies every NetworkTables value (or just the ones matching the filter) as text. */
