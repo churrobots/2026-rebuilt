@@ -11,6 +11,19 @@ const TAKE_OVER_IDLE_MS = 2000;
 // Two claims this close together are a tie (each dashboard hears the other's claim after
 // its own), so the larger id wins. Otherwise both would step aside and nobody would drive.
 const TIE_MS = 500;
+// Per-tab memory (sessionStorage survives a refresh) so a reload picks up where it left off.
+// Whether this tab was the one driving, so it reclaims right away instead of waiting for
+// the idle timer and showing "Another dashboard is driving".
+const DRIVING_KEY = "sim-ds-driving";
+// Set by prepareForReload() when the dashboard reloads itself for new code during teleop.
+const RESUME_TELEOP_KEY = "resume-teleop-after-dashboard-reload";
+
+/** Reads a one-time sessionStorage flag and clears it. */
+function takeSessionFlag(key) {
+  const value = sessionStorage.getItem(key) === "true";
+  sessionStorage.removeItem(key);
+  return value;
+}
 
 /** A Shadow-DOM simulated Driver Station and `/SimSupervisor/*` publisher. */
 export class SimDriverStation extends HTMLElement {
@@ -18,11 +31,12 @@ export class SimDriverStation extends HTMLElement {
   /** @type {"teleop" | "auto" | "test"} */ #mode = "teleop";
   /** @type {"red" | "blue"} */ #alliance =
     localStorage.getItem("sim-alliance") === "red" ? "red" : "blue";
-  /** @type {boolean} */ #enabled = false;
+  /** @type {boolean} */ #driving = sessionStorage.getItem(DRIVING_KEY) === "true";
+  // Re-enable teleop only after an automatic code reload, and only if this tab drives.
+  /** @type {boolean} */ #enabled = takeSessionFlag(RESUME_TELEOP_KEY) && this.#driving;
   /** @type {number} */ #heartbeat = 0;
   /** @type {number | undefined} */ #timer;
   /** @type {string} */ #id = Math.random().toString(36).slice(2, 10);
-  /** @type {boolean} */ #driving = false;
   /** @type {number} */ #claimedAt = 0;
   /** @type {boolean} */ #wasConnected = false;
   /** @type {unknown} */ #lastHeartbeatSeen;
@@ -96,7 +110,7 @@ export class SimDriverStation extends HTMLElement {
   }
   prepareForReload() {
     sessionStorage.setItem(
-      "resume-teleop-after-dashboard-reload",
+      RESUME_TELEOP_KEY,
       this.#enabled && this.#mode === "teleop" ? "true" : "false",
     );
   }
@@ -198,6 +212,7 @@ export class SimDriverStation extends HTMLElement {
   /** Makes this dashboard the one that drives the robot. */
   #claim() {
     this.#driving = true;
+    sessionStorage.setItem(DRIVING_KEY, "true");
     this.#claimedAt = performance.now();
     this.#core?.publish(OWNER_TOPIC, "string", this.#id);
   }
@@ -217,6 +232,7 @@ export class SimDriverStation extends HTMLElement {
         (claimedAt - this.#claimedAt > TIE_MS || owner.value > this.#id);
       if (someoneElseClaimed) {
         this.#driving = false;
+        sessionStorage.setItem(DRIVING_KEY, "false");
         this.#enabled = false;
         this.#heartbeatChangedAt = now;
         this.#render();
