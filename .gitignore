@@ -193,3 +193,6 @@ src/main/java/frc/robot/BuildConstants.java
 # We actually want to share our Sim GUI for now, since it takes
 # some time to setup and we usually want a common view of simulation
 !sim*
+
+# Robot logs and NetworkTables snapshots from the "Download Robot Debug Info" task
+debug/

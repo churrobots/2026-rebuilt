@@ -114,17 +114,20 @@
     "**/deploy/pathplanner/": true,
     // Churrobots: Sim Driver Station, NetworkTables protocol, and PWA metadata are
     // stable infrastructure. Keep them out of routine dashboard UI work.
-    "src/main/deploy/dashboard/core/**": true,
+    "src/main/deploy/dashboard/core/": true,
     "src/main/deploy/dashboard/index.html": true,
     "src/main/deploy/dashboard/index.css": true,
     "src/main/deploy/dashboard/manifest.webmanifest": true,
     "src/main/deploy/dashboard/service-worker.js": true,
     // Churrobots: sim plumbing that feeds dashboard controller input to the robot.
     // Stable infrastructure, so keep it out of routine robot code work.
-    "src/main/java/frc/robot/sim/SimulationControllerBridge.java": true,
+    "src/main/java/frc/robot/sim/": true,
     // Churrobots: coach-only tools, including the VS Code extension that adds the
     // Claude/Sim/Dashboard buttons.
     "tools/": true,
+    // Churrobots: Claude Code settings, and robot logs saved by the ChurroDump button.
+    "**/.claude": true,
+    "debug/": true,
     // Churrobots: hide junk files
     "**/deploy/example.txt": true,
   },

@@ -1,6 +1,7 @@
 const vscode = require("vscode");
 
 const SIM_TASK = "Start Supervised Robot Simulation";
+const DUMP_TASK = "Download Robot Debug Info";
 const DASHBOARD_URL = "http://localhost:5800";
 const CLAUDE_TERMINAL = "ChurroClaude";
 // Keep in sync with the fill color in icons/*.svg.
@@ -12,6 +13,7 @@ function activate(context) {
     ["churrobots.startClaude", "$(sparkle) ChurroClaude", "Start a sandboxed Claude session (sbx run claude)", startClaude],
     ["churrobots.startSimulator", "$(play) ChurroSim", "Start the robot simulator (restarts on save)", startSimulator],
     ["churrobots.openDashboard", "$(dashboard) ChurroDashboard", `Open the robot dashboard (${DASHBOARD_URL})`, openDashboard],
+    ["churrobots.dumpDebug", "$(cloud-download) ChurroDump", "Save recent robot logs and NetworkTables values to debug/", dumpDebug],
   ];
   buttons.forEach(([command, text, tooltip, run], index) => {
     context.subscriptions.push(vscode.commands.registerCommand(command, run));
@@ -41,14 +43,22 @@ function startClaude() {
   claudeTerminal.sendText("sbx run claude");
 }
 
-async function startSimulator() {
-  if (vscode.tasks.taskExecutions.some((execution) => execution.task.name === SIM_TASK)) {
-    vscode.window.showInformationMessage("The robot simulator is already running.");
+function startSimulator() {
+  return runTask(SIM_TASK, "The robot simulator is already running.");
+}
+
+function dumpDebug() {
+  return runTask(DUMP_TASK, "Already downloading robot debug info.");
+}
+
+async function runTask(name, alreadyRunningMessage) {
+  if (vscode.tasks.taskExecutions.some((execution) => execution.task.name === name)) {
+    vscode.window.showInformationMessage(alreadyRunningMessage);
     return;
   }
-  const task = (await vscode.tasks.fetchTasks()).find((candidate) => candidate.name === SIM_TASK);
+  const task = (await vscode.tasks.fetchTasks()).find((candidate) => candidate.name === name);
   if (!task) {
-    vscode.window.showErrorMessage(`Couldn't find the "${SIM_TASK}" task in .vscode/tasks.json.`);
+    vscode.window.showErrorMessage(`Couldn't find the "${name}" task in .vscode/tasks.json.`);
     return;
   }
   await vscode.tasks.executeTask(task);

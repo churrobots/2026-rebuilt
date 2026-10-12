@@ -30,7 +30,7 @@ cat > "$staging/extension.vsixmanifest" <<EOF
   <Metadata>
     <Identity Language="en-US" Id="$name" Version="$version" Publisher="$publisher"/>
     <DisplayName>Churrobots Robot Buttons</DisplayName>
-    <Description xml:space="preserve">Status bar buttons to start Claude, the robot simulator, and the dashboard.</Description>
+    <Description xml:space="preserve">Status bar buttons to start Claude, the robot simulator, the dashboard, and robot debug downloads.</Description>
     <Categories>Other</Categories>
     <Properties>
       <Property Id="Microsoft.VisualStudio.Code.Engine" Value="$engine"/>
