@@ -13,7 +13,7 @@ public class HardwareConstants {
   public static final int CLIMBER_MOTOR_ID = 10;
 
   // Set this to "true" if we're at a competition and seeing loop overruns or
-  // inability to load Elastic dashboard or AdvantageKit
+  // inability to load the dashboard or AdvantageKit
   public static final boolean REDUCE_ROBORIO_RESOURCE_USAGE = true;
   public static final boolean ENABLE_DIAGNOSTIC_POSES = true;
 }

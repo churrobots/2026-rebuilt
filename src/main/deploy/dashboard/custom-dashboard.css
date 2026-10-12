@@ -1,0 +1,149 @@
+:host {
+  flex: 1;
+  min-height: 0;
+  display: block;
+  overflow: auto;
+  color: #edf2f7;
+  font:
+    14px system-ui,
+    sans-serif;
+}
+
+main {
+  box-sizing: border-box;
+  min-height: 100%;
+  padding: 24px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 18px;
+  align-content: start;
+}
+
+.card {
+  padding: 22px;
+  background: var(--panel, #171d27);
+  border: 1px solid var(--line, #303a4b);
+  border-radius: 12px;
+}
+
+.eyebrow {
+  margin: 0 0 5px;
+  color: #93a0b4;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+h1,
+h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.card-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.field-card {
+  grid-row: span 2;
+}
+.field-pose {
+  color: #8f9bad;
+  font:
+    0.72rem ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace;
+}
+.field-view {
+  height: 480px;
+  margin-top: 16px;
+  padding: 12px;
+  background: #0c1017;
+  border-radius: 8px;
+}
+.field-view canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.auto-select {
+  width: 100%;
+  margin-top: 16px;
+  padding: 10px 12px;
+  color: inherit;
+  background: #0c1017;
+  border: 1px solid var(--line, #303a4b);
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+.auto-active {
+  margin: 10px 0 0;
+  color: #8f9bad;
+  font-size: 0.8rem;
+}
+.auto-active output {
+  color: #edf2f7;
+  font-weight: 700;
+}
+
+.hardware-summary {
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+.hardware-summary[data-state="ok"] {
+  color: var(--green, #38d977);
+}
+.hardware-summary[data-state="fault"] {
+  color: var(--red, #ff5364);
+}
+.hardware-summary[data-state="missing"] {
+  color: #8f9bad;
+}
+.hardware-groups h2 {
+  margin: 14px 0 6px;
+  color: #93a0b4;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.hardware-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 6px;
+}
+.light {
+  padding: 6px 8px;
+  overflow: hidden;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-align: center;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.light[data-state="ok"] {
+  color: #062b14;
+  background: var(--green, #38d977);
+}
+.light[data-state="fault"] {
+  color: #ffffff;
+  background: var(--red, #ff5364);
+}
+.light[data-state="missing"] {
+  color: #8f9bad;
+  background: #232b38;
+}
+
+@media (max-width: 680px) {
+  main {
+    padding: 14px;
+  }
+}

@@ -112,8 +112,19 @@
     "src/main/java/org/": true,
     // Churrobots: hide pathplanner files, those are edited by pathplanner
     "**/deploy/pathplanner/": true,
-    // Churrobots: hide elastic dashboard files, those are edited by elastic
-    "**/deploy/elastic-layout.json": true,
+    // Churrobots: Sim Driver Station, NetworkTables protocol, and PWA metadata are
+    // stable infrastructure. Keep them out of routine dashboard UI work.
+    "src/main/deploy/dashboard/core/**": true,
+    "src/main/deploy/dashboard/index.html": true,
+    "src/main/deploy/dashboard/index.css": true,
+    "src/main/deploy/dashboard/manifest.webmanifest": true,
+    "src/main/deploy/dashboard/service-worker.js": true,
+    // Churrobots: sim plumbing that feeds dashboard controller input to the robot.
+    // Stable infrastructure, so keep it out of routine robot code work.
+    "src/main/java/frc/robot/sim/SimulationControllerBridge.java": true,
+    // Churrobots: coach-only tools, including the VS Code extension that adds the
+    // Claude/Sim/Dashboard buttons.
+    "tools/": true,
     // Churrobots: hide junk files
     "**/deploy/example.txt": true,
   },

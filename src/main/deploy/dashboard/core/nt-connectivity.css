@@ -1,0 +1,83 @@
+:host {
+  display: block;
+  padding: 7px 18px;
+  color: #edf2f7;
+  background: #10151e;
+  border-block: 1px solid #293142;
+  font: inherit;
+}
+
+section {
+  display: flex;
+  align-items: center;
+  min-height: 36px;
+  gap: 10px;
+}
+strong {
+  font-size: 0.8rem;
+}
+
+input {
+  width: 78px;
+  padding: 6px 8px;
+  color: inherit;
+  background: #0d1118;
+  border: 1px solid #293142;
+  border-radius: 7px;
+}
+
+#points {
+  display: flex;
+  gap: 6px;
+}
+
+button {
+  padding: 5px 9px;
+  color: #778294;
+  background: #191e27;
+  border: 1px solid #343d4c;
+  border-radius: 99px;
+  cursor: pointer;
+  font-size: 0.72rem;
+}
+
+button.connected {
+  color: #a7f3c1;
+  background: #173b27;
+  border-color: #38a963;
+}
+button.offline {
+  color: #fecaca;
+  background: #421d24;
+  border-color: #dc4c5c;
+}
+
+#sim-hint {
+  margin: 6px 0 2px;
+  padding: 12px 16px;
+  color: #1a0017;
+  background: #ff2bd6;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+#sim-hint[hidden] {
+  display: none;
+}
+#sim-hint strong {
+  font-size: inherit;
+}
+#sim-hint small {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+kbd {
+  display: inline-block;
+  padding: 2px 8px;
+  color: #ff2bd6;
+  background: #1a0017;
+  border-radius: 6px;
+  font: 700 0.9rem ui-monospace, monospace;
+}
