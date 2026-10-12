@@ -10,6 +10,9 @@
 }
 
 main {
+  /* Cards are sized for a bigger screen than the driver station laptop; this shrinks them
+     to fit. Change this one number to resize every card. */
+  zoom: 0.8;
   box-sizing: border-box;
   min-height: 100%;
   padding: 24px;
