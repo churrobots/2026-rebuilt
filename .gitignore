@@ -196,3 +196,6 @@ src/main/java/frc/robot/BuildConstants.java
 
 # Robot logs and NetworkTables snapshots from the "Download Robot Debug Info" task
 debug/
+
+# Personal Claude Code settings (shared skills in .claude/skills are committed)
+.claude/settings.local.json
