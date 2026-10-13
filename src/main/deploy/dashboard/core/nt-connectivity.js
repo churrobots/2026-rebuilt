@@ -1,42 +1,35 @@
 /** @typedef {import("./dashboard-core.js").DashboardCore} DashboardCore */
 
-/**
- * One NetworkTables server the driver can select.
- * @typedef {Object} ConnectionCandidate
- * @property {string} id
- * @property {string} host
- * @property {string} label
- */
+// Wait this long before showing the banner, so it doesn't flash while the page reconnects
+// after a reload or the simulator restarts after a save.
+const SHOW_AFTER_MS = 1000;
 
-/** NetworkTables connection picker with fully isolated markup and styles. */
+/**
+ * Shows a banner only while NetworkTables is disconnected. The dashboard always connects to
+ * the robot program that served this page, so there's nothing to pick.
+ */
 export class NtConnectivity extends HTMLElement {
   /** @type {DashboardCore | null} */
   #core = null;
   /** @type {ReturnType<typeof setTimeout> | undefined} */
-  #simHintTimer;
+  #showTimer;
 
   constructor() {
     super();
     this.attachShadow({ mode: "open" });
     const version = new URL(import.meta.url).searchParams.get("v") ?? "initial";
-    const isMac = /Mac|iPhone|iPad/.test(navigator.platform);
-    const keys = isMac ? ["⌘ Cmd", "⇧ Shift", "B"] : ["Ctrl", "Shift", "B"];
     this.shadowRoot.innerHTML = `<link rel="stylesheet" href="core/nt-connectivity.css?v=${version}">
-      <section aria-label="NetworkTables connectivity">
-        <strong>NetworkTables</strong>
-        <input inputmode="numeric" aria-label="Team number" placeholder="Team #">
-        <div id="points"></div>
-      </section>
-      <p id="sim-hint" role="status" hidden>
+      <p id="sim" role="status" hidden>
         <strong>The simulator isn't running.</strong>
-        In VS Code, press ${keys.map((key) => `<kbd>${key}</kbd>`).join(" + ")} to start it.
+        In VS Code, run the <kbd>ChurroBots: Develop and Simulate</kbd> build task to start it.
         <small>Just saved a file? Wait a few seconds while it restarts.</small>
+      </p>
+      <p id="robot" role="status" hidden>
+        <strong>Can't reach the robot.</strong>
+        <span id="robot-detail"></span>
+        <small>Showing the last values received until it reconnects.</small>
       </p>`;
-    this.shadowRoot.querySelector("input").value =
-      localStorage.getItem("frc-team-number") || "8048";
-    this.shadowRoot
-      .querySelector("input")
-      .addEventListener("change", () => this.render());
+    this.hidden = true;
   }
 
   /** @param {DashboardCore | null} core The protected shared core service. */
@@ -52,61 +45,19 @@ export class NtConnectivity extends HTMLElement {
   }
 
   render() {
-    const input = this.shadowRoot.querySelector("input");
-    const team = Number.parseInt(input.value, 10);
-    localStorage.setItem("frc-team-number", input.value.trim());
-    /** @type {ConnectionCandidate[]} */
-    const candidates = [{ id: "sim", host: "localhost", label: "Simulator" }];
-    if (Number.isInteger(team) && team > 0 && team <= 99999)
-      candidates.push(
-        {
-          id: "team-ip",
-          host: `10.${Math.floor(team / 100)}.${team % 100}.2`,
-          label: `10.${Math.floor(team / 100)}.${team % 100}.2`,
-        },
-        {
-          id: "mdns",
-          host: `roborio-${team}-frc.local`,
-          label: `roborio-${team}-frc.local`,
-        },
-      );
     const state = this.#core?.connection;
-    this.#updateSimHint(state);
-    const points = this.shadowRoot.querySelector("#points");
-    points.replaceChildren(
-      ...candidates.map((candidate) => {
-        const button = document.createElement("button");
-        const selected = state?.host === candidate.host;
-        button.className = selected
-          ? state.connected
-            ? "connected"
-            : "offline"
-          : "";
-        button.textContent = candidate.label;
-        button.addEventListener("click", () =>
-          this.dispatchEvent(
-            new CustomEvent("connection-request", {
-              detail: candidate,
-              bubbles: true,
-              composed: true,
-            }),
-          ),
-        );
-        return button;
-      }),
-    );
-  }
-
-  /** @param {import("./dashboard-core.js").DashboardConnection | undefined} state */
-  #updateSimHint(state) {
-    const hint = this.shadowRoot.querySelector("#sim-hint");
-    clearTimeout(this.#simHintTimer);
-    if (state?.isSimulation && !state.connected) {
-      // Wait briefly so the hint doesn't flash while the page reconnects after a reload.
-      this.#simHintTimer = setTimeout(() => (hint.hidden = false), 1000);
-    } else {
-      hint.hidden = true;
+    clearTimeout(this.#showTimer);
+    if (!state || state.connected) {
+      this.hidden = true;
+      return;
     }
+    this.#showTimer = setTimeout(() => {
+      this.shadowRoot.querySelector("#sim").hidden = !state.isSimulation;
+      this.shadowRoot.querySelector("#robot").hidden = state.isSimulation;
+      this.shadowRoot.querySelector("#robot-detail").textContent =
+        `Is it on, is the robot code running, and is this laptop on its network (${state.host})?`;
+      this.hidden = false;
+    }, SHOW_AFTER_MS);
   }
 }
 

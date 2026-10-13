@@ -2,7 +2,8 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Start Supervised Robot Simulation",
+      "label": "ChurroBots: 🎮 Develop and Simulate",
+      "detail": "Start the robot simulator (restarts on save)",
       "type": "process",
       "command": "${env:HOME}/wpilib/2026/jdk/bin/java",
       "windows": {
@@ -14,14 +15,103 @@
       "options": {
         "cwd": "${workspaceFolder}"
       },
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      },
+      "group": "build",
       "presentation": {
         "reveal": "always",
         "panel": "dedicated",
         "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "ChurroBots: 📊 Open Simulation Robot Dashboard",
+      "detail": "Open the dashboard for the simulator (http://localhost:5800)",
+      "type": "process",
+      "command": "open",
+      "args": [
+        "http://localhost:5800"
+      ],
+      "windows": {
+        "command": "cmd",
+        "args": [
+          "/c",
+          "start",
+          "",
+          "http://localhost:5800"
+        ]
+      },
+      "linux": {
+        "command": "xdg-open"
+      },
+      "group": "build",
+      "presentation": {
+        "reveal": "never",
+        "close": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "ChurroBots: 📊 Open Real Robot Dashboard",
+      "detail": "Open the dashboard for the real robot (http://10.80.48.2:5800); the laptop must be on the robot network",
+      "type": "process",
+      "command": "open",
+      "args": [
+        "http://10.80.48.2:5800"
+      ],
+      "windows": {
+        "command": "cmd",
+        "args": [
+          "/c",
+          "start",
+          "",
+          "http://10.80.48.2:5800"
+        ]
+      },
+      "linux": {
+        "command": "xdg-open"
+      },
+      "group": "build",
+      "presentation": {
+        "reveal": "never",
+        "close": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "ChurroBots: 🔍 Download Real Robot Debug Data for Claude",
+      "detail": "Save recent robot logs (SSH) and NetworkTables values (NT4) to debug/<timestamp>/",
+      "type": "process",
+      "command": "${env:HOME}/wpilib/2026/jdk/bin/java",
+      "windows": {
+        "command": "${env:USERPROFILE}\\wpilib\\2026\\jdk\\bin\\java.exe"
+      },
+      "args": [
+        "tools/DownloadRobotDebug.java"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "ChurroBots: ✨ Run Claude",
+      "detail": "Start a sandboxed Claude session (sbx run claude)",
+      "type": "shell",
+      "command": "sbx run claude",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated"
       },
       "problemMatcher": []
     }

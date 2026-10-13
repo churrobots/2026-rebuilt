@@ -116,7 +116,7 @@
     "**/deploy/elastic-layout.json": true,
     // Churrobots: Sim Driver Station, NetworkTables protocol, and PWA metadata are
     // stable infrastructure. Keep them out of routine dashboard UI work.
-    "src/main/deploy/dashboard/core/**": true,
+    "src/main/deploy/dashboard/core/": true,
     "src/main/deploy/dashboard/index.html": true,
     "src/main/deploy/dashboard/index.css": true,
     "src/main/deploy/dashboard/manifest.webmanifest": true,
@@ -124,9 +124,10 @@
     // Churrobots: sim plumbing that feeds dashboard controller input to the robot.
     // Stable infrastructure, so keep it out of routine robot code work.
     "src/main/java/frc/robot/sim/SimulationControllerBridge.java": true,
-    // Churrobots: coach-only tools, including the VS Code extension that adds the
-    // Claude/Sim/Dashboard buttons.
+    // Churrobots: coach-only tools behind the "ChurroBots: ..." build tasks (Shift+Cmd+B).
     "tools/": true,
+    // Churrobots: robot logs saved by the "ChurroBots: Download Real Robot Debug Data for Claude" task.
+    "debug/": true,
     // Churrobots: AI assistant instructions and tutorial materials. The assistant
     // reads these; students don't need to see them in the Explorer.
     "**/AGENTS.md": true,

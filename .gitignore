@@ -197,3 +197,9 @@ __pycache__/
 # We actually want to share our Sim GUI for now, since it takes
 # some time to setup and we usually want a common view of simulation
 !sim*
+
+# Robot logs and NetworkTables snapshots from the "ChurroBots: Download Real Robot Debug Data for Claude" task
+debug/
+
+# Personal Claude Code settings (shared skills in .claude/skills are committed)
+.claude/settings.local.json

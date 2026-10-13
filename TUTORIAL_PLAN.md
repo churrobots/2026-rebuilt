@@ -23,7 +23,7 @@ Your code does not have to match the reference line-for-line. If it works and yo
 
 1. Install WPILib 2026 and open the project in WPILib VS Code. (The vendor tools, Phoenix Tuner X and the REV Hardware Client, can wait until Phase 3.)
 2. Check out the tutorial starting branch (`fresh-start`) and make your own branch from it (C05). It's the **AdvantageKit Spark Swerve template** already adapted for our Kraken MAXSwerve modules (`ModuleIOKraken`). It also includes the team's tooling: the browser dashboard, `SimSupervisor`, the Sim Driver Station bridge, and every vendor library we use (Phoenix 6, REVLib, PhotonVision, PathPlanner, and so on). There are no mechanisms yet. You'll build those.
-3. Plug an Xbox-style controller into the laptop. Click **ChurroSim** (or press ⌘⇧B) to start the simulator, then **ChurroDashboard** to open `http://localhost:5800`.
+3. Plug an Xbox-style controller into the laptop. Press ⌘⇧B (Ctrl+Shift+B on Windows) and pick **ChurroBots: Develop and Simulate** to start the simulator, then do the same with **ChurroBots: Open Simulation Robot Dashboard** to open `http://localhost:5800`.
 4. In the dashboard's Sim Driver Station, check that the controller shows as connected, then enable **teleop** and **drive**. The template already has the controls:
    - left stick moves the robot
    - right stick turns it

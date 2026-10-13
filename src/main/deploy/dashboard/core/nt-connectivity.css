@@ -6,73 +6,39 @@
   border-block: 1px solid #293142;
   font: inherit;
 }
-
-section {
-  display: flex;
-  align-items: center;
-  min-height: 36px;
-  gap: 10px;
-}
-strong {
-  font-size: 0.8rem;
+:host([hidden]) {
+  display: none;
 }
 
-input {
-  width: 78px;
-  padding: 6px 8px;
-  color: inherit;
-  background: #0d1118;
-  border: 1px solid #293142;
-  border-radius: 7px;
-}
-
-#points {
-  display: flex;
-  gap: 6px;
-}
-
-button {
-  padding: 5px 9px;
-  color: #778294;
-  background: #191e27;
-  border: 1px solid #343d4c;
-  border-radius: 99px;
-  cursor: pointer;
-  font-size: 0.72rem;
-}
-
-button.connected {
-  color: #a7f3c1;
-  background: #173b27;
-  border-color: #38a963;
-}
-button.offline {
-  color: #fecaca;
-  background: #421d24;
-  border-color: #dc4c5c;
-}
-
-#sim-hint {
-  margin: 6px 0 2px;
+p {
+  margin: 0;
   padding: 12px 16px;
-  color: #1a0017;
-  background: #ff2bd6;
   border-radius: 10px;
   font-size: 1rem;
   font-weight: 600;
 }
-#sim-hint[hidden] {
+p[hidden] {
   display: none;
 }
-#sim-hint strong {
+strong {
   font-size: inherit;
 }
-#sim-hint small {
+small {
   display: block;
   margin-top: 4px;
   font-size: 0.8rem;
   font-weight: 500;
 }
+
+#sim {
+  color: #1a0017;
+  background: #ff2bd6;
+}
+#robot {
+  color: #2b0a0f;
+  background: #ff8b97;
+}
+
 kbd {
   display: inline-block;
   padding: 2px 8px;

@@ -42,7 +42,7 @@ export class DashboardCore extends EventTarget {
     super();
     this.#state = {
       host,
-      id: host === "localhost" ? "sim" : "page",
+      id: host === "localhost" || host === "127.0.0.1" ? "sim" : "page",
       connected: false,
     };
     this.#nt = new NT4Client(host);
@@ -138,7 +138,6 @@ export class DashboardCoreElement extends HTMLElement {
     const driverStation = document.createElement("sim-driver-station");
     connectivity.core = this.#core;
     driverStation.core = this.#core;
-    connectivity.addEventListener("connection-request", ({ detail }) => this.#core.setHost(detail.host, detail.id));
     this.style.cssText = "flex: 1; min-height: 0; display: flex; flex-direction: column;";
     this.replaceChildren(driverStation, connectivity, ...(customDashboard ? [customDashboard] : []));
   }
