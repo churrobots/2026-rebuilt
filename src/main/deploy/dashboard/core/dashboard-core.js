@@ -136,6 +136,9 @@ export class DashboardCoreElement extends HTMLElement {
     const customDashboard = this.querySelector("custom-dashboard");
     const connectivity = document.createElement("nt-connectivity");
     const driverStation = document.createElement("sim-driver-station");
+    // While disconnected the cards would only show stale or empty values, so the banner
+    // replaces them until the robot is back. Set before core, so they start hidden.
+    connectivity.replaces = customDashboard;
     connectivity.core = this.#core;
     driverStation.core = this.#core;
     this.style.cssText = "flex: 1; min-height: 0; display: flex; flex-direction: column;";

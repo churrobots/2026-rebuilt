@@ -48,7 +48,7 @@ export class SimDriverStation extends HTMLElement {
     const root = this.attachShadow({ mode: "open" });
     const version = new URL(import.meta.url).searchParams.get("v") ?? "initial";
     root.innerHTML = `<link rel="stylesheet" href="core/sim-driver-station.css?v=${version}">
-      <div class="offline">Driver Station floats here</div>
+      <div class="offline">Sim Driver Station will appear here</div>
       <div class="ds" hidden>
         <button class="take-over" hidden>Another dashboard is driving the robot. Click here to drive from this one.</button>
         <div class="controls">
