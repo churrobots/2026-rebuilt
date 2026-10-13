@@ -14,40 +14,49 @@ const AUTO_SELECTED_TOPIC = `${AUTO_TABLE}/selected`;
 
 // HardwareMonitor publishes true when a device is healthy, false when it's faulted.
 const HARDWARE_TABLE = "/SmartDashboard/HardwareMonitor/FaultStatus";
-const HARDWARE_GROUPS = [
+// Swerve corners, in the order they sit on the robot with the front at the top.
+const ROBOT_CORNERS = [
   {
-    name: "Cameras & gyro",
+    name: "FL",
     devices: [
-      ["camera_frontleft", "Cam FL"],
-      ["camera_frontright", "Cam FR"],
-      ["camera_backleft", "Cam BL"],
-      ["camera_backright", "Cam BR"],
-      ["Pigeon2 gyro", "Gyro"],
+      ["FrontLeftDrive", "Drive"],
+      ["FrontLeftTurn", "Turn"],
+      ["camera_frontleft", "Camera"],
     ],
   },
   {
-    name: "Drive",
+    name: "FR",
     devices: [
-      ["FrontLeftDrive", "FL drive"],
-      ["FrontLeftTurn", "FL turn"],
-      ["FrontRightDrive", "FR drive"],
-      ["FrontRightTurn", "FR turn"],
-      ["BackLeftDrive", "BL drive"],
-      ["BackLeftTurn", "BL turn"],
-      ["BackRightDrive", "BR drive"],
-      ["BackRightTurn", "BR turn"],
+      ["FrontRightDrive", "Drive"],
+      ["FrontRightTurn", "Turn"],
+      ["camera_frontright", "Camera"],
     ],
   },
   {
-    name: "Mechanisms",
+    name: "BL",
     devices: [
-      ["shooterMotor", "Shooter"],
-      ["feederMotor", "Feeder"],
-      ["spindexerMotor", "Spindexer"],
-      ["intakeRollerMotor", "Intake roller"],
-      ["intakeArmMotor", "Intake arm"],
+      ["BackLeftDrive", "Drive"],
+      ["BackLeftTurn", "Turn"],
+      ["camera_backleft", "Camera"],
     ],
   },
+  {
+    name: "BR",
+    devices: [
+      ["BackRightDrive", "Drive"],
+      ["BackRightTurn", "Turn"],
+      ["camera_backright", "Camera"],
+    ],
+  },
+];
+// Drawn in the middle of the robot, where the gyro usually sits.
+const GYRO = ["Pigeon2 gyro", "Gyro"];
+const OTHER_HARDWARE = [
+  ["shooterMotor", "Shooter"],
+  ["feederMotor", "Feeder"],
+  ["spindexerMotor", "Spindexer"],
+  ["intakeRollerMotor", "Intake roller"],
+  ["intakeArmMotor", "Intake arm"],
 ];
 
 // 2026 field size and robot bumper size, in meters.
@@ -70,6 +79,7 @@ export class CustomDashboard extends HTMLElement {
         new URL(import.meta.url).searchParams.get("v") ?? "initial";
       root.innerHTML = `<link rel="stylesheet" href="custom-dashboard.css?v=${version}">
         <main>
+          <div class="side">
           <section class="card" aria-labelledby="auto-heading">
             <div class="card-heading">
               <div><p class="eyebrow">Autonomous</p><h1 id="auto-heading">Auto</h1></div>
@@ -86,6 +96,7 @@ export class CustomDashboard extends HTMLElement {
             </div>
             <div class="hardware-groups"></div>
           </section>
+          </div>
           <section class="card field-card" aria-labelledby="field-heading">
             <div class="card-heading">
               <div><p class="eyebrow">Drivetrain</p><h1 id="field-heading">Field</h1></div>
@@ -187,21 +198,43 @@ export class CustomDashboard extends HTMLElement {
     /** @type {Map<string, HTMLElement>} */
     const lights = new Map();
 
-    for (const group of HARDWARE_GROUPS) {
-      const heading = document.createElement("h2");
-      heading.textContent = group.name;
-      const grid = document.createElement("div");
-      grid.className = "hardware-grid";
-      for (const [device, label] of group.devices) {
-        const light = document.createElement("span");
-        light.className = "light";
-        light.textContent = label;
-        light.title = device;
-        lights.set(`${HARDWARE_TABLE}/${device}`, light);
-        grid.append(light);
-      }
-      groups.append(heading, grid);
+    /** @param {string} device @param {string} label */
+    const makeLight = (device, label) => {
+      const light = document.createElement("span");
+      light.className = "light";
+      light.textContent = label;
+      light.title = device;
+      lights.set(`${HARDWARE_TABLE}/${device}`, light);
+      return light;
+    };
+
+    // The drivetrain as a top-down robot: front at the top, one box per swerve corner.
+    const robot = document.createElement("div");
+    robot.className = "robot";
+    const front = document.createElement("div");
+    front.className = "robot-front";
+    front.textContent = "▲ Front";
+    const corners = document.createElement("div");
+    corners.className = "corners";
+    for (const corner of ROBOT_CORNERS) {
+      const box = document.createElement("div");
+      box.className = "corner";
+      const name = document.createElement("b");
+      name.textContent = corner.name;
+      box.append(name, ...corner.devices.map(([device, label]) => makeLight(device, label)));
+      corners.append(box);
     }
+    const gyro = makeLight(...GYRO);
+    gyro.classList.add("gyro");
+    corners.append(gyro);
+    robot.append(front, corners);
+
+    const otherHeading = document.createElement("h2");
+    otherHeading.textContent = "Mechanisms";
+    const other = document.createElement("div");
+    other.className = "hardware-grid";
+    other.append(...OTHER_HARDWARE.map(([device, label]) => makeLight(device, label)));
+    groups.append(robot, otherHeading, other);
 
     const render = () => {
       let faults = 0;

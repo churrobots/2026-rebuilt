@@ -2,24 +2,45 @@
   flex: 1;
   min-height: 0;
   display: block;
-  overflow: auto;
+  /* The layout below always fits the window, so the page itself never scrolls. */
+  overflow: hidden;
   color: #edf2f7;
   font:
     14px system-ui,
     sans-serif;
 }
 
+/* Field on the left, filling the full height. The other cards fill the rest, side by side
+   when there's room, scrolling inside their own area if they ever run out of room. */
 main {
-  /* Cards are sized for a bigger screen than the driver station laptop; this shrinks them
-     to fit. Change this one number to resize every card. */
-  zoom: 0.8;
   box-sizing: border-box;
-  min-height: 100%;
-  padding: 24px;
+  height: 100%;
+  padding: 16px;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 18px;
+  /* The field is about 2.2x taller than wide, so size its column from the window height
+     instead of giving it all the spare width. */
+  grid-template-columns: min(45%, calc((100vh - 120px) * 0.45)) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  gap: 14px;
+}
+
+.side {
+  grid-column: 2;
+  grid-row: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   align-content: start;
+  align-items: start;
+  gap: 14px;
+  overflow-y: auto;
+}
+
+/* Card contents are sized for a bigger screen than the driver station laptop; this shrinks
+   them to fit. Change these numbers to resize the cards. */
+.side .card,
+.field-card .card-heading {
+  zoom: 0.8;
 }
 
 .card {
@@ -52,7 +73,12 @@ h2 {
 }
 
 .field-card {
-  grid-row: span 2;
+  grid-column: 1;
+  grid-row: 1;
+  min-height: 0;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
 }
 .field-pose {
   color: #8f9bad;
@@ -63,8 +89,9 @@ h2 {
     monospace;
 }
 .field-view {
-  height: 480px;
-  margin-top: 16px;
+  flex: 1;
+  min-height: 0;
+  margin-top: 12px;
   padding: 12px;
   background: #0c1017;
   border-radius: 8px;
@@ -117,6 +144,64 @@ h2 {
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
+.robot {
+  margin-top: 14px;
+  padding: 8px;
+  display: grid;
+  gap: 8px;
+  border: 2px solid var(--line, #303a4b);
+  border-top-color: var(--blue, #57a6ff);
+  border-radius: 12px;
+}
+.robot-front {
+  margin-bottom: -2px;
+  color: var(--blue, #57a6ff);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-align: center;
+  text-transform: uppercase;
+}
+/* Left corners | gyro | right corners. The gyro sits in the middle of the robot. */
+.corners {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  gap: 8px;
+}
+.corner:nth-child(1),
+.corner:nth-child(3) {
+  grid-column: 1;
+}
+.corner:nth-child(2),
+.corner:nth-child(4) {
+  grid-column: 3;
+}
+.corner:nth-child(1),
+.corner:nth-child(2) {
+  grid-row: 1;
+}
+.corner:nth-child(3),
+.corner:nth-child(4) {
+  grid-row: 2;
+}
+.corners .gyro {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+}
+.corner {
+  padding: 8px;
+  display: grid;
+  gap: 5px;
+  background: #0c1017;
+  border-radius: 8px;
+}
+.corner b {
+  color: #93a0b4;
+  font-size: 0.75rem;
+}
+
 .hardware-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
@@ -145,8 +230,27 @@ h2 {
   background: #232b38;
 }
 
+/* Phones and narrow windows: stack everything and let the page scroll. */
 @media (max-width: 680px) {
+  :host {
+    overflow: auto;
+  }
   main {
+    height: auto;
     padding: 14px;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+  }
+  .side,
+  .field-card {
+    grid-column: auto;
+    grid-row: auto;
+  }
+  .side {
+    overflow: visible;
+  }
+  .field-view {
+    flex: none;
+    height: 60vh;
   }
 }
