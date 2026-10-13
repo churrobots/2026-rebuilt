@@ -63,6 +63,8 @@ Also open the robot code that's involved (subsystems, `RobotContainer.java`, `Ha
 
 ## What things mean on this robot
 
+Some of these only exist when the robot code has `HardwareMonitor` (the competition robot's branches have it; the tutorial branches don't). If a topic or log line isn't in the dump, skip it rather than treating it as missing.
+
 - **`HardwareMonitor/Devices/<name>/`**: per device `type`, `canId`, `connected`, `faults`, `warnings`, `firmware`. Firmware is blank until the device has been seen connected.
 - **`HardwareMonitor/FaultStatus/<name>`**: the red/green light. `true` means **healthy**, `false` means a problem. (Easy to get backwards!)
 - **`HardwareMonitor/CANBus/*`**: CAN bus health. `receiveErrorCount`/`transmitErrorCount` near 0 means the wires the roboRIO can reach are electrically fine. 96+ is "error warning", 128+ is "error passive", and climbing `busOffCount` is serious. Zero errors does **not** rule out a broken chain: the roboRIO has its own terminator, so a short cut-off chain often still works cleanly.

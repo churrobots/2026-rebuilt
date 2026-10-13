@@ -17,12 +17,12 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.sim.SimulationControllerBridge;
 import frc.robot.subsystems.HardwareConstants;
 import frc.robot.util.HardwareMonitor;
 
 import static edu.wpi.first.units.Units.RPM;
 
+import org.churrobots.sim.SimulationControllerBridge;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
