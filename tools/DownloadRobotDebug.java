@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -35,6 +36,8 @@ public final class DownloadRobotDebug {
       List.of("/u/logs", "/U/logs", "/home/lvuser/logs");
   // The robot program's console output, which is where crash stack traces end up.
   private static final List<String> LOG_FILES = List.of("/home/lvuser/FRC_UserProgram.log");
+  // Written by the Java runtime itself if it crashes hard (not a normal exception).
+  private static final String JAVA_CRASH_FILES = "/home/lvuser/hs_err_pid*.log";
   private static final Duration NT_CONNECT_TIMEOUT = Duration.ofSeconds(3);
   private static final Duration NT_QUIET = Duration.ofSeconds(1);
   private static final Duration NT_MAX_WAIT = Duration.ofSeconds(10);
@@ -105,6 +108,8 @@ public final class DownloadRobotDebug {
     for (String file : LOG_FILES) {
       listing.append(" [ -f ").append(file).append(" ] && stat -c '%Y %s %n' ").append(file).append(";");
     }
+    listing.append(" for f in ").append(JAVA_CRASH_FILES)
+        .append("; do [ -f \"$f\" ] && stat -c '%Y %s %n' \"$f\"; done;");
     listing.append(" true");
 
     String text;
@@ -145,7 +150,8 @@ public final class DownloadRobotDebug {
       if (modified >= robotNow - RECENT.toSeconds()) {
         selected.add(entry.getKey());
       }
-      if (!LOG_FILES.contains(entry.getKey()) && modified > newestModified) {
+      if (!LOG_FILES.contains(entry.getKey()) && !entry.getKey().contains("/hs_err_pid")
+          && modified > newestModified) {
         newest = entry.getKey();
         newestModified = modified;
       }
@@ -179,9 +185,28 @@ public final class DownloadRobotDebug {
         }
         Files.write(output.resolve(name), result.stdout());
         note("Log " + remote + " -> " + name);
+        if (name.endsWith(".wpilog")) {
+          saveConsoleText(name, result.stdout());
+        }
       } catch (IOException | InterruptedException e) {
         note("Log " + remote + ": failed: " + e.getMessage());
       }
+    }
+  }
+
+  /** Pulls the robot's console output out of a binary .wpilog into a readable .txt next to it. */
+  private void saveConsoleText(String logName, byte[] log) {
+    String textName = logName.substring(0, logName.length() - ".wpilog".length()) + ".console.txt";
+    try {
+      List<String> lines = WpiLog.consoleLines(log);
+      if (lines.isEmpty()) {
+        note("  (no console output in " + logName + ")");
+        return;
+      }
+      Files.write(output.resolve(textName), lines);
+      note("  console text -> " + textName);
+    } catch (RuntimeException | IOException e) {
+      note("  couldn't read console text from " + logName + ": " + e);
     }
   }
 
@@ -544,6 +569,73 @@ public final class DownloadRobotDebug {
         }
       }
       return out.append('"').toString();
+    }
+  }
+
+  /**
+   * Just enough of the WPILOG format to read DataLogManager's "console" and "messages" text.
+   * See https://github.com/wpilibsuite/allwpilib/blob/main/wpiutil/doc/datalog.adoc
+   */
+  private static final class WpiLog {
+    private static final Set<String> TEXT_ENTRIES = Set.of("console", "messages");
+
+    static List<String> consoleLines(byte[] data) {
+      ByteBuffer in = ByteBuffer.wrap(data).order(java.nio.ByteOrder.LITTLE_ENDIAN);
+      if (data.length < 12 || !new String(data, 0, 6, StandardCharsets.US_ASCII).equals("WPILOG")) {
+        throw new IllegalArgumentException("not a WPILOG file");
+      }
+      in.position(8);
+      in.position(12 + in.getInt());
+
+      Map<Long, String> textEntryNames = new HashMap<>();
+      List<String> lines = new ArrayList<>();
+      // The newest run's file may still be open, so stop quietly at a cut-off record.
+      while (in.remaining() >= 1) {
+        int header = in.get() & 0xff;
+        int idLength = (header & 0x3) + 1;
+        int sizeLength = ((header >> 2) & 0x3) + 1;
+        int timestampLength = ((header >> 4) & 0x7) + 1;
+        if (in.remaining() < idLength + sizeLength + timestampLength) break;
+        long id = readUnsigned(in, idLength);
+        int size = (int) readUnsigned(in, sizeLength);
+        long timestampMicros = readUnsigned(in, timestampLength);
+        if (size < 0 || in.remaining() < size) break;
+        byte[] payload = new byte[size];
+        in.get(payload);
+
+        if (id == 0) {
+          // Control record: type 0 starts an entry (id, name, type, metadata).
+          ByteBuffer control = ByteBuffer.wrap(payload).order(java.nio.ByteOrder.LITTLE_ENDIAN);
+          if (control.remaining() >= 5 && control.get() == 0) {
+            long entryId = control.getInt() & 0xffffffffL;
+            String name = readString(control);
+            String type = readString(control);
+            if (TEXT_ENTRIES.contains(name) && type.equals("string")) {
+              textEntryNames.put(entryId, name);
+            }
+          }
+        } else if (textEntryNames.containsKey(id)) {
+          String prefix = String.format("[%9.3fs]%s ", timestampMicros / 1e6,
+              textEntryNames.get(id).equals("messages") ? " (message)" : "");
+          String text = new String(payload, StandardCharsets.UTF_8);
+          for (String line : text.split("\\R")) {
+            if (!line.isEmpty()) lines.add(prefix + line);
+          }
+        }
+      }
+      return lines;
+    }
+
+    private static long readUnsigned(ByteBuffer in, int length) {
+      long value = 0;
+      for (int i = 0; i < length; i++) value |= (long) (in.get() & 0xff) << (8 * i);
+      return value;
+    }
+
+    private static String readString(ByteBuffer in) {
+      byte[] bytes = new byte[in.getInt()];
+      in.get(bytes);
+      return new String(bytes, StandardCharsets.UTF_8);
     }
   }
 }

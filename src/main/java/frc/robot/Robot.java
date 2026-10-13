@@ -11,6 +11,7 @@ import com.ctre.phoenix6.SignalLogger;
 import com.revrobotics.util.StatusLogger;
 
 import edu.wpi.first.net.WebServer;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -46,6 +47,13 @@ public class Robot extends LoggedRobot {
   private SimulationControllerBridge simulationControllerBridge;
 
   public Robot() {
+    // Keep a small log file per run (console output only) in /home/lvuser/logs, or on a USB
+    // stick if one is plugged in. FRC_UserProgram.log is wiped at every restart, so without
+    // this a crash loop leaves no record of earlier crashes. ChurroInvestigate downloads these
+    // and pulls out the console text. Started first so startup crashes are captured too.
+    DataLogManager.start();
+    DataLogManager.logNetworkTables(false);
+
     // Record metadata
     Logger.recordMetadata("ProjectName", BuildConstants.MAVEN_NAME);
     Logger.recordMetadata("BuildDate", BuildConstants.BUILD_DATE);

@@ -1,6 +1,6 @@
 ---
 name: churro-debug
-description: Walk a student through debugging the robot using the latest ChurroDump in debug/. Use when someone asks what's wrong with the robot, why a motor/camera/sensor isn't working, why the robot crashed or won't drive, or wants help reading a dump, robot logs, or NetworkTables values.
+description: Walk a student through debugging the robot using the latest ChurroInvestigate in debug/. Use when someone asks what's wrong with the robot, why a motor/camera/sensor isn't working, why the robot crashed or won't drive, or wants help reading a dump, robot logs, or NetworkTables values.
 ---
 
 # Churro Debug
@@ -24,7 +24,7 @@ Dumps live in `debug/<date>_<time>/` (for example `debug/2026-10-12_16-45-27/`).
 ls -d debug/*/ | tail -1
 ```
 
-- If there's no `debug/` folder or it's empty, tell the student to press the **ChurroDump** button in VS Code (or run the "Download Robot Debug Info" task) with the robot on, then stop and wait.
+- If there's no `debug/` folder or it's empty, tell the student to press the **ChurroInvestigate** button in VS Code (or run the "Download Robot Debug Info" task) with the robot on, then stop and wait.
 - Compare the folder's time to now. If it's more than about 15 minutes old, or they've changed something on the robot since, ask if they want to grab a fresh dump first.
 - If there's an older dump too, it's useful to compare: "Last time X was broken, now it's fixed" is great evidence.
 
@@ -34,7 +34,7 @@ Each dump folder has:
 
 | File | What it is |
 |---|---|
-| `summary.txt` | What ChurroDump saved and anything that failed (for example robot code not running, so no NetworkTables). Read this first. |
+| `summary.txt` | What ChurroInvestigate saved and anything that failed (for example robot code not running, so no NetworkTables). Read this first. |
 | `networktables.json` | Every value the robot was publishing at that moment. Big, so pull out the parts you need (below) instead of reading it all. |
 | `FRC_UserProgram.log` | Everything the robot program printed: startup, warnings, errors, crashes. This is the history. |
 | `*.wpilog` (sometimes) | Data logs. Binary, so mention them but don't try to read them. |
@@ -77,7 +77,7 @@ Also open the robot code that's involved (subsystems, `RobotContainer.java`, `Ha
 
 Good debugging moves from the dump to the real robot. Useful things to ask students to look at:
 
-- **Status lights.** No light at all usually means no power (breaker, PDH channel, power wire). A light that's on but blinking an error pattern usually means power is fine but CAN isn't. For example, a SPARK slow-blinking magenta/blue or a TalonFX/Pigeon blinking red/orange.
+- **Status lights.** No light at all usually means no power (breaker, PDH channel, power wire). Don't guess what a color or blink pattern means; look it up with the student in the official chart (SPARK MAX: https://docs.revrobotics.com/brushless/spark-max/status-led, SPARK Flex: https://docs.revrobotics.com/brushless/spark-flex/status-led). From REV's SPARK MAX table, for brushless motors (all of ours): **magenta = coast**, **cyan = brake** (blue/yellow are for brushed motors only); **blinking = no valid signal**, **solid = valid signal**; orange mixed with another color is a fault code; dark means recovery mode, bad firmware, or no power. Careful: on this robot a SPARK that the dumps show *is* on CAN still blinks magenta while the robot is disabled, so blinking alone doesn't prove a device is off the bus. Compare against the dump's `connected` value, or enable the robot (on blocks) and see which lights change.
 - **The CAN chain.** Follow the yellow/green wires device to device. If some devices work and some don't, the break is usually just after the last working device. Have them figure out where the working CAN IDs are physically.
 - **Breakers and the PDH**, the battery voltage, and whether the coprocessor (for cameras) is powered and on the network.
 - **REV Hardware Client** and **Phoenix Tuner X** for devices with the wrong CAN ID or old firmware.
@@ -88,7 +88,7 @@ Good debugging moves from the dump to the real robot. Useful things to ask stude
 2. Start with a one-or-two sentence big picture: "Most of the motors aren't talking to the robot's brain, but the three that are, are fine."
 3. Walk through the evidence one finding at a time, in plain words, with a question after each.
 4. Build a theory together. Say how sure you are and what would prove it right or wrong.
-5. Give the next debugging step: one concrete thing to check or try. After they've done it, ask them to take a new ChurroDump so you can see what changed.
+5. Give the next debugging step: one concrete thing to check or try. After they've done it, ask them to take a new ChurroInvestigate so you can see what changed.
 6. At the end, recap what you learned together and what the fix was (or what to check next time).
 
 ## Rules
