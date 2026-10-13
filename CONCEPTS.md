@@ -326,7 +326,7 @@ Good feedforward does most of the work, and PID just cleans up the rest.
 ### C41 · Simulation
 **Level:** Core
 **The idea:** Simulation runs your real robot code on a laptop, with physics models standing in for motors and sensors. Test *everything* here first. It's free, fast, and can't break anything. Our `SimSupervisor` automatically restarts the simulator every time you save a file.
-**In our robot:** `tools/SimSupervisor.java`, `sim/SimulationControllerBridge.java`, the `simulationPeriodic()` methods
+**In our robot:** `tools/SimSupervisor.java`, `org/churrobots/sim/SimulationControllerBridge.java`, the `simulationPeriodic()` methods
 **Learn more:** `software/wpilib-tools/robot-simulation/introduction.html`
 
 ### C42 · NetworkTables and dashboards

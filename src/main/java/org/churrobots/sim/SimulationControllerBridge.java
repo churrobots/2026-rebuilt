@@ -1,4 +1,4 @@
-package frc.robot.sim;
+package org.churrobots.sim;
 
 import edu.wpi.first.hal.AllianceStationID;
 import edu.wpi.first.networktables.BooleanArraySubscriber;
