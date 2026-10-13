@@ -13,6 +13,7 @@ import com.revrobotics.util.StatusLogger;
 import edu.wpi.first.net.WebServer;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
@@ -40,13 +41,16 @@ public class Robot extends LoggedRobot {
   private SimulationControllerBridge simulationControllerBridge = null;
 
   public Robot() {
-    // Keep a small log file per run (console output only) in /home/lvuser/logs, or on a USB
-    // stick if one is plugged in. FRC_UserProgram.log is wiped at every restart, so without
-    // this a crash loop leaves no record of earlier crashes. The "Download Real Robot Debug
-    // Data" task downloads these and pulls out the console text. Started first so startup
-    // crashes are captured too.
-    DataLogManager.start();
-    DataLogManager.logNetworkTables(false);
+    // On the real robot, keep a small log file per run (console output only) in
+    // /home/lvuser/logs, or on a USB stick if one is plugged in. FRC_UserProgram.log is wiped
+    // at every restart, so without this a crash loop leaves no record of earlier crashes. The
+    // "Download Real Robot Debug Data" task downloads these and pulls out the console text.
+    // Started first so startup crashes are captured too. Skipped in simulation, where it
+    // can't capture console output and would just fill logs/ with empty files.
+    if (RobotBase.isReal()) {
+      DataLogManager.start();
+      DataLogManager.logNetworkTables(false);
+    }
 
     // Record metadata
     Logger.recordMetadata("ProjectName", BuildConstants.MAVEN_NAME);
