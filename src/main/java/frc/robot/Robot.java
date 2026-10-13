@@ -11,11 +11,13 @@ import com.ctre.phoenix6.SignalLogger;
 import com.revrobotics.util.StatusLogger;
 
 import edu.wpi.first.net.WebServer;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.sim.SimulationControllerBridge;
 import frc.robot.subsystems.HardwareConstants;
 import frc.robot.util.HardwareMonitor;
 
@@ -42,8 +44,16 @@ public class Robot extends LoggedRobot {
   private Command autonomousCommand;
   private RobotContainer robotContainer;
   private Field2d field = null;
+  private SimulationControllerBridge simulationControllerBridge;
 
   public Robot() {
+    // Keep a small log file per run (console output only) in /home/lvuser/logs, or on a USB
+    // stick if one is plugged in. FRC_UserProgram.log is wiped at every restart, so without
+    // this a crash loop leaves no record of earlier crashes. ChurroInvestigate downloads these
+    // and pulls out the console text. Started first so startup crashes are captured too.
+    DataLogManager.start();
+    DataLogManager.logNetworkTables(false);
+
     // Record metadata
     Logger.recordMetadata("ProjectName", BuildConstants.MAVEN_NAME);
     Logger.recordMetadata("BuildDate", BuildConstants.BUILD_DATE);
@@ -95,6 +105,13 @@ public class Robot extends LoggedRobot {
     // Start AdvantageKit logger
     Logger.start();
 
+    // Serve the dependency-free dashboard from src/main/deploy/dashboard.
+    WebServer.start(5800, Filesystem.getDeployDirectory().getPath() + "/dashboard");
+
+    if (Constants.currentMode == Constants.Mode.SIM) {
+      simulationControllerBridge = new SimulationControllerBridge();
+    }
+
     // Instantiate our RobotContainer. This will perform all our button bindings,
     // and put our autonomous chooser on the dashboard.
     robotContainer = new RobotContainer();
@@ -103,6 +120,10 @@ public class Robot extends LoggedRobot {
   /** This function is called periodically during all modes. */
   @Override
   public void robotPeriodic() {
+    if (simulationControllerBridge != null) {
+      simulationControllerBridge.update();
+    }
+
     // Optionally switch the thread to high priority to improve loop
     // timing (see the template project documentation for details)
     // Threads.setCurrentThreadPriority(true, 99);
@@ -119,9 +140,6 @@ public class Robot extends LoggedRobot {
 
     // Monitor highlevel hardware faults during a match.
     HardwareMonitor.dumpHardwareStatusToNetworkTables(Constants.debugMemoryUsage);
-
-    // Make sure Elastic dashboard is available for download.
-    WebServer.start(5800, Filesystem.getDeployDirectory().getPath());
   }
 
   /** This function is called once when the robot is disabled. */

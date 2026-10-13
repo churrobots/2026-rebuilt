@@ -1,0 +1,49 @@
+:host {
+  display: block;
+  padding: 7px 18px;
+  color: #edf2f7;
+  background: #10151e;
+  border-block: 1px solid #293142;
+  font: inherit;
+}
+:host([hidden]) {
+  display: none;
+}
+
+p {
+  margin: 0;
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+p[hidden] {
+  display: none;
+}
+strong {
+  font-size: inherit;
+}
+small {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+#sim {
+  color: #1a0017;
+  background: #ff2bd6;
+}
+#robot {
+  color: #2b0a0f;
+  background: #ff8b97;
+}
+
+kbd {
+  display: inline-block;
+  padding: 2px 8px;
+  color: #ff2bd6;
+  background: #1a0017;
+  border-radius: 6px;
+  font: 700 0.9rem ui-monospace, monospace;
+}

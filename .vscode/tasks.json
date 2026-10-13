@@ -1,0 +1,48 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start Supervised Robot Simulation",
+      "type": "process",
+      "command": "${env:HOME}/wpilib/2026/jdk/bin/java",
+      "windows": {
+        "command": "${env:USERPROFILE}\\wpilib\\2026\\jdk\\bin\\java.exe"
+      },
+      "args": [
+        "tools/SimSupervisor.java"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Download Robot Debug Info",
+      "detail": "Saves recent robot logs (SSH) and NetworkTables values (NT4) to debug/<timestamp>/",
+      "type": "process",
+      "command": "${env:HOME}/wpilib/2026/jdk/bin/java",
+      "windows": {
+        "command": "${env:USERPROFILE}\\wpilib\\2026\\jdk\\bin\\java.exe"
+      },
+      "args": [
+        "tools/DownloadRobotDebug.java"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "problemMatcher": []
+    }
+  ]
+}

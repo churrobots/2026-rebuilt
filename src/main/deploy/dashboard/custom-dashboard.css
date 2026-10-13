@@ -1,0 +1,256 @@
+:host {
+  flex: 1;
+  min-height: 0;
+  display: block;
+  /* The layout below always fits the window, so the page itself never scrolls. */
+  overflow: hidden;
+  color: #edf2f7;
+  font:
+    14px system-ui,
+    sans-serif;
+}
+
+/* Field on the left, filling the full height. The other cards fill the rest, side by side
+   when there's room, scrolling inside their own area if they ever run out of room. */
+main {
+  box-sizing: border-box;
+  height: 100%;
+  padding: 16px;
+  display: grid;
+  /* The field is about 2.2x taller than wide, so size its column from the window height
+     instead of giving it all the spare width. */
+  grid-template-columns: min(45%, calc((100vh - 120px) * 0.45)) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  gap: 14px;
+}
+
+.side {
+  grid-column: 2;
+  grid-row: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  align-content: start;
+  align-items: start;
+  gap: 14px;
+  overflow-y: auto;
+}
+
+/* Card contents are sized for a bigger screen than the driver station laptop; this shrinks
+   them to fit. Change these numbers to resize the cards. */
+.side .card,
+.field-card .card-heading {
+  zoom: 0.8;
+}
+
+.card {
+  padding: 22px;
+  background: var(--panel, #171d27);
+  border: 1px solid var(--line, #303a4b);
+  border-radius: 12px;
+}
+
+.eyebrow {
+  margin: 0 0 5px;
+  color: #93a0b4;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+h1,
+h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.card-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.field-card {
+  grid-column: 1;
+  grid-row: 1;
+  min-height: 0;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+.field-pose {
+  color: #8f9bad;
+  font:
+    0.72rem ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace;
+}
+.field-view {
+  flex: 1;
+  min-height: 0;
+  margin-top: 12px;
+  padding: 12px;
+  background: #0c1017;
+  border-radius: 8px;
+}
+.field-view canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.auto-select {
+  width: 100%;
+  margin-top: 16px;
+  padding: 10px 12px;
+  color: inherit;
+  background: #0c1017;
+  border: 1px solid var(--line, #303a4b);
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+.auto-active {
+  margin: 10px 0 0;
+  color: #8f9bad;
+  font-size: 0.8rem;
+}
+.auto-active output {
+  color: #edf2f7;
+  font-weight: 700;
+}
+
+.hardware-summary {
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+.hardware-summary[data-state="ok"] {
+  color: var(--green, #38d977);
+}
+.hardware-summary[data-state="fault"] {
+  color: var(--red, #ff5364);
+}
+.hardware-summary[data-state="missing"] {
+  color: #8f9bad;
+}
+.hardware-groups h2 {
+  margin: 14px 0 6px;
+  color: #93a0b4;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.robot {
+  margin-top: 14px;
+  padding: 8px;
+  display: grid;
+  gap: 8px;
+  border: 2px solid var(--line, #303a4b);
+  border-top-color: var(--blue, #57a6ff);
+  border-radius: 12px;
+}
+.robot-front {
+  margin-bottom: -2px;
+  color: var(--blue, #57a6ff);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-align: center;
+  text-transform: uppercase;
+}
+/* Left corners | gyro | right corners. The gyro sits in the middle of the robot. */
+.corners {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  gap: 8px;
+}
+.corner:nth-child(1),
+.corner:nth-child(3) {
+  grid-column: 1;
+}
+.corner:nth-child(2),
+.corner:nth-child(4) {
+  grid-column: 3;
+}
+.corner:nth-child(1),
+.corner:nth-child(2) {
+  grid-row: 1;
+}
+.corner:nth-child(3),
+.corner:nth-child(4) {
+  grid-row: 2;
+}
+.corners .gyro {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+}
+.corner {
+  padding: 8px;
+  display: grid;
+  gap: 5px;
+  background: #0c1017;
+  border-radius: 8px;
+}
+.corner b {
+  color: #93a0b4;
+  font-size: 0.75rem;
+}
+
+.hardware-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 6px;
+}
+.light {
+  padding: 6px 8px;
+  overflow: hidden;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-align: center;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.light[data-state="ok"] {
+  color: #062b14;
+  background: var(--green, #38d977);
+}
+.light[data-state="fault"] {
+  color: #ffffff;
+  background: var(--red, #ff5364);
+}
+.light[data-state="missing"] {
+  color: #8f9bad;
+  background: #232b38;
+}
+
+/* Phones and narrow windows: stack everything and let the page scroll. */
+@media (max-width: 680px) {
+  :host {
+    overflow: auto;
+  }
+  main {
+    height: auto;
+    padding: 14px;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+  }
+  .side,
+  .field-card {
+    grid-column: auto;
+    grid-row: auto;
+  }
+  .side {
+    overflow: visible;
+  }
+  .field-view {
+    flex: none;
+    height: 60vh;
+  }
+}

@@ -1,17 +1,27 @@
 package frc.robot.util;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.photonvision.PhotonCamera;
 import org.photonvision.targeting.PhotonPipelineResult;
 
+import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.revrobotics.REVLibError;
 import com.revrobotics.spark.SparkBase;
 
+import edu.wpi.first.hal.can.CANStatus;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
@@ -32,6 +42,24 @@ public class HardwareMonitor {
   private static final long MAX_ALLOWABLE_VISION_LATENCY_MILLISECONDS = 60;
   private static final long MAX_ALLOWABLE_VISION_UNSEEN_SECONDS = 5;
   private static int tickCounter = 0;
+
+  // Firmware is only read once per device, the first time it shows up connected.
+  private static final Map<String, String> firmwareCache = new HashMap<>();
+
+  // Problems are logged when they appear, change or clear, so the robot console (and
+  // FRC_UserProgram.log, which ChurroInvestigate downloads) keeps a history. A device that flaps is
+  // logged at most once per interval; its latest state is logged when the interval ends.
+  private static final double MIN_SECONDS_BETWEEN_LOGS = 1.0;
+  private static final double MIN_SECONDS_BETWEEN_CAN_LOGS = 5.0;
+  // CAN controllers count errors up to 255: 96+ is "error warning", 128+ is "error passive".
+  private static final int CAN_ERROR_WARNING_LEVEL = 96;
+  private static final int CAN_ERROR_PASSIVE_LEVEL = 128;
+  private static final Map<String, String> loggedProblems = new HashMap<>();
+  private static final Map<String, Double> lastLogSeconds = new HashMap<>();
+  private static String loggedCanErrorLevel = "ok";
+  private static int loggedBusOffCount = 0;
+  private static int loggedTxFullCount = 0;
+  private static double lastCanLogSeconds = Double.NEGATIVE_INFINITY;
 
   public static void registerHardware(String hardwareName, Object device) {
     if (device == null) {
@@ -65,25 +93,204 @@ public class HardwareMonitor {
       // Nulled hardware objects are automatically faulted
       SmartDashboard.putBoolean("HardwareMonitor/FaultStatus/" + nullHardwareName, false);
     }
-    for (var talon : talonMap.entrySet()) {
-      SmartDashboard.putBoolean("HardwareMonitor/FaultStatus/" + talon.getKey(),
-          // TODO: refactor FaultMonitor method into this class for registerHardware idiom
-          !_hasAnyDisconnectsOrFaults(talon.getValue()));
-    }
     for (var spark : sparkMap.entrySet()) {
       SmartDashboard.putBoolean("HardwareMonitor/FaultStatus/" + spark.getKey(),
           // TODO: refactor FaultMonitor method into this class for registerHardware idiom
           !_hasAnyDisconnectsOrFaults(spark.getValue()));
     }
-    for (var pigeon : pigeonMap.entrySet()) {
-      SmartDashboard.putBoolean("HardwareMonitor/FaultStatus/" + pigeon.getKey(),
-          // TODO: refactor FaultMonitor method into this class for registerHardware idiom
-          !_hasAnyDisconnectsOrFaults(pigeon.getValue()));
-    }
     for (var camera : cameraMap.entrySet()) {
       SmartDashboard.putBoolean("HardwareMonitor/FaultStatus/" + camera.getKey(),
           !_cameraHasFaults(camera.getValue()));
     }
+    _publishDeviceStatus();
+  }
+
+  /** One device's status, published under HardwareMonitor/Devices/<name>/. */
+  private record DeviceStatus(String name, String type, int canId, boolean connected,
+      List<String> faults, List<String> warnings, String firmware) {
+  }
+
+  /**
+   * Publishes every device's type, CAN ID, connection, named faults and firmware under
+   * "HardwareMonitor/Devices/<name>/", plus CAN bus health numbers ("HardwareMonitor/CANBus/*").
+   * Also sets the TalonFX and Pigeon2 FaultStatus lights, so their faults are only read once.
+   */
+  private static void _publishDeviceStatus() {
+    Map<String, DeviceStatus> devices = new TreeMap<>();
+    for (String name : nullHardware) {
+      devices.put(name, new DeviceStatus(name, "unknown", -1, false,
+          List.of("NotCreated"), List.of(), ""));
+    }
+    for (var talon : talonMap.entrySet()) {
+      devices.put(talon.getKey(), _ctreStatus(talon.getKey(), "TalonFX", talon.getValue(),
+          _talonFaults(talon.getValue()), talon.getValue().getVersion()));
+    }
+    for (var pigeon : pigeonMap.entrySet()) {
+      devices.put(pigeon.getKey(), _ctreStatus(pigeon.getKey(), "Pigeon2", pigeon.getValue(),
+          _pigeonFaults(pigeon.getValue()), pigeon.getValue().getVersion()));
+    }
+    for (String name : talonMap.keySet()) {
+      _publishCtreFaultStatus(devices.get(name));
+    }
+    for (String name : pigeonMap.keySet()) {
+      _publishCtreFaultStatus(devices.get(name));
+    }
+    for (var spark : sparkMap.entrySet()) {
+      devices.put(spark.getKey(), _sparkStatus(spark.getKey(), spark.getValue()));
+    }
+    for (var camera : cameraMap.entrySet()) {
+      devices.put(camera.getKey(), new DeviceStatus(camera.getKey(), "PhotonCamera", -1,
+          camera.getValue().isConnected(), List.of(), List.of(), ""));
+    }
+
+    for (DeviceStatus device : devices.values()) {
+      String prefix = "HardwareMonitor/Devices/" + device.name() + "/";
+      SmartDashboard.putString(prefix + "type", device.type());
+      SmartDashboard.putNumber(prefix + "canId", device.canId());
+      SmartDashboard.putBoolean(prefix + "connected", device.connected());
+      SmartDashboard.putStringArray(prefix + "faults", device.faults().toArray(String[]::new));
+      SmartDashboard.putStringArray(prefix + "warnings", device.warnings().toArray(String[]::new));
+      SmartDashboard.putString(prefix + "firmware", device.firmware());
+      _logProblemChanges(device);
+    }
+
+    // Error counts climb when the CAN chain is broken or unterminated.
+    CANStatus can = RobotController.getCANStatus();
+    SmartDashboard.putNumber("HardwareMonitor/CANBus/utilizationPercent", can.percentBusUtilization * 100);
+    SmartDashboard.putNumber("HardwareMonitor/CANBus/busOffCount", can.busOffCount);
+    SmartDashboard.putNumber("HardwareMonitor/CANBus/txFullCount", can.txFullCount);
+    SmartDashboard.putNumber("HardwareMonitor/CANBus/receiveErrorCount", can.receiveErrorCount);
+    SmartDashboard.putNumber("HardwareMonitor/CANBus/transmitErrorCount", can.transmitErrorCount);
+    _logCanBusChanges(can);
+  }
+
+  /** Logs when a device's problem appears, changes or clears. */
+  private static void _logProblemChanges(DeviceStatus device) {
+    String problem;
+    if (!device.connected()) {
+      problem = "DISCONNECTED";
+    } else if (!device.faults().isEmpty() || !device.warnings().isEmpty()) {
+      List<String> issues = new ArrayList<>(device.faults());
+      for (String warning : device.warnings()) {
+        issues.add("warning " + warning);
+      }
+      problem = "faults: " + String.join(", ", issues);
+    } else {
+      problem = "";
+    }
+
+    String logged = loggedProblems.getOrDefault(device.name(), "");
+    double now = Timer.getFPGATimestamp();
+    if (problem.equals(logged)
+        || now - lastLogSeconds.getOrDefault(device.name(), Double.NEGATIVE_INFINITY) < MIN_SECONDS_BETWEEN_LOGS) {
+      return;
+    }
+    loggedProblems.put(device.name(), problem);
+    lastLogSeconds.put(device.name(), now);
+    String label = String.format("[HardwareMonitor %.1fs] %s (%s%s)", now, device.name(), device.type(),
+        device.canId() < 0 ? "" : " CAN " + device.canId());
+    if (problem.isEmpty()) {
+      System.out.println(label + ": OK again (was " + logged + ")");
+    } else {
+      DriverStation.reportWarning(label + ": " + problem, false);
+    }
+  }
+
+  /** Logs bus-off and full-transmit-buffer events, and when CAN error counts cross a level. */
+  private static void _logCanBusChanges(CANStatus can) {
+    int worstErrorCount = Math.max(can.receiveErrorCount, can.transmitErrorCount);
+    String errorLevel = worstErrorCount >= CAN_ERROR_PASSIVE_LEVEL ? "error passive"
+        : worstErrorCount >= CAN_ERROR_WARNING_LEVEL ? "error warning" : "ok";
+    boolean busOff = can.busOffCount > loggedBusOffCount;
+    boolean txFull = can.txFullCount > loggedTxFullCount;
+    double now = Timer.getFPGATimestamp();
+    if ((!busOff && !txFull && errorLevel.equals(loggedCanErrorLevel))
+        || now - lastCanLogSeconds < MIN_SECONDS_BETWEEN_CAN_LOGS) {
+      return;
+    }
+    String message = String.format(
+        "[HardwareMonitor %.1fs] CAN bus %s: rx errors %d, tx errors %d, bus-off +%d, tx-full +%d, %.0f%% used",
+        now, errorLevel, can.receiveErrorCount, can.transmitErrorCount,
+        can.busOffCount - loggedBusOffCount, can.txFullCount - loggedTxFullCount,
+        can.percentBusUtilization * 100);
+    if (errorLevel.equals("ok") && !busOff && !txFull) {
+      System.out.println(message);
+    } else {
+      DriverStation.reportWarning(message, false);
+    }
+    loggedCanErrorLevel = errorLevel;
+    loggedBusOffCount = can.busOffCount;
+    loggedTxFullCount = can.txFullCount;
+    lastCanLogSeconds = now;
+  }
+
+  /** CTRE devices are healthy when connected with no active faults. */
+  private static void _publishCtreFaultStatus(DeviceStatus device) {
+    SmartDashboard.putBoolean("HardwareMonitor/FaultStatus/" + device.name(),
+        device.connected() && device.faults().isEmpty());
+  }
+
+  private static DeviceStatus _ctreStatus(String name, String type, ParentDevice device,
+      List<String> faults, StatusSignal<Integer> versionSignal) {
+    boolean connected = device.isConnected();
+    if (connected && !firmwareCache.containsKey(name)) {
+      int version = versionSignal.getValue();
+      firmwareCache.put(name, ((version >> 24) & 0xff) + "." + ((version >> 16) & 0xff) + "."
+          + ((version >> 8) & 0xff) + "." + (version & 0xff));
+    }
+    return new DeviceStatus(name, type, device.getDeviceID(), connected,
+        connected ? faults : List.of(), List.of(), firmwareCache.getOrDefault(name, ""));
+  }
+
+  private static DeviceStatus _sparkStatus(String name, SparkBase device) {
+    // REVLib has no isConnected(); a read that times out is how SparkUtil spots a missing SPARK.
+    device.getBusVoltage();
+    boolean connected = device.getLastError() == REVLibError.kOk;
+    List<String> faults = new ArrayList<>();
+    List<String> warnings = new ArrayList<>();
+    if (connected) {
+      SparkBase.Faults f = device.getFaults();
+      _addIf(faults, f.other, "Other");
+      _addIf(faults, f.motorType, "MotorType");
+      _addIf(faults, f.sensor, "Sensor");
+      _addIf(faults, f.can, "CAN");
+      _addIf(faults, f.temperature, "Temperature");
+      _addIf(faults, f.gateDriver, "GateDriver");
+      _addIf(faults, f.escEeprom, "EscEeprom");
+      _addIf(faults, f.firmware, "Firmware");
+      SparkBase.Warnings w = device.getWarnings();
+      _addIf(warnings, w.brownout, "Brownout");
+      _addIf(warnings, w.overcurrent, "Overcurrent");
+      _addIf(warnings, w.escEeprom, "EscEeprom");
+      _addIf(warnings, w.extEeprom, "ExtEeprom");
+      _addIf(warnings, w.sensor, "Sensor");
+      _addIf(warnings, w.stall, "Stall");
+      _addIf(warnings, w.hasReset, "HasReset");
+      _addIf(warnings, w.other, "Other");
+      if (!firmwareCache.containsKey(name)) {
+        firmwareCache.put(name, device.getFirmwareString());
+      }
+    }
+    String type = device.getClass().getSimpleName();
+    return new DeviceStatus(name, type, device.getDeviceId(), connected, faults, warnings,
+        firmwareCache.getOrDefault(name, ""));
+  }
+
+  private static void _addIf(List<String> names, boolean active, String name) {
+    if (active) {
+      names.add(name);
+    }
+  }
+
+  /** Names of the active faults in a list of (name, signal) pairs. */
+  private static List<String> _activeFaults(Object... namesAndSignals) {
+    List<String> active = new ArrayList<>();
+    for (int i = 0; i < namesAndSignals.length; i += 2) {
+      if (Boolean.TRUE.equals(((StatusSignal<?>) namesAndSignals[i + 1]).getValue())) {
+        active.add((String) namesAndSignals[i]);
+      }
+    }
+    return active;
   }
 
   private static void _registerPhotonCamera(String hardwareName, PhotonCamera camera) {
@@ -125,33 +332,21 @@ public class HardwareMonitor {
     return !hasConnection || hasHighLatency || longTimeSinceLastPong;
   }
 
-  private static boolean _hasAnyDisconnectsOrFaults(Pigeon2 device) {
-    if (!device.isConnected()) {
-      return true;
-    } else {
-      boolean faultHardware = device.getFault_Hardware().getValue() == true;
-      boolean faultUndervoltage = device.getFault_Undervoltage().getValue() == true;
-      boolean faultBootDuringEnable = device.getFault_BootDuringEnable().getValue() == true;
-      boolean faultUnlicensedFeatureInUse = device.getFault_UnlicensedFeatureInUse().getValue() == true;
-      boolean faultBootupAccelerometer = device.getFault_BootupAccelerometer().getValue() == true;
-      boolean faultBootupGyroscope = device.getFault_BootupGyroscope().getValue() == true;
-      boolean faultBootupMagnetometer = device.getFault_BootupMagnetometer().getValue() == true;
-      boolean faultBootIntoMotion = device.getFault_BootIntoMotion().getValue() == true;
-      boolean faultDataAcquiredLate = device.getFault_DataAcquiredLate().getValue() == true;
-      boolean faultLoopTimeSlow = device.getFault_LoopTimeSlow().getValue() == true;
-      boolean faultSaturatedMagnetometer = device.getFault_SaturatedMagnetometer().getValue() == true;
-      boolean faultSaturatedAccelerometer = device.getFault_SaturatedAccelerometer().getValue() == true;
-      boolean faultSaturatedGyroscope = device.getFault_SaturatedGyroscope().getValue() == true;
-      boolean hasAnyFaults = faultHardware || faultUndervoltage || faultBootDuringEnable
-          || faultUnlicensedFeatureInUse || faultBootupAccelerometer || faultBootupGyroscope
-          || faultBootupMagnetometer || faultBootIntoMotion || faultDataAcquiredLate || faultLoopTimeSlow
-          || faultSaturatedMagnetometer || faultSaturatedAccelerometer || faultSaturatedGyroscope;
-      if (hasAnyFaults) {
-        return true;
-      } else {
-        return false;
-      }
-    }
+  private static List<String> _pigeonFaults(Pigeon2 device) {
+    return _activeFaults(
+        "Hardware", device.getFault_Hardware(),
+        "Undervoltage", device.getFault_Undervoltage(),
+        "BootDuringEnable", device.getFault_BootDuringEnable(),
+        "UnlicensedFeatureInUse", device.getFault_UnlicensedFeatureInUse(),
+        "BootupAccelerometer", device.getFault_BootupAccelerometer(),
+        "BootupGyroscope", device.getFault_BootupGyroscope(),
+        "BootupMagnetometer", device.getFault_BootupMagnetometer(),
+        "BootIntoMotion", device.getFault_BootIntoMotion(),
+        "DataAcquiredLate", device.getFault_DataAcquiredLate(),
+        "LoopTimeSlow", device.getFault_LoopTimeSlow(),
+        "SaturatedMagnetometer", device.getFault_SaturatedMagnetometer(),
+        "SaturatedAccelerometer", device.getFault_SaturatedAccelerometer(),
+        "SaturatedGyroscope", device.getFault_SaturatedGyroscope());
   }
 
   private static boolean _hasAnyDisconnectsOrFaults(SparkBase device) {
@@ -164,48 +359,32 @@ public class HardwareMonitor {
     }
   }
 
-  private static boolean _hasAnyDisconnectsOrFaults(TalonFX device) {
-    if (!device.isConnected()) {
-      return true;
-    } else {
-      boolean faultHardware = device.getFault_Hardware().getValue() == true;
-      boolean faultProcTemp = device.getFault_ProcTemp().getValue() == true;
-      boolean faultDeviceTemp = device.getFault_DeviceTemp().getValue() == true;
-      boolean faultUndervoltage = device.getFault_Undervoltage().getValue() == true;
-      boolean faultBootDuringEnable = device.getFault_BootDuringEnable().getValue() == true;
-      boolean faultUnlicensedFeatureInUse = device.getFault_UnlicensedFeatureInUse().getValue() == true;
-      boolean faultBridgeBrownout = device.getFault_BridgeBrownout().getValue() == true;
-      boolean faultRemoteSensorReset = device.getFault_RemoteSensorReset().getValue() == true;
-      boolean faultMissingDifferentialFX = device.getFault_MissingDifferentialFX().getValue() == true;
-      boolean faultRemoteSensorPosOverflow = device.getFault_RemoteSensorPosOverflow().getValue() == true;
-      boolean faultOverSupplyV = device.getFault_OverSupplyV().getValue() == true;
-      boolean faultUnstableSupplyV = device.getFault_UnstableSupplyV().getValue() == true;
-      boolean faultReverseHardLimit = device.getFault_ReverseHardLimit().getValue() == true;
-      boolean faultForwardHardLimit = device.getFault_ForwardHardLimit().getValue() == true;
-      boolean faultReverseSoftLimit = device.getFault_ReverseSoftLimit().getValue() == true;
-      boolean faultForwardSoftLimit = device.getFault_ForwardSoftLimit().getValue() == true;
-      boolean faultMissingSoftLimitRemote = device.getFault_MissingSoftLimitRemote().getValue() == true;
-      boolean faultMissingHardLimitRemote = device.getFault_MissingHardLimitRemote().getValue() == true;
-      boolean faultRemoteSensorDataInvalid = device.getFault_RemoteSensorDataInvalid().getValue() == true;
-      boolean faultFusedSensorOutOfSync = device.getFault_FusedSensorOutOfSync().getValue() == true;
-      boolean faultStatorCurrLimit = device.getFault_StatorCurrLimit().getValue() == true;
-      boolean faultSupplyCurrLimit = device.getFault_SupplyCurrLimit().getValue() == true;
-      boolean faultUsingFusedCANcoderWhileUnlicensed = device.getFault_UsingFusedCANcoderWhileUnlicensed()
-          .getValue() == true;
-      boolean faultStaticBrakeDisabled = device.getFault_StaticBrakeDisabled().getValue() == true;
-      boolean hasAnyFaults = faultHardware || faultProcTemp || faultDeviceTemp || faultUndervoltage
-          || faultBootDuringEnable || faultUnlicensedFeatureInUse || faultBridgeBrownout || faultRemoteSensorReset
-          || faultMissingDifferentialFX || faultRemoteSensorPosOverflow || faultOverSupplyV || faultUnstableSupplyV
-          || faultReverseHardLimit || faultForwardHardLimit || faultReverseSoftLimit || faultForwardSoftLimit
-          || faultMissingSoftLimitRemote || faultMissingHardLimitRemote || faultRemoteSensorDataInvalid
-          || faultFusedSensorOutOfSync || faultStatorCurrLimit || faultSupplyCurrLimit
-          || faultUsingFusedCANcoderWhileUnlicensed || faultStaticBrakeDisabled;
-      if (hasAnyFaults) {
-        return true;
-      } else {
-        return false;
-      }
-    }
+  private static List<String> _talonFaults(TalonFX device) {
+    return _activeFaults(
+        "Hardware", device.getFault_Hardware(),
+        "ProcTemp", device.getFault_ProcTemp(),
+        "DeviceTemp", device.getFault_DeviceTemp(),
+        "Undervoltage", device.getFault_Undervoltage(),
+        "BootDuringEnable", device.getFault_BootDuringEnable(),
+        "UnlicensedFeatureInUse", device.getFault_UnlicensedFeatureInUse(),
+        "BridgeBrownout", device.getFault_BridgeBrownout(),
+        "RemoteSensorReset", device.getFault_RemoteSensorReset(),
+        "MissingDifferentialFX", device.getFault_MissingDifferentialFX(),
+        "RemoteSensorPosOverflow", device.getFault_RemoteSensorPosOverflow(),
+        "OverSupplyV", device.getFault_OverSupplyV(),
+        "UnstableSupplyV", device.getFault_UnstableSupplyV(),
+        "ReverseHardLimit", device.getFault_ReverseHardLimit(),
+        "ForwardHardLimit", device.getFault_ForwardHardLimit(),
+        "ReverseSoftLimit", device.getFault_ReverseSoftLimit(),
+        "ForwardSoftLimit", device.getFault_ForwardSoftLimit(),
+        "MissingSoftLimitRemote", device.getFault_MissingSoftLimitRemote(),
+        "MissingHardLimitRemote", device.getFault_MissingHardLimitRemote(),
+        "RemoteSensorDataInvalid", device.getFault_RemoteSensorDataInvalid(),
+        "FusedSensorOutOfSync", device.getFault_FusedSensorOutOfSync(),
+        "StatorCurrLimit", device.getFault_StatorCurrLimit(),
+        "SupplyCurrLimit", device.getFault_SupplyCurrLimit(),
+        "UsingFusedCANcoderWhileUnlicensed", device.getFault_UsingFusedCANcoderWhileUnlicensed(),
+        "StaticBrakeDisabled", device.getFault_StaticBrakeDisabled());
   }
 
 }
