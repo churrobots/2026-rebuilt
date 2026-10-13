@@ -38,6 +38,9 @@ const HUB_HEIGHT_METERS = 1.829; // 72 in, game manual (FuelPhysicsSim on main)
 // with the green and red boxes PhotonVision draws around tags.
 const TAG_USED_COLOR = "#22d3ee";
 const TAG_REJECTED_COLOR = "#e879f9";
+// The cards shrink to fit the window. Below this they'd be too small to read, so the page
+// scrolls instead.
+const MIN_FIT_SCALE = 0.4;
 const TAG_SIZE_METERS = 0.1651; // 6.5 in tag; the highlight is drawn a bit bigger
 const CAMERA_NAMES = CAMERAS.map((camera) => camera.name);
 // Sim cameras are 960x720 with an 80° diagonal view, which is about 68° side to side.
@@ -175,6 +178,7 @@ export class CustomDashboard extends HTMLElement {
   /** @param {DashboardCore} core The shared protected core API. */
   #start(core) {
     this.#started = true;
+    this.#startFitToWindow();
     this.#startFieldCard(core);
     this.#startButtonCard(core);
     this.#startIntakeCard(core);
@@ -182,6 +186,59 @@ export class CustomDashboard extends HTMLElement {
     this.#startCameraCard(core);
     this.#startCopyCard(core);
     this.#startAutoCard(core);
+  }
+
+  /**
+   * Shrinks the whole card layout just enough to fit the window, with nothing cut off and
+   * no scrolling. The layout is given a wider "virtual" width and then scaled down, so the
+   * cards can rearrange into more columns instead of just getting tiny.
+   */
+  #startFitToWindow() {
+    const main = this.shadowRoot.querySelector("main");
+    let frame = 0;
+
+    /** Lays the cards out for one scale and reports whether they fit the window. */
+    const fitsAt = (scale, width, height) => {
+      main.style.width = `${width / scale}px`;
+      return main.offsetHeight * scale <= height;
+    };
+    const fit = () => {
+      frame = 0;
+      const width = this.clientWidth;
+      const height = this.clientHeight;
+      if (!width || !height) return;
+      let scale = 1;
+      if (!fitsAt(1, width, height)) {
+        // Binary search for the biggest scale that fits.
+        let low = MIN_FIT_SCALE;
+        let high = 1;
+        for (let i = 0; i < 10; i++) {
+          const middle = (low + high) / 2;
+          if (fitsAt(middle, width, height)) low = middle;
+          else high = middle;
+        }
+        scale = low;
+      }
+      const fits = fitsAt(scale, width, height);
+      main.style.transform = scale < 1 ? `scale(${scale})` : "";
+      // Only if it can't fit even at the smallest readable size (e.g. on a phone).
+      this.style.overflowY = fits ? "hidden" : "auto";
+    };
+    // Refit when the window resizes or a card's contents change size (e.g. camera streams
+    // showing up). Refitting gives the same answer for the same content, so it settles.
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(fit);
+    };
+    const resizeObserver = new ResizeObserver(schedule);
+    resizeObserver.observe(this);
+    main.querySelectorAll(".card").forEach((card) => resizeObserver.observe(card));
+    this.#cleanup.push(() => {
+      resizeObserver.disconnect();
+      cancelAnimationFrame(frame);
+      main.style.width = "";
+      main.style.transform = "";
+    });
+    schedule();
   }
 
   /** Picks the auto to run, shows which one the robot will run, and times auto. */

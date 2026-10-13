@@ -2,6 +2,8 @@
   flex: 1;
   min-height: 0;
   display: block;
+  /* The cards are scaled to fit (see #startFitToWindow), so the page doesn't scroll. */
+  overflow: hidden;
   color: #edf2f7;
   font:
     14px system-ui,
@@ -10,7 +12,7 @@
 
 main {
   box-sizing: border-box;
-  min-height: 100%;
+  transform-origin: top left;
   padding: 24px;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
