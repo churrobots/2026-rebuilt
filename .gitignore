@@ -194,7 +194,7 @@ src/main/java/frc/robot/BuildConstants.java
 # some time to setup and we usually want a common view of simulation
 !sim*
 
-# Robot logs and NetworkTables snapshots from the "Download Robot Debug Info" task
+# Robot logs and NetworkTables snapshots from the "ChurroBots: Download Real Robot Debug Data for Claude" task
 debug/
 
 # Personal Claude Code settings (shared skills in .claude/skills are committed)

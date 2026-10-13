@@ -122,10 +122,9 @@
     // Churrobots: sim plumbing that feeds dashboard controller input to the robot.
     // Stable infrastructure, so keep it out of routine robot code work.
     "src/main/java/frc/robot/sim/": true,
-    // Churrobots: coach-only tools, including the VS Code extension that adds the
-    // Claude/Sim/Dashboard buttons.
+    // Churrobots: coach-only tools behind the "ChurroBots: ..." build tasks (Shift+Cmd+B).
     "tools/": true,
-    // Churrobots: Claude Code settings, and robot logs saved by the ChurroInvestigate button.
+    // Churrobots: Claude Code settings, and robot logs saved by the "ChurroBots: Download Real Robot Debug Data for Claude" task.
     "**/.claude": true,
     "debug/": true,
     // Churrobots: hide junk files

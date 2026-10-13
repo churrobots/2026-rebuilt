@@ -47,7 +47,7 @@ public class HardwareMonitor {
   private static final Map<String, String> firmwareCache = new HashMap<>();
 
   // Problems are logged when they appear, change or clear, so the robot console (and
-  // FRC_UserProgram.log, which ChurroInvestigate downloads) keeps a history. A device that flaps is
+  // FRC_UserProgram.log, which the debug data task downloads) keeps a history. A device that flaps is
   // logged at most once per interval; its latest state is logged when the interval ends.
   private static final double MIN_SECONDS_BETWEEN_LOGS = 1.0;
   private static final double MIN_SECONDS_BETWEEN_CAN_LOGS = 5.0;

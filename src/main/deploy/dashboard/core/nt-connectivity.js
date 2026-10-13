@@ -21,7 +21,7 @@ export class NtConnectivity extends HTMLElement {
     this.shadowRoot.innerHTML = `<link rel="stylesheet" href="core/nt-connectivity.css?v=${version}">
       <p id="sim" role="status" hidden>
         <strong>The simulator isn't running.</strong>
-        In VS Code, click <kbd>ChurroSim</kbd> to start it.
+        In VS Code, run the <kbd>ChurroBots: Develop and Simulate</kbd> build task to start it.
         <small>Just saved a file? Wait a few seconds while it restarts.</small>
       </p>
       <p id="robot" role="status" hidden>

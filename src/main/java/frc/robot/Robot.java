@@ -49,7 +49,7 @@ public class Robot extends LoggedRobot {
   public Robot() {
     // Keep a small log file per run (console output only) in /home/lvuser/logs, or on a USB
     // stick if one is plugged in. FRC_UserProgram.log is wiped at every restart, so without
-    // this a crash loop leaves no record of earlier crashes. ChurroInvestigate downloads these
+    // this a crash loop leaves no record of earlier crashes. the "Download Real Robot Debug Data" task downloads these
     // and pulls out the console text. Started first so startup crashes are captured too.
     DataLogManager.start();
     DataLogManager.logNetworkTables(false);
