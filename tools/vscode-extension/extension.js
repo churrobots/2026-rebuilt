@@ -1,7 +1,7 @@
 const vscode = require("vscode");
 
 const SIM_TASK = "Start Supervised Robot Simulation";
-const DUMP_TASK = "Download Robot Debug Info";
+const INVESTIGATE_TASK = "Download Robot Debug Info";
 const DASHBOARD_URL = "http://localhost:5800";
 const CLAUDE_TERMINAL = "ChurroClaude";
 // Keep in sync with the fill color in icons/*.svg.
@@ -13,7 +13,7 @@ function activate(context) {
     ["churrobots.startClaude", "$(sparkle) ChurroClaude", "Start a sandboxed Claude session (sbx run claude)", startClaude],
     ["churrobots.startSimulator", "$(play) ChurroSim", "Start the robot simulator (restarts on save)", startSimulator],
     ["churrobots.openDashboard", "$(dashboard) ChurroDashboard", `Open the robot dashboard (${DASHBOARD_URL})`, openDashboard],
-    ["churrobots.dumpDebug", "$(cloud-download) ChurroDump", "Save recent robot logs and NetworkTables values to debug/", dumpDebug],
+    ["churrobots.investigate", "$(search) ChurroInvestigate", "Save recent robot logs and NetworkTables values to debug/", investigate],
   ];
   buttons.forEach(([command, text, tooltip, run], index) => {
     context.subscriptions.push(vscode.commands.registerCommand(command, run));
@@ -47,8 +47,8 @@ function startSimulator() {
   return runTask(SIM_TASK, "The robot simulator is already running.");
 }
 
-function dumpDebug() {
-  return runTask(DUMP_TASK, "Already downloading robot debug info.");
+function investigate() {
+  return runTask(INVESTIGATE_TASK, "Already downloading robot debug info.");
 }
 
 async function runTask(name, alreadyRunningMessage) {

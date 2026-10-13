@@ -3,7 +3,7 @@
   "displayName": "Churrobots Robot Buttons",
   "description": "Status bar buttons to start Claude, the robot simulator, the dashboard, and robot debug downloads.",
   "publisher": "churrobots",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "private": true,
   "engines": {
     "vscode": "^1.90.0"
@@ -30,9 +30,9 @@
         "icon": "icons/dashboard.svg"
       },
       {
-        "command": "churrobots.dumpDebug",
-        "title": "ChurroDump",
-        "icon": "icons/dump.svg"
+        "command": "churrobots.investigate",
+        "title": "ChurroInvestigate",
+        "icon": "icons/investigate.svg"
       }
     ],
     "menus": {
@@ -53,7 +53,7 @@
           "when": "churrobots.robotProject"
         },
         {
-          "command": "churrobots.dumpDebug",
+          "command": "churrobots.investigate",
           "group": "navigation@4",
           "when": "churrobots.robotProject"
         }

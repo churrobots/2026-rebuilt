@@ -125,7 +125,7 @@
     // Churrobots: coach-only tools, including the VS Code extension that adds the
     // Claude/Sim/Dashboard buttons.
     "tools/": true,
-    // Churrobots: Claude Code settings, and robot logs saved by the ChurroDump button.
+    // Churrobots: Claude Code settings, and robot logs saved by the ChurroInvestigate button.
     "**/.claude": true,
     "debug/": true,
     // Churrobots: hide junk files
