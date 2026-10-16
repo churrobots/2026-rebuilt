@@ -76,27 +76,9 @@ Your code does not have to match the reference line-for-line. If it works and yo
 
 ---
 
-## Phase 3: Drivetrain on the real robot
+## Phase 3: moved (see below Phase 5)
 
-**Goal:** Everything that worked in sim now works on carpet with the Krakens.
-**Concepts:** C01, C04, C12, C15, C17, C22, C24, C26, C44
-**Reference:** `unleash-the-kraken`: `drive/ModuleIOKraken.java`, `drive/DriveConstants.java` (the Kraken section), `util/PhoenixUtil.java`
-**Zero to Robot:** Step 2 (`frc-game-tools.html`) and Step 4 (`running-test-program.html`)
-
-1. Install the FRC Game Tools (Driver Station) on Windows, plus **Phoenix Tuner X** and the **REV Hardware Client**. Tour the control system hardware on the robot with a coach: roboRIO, radio, PDH, CAN chain, and motor controllers (C01).
-2. Review `DriveConstants` against the new robot: CAN IDs, track width and wheelbase, wheel radius, drive gearing, current limits, and inversions. They start with values from the old robot. Note that `driveGearbox = DCMotor.getKrakenX60(1)` is what makes the simulation model a Kraken. Explain every number and verify it on the real robot. Don't trust it blindly: *where does each value come from?* (C17)
-3. **The IO layer lesson (C12).** Read through `ModuleIOKraken` together. The team wrote it to swap the template's NEO Vortex drive motors for Krakens:
-   - **Drive:** a TalonFX using Phoenix 6: `TalonFXConfiguration` for inversion, brake mode, stator and supply current limits, and `SensorToMechanismRatio` (so the closed loop works in *wheel* rotations). It uses `VelocityVoltage` and `VoltageOut` control requests, and status signals for position and velocity.
-   - **Turn:** a SPARK MAX + absolute encoder, the same as the template.
-   - Compare it with the template's original `ModuleIOSpark` (`git show main:src/main/java/frc/robot/subsystems/drive/ModuleIOSpark.java`). Point out that `Drive.java` didn't have to change at all.
-4. Explain why the Kraken gains are in different units (TalonFX native: volts per wheel rotation/second) and must be re-tuned. Don't just convert them.
-5. 🧑‍🏫 Deploy, with the robot on blocks first (C44). Check the CAN IDs in Phoenix Tuner X and the REV Hardware Client. Set the module zero rotations, check that each module turns and drives the right way, and check the gyro direction (counter-clockwise positive, C04).
-6. 🧑‍🏫 Run the template's wheel radius and feedforward characterization from the auto chooser to find the Kraken kS and kV (C22).
-7. Add a "reset heading" button (reference: `resetPoseFacingAway()` on `main`).
-8. 🧑‍🏫 Test the intake roller from Phase 2 on the real robot: check the CAN ID, spin direction, and current limit. This is the first time its real-hardware IO class runs.
-
-**Dashboard milestone:** The Field card now tracks the *real* robot (connect the dashboard to the robot's address). Add a "module health" row showing each module's measured wheel angle, which makes a mis-zeroed module obvious.
-**Done when:** The robot drives field-relative smoothly on carpet, and the dashboard pose tracks the real movement.
+**Moved:** do this phase after Phase 5 step 3. It now sits right after Phase 5 below.
 
 ---
 
@@ -110,7 +92,7 @@ Your code does not have to match the reference line-for-line. If it works and yo
 2. Add the AdvantageKit `Vision` subsystem with `VisionIOPhotonVisionSim` for the new robot's cameras. Wire it to `drive::addVisionMeasurement`.
 3. Measure and enter each robot-to-camera transform on the new robot (C30). Discuss the old robot's lesson: "all cameras are flipped on this robot."
 4. In sim, drive around and watch accepted vs. rejected vision poses in AdvantageScope. Explain the standard deviations and rejection rules in `Vision.java`.
-5. 🧑‍🏫 Real robot: configure the PhotonVision coprocessor, and check the pose against a tape-measured position on the field.
+5. 🧑‍🏫 Real robot (after Phase 3 step 6 has the coprocessors mounted and streaming): configure the PhotonVision pipelines, and check the pose against a tape-measured position on the field.
 
 **Dashboard milestone:** A "Vision" card showing, per camera: connected, number of tags seen, and whether the last pose was accepted.
 **Done when:** Pushing the robot by hand (or "slipping" it in sim) is corrected by vision within about a second.
@@ -125,11 +107,41 @@ Your code does not have to match the reference line-for-line. If it works and yo
 
 1. Install PathPlanner and configure the robot settings (mass, module config with the Kraken X60, and so on).
 2. Draw a simple "drive out of the starting zone" path and run it in sim.
-3. Pick it from the auto chooser. The template already has one (Phase 3 used it for characterization).
-4. 🧑‍🏫 Test the path on the real field at slow speed first.
+3. Pick it from the auto chooser and run it once in sim. Watch it work on the Field card. (The template's chooser also has the characterization autos that Phase 3 uses.)
+4. 🧑‍🏫 After Phase 3: test the path on the real field at slow speed first.
 
 **Dashboard milestone:** Show the selected auto name and an auto timer. Stretch: draw the planned path on the field view.
-**Done when:** The drive-out path works 3 times in a row in sim.
+**Done when:** The drive-out path runs in sim and you've watched it work. **Next: Phase 3** (real robot).
+
+---
+
+## Phase 3: Drivetrain on the real robot (done after Phase 5)
+
+**When:** After Phase 5 step 3. The robot wasn't ready earlier, so vision and autos were built in sim first (coach reorder, 2026-10-16).
+**Goal:** Everything that worked in sim now works on carpet with the Krakens.
+**Concepts:** C01, C04, C12, C15, C17, C22, C24, C26, C30, C44
+**Reference:** `unleash-the-kraken`: `drive/ModuleIOKraken.java`, `drive/DriveConstants.java` (the Kraken section), `util/PhoenixUtil.java`
+**Zero to Robot:** Step 2 (`frc-game-tools.html`) and Step 4 (`running-test-program.html`)
+
+1. Install the FRC Game Tools (Driver Station) on Windows, plus **Phoenix Tuner X** and the **REV Hardware Client**. Tour the control system hardware on the robot with a coach: roboRIO, radio, PDH, CAN chain, and motor controllers (C01).
+2. **Real CAN IDs from the orange sticky note.** Put the drivetrain's CAN IDs (drive motors, turn motors, gyro) into `DriveConstants`. They start with the old robot's values. One ID on the note is the **spindexer**: we build that in Phase 7, so don't put it in code yet; just write it down in `TUTORIAL_PROGRESS.md`. While you're in `DriveConstants`, go over the other numbers too (track width and wheelbase, wheel radius, drive gearing, current limits, inversions): *where does each value come from?* Note that `driveGearbox = DCMotor.getKrakenX60(1)` is what makes the simulation model a Kraken (C17).
+3. **Check the robot still runs in sim.** CAN IDs don't change the simulation, but a typo can break the build. Drive around on the dashboard like in Phase 0.
+4. **The IO layer lesson (C12).** Read through `ModuleIOKraken` together. The team wrote it to swap the template's NEO Vortex drive motors for Krakens:
+   - **Drive:** a TalonFX using Phoenix 6: `TalonFXConfiguration` for inversion, brake mode, stator and supply current limits, and `SensorToMechanismRatio` (so the closed loop works in *wheel* rotations). It uses `VelocityVoltage` and `VoltageOut` control requests, and status signals for position and velocity.
+   - **Turn:** a SPARK MAX + absolute encoder, the same as the template.
+   - Compare it with the template's original `ModuleIOSpark` (`git show main:src/main/java/frc/robot/subsystems/drive/ModuleIOSpark.java`). Point out that `Drive.java` didn't have to change at all.
+5. 🧑‍🏫 **Bench test on the Throne** (the robot up on blocks, wheels in the air) (C44). Deploy the code. Drive **forward, left, right, and back**, and rotate in place: the wheels should angle into a circle. Check the gyro direction too (counter-clockwise positive, C04). If a module points or spins the wrong way:
+   - First confirm that Electrical calibrated the wheels (module zeros) properly.
+   - If they did, check the turn motor offsets in the code (`frontLeftZeroRotation` and friends in `DriveConstants`).
+   Then pick one of the **characterization autos** from the auto chooser and run it. On the Throne it just spins the wheels in the air, so ignore the numbers: the point is that the chooser and autos work on the real robot.
+6. 🧑‍🏫 **Install vision.** Put the coprocessors in their mounts and power them, and mount the cameras on the base. From the driver station laptop, connect to **both** PhotonVision coprocessors and check that you can see **every** camera stream. (Measuring camera transforms and checking the pose against the tape measure is Phase 4 steps 3 and 5.)
+7. 🧑‍🏫 **On the carpet.** Once everything works on the bench, put the robot on the carpet and drive it around. Make sure basic field-relative driving works and the dashboard pose follows the robot.
+8. 🧑‍🏫 **Drivetrain characterization** on the carpet at Bloomhouse. Follow the AdvantageKit instructions for the template's characterization autos (wheel radius, then feedforward for the Kraken kS and kV) and update the code with the results as instructed (C22). Explain why the Kraken gains are in TalonFX units (volts per wheel rotation/second) and are measured, not converted from the old numbers. **Note:** we'll re-characterize after the superstructure is mounted, because it adds weight (see Phase 13).
+9. Add a "reset heading" button (reference: `resetPoseFacingAway()` on `main`).
+10. 🧑‍🏫 Test the intake roller from Phase 2 on the real robot: check the CAN ID, spin direction, and current limit. This is the first time its real-hardware IO class runs.
+
+**Dashboard milestone:** The Field card now tracks the *real* robot (connect the dashboard to the robot's address). Add a "module health" row showing each module's measured wheel angle, which makes a mis-zeroed module obvious on the Throne.
+**Done when:** The robot drives field-relative smoothly on carpet, the dashboard pose tracks the real movement, both PhotonVision coprocessors show all camera streams, and the characterization values are in the code.
 
 ---
 
@@ -270,6 +282,7 @@ Your code does not have to match the reference line-for-line. If it works and yo
 - Check loop time and the roboRIO resource flags (`HardwareConstants.REDUCE_ROBORIO_RESOURCE_USAGE` on `main`), and explain why they exist.
 - Logging to USB for post-match replay (C14).
 - Driver practice, with feedback turned into code changes.
+- 🧑‍🏫 Re-run the drivetrain characterization (Phase 3 step 8) now that the superstructure is mounted, since its weight changes the numbers.
 
 ---
 

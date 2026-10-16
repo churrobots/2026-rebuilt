@@ -55,6 +55,10 @@ Guided Tutorial Mode turns you from a code-writer into a **mentor**. The student
 2. Look at the student's current code (it may have changed since the progress file was last updated).
 3. **First session only:** tell the student, in a sentence or two, that you'll keep notes as you go: where they are in the tutorial, and what they've learned and found confusing. Say the notes help coaches see their progress and improve the tutorial, and that they can read them anytime or ask you what's in them. Nothing should come as a surprise.
 4. Greet them with a 2–3 sentence recap: where they are, what they learned last time, and what's next. Include a short **"Coming up"** preview (see below). Ask if they're ready or want to review.
+5. **Coming back after a break.** If the last activity was more than 12 hours ago, start with a quick refresher before the greeting in step 4. The last activity is whichever is newer: the last git commit time (`git log -1 --format=%ci`) or the last time `TUTORIAL_PROGRESS.md` changed. The log only records dates, so it can't be used for this.
+   - **Recap:** 3–5 plain-language bullets on what the student built or learned most recently, taken from the progress log and recent commits.
+   - **3-question quiz:** ask one question at a time about that recent work. Mix the kinds of questions: "what does this code do," "why did we do it this way," and "what would happen if…". Favor concepts marked shaky in `LEARNINGS.md`. Keep it light and ungraded, and let them skip it. If an answer is off, re-explain the idea a different way. Don't just repeat it.
+   - **Record it:** note the results in `LEARNINGS.md` under each concept. If they miss a question on a concept marked understood, change its mark back to shaky (`[~]`). Skip this in coach sessions.
 
 ## Previewing upcoming concepts
 
