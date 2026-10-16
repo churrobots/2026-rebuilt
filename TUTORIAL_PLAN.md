@@ -92,7 +92,7 @@ Your code does not have to match the reference line-for-line. If it works and yo
 2. Add the AdvantageKit `Vision` subsystem with `VisionIOPhotonVisionSim` for the new robot's cameras. Wire it to `drive::addVisionMeasurement`.
 3. Measure and enter each robot-to-camera transform on the new robot (C30). Discuss the old robot's lesson: "all cameras are flipped on this robot."
 4. In sim, drive around and watch accepted vs. rejected vision poses in AdvantageScope. Explain the standard deviations and rejection rules in `Vision.java`.
-5. 🧑‍🏫 Real robot (after Phase 3 step 6 has the coprocessors mounted and streaming): configure the PhotonVision pipelines, and check the pose against a tape-measured position on the field.
+5. 🧑‍🏫 Real robot (after Phase 3 step 7 has the coprocessors mounted and streaming): configure the PhotonVision pipelines, and check the pose against a tape-measured position on the field.
 
 **Dashboard milestone:** A "Vision" card showing, per camera: connected, number of tags seen, and whether the last pose was accepted.
 **Done when:** Pushing the robot by hand (or "slipping" it in sim) is corrected by vision within about a second.
@@ -117,37 +117,46 @@ Your code does not have to match the reference line-for-line. If it works and yo
 
 ## Phase 3: Drivetrain on the real robot (done after Phase 5)
 
-**When:** After Phase 5 step 3. The robot wasn't ready earlier, so vision and autos were built in sim first (coach reorder, 2026-10-16).
-**Goal:** Everything that worked in sim now works on carpet with the Krakens.
-**Concepts:** C01, C04, C12, C15, C17, C22, C24, C26, C30, C44
-**Reference:** `unleash-the-kraken`: `drive/ModuleIOKraken.java`, `drive/DriveConstants.java` (the Kraken section), `util/PhoenixUtil.java`
+**When:** After Phase 5 step 3. The robot wasn't ready earlier, so vision and autos were built in sim first (coach reorder, 2026-10-16). The spindexer is built here too, before the bench test, so it can be checked on the Throne along with the drivetrain (coach reorder, 2026-10-16).
+**Goal:** Everything that worked in sim now works on carpet with the Krakens. Along the way, build the spindexer (your second roller) so it's ready for the bench test.
+**Concepts:** C01, C04, C12, C15, C17, C22, C24, C26, C30, C34, C44, C45
+**Reference:** `unleash-the-kraken`: `drive/ModuleIOKraken.java`, `drive/DriveConstants.java` (the Kraken section), `util/PhoenixUtil.java`; spindexer hardware values: `main`: `subsystems/Spindexer.java`, `HardwareConstants.java`, `ControlsConstants.java` (YAMS: take its numbers, not its structure)
 **Zero to Robot:** Step 2 (`frc-game-tools.html`) and Step 4 (`running-test-program.html`)
 
 1. Install the FRC Game Tools (Driver Station) on Windows, plus **Phoenix Tuner X** and the **REV Hardware Client**. Tour the control system hardware on the robot with a coach: roboRIO, radio, PDH, CAN chain, and motor controllers (C01).
-2. **Real CAN IDs from the orange sticky note.** Put the drivetrain's CAN IDs (drive motors, turn motors, gyro) into `DriveConstants`. They start with the old robot's values. One ID on the note is the **spindexer**: we build that in Phase 7, so don't put it in code yet; just write it down in `TUTORIAL_PROGRESS.md`. While you're in `DriveConstants`, go over the other numbers too (track width and wheelbase, wheel radius, drive gearing, current limits, inversions): *where does each value come from?* Note that `driveGearbox = DCMotor.getKrakenX60(1)` is what makes the simulation model a Kraken (C17).
+2. **Real CAN IDs from the orange sticky note.** Put the drivetrain's CAN IDs (drive motors, turn motors, gyro) into `DriveConstants`. They start with the old robot's values. One ID on the note is the **spindexer**: write it down in `TUTORIAL_PROGRESS.md` now, and use it when you build the spindexer in step 5. While you're in `DriveConstants`, go over the other numbers too (track width and wheelbase, wheel radius, drive gearing, current limits, inversions): *where does each value come from?* Note that `driveGearbox = DCMotor.getKrakenX60(1)` is what makes the simulation model a Kraken (C17).
 3. **Check the robot still runs in sim.** CAN IDs don't change the simulation, but a typo can break the build. Drive around on the dashboard like in Phase 0.
 4. **The IO layer lesson (C12).** Read through `ModuleIOKraken` together. The team wrote it to swap the template's NEO Vortex drive motors for Krakens:
    - **Drive:** a TalonFX using Phoenix 6: `TalonFXConfiguration` for inversion, brake mode, stator and supply current limits, and `SensorToMechanismRatio` (so the closed loop works in *wheel* rotations). It uses `VelocityVoltage` and `VoltageOut` control requests, and status signals for position and velocity.
    - **Turn:** a SPARK MAX + absolute encoder, the same as the template.
    - Compare it with the template's original `ModuleIOSpark` (`git show main:src/main/java/frc/robot/subsystems/drive/ModuleIOSpark.java`). Point out that `Drive.java` didn't have to change at all.
-5. 🧑‍🏫 **Bench test on the Throne** (the robot up on blocks, wheels in the air) (C44). Deploy the code. Drive **forward, left, right, and back**, and rotate in place: the wheels should angle into a circle. Check the gyro direction too (counter-clockwise positive, C04). If a module points or spins the wrong way:
+5. **Build the spindexer, in sim first (C34).** The spindexer is the spinning floor of the hopper: it carries game pieces around to the feeder. It's a roller, just like the intake roller, so the **student writes it** using the Phase 2 pattern, climbing the hint ladder instead of copying their intake files.
+   - **Hardware facts first.** On `main` it's a SPARK MAX + NEO, 20:1, inverted, coast, 40 A stator limit (`git show main:src/main/java/frc/robot/subsystems/Spindexer.java`). Use the CAN ID from the sticky note (step 2), and confirm the motor and gearing on the new robot with mechanical. Don't guess. Mark anything unconfirmed `TODO: verify on the Throne`.
+   - **Design on paper:** what's the same as the intake roller, and what's different? (Different motor controller, so a different vendor library in the real IO; much bigger gear reduction, so a much slower output.)
+   - Write `SpindexerIO` (with `@AutoLog` inputs, including position so the dashboard can show it turning), `SpindexerIOSim` (`DCMotorSim`), the real IO (`SpindexerIOSpark` or `SpindexerIOTalonFX`, whichever is on the robot), and `SpindexerConstants` (C12, C15, C16).
+   - Write the `Spindexer` subsystem with a stop default command and open-loop `feed()` (toward the shooter) and `unjam()` (backwards) commands (C07, C09, C18). The student picks unused buttons and binds them in `RobotContainer`. Closed-loop comes in Phase 7.
+   - **C45 discussion:** the spindexer and intake roller IO look almost the same. Could they share one `RollerIO`? What would we gain, and what would get harder? Keep them separate for now unless the student wants to try it.
+   - **Visualize it** (see the dashboard milestone). Before building the card, ask the student what they'd want to see to know it works, and let them design it.
+   - Test in sim: holding the button spins the spindexer on the dashboard, the other button spins it backwards, and letting go stops it.
+6. 🧑‍🏫 **Bench test on the Throne** (the robot up on blocks, wheels in the air) (C44). Deploy the code. Drive **forward, left, right, and back**, and rotate in place: the wheels should angle into a circle. Check the gyro direction too (counter-clockwise positive, C04). If a module points or spins the wrong way:
    - First confirm that Electrical calibrated the wheels (module zeros) properly.
    - If they did, check the turn motor offsets in the code (`frontLeftZeroRotation` and friends in `DriveConstants`).
+   **Also check the spindexer:** it shows up on CAN, `feed()` turns it toward the shooter (flip the inversion in `SpindexerConstants` if not), and the measured speed on the dashboard matches what you see. This is the first time its real-hardware IO class runs.
    Then pick one of the **characterization autos** from the auto chooser and run it. On the Throne it just spins the wheels in the air, so ignore the numbers: the point is that the chooser and autos work on the real robot.
-6. 🧑‍🏫 **Install vision.** Put the coprocessors in their mounts and power them, and mount the cameras on the base. From the driver station laptop, connect to **both** PhotonVision coprocessors and check that you can see **every** camera stream. (Measuring camera transforms and checking the pose against the tape measure is Phase 4 steps 3 and 5.)
-7. 🧑‍🏫 **On the carpet.** Once everything works on the bench, put the robot on the carpet and drive it around. Make sure basic field-relative driving works and the dashboard pose follows the robot.
-8. 🧑‍🏫 **Drivetrain characterization** on the carpet at Bloomhouse. Follow the AdvantageKit instructions for the template's characterization autos (wheel radius, then feedforward for the Kraken kS and kV) and update the code with the results as instructed (C22). Explain why the Kraken gains are in TalonFX units (volts per wheel rotation/second) and are measured, not converted from the old numbers. **Note:** we'll re-characterize after the superstructure is mounted, because it adds weight (see Phase 13).
-9. Add a "reset heading" button (reference: `resetPoseFacingAway()` on `main`).
-10. 🧑‍🏫 Test the intake roller from Phase 2 on the real robot: check the CAN ID, spin direction, and current limit. This is the first time its real-hardware IO class runs.
+7. 🧑‍🏫 **Install vision.** Put the coprocessors in their mounts and power them, and mount the cameras on the base. From the driver station laptop, connect to **both** PhotonVision coprocessors and check that you can see **every** camera stream. (Measuring camera transforms and checking the pose against the tape measure is Phase 4 steps 3 and 5.)
+8. 🧑‍🏫 **On the carpet.** Once everything works on the bench, put the robot on the carpet and drive it around. Make sure basic field-relative driving works and the dashboard pose follows the robot.
+9. 🧑‍🏫 **Drivetrain characterization** on the carpet at Bloomhouse. Follow the AdvantageKit instructions for the template's characterization autos (wheel radius, then feedforward for the Kraken kS and kV) and update the code with the results as instructed (C22). Explain why the Kraken gains are in TalonFX units (volts per wheel rotation/second) and are measured, not converted from the old numbers. **Note:** we'll re-characterize after the superstructure is mounted, because it adds weight (see Phase 13).
+10. Add a "reset heading" button (reference: `resetPoseFacingAway()` on `main`).
+11. 🧑‍🏫 Test the intake roller from Phase 2 on the real robot: check the CAN ID, spin direction, and current limit. This is the first time its real-hardware IO class runs.
 
-**Dashboard milestone:** The Field card now tracks the *real* robot (connect the dashboard to the robot's address). Add a "module health" row showing each module's measured wheel angle, which makes a mis-zeroed module obvious on the Throne.
-**Done when:** The robot drives field-relative smoothly on carpet, the dashboard pose tracks the real movement, both PhotonVision coprocessors show all camera streams, and the characterization values are in the code.
+**Dashboard milestone:** A "Spindexer" card (step 5), designed with the student. Suggested: a top-down disc that turns with the spindexer's **measured** position (so it stops when the motor stops, and lags when it's loaded), with an arrow for direction, plus commanded volts, measured RPM, and a spinning/stopped light. Then the Field card tracks the *real* robot (connect the dashboard to the robot's address). Add a "module health" row showing each module's measured wheel angle, which makes a mis-zeroed module obvious on the Throne.
+**Done when:** The spindexer spins both ways on the dashboard in sim and on the Throne, the robot drives field-relative smoothly on carpet, the dashboard pose tracks the real movement, both PhotonVision coprocessors show all camera streams, and the characterization values are in the code.
 
 ---
 
 ## Phase 6: The intake arm (position control)
 
-**Goal:** An arm that goes to exact angles and holds them against gravity, built as your second IO layer. Then combine it with the roller into one intake action.
+**Goal:** An arm that goes to exact angles and holds them against gravity, built as your third IO layer (after the intake roller and spindexer). Then combine it with the roller into one intake action.
 **Concepts:** C06, C07, C09, C10, C12, C15, C16, C17, C19, C20, C21, C36, C45
 **Reference:** structure: your `IntakeRollerIO` from Phase 2, plus a public AdvantageKit arm example; hardware values: `main`: `subsystems/IntakeArm.java` (YAMS: take its CAN ID, gearing, limits, and starting gains, not its structure); `sandbox-sim`: `subsystems/MechanismVisualizer.java` (AdvantageScope visualization)
 
@@ -182,7 +191,7 @@ Your code does not have to match the reference line-for-line. If it works and yo
 
 1. Build `Shooter` with its own IO layer: `ShooterIO`, `ShooterIOTalonFX` (coast mode, current limit, Phoenix 6 `VelocityVoltage` running on the motor controller), and `ShooterIOSim` (WPILib `FlywheelSim` + a `PIDController`). It's the same split `ModuleIOKraken` / `ModuleIOSim` use for drive velocity. Idle speed is the default command. Explain why coast mode is used (C15).
 2. Tune the flywheel: kV first (the feedforward does most of the work), then P for recovery after each shot (C21, `tuning-flywheel.html`).
-3. Build `Feeder` and `Spindexer` (velocity rollers), each with its own IO layer. Reuse what you learned writing the intake roller. Then go back and switch the intake roller to closed-loop too, by adding a `setVelocity(...)` to its IO (C18).
+3. Build `Feeder` (a velocity roller) with its own IO layer. Reuse what you learned writing the intake roller and spindexer. The `Spindexer` already exists from Phase 3 step 5: switch it and the intake roller to closed-loop too, by adding a `setVelocity(...)` to their IO (C18).
 4. Compose the shoot command: spin up → wait until at speed → feed + index (C10, C37). Discuss why feeding early wastes shots.
 5. Add `MechanismVisualizer` (from `sandbox-sim`) so AdvantageScope shows all the mechanisms moving together: arm, roller, and flywheel (C14).
 
@@ -282,7 +291,7 @@ Your code does not have to match the reference line-for-line. If it works and yo
 - Check loop time and the roboRIO resource flags (`HardwareConstants.REDUCE_ROBORIO_RESOURCE_USAGE` on `main`), and explain why they exist.
 - Logging to USB for post-match replay (C14).
 - Driver practice, with feedback turned into code changes.
-- 🧑‍🏫 Re-run the drivetrain characterization (Phase 3 step 8) now that the superstructure is mounted, since its weight changes the numbers.
+- 🧑‍🏫 Re-run the drivetrain characterization (Phase 3 step 9) now that the superstructure is mounted, since its weight changes the numbers.
 
 ---
 
