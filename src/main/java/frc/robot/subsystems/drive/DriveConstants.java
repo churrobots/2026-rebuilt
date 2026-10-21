@@ -52,15 +52,15 @@ public class DriveConstants {
   // Device CAN IDs
   public static final int pigeonCanId = 9;
 
-  public static final int frontLeftDriveCanId = 7;
-  public static final int backLeftDriveCanId = 8;
-  public static final int frontRightDriveCanId = 6;
-  public static final int backRightDriveCanId = 5;
+  public static final int frontLeftDriveCanId = 10;
+  public static final int backLeftDriveCanId = 2;
+  public static final int frontRightDriveCanId = 8;
+  public static final int backRightDriveCanId = 6;
 
-  public static final int frontLeftTurnCanId = 3;
-  public static final int backLeftTurnCanId = 4;
-  public static final int frontRightTurnCanId = 2;
-  public static final int backRightTurnCanId = 1;
+  public static final int frontLeftTurnCanId = 11;
+  public static final int backLeftTurnCanId = 1;
+  public static final int frontRightTurnCanId = 7;
+  public static final int backRightTurnCanId = 4;
 
   // Drive motor configuration
   // This is how to tune all the values here
@@ -114,7 +114,11 @@ public class DriveConstants {
 
   // Kraken (TalonFX) drive configuration -- used by ModuleIOKraken only.
   // Positive voltage must drive the robot forward; verify on-robot and flip if needed.
-  public static final boolean driveInverted = false;
+  // On the real robot, the right-side wheels drove backwards, so they're inverted.
+  public static final boolean frontLeftDriveInverted = false;
+  public static final boolean frontRightDriveInverted = true;
+  public static final boolean backLeftDriveInverted = false;
+  public static final boolean backRightDriveInverted = true;
   // Supply current limit (stator limit reuses driveMotorCurrentLimit above).
   public static final int driveSupplyCurrentLimit = 60;
   // Slot0 gains in TalonFX NATIVE units. Because Feedback.SensorToMechanismRatio =

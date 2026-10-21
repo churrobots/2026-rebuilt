@@ -111,6 +111,13 @@ public class ModuleIOKraken implements ModuleIO {
 
     // Configure drive motor. The gear reduction is applied in firmware via
     // SensorToMechanismRatio, so position/velocity come out in wheel rotations.
+    boolean driveInverted = switch (module) {
+      case 0 -> frontLeftDriveInverted;
+      case 1 -> frontRightDriveInverted;
+      case 2 -> backLeftDriveInverted;
+      case 3 -> backRightDriveInverted;
+      default -> false;
+    };
     var driveConfig = new TalonFXConfiguration();
     driveConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     driveConfig.MotorOutput.Inverted =

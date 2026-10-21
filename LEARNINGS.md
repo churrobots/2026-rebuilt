@@ -4,7 +4,7 @@ Student: (not given yet)
 ## Concept checklist
 Legend: [ ] not yet · [~] seen, still shaky · [x] understood
 
-- [ ] C01 · The FRC control system
+- [~] C01 · The FRC control system (2026-10-20, Phase 3 step 2)
 - [~] C02 · Robot modes and the 20 ms loop (2026-10-07, Phase 1 step 3)
 - [ ] C03 · Java you'll see in robot code
 - [ ] C04 · Units and coordinates
@@ -35,7 +35,7 @@ Legend: [ ] not yet · [~] seen, still shaky · [x] understood
 - [~] C29 · AprilTags (2026-10-10, Phase 4 step 1)
 - [~] C30 · Camera transforms and pose estimation (2026-10-10, Phase 4 step 4)
 - [ ] C31 · PhotonVision
-- [ ] C32 · PathPlanner and named commands
+- [~] C32 · PathPlanner and named commands (2026-10-20, Phase 5)
 - [ ] C33 · Mechanism state in autonomous
 - [ ] C34 · Rollers and indexers
 - [ ] C35 · Flywheels (velocity control)
@@ -108,6 +108,11 @@ Legend: [ ] not yet · [~] seen, still shaky · [x] understood
 - 2026-10-10 (Phase 4 step 4): Explained with the "asking for directions" analogy. Read the rejectPose rules in Vision.java and picked maxDistance on their own: "our cameras arent so good so i dont think we can see too far so rejecting the ones we cant see might be a smart move." Correct reasoning. Also suggested a different color for tags that are seen but too far to use, which Claude added (dashed yellow rays). Standard deviations ("how much to trust") not covered yet.
 - 2026-10-10: Asked "why do we want to make the distance smaller?" (good question). Changed maxDistance to 15 ft themselves (first code edit they typed in a while!) and saw the result: "it rejects too much, we need a sweet spot!" Found the idea of tuning a trade-off on their own (C21 preview).
 - 2026-10-10: Noticed on their own that poses get rejected near the hub. When asked to check the tag count, they reported "4 tags, 2 slanted, 2 straight on," which disproved Claude's first guess (single-tag ambiguity). Good habit: checking data instead of accepting a guess. Claude added a rejection-reason readout so they can find the real cause.
+### C01 · The FRC control system (CAN IDs)
+- 2026-10-20 (Phase 3 step 2): Explained CAN IDs as house numbers on one street. The student read the IDs off the orange sticky note and typed all 8 drive/turn IDs into DriveConstants **themselves**, all correct on the first try. Hasn't answered the "two motors with the same ID" check question yet.
+- 2026-10-21: Asked "how do CAN IDs work, explain it simply." Re-explained with a classroom analogy (one teacher, students answer only to their own number). Skipped the check question again.
+### C15 · Motors and motor controllers (inversion)
+- 2026-10-21 (Phase 3, real robot): The right-side drive wheels spun backwards. The student asked Claude to flip only the right drive motors and show where in the code. Asked a sharp follow-up: "does it work by taking the forward direction and adding 180 if the inverse flag is found?" Explained that inversion flips the sign of output and sensor inside the TalonFX (not an angle). Their 180° idea is exactly swerve module optimization (turn 180° + reverse speed), so it was connected to `optimize` in Module.java. Good intuition.
 
 ## Tutorial feedback
 - 2026-10-07 (Phase 0): Student wanted to move fast through setup ("skip this," "its already running"). The setup steps could be shorter for students who already have the sim running.

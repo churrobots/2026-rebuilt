@@ -1,5 +1,5 @@
 # Tutorial progress
-Student: (not given yet)   Current phase: 5 – Autonomous, part 1: follow a path   Current step: 3 (run the auto once in sim) → then Phase 3 (real robot)
+Student: (not given yet)   Current phase: 3 – Drivetrain on the real robot (done after Phase 5)   Current step: 5
 
 ## Log
 - 2026-10-07: Started Guided Tutorial Mode. Skipped making a personal branch (step 2) at student's request; still working on `fresh-start`.
@@ -41,6 +41,10 @@ Student: (not given yet)   Current phase: 5 – Autonomous, part 1: follow a pat
 
 - 2026-10-16: Coach reordered the plan. Finish Phase 5 by running "New Auto" once in sim (no need to rename the paths). Then Phase 3 (real robot), which now comes after Phase 5: CAN IDs from the orange sticky note (write down the spindexer's ID here for Phase 7) → check sim still runs → bench test on the Throne (incl. running a characterization auto) → install vision (both PhotonVision coprocessors, all streams) → drive on carpet → characterization at Bloomhouse (re-do after the superstructure is mounted). Phase 5 step 4 (real-field path test) waits until after Phase 3.
 - 2026-10-16: Coach reordered again: the **spindexer** is now built in Phase 3 step 5, after the CAN IDs and the ModuleIOKraken read-through and **before** the Throne bench test. The student writes it (same IO pattern as the intake roller) and Claude builds a "Spindexer" dashboard card they design together; it gets checked on the Throne in step 6. Phase 7 now only adds the Feeder and switches the spindexer/intake to closed-loop.
+- 2026-10-20: New session. Resuming at Phase 5 step 3 (run "New Auto" once in sim), then Phase 3 in its new order.
+- 2026-10-20: Ran "New Auto" in sim and it finished the whole path. **Phase 5 sim work done** (step 4, the real-field test, waits until after Phase 3). Starting Phase 3.
+- 2026-10-20: Phase 3 step 2: CAN IDs from the orange sticky note (so far): 1 = back left turn, 2 = back left drive, **3 = spindexer**, 4 = back right turn, 5 = PDH, 6 = back right drive, 7 = front right turn. Then: 8 = front right drive, 9 = Pigeon, 10 = front left drive, 11 = front left turn. Intake roller isn't on the note (code still uses 20 from 2026, so verify in Phase 3 step 11). Left a `👉 YOUR TURN` marker in DriveConstants. The student typed all 8 motor IDs themselves, and all are correct. Step 3: the sim still drives fine after the CAN ID change.
+- 2026-10-21: Real-robot drive test (with coach): the left wheels drove the right way and the right wheels drove backwards. At the student's request, replaced the single `driveInverted` with per-module `frontLeft/frontRight/backLeft/backRightDriveInverted` in DriveConstants (right side = true), picked per module in ModuleIOKraken (same switch pattern as the CAN IDs). Turn motors unchanged. Not yet re-tested on the robot. Note: a module zeroed 180° off would look the same, so the plan's "check Electrical calibrated the module zeros" still applies.
 
 ## Backlog
 - **Far tags spoil multi-tag poses.** Student's idea: drop just the far tags. Options: (1) a PhotonVision pipeline filter (min tag area or distance), if our version has one; mirror it in sim with `PhotonCameraSim.setMaxSightRange` / `setMinTargetAreaPixels` and save the PhotonVision settings in the repo; or (2) in `VisionIOPhotonVision`, filter targets by distance and re-solve with `VisionEstimation.estimateCamPosePNP` (API not verified offline). Check PhotonVision settings with a coach first.
