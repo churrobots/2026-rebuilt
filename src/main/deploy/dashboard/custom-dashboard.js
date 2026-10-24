@@ -23,10 +23,10 @@ const INTAKE = { centerX: 0.58, width: 0.8, depth: 0.29 };
 // Copied from robotToCamera* in VisionConstants.java, so keep them in sync.
 // All 4 are mounted upside down (roll 180°) and tilted up (negative pitch).
 const CAMERAS = [
-  { name: "Front right", ntName: "camera_frontright", x: 0.022, y: -0.330, z: 0.429, rollDeg: 180, pitchDeg: -15, yawDeg: -43 },
-  { name: "Back right", ntName: "camera_backright", x: -0.302, y: -0.276, z: 0.425, rollDeg: 180, pitchDeg: -15, yawDeg: -150 },
-  { name: "Front left", ntName: "camera_frontleft", x: 0.022, y: 0.330, z: 0.429, rollDeg: 180, pitchDeg: -15, yawDeg: 43 },
-  { name: "Back left", ntName: "camera_backleft", x: -0.302, y: 0.308, z: 0.254, rollDeg: 180, pitchDeg: -18, yawDeg: 150 },
+  { name: "Front right", ntName: "camera_frontright", x: -0.003, y: -0.330, z: 0.365, rollDeg: 180, pitchDeg: -15, yawDeg: -43 },
+  { name: "Back right", ntName: "camera_backright", x: -0.302, y: -0.276, z: 0.362, rollDeg: 180, pitchDeg: -15, yawDeg: -150 },
+  { name: "Front left", ntName: "camera_frontleft", x: -0.003, y: 0.330, z: 0.365, rollDeg: 180, pitchDeg: -15, yawDeg: 43 },
+  { name: "Back left", ntName: "camera_backleft", x: -0.302, y: 0.308, z: 0.191, rollDeg: 180, pitchDeg: -18, yawDeg: 150 },
 ];
 // Sim camera image: 960x720 with an 80° diagonal view (VisionIOPhotonVisionSim.java).
 const CAMERA_IMAGE = { width: 960, height: 720, diagonalFovDeg: 80 };

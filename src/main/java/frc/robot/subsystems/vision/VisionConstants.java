@@ -33,12 +33,16 @@ public class VisionConstants {
   public static String cameraBackLeft = "camera_backleft";
 
   // Robot to camera transforms
-  // TODO: verify on the new robot. Students say it has the same 4 cameras in
-  // the same places as the 2026 robot, so these are the 2026 values for now.
+  // New robot = the 2026 robot's camera spots, but every camera is 2.5 in lower
+  // and the two front cameras are 1 in farther back (students, 2026-10-24).
+  // Written as "2026 value - change" so you can see both.
+  // TODO: verify on the new robot with a tape measure (Phase 4 step 3).
+  private static final double CAMERA_LOWER_INCHES = 2.5;
+  private static final double FRONT_CAMERA_BACK_INCHES = 1.0;
   // (Not used by Limelight, configure in web UI instead)
   public static Transform3d robotToCameraFrontRight = new Transform3d(
-      Units.inchesToMeters(0.875), Units.inchesToMeters(-13),
-      Units.inchesToMeters(16.875),
+      Units.inchesToMeters(0.875 - FRONT_CAMERA_BACK_INCHES), Units.inchesToMeters(-13),
+      Units.inchesToMeters(16.875 - CAMERA_LOWER_INCHES),
       new Rotation3d(
           Math.PI,
           Units.degreesToRadians(-15),
@@ -47,7 +51,7 @@ public class VisionConstants {
 
   public static Transform3d robotToCameraBackRight = new Transform3d(
       Units.inchesToMeters(-11.875), Units.inchesToMeters(-10.875),
-      Units.inchesToMeters(16.75),
+      Units.inchesToMeters(16.75 - CAMERA_LOWER_INCHES),
       new Rotation3d(
           Math.PI, // camera is upside down
           Units.degreesToRadians(-15), // pitched back
@@ -55,8 +59,8 @@ public class VisionConstants {
       ));
 
   public static Transform3d robotToCameraFrontLeft = new Transform3d(
-      Units.inchesToMeters(0.875), Units.inchesToMeters(13), Units.inchesToMeters(
-          16.875),
+      Units.inchesToMeters(0.875 - FRONT_CAMERA_BACK_INCHES), Units.inchesToMeters(13),
+      Units.inchesToMeters(16.875 - CAMERA_LOWER_INCHES),
       new Rotation3d(
           Math.PI,
           Units.degreesToRadians(-15),
@@ -65,7 +69,7 @@ public class VisionConstants {
 
   public static Transform3d robotToCameraBackLeft = new Transform3d(
       Units.inchesToMeters(-11.875), Units.inchesToMeters(12.125),
-      Units.inchesToMeters(10),
+      Units.inchesToMeters(10 - CAMERA_LOWER_INCHES),
       new Rotation3d(
           Math.PI, // camera is upside down
           Units.degreesToRadians(-18), // pitched back
