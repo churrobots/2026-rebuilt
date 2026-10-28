@@ -151,6 +151,21 @@ export class CustomDashboard extends HTMLElement {
               <div><p class="eyebrow">Held (whileTrue)</p><output class="status-light b-held">NOT HELD</output></div>
             </div>
           </section>
+          <section class="card" aria-labelledby="aim-math-heading">
+            <div class="card-heading">
+              <div><p class="eyebrow">Debug</p><h1 id="aim-math-heading">Debug: Aim math</h1></div>
+            </div>
+            <p class="eyebrow">Robot → blue hub</p>
+            <output class="aim-math-positions">Waiting for pose…</output>
+            <div class="stat-row">
+              <div><p class="eyebrow">dx (m)</p><output class="big-number aim-math-dx">—</output></div>
+              <div><p class="eyebrow">dy (m)</p><output class="big-number aim-math-dy">—</output></div>
+            </div>
+            <div class="stat-row">
+              <div><p class="eyebrow">Distance (m)</p><output class="big-number aim-math-distance">—</output></div>
+              <div><p class="eyebrow">atan2 angle</p><output class="big-number aim-math-angle">—</output></div>
+            </div>
+          </section>
         </main>`;
     }
     if (this.#core && !this.#started) this.#start(this.#core);
@@ -186,6 +201,7 @@ export class CustomDashboard extends HTMLElement {
     this.#startCameraCard(core);
     this.#startCopyCard(core);
     this.#startAutoCard(core);
+    this.#startAimMathCard(core);
   }
 
   /**
@@ -512,6 +528,46 @@ export class CustomDashboard extends HTMLElement {
     /** @param {CustomEvent<DashboardTopic>} event */
     const topicListener = ({ detail: topic }) => {
       if ([ROLLER_VOLTS_TOPIC, ROLLER_VELOCITY_TOPIC].includes(topic.name)) render();
+    };
+    core.addEventListener("topic", topicListener);
+    this.#cleanup.push(() => core.removeEventListener("topic", topicListener));
+    render();
+  }
+
+  /**
+   * Debug (temporary, auto-aim side track step 2): the trig from the robot to the blue hub,
+   * worked out here from the pose so the student can check their paper predictions.
+   * Remove once AimHelper logs these numbers from the robot (step 5).
+   */
+  #startAimMathCard(core) {
+    const root = this.shadowRoot;
+    const positionsText = root.querySelector(".aim-math-positions");
+    const dxText = root.querySelector(".aim-math-dx");
+    const dyText = root.querySelector(".aim-math-dy");
+    const distanceText = root.querySelector(".aim-math-distance");
+    const angleText = root.querySelector(".aim-math-angle");
+
+    const render = () => {
+      const pose = decodePose2d(core.getTopic(POSE_TOPIC)?.value);
+      // The blue hub is the first box in Field/Hubs: [minX, minY, maxX, maxY].
+      const hubBox = toNumbers(core.getTopic(HUBS_TOPIC)?.value);
+      if (!pose || hubBox.length < 4) return;
+      const hubX = (hubBox[0] + hubBox[2]) / 2;
+      const hubY = (hubBox[1] + hubBox[3]) / 2;
+      const dx = hubX - pose.x;
+      const dy = hubY - pose.y;
+      const angleDeg = (Math.atan2(dy, dx) * 180) / Math.PI;
+      positionsText.textContent =
+        `Robot (${pose.x.toFixed(2)}, ${pose.y.toFixed(2)})  →  hub (${hubX.toFixed(2)}, ${hubY.toFixed(2)})`;
+      dxText.textContent = dx.toFixed(2);
+      dyText.textContent = dy.toFixed(2);
+      distanceText.textContent = Math.hypot(dx, dy).toFixed(2);
+      angleText.textContent = `${angleDeg.toFixed(1)}°`;
+    };
+
+    /** @param {CustomEvent<DashboardTopic>} event */
+    const topicListener = ({ detail: topic }) => {
+      if ([POSE_TOPIC, HUBS_TOPIC].includes(topic.name)) render();
     };
     core.addEventListener("topic", topicListener);
     this.#cleanup.push(() => core.removeEventListener("topic", topicListener));

@@ -42,10 +42,10 @@ Legend: [ ] not yet · [~] seen, still shaky · [x] understood
 - [ ] C36 · Arms and elevators (position control)
 - [ ] C37 · Superstructure coordination
 - [ ] C46 · Turrets
-- [ ] C38 · Heading lock and auto-aim
+- [~] C38 · Heading lock and auto-aim (2026-10-28, side track step 1)
 - [ ] C39 · Lookup tables and interpolation
 - [ ] C40 · Shoot on the move
-- [ ] C47 · Trigonometry for aiming
+- [x] C47 · Trigonometry for aiming (2026-10-28, side track step 2)
 - [ ] C48 · Choosing a shot: shooting vs. passing
 - [~] C41 · Simulation (2026-10-07, Phase 0 step 3)
 - [~] C42 · NetworkTables and dashboards (2026-10-07, Phase 0 step 5)
@@ -115,6 +115,12 @@ Legend: [ ] not yet · [~] seen, still shaky · [x] understood
 - 2026-10-21: Asked "how do CAN IDs work, explain it simply." Re-explained with a classroom analogy (one teacher, students answer only to their own number). Skipped the check question again.
 ### C15 · Motors and motor controllers (inversion)
 - 2026-10-21 (Phase 3, real robot): The right-side drive wheels spun backwards. The student asked Claude to flip only the right drive motors and show where in the code. Asked a sharp follow-up: "does it work by taking the forward direction and adding 180 if the inverse flag is found?" Explained that inversion flips the sign of output and sensor inside the TalonFX (not an angle). Their 180° idea is exactly swerve module optimization (turn 180° + reverse speed), so it was connected to `optimize` in Module.java. Good intuition.
+
+### C38 · Heading lock and auto-aim
+- 2026-10-28 (Auto-aim side track step 1): Seen. Asked what the driver gives up with heading lock vs. a turret. Student answered right away: "independent mobility and the ability to dodge attacks." The rear-shooter +180° part isn't covered yet (step 4).
+
+### C47 · Trigonometry for aiming
+- 2026-10-28 (Auto-aim side track step 2, on paper): Robot (2, 6) → hub (4.60, 4.035): got the distance right on their own ("about 3.26"). Predicted the angle as "-45 about ish" (correct sign, real answer −37°). For the robot-past-the-hub case (7, 6), they got "around 26" from atan(dy/dx) instead of 39°, probably a calculator slip; after the walk-through they explained the atan trap in their own words: "it's not accurate for |theta|>90, it will return 180 at fault." Counts as understood. Then predicted 3 spots before driving: A (2.0, 4.035) → 0°, B (4.6, 7.0) → −90°, C (1.0, 1.0) → 40°. All correct (C is really 40.1°). Drove to all three in sim and the Debug: Aim math card matched ("its correct").
 
 ## Tutorial feedback
 - 2026-10-07 (Phase 0): Student wanted to move fast through setup ("skip this," "its already running"). The setup steps could be shorter for students who already have the sim running.

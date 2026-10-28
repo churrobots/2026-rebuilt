@@ -1,5 +1,5 @@
 # Tutorial progress
-Student: (not given yet)   Current phase: Side track – Auto-aim without the turret   Current step: 1
+Student: (not given yet)   Current phase: Side track – Auto-aim without the turret   Current step: 3
 (Phase 3 paused at step 5: the spindexer is being finished by another student. Come back for steps 6–11.)
 
 ## Log
@@ -47,6 +47,9 @@ Student: (not given yet)   Current phase: Side track – Auto-aim without the tu
 - 2026-10-20: Phase 3 step 2: CAN IDs from the orange sticky note (so far): 1 = back left turn, 2 = back left drive, **3 = spindexer**, 4 = back right turn, 5 = PDH, 6 = back right drive, 7 = front right turn. Then: 8 = front right drive, 9 = Pigeon, 10 = front left drive, 11 = front left turn. Intake roller isn't on the note (code still uses 20 from 2026, so verify in Phase 3 step 11). Left a `👉 YOUR TURN` marker in DriveConstants. The student typed all 8 motor IDs themselves, and all are correct. Step 3: the sim still drives fine after the CAN ID change.
 - 2026-10-21: Real-robot drive test (with coach): the left wheels drove the right way and the right wheels drove backwards. At the student's request, replaced the single `driveInverted` with per-module `frontLeft/frontRight/backLeft/backRightDriveInverted` in DriveConstants (right side = true), picked per module in ModuleIOKraken (same switch pattern as the CAN IDs). Turn motors unchanged. Not yet re-tested on the robot. Note: a module zeroed 180° off would look the same, so the plan's "check Electrical calibrated the module zeros" still applies.
 - 2026-10-28: Coach added a new **side track: auto-aim without the turret** (heading lock, like the 2026 robot) to the plan. It covers trig for aiming (new C47), the shooter facing out the **back** (ask the student, don't tell them), shooting vs. passing (new C48), and the velocity calibration table (C39, after Phase 7). The coach moved this student onto the side track now, on branch `madtown-autoaim`. **Someone else will finish the spindexer** (Phase 3 step 5). This student comes back to Phase 3 steps 6–11 afterward.
+- 2026-10-28: Side track step 1 done: discussed heading lock vs. turret (student: heading lock costs "independent mobility and the ability to dodge attacks"). Starting step 2 (trig on paper).
+- 2026-10-28: Step 2 on paper done (distance, atan vs. atan2). Claude added a temporary "Debug: Aim math" dashboard card (dx, dy, distance, atan2 angle to the blue hub, computed in JS from the pose and `Field/Hubs`). **Remove it once AimHelper logs these from the robot (step 5).** Next: predict spots A (2.0, 4.035), B (4.6, 7.0), C (1.0, 1.0) and check them in sim.
+- 2026-10-28: Step 2 done: predicted A 0°, B −90°, C 40° and confirmed all three in sim. Starting step 3 (the right hub for our alliance, C04).
 
 ## Backlog
 - **Far tags spoil multi-tag poses.** Student's idea: drop just the far tags. Options: (1) a PhotonVision pipeline filter (min tag area or distance), if our version has one; mirror it in sim with `PhotonCameraSim.setMaxSightRange` / `setMinTargetAreaPixels` and save the PhotonVision settings in the repo; or (2) in `VisionIOPhotonVision`, filter targets by distance and re-solve with `VisionEstimation.estimateCamPosePNP` (API not verified offline). Check PhotonVision settings with a coach first.
