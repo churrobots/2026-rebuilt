@@ -1,5 +1,7 @@
 package frc.robot.sim;
 
+import static frc.robot.FieldConstants.BLUE_HUB_CENTER;
+import static frc.robot.FieldConstants.RED_HUB_CENTER;
 import static frc.robot.subsystems.vision.VisionConstants.aprilTagLayout;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -21,8 +23,6 @@ public class FieldBoundaries {
 
   // Hubs from the game manual (FuelPhysicsSim on main): a 47 in square base.
   private static final double HUB_SIDE = Units.inchesToMeters(47);
-  private static final Translation2d BLUE_HUB_CENTER = new Translation2d(4.5974, 4.035);
-  private static final Translation2d RED_HUB_CENTER = new Translation2d(11.938, 4.035);
 
   private final double fieldLength = aprilTagLayout.getFieldLength();
   private final double fieldWidth = aprilTagLayout.getFieldWidth();

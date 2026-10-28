@@ -7,7 +7,7 @@ Legend: [ ] not yet · [~] seen, still shaky · [x] understood
 - [~] C01 · The FRC control system (2026-10-20, Phase 3 step 2)
 - [~] C02 · Robot modes and the 20 ms loop (2026-10-07, Phase 1 step 3)
 - [ ] C03 · Java you'll see in robot code
-- [ ] C04 · Units and coordinates
+- [~] C04 · Units and coordinates (2026-10-28, side track step 3)
 - [~] C05 · Git and branches (2026-10-07, Phase 0 step 8)
 - [ ] C06 · Subsystems
 - [~] C07 · Commands and requirements (2026-10-07, Phase 1 step 1)
@@ -122,6 +122,9 @@ Legend: [ ] not yet · [~] seen, still shaky · [x] understood
 ### C47 · Trigonometry for aiming
 - 2026-10-28 (Auto-aim side track step 2, on paper): Robot (2, 6) → hub (4.60, 4.035): got the distance right on their own ("about 3.26"). Predicted the angle as "-45 about ish" (correct sign, real answer −37°). For the robot-past-the-hub case (7, 6), they got "around 26" from atan(dy/dx) instead of 39°, probably a calculator slip; after the walk-through they explained the atan trap in their own words: "it's not accurate for |theta|>90, it will return 180 at fault." Counts as understood. Then predicted 3 spots before driving: A (2.0, 4.035) → 0°, B (4.6, 7.0) → −90°, C (1.0, 1.0) → 40°. All correct (C is really 40.1°). Drove to all three in sim and the Debug: Aim math card matched ("its correct").
 
+### C04 · Units and coordinates
+- 2026-10-28 (Auto-aim side track step 3): Seen. Explained that the origin is always at the blue wall, so the red hub's x = fieldLength − blueHubX. Student skipped the question ("next step?"), so understanding isn't checked yet. Come back to it in step 5 (red-alliance JUnit case).
+
 ## Tutorial feedback
 - 2026-10-07 (Phase 0): Student wanted to move fast through setup ("skip this," "its already running"). The setup steps could be shorter for students who already have the sim running.
 - 2026-10-07 (Phase 0 step 7): Coach direction: students should focus on Java. Claude writes the dashboard JS from now on (the student still picks what to show). Consider changing Phase 0 step 7 and the dashboard milestones in the plan to match.
@@ -131,3 +134,4 @@ Legend: [ ] not yet · [~] seen, still shaky · [x] understood
 - 2026-10-10 (Phase 2 step 7): Students asked Claude to "humanize" and "code switch": "we are not pros so we dont understand everything." Claude's messages had gotten too long and full of jargon (tables, line numbers, terms like stator/open-loop without explanation). Switched to a shorter, casual, plain-English style.
 - 2026-10-10: Even a one-line exercise with all the pieces given got "write it for us." The students may need a stronger nudge, or a coach's expectation, to type code themselves. Consider asking them to type Claude's line by hand, or to predict before Claude writes.
 - 2026-10-10 (Phase 5): A real debugging session. Students noticed the auto restarting. Claude's hypothesis (heartbeat timeout disables the robot) was tested with a dashboard counter before changing any code, and confirmed (19 restarts). This was a good live example of "measure first, then fix." Next: change one variable at a time (camera streams off). → A coach found the real cause: a second open dashboard was sending "disabled." Claude's guess about *why* was wrong. Worth telling students: the counter proved *what* happened, and the *why* still needed more digging.
+- 2026-10-28 (Auto-aim side track step 4): A coach asked Claude to "ask less questions and get into implementation." Steps 1–4 had a lot of back-and-forth before any code, and the student had started skipping questions ("next step?"). Consider trimming the ask-don't-tell questions in steps 3–4 to one each, and reaching code (AimHelper) sooner.

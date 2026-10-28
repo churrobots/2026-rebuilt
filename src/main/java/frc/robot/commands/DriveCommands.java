@@ -19,18 +19,19 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveConstants;
+import frc.robot.util.AimHelper;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 
 public class DriveCommands {
   private static final double DEADBAND = 0.1;
@@ -129,9 +130,16 @@ public class DriveCommands {
               ySupplier.getAsDouble());
 
           // Calculate angular speed
+          Rotation2d targetHeading = rotationSupplier.get();
           double omega = angleController.calculate(
-              drive.getRotation().getRadians(), rotationSupplier.get().getRadians());
-          SmartDashboard.putBoolean("aimLocked", angleController.atGoal());
+              drive.getRotation().getRadians(), targetHeading.getRadians());
+
+          // Locked = the robot is really facing the target (not just following the profile).
+          double headingError = targetHeading.minus(drive.getRotation()).getRadians();
+          Logger.recordOutput("Aim/TargetHeadingDeg", targetHeading.getDegrees());
+          Logger.recordOutput("Aim/ActualHeadingDeg", drive.getRotation().getDegrees());
+          Logger.recordOutput(
+              "Aim/Locked", Math.abs(headingError) < ALLOWABLE_ERROR_MARGIN_FOR_AIMING);
 
           // Convert to field relative speeds & send command
           ChassisSpeeds speeds = new ChassisSpeeds(
@@ -149,10 +157,10 @@ public class DriveCommands {
           double error = angleController.getPositionError();
           boolean closeEnough = Math.abs(error) < ALLOWABLE_ERROR_MARGIN_FOR_AIMING;
           if (wantsXLock && closeEnough) {
-            SmartDashboard.putBoolean("AIM_LOCK", true);
+            Logger.recordOutput("Aim/XLocked", true);
             drive.stopWithX();
           } else {
-            SmartDashboard.putBoolean("AIM_LOCK", false);
+            Logger.recordOutput("Aim/XLocked", false);
             drive.runVelocity(
                 ChassisSpeeds.fromFieldRelativeSpeeds(
                     speeds,
@@ -167,11 +175,31 @@ public class DriveCommands {
         .beforeStarting(
             () -> {
               angleController.reset(drive.getRotation().getRadians());
-              SmartDashboard.putBoolean("aimLocked", false);
+              Logger.recordOutput("Aim/Locked", false);
             })
 
         // Commands may be cancelled before another drive command gets a chance to publish.
-        .finallyDo(() -> SmartDashboard.putBoolean("aimLocked", false));
+        .finallyDo(() -> Logger.recordOutput("Aim/Locked", false));
+  }
+
+  /**
+   * Hold-to-aim: the driver still drives with the left stick, and the robot turns its back
+   * (the shooter) toward our hub. The math lives in AimHelper.
+   */
+  public static Command aimAtHub(Drive drive, DoubleSupplier xSupplier, DoubleSupplier ySupplier) {
+    return joystickDriveAtAngle(
+            drive,
+            xSupplier,
+            ySupplier,
+            () -> {
+              Alliance alliance = DriverStation.getAlliance().orElse(Alliance.Blue);
+              Pose2d pose = drive.getPose();
+              Logger.recordOutput("Aim/DistanceMeters", AimHelper.distanceToHub(pose, alliance));
+              return AimHelper.shootHeading(pose, alliance);
+            },
+            () -> false)
+        .beforeStarting(() -> Logger.recordOutput("Aim/Active", true))
+        .finallyDo(() -> Logger.recordOutput("Aim/Active", false));
   }
 
   /**

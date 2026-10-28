@@ -167,6 +167,13 @@ public class RobotContainer {
                 () -> Rotation2d.kZero,
                 () -> false));
 
+    // Auto-aim: hold right bumper to keep driving while the robot turns its back to our hub
+    controller
+        .rightBumper()
+        .whileTrue(
+            DriveCommands.aimAtHub(
+                drive, () -> -controller.getLeftY(), () -> -controller.getLeftX()));
+
     // Switch to X pattern when X button is pressed
     controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
