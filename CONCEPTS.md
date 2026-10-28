@@ -307,12 +307,43 @@ Good feedforward does most of the work, and PID just cleans up the rest.
 - **Heading lock** (2026 competition robot): the driver controls where the robot *moves*, and a PID controller turns the *whole robot* to face the target.
 - **Turret aim** (new robot): the turret points at the target (C46), and the driver keeps full control of rotation. Heading lock is still useful as a backup when the target is outside the turret's range, and for fixed angles like driving over the bump.
 
+
+**Which side shoots?** The heading you lock to is the direction the robot's *front* (the intake side, heading 0°) points. If the shooter faces out the back, as on the new robot, the heading you need is the angle to the target **+ 180°**.
+
 **In our robot:** `DriveCommands.joystickDriveAtAngle(...)`, `SemiAutoHelper.getFullAutoDriveAngle(...)`, `RobotContainer.driveWithAutoAim()`; `Churret.aimAtHub(...)` on `churret`
+**Check yourself:** The hub is at a field angle of 30° from the robot, and the shooter faces out the back. What heading should the robot turn to?
 
 ### C39 · Lookup tables and interpolation
 **Level:** Deeper
-**The idea:** Physics models of shots are hard, so teams *measure*: "at 100 inches, 2900 RPM scores." They save those pairs in a table, and **interpolation** fills in the gaps (at 105 inches, use about 2925 RPM).
-**In our robot:** `InterpolatingDoubleTreeMap lookupDistanceInInchesToRPM` in `SemiAutoHelper.java`
+**The idea:** Physics models of shots are hard, so teams *measure*: "at 100 inches, 2900 RPM scores." They save those pairs in a table, and **interpolation** fills in the gaps (at 105 inches, use about 2925 RPM). Building the table is called **calibration**:
+- Put the robot at measured spots across the shooting range.
+- Turn a live RPM knob on the dashboard until shots score reliably.
+- Record the robot's *own* measured distance next to the RPM that worked (the middle of the range that scores).
+
+Outside the table's range, the lookup just holds the end value. Re-calibrate when the shooter changes (new wheels, worn balls, a different angle).
+**In our robot:** `InterpolatingDoubleTreeMap lookupDistanceInInchesToRPM` and `lookupDistanceInInchesToPassingRPM` in `SemiAutoHelper.java`; the live `SHOOTER_BOOST` knob from `util/TunableNumber.java`
+**Check yourself:** Your table has 100" → 2900 RPM and 120" → 3100 RPM. What RPM does the robot use at 110"? At 150"? Why should the table store the distance the *robot* measured, not the tape measure's?
+
+### C47 · Trigonometry for aiming
+**Level:** Core
+**The idea:** To aim, subtract the robot's position from the target's position to get an arrow (`dx`, `dy`) from the robot to the target.
+- **How far?** Use the Pythagorean theorem: `distance = √(dx² + dy²)`, which is `Math.hypot(dx, dy)` or `Translation2d.getDistance(...)` in code.
+- **Which way?** Use `atan2(dy, dx)`, which gives the arrow's angle, counter-clockwise from +X (C04). Plain `atan(dy / dx)` can't tell "up and right" from "down and left," so it's 180° off whenever the target is behind you in X. `atan2` checks the signs of both numbers to get the right answer anywhere on the field.
+- **Wrapping and offsets.** Angles wrap around: 190° is the same as −170°. Adding an offset (like +180° for a rear shooter) can push a number past ±180°, so let `Rotation2d` do the math. It wraps for you, and heading lock then turns the short way around.
+
+**In our robot:** `SemiAutoHelper.getAngleToHub(...)` and `getDistanceToHub(...)` on `main`
+**Check yourself:** The robot is at (2, 6) and the hub is at (4.6, 4.0). Roughly how far away is the hub, and is the angle to it positive or negative? What would `atan(dy/dx)` give if the robot were at (7, 6) instead?
+**Learn more:** `software/advanced-controls/geometry/pose.html`
+
+### C48 · Choosing a shot: shooting vs. passing
+**Level:** Deeper
+**The idea:** Where the robot is decides what a ball is good for. The 2026 robot **shot** at the hub from inside our alliance zone. Everywhere else it **passed** back toward our side, so we or a partner could pick the ball up later. Each choice gets its own aim target and its own RPM table. The pass table is keyed by distance to our wall, not to the hub. Questions to design around:
+- Where should a pass land, and could the hub block it?
+- What happens right on the zone line? The choice can flicker every loop. A small buffer zone (**hysteresis**) fixes that.
+- Which extras belong to only one mode? The 2026 robot x-locked only when shooting.
+
+**In our robot:** `SemiAutoHelper.getFullAutoDriveAngle(...)`, `getFullAutoShooterVelocity(...)`, `isInAllianceZone(...)`, `getAngleToAlliance()`; `RobotContainer.requestXlockWhenAimingAtHub()` on `main`
+**Check yourself:** The robot is in the neutral zone and the driver holds auto-aim. What does it aim at, and which table picks the RPM? What would go wrong if it used the hub table?
 
 ### C40 · Shoot on the move
 **Level:** Stretch

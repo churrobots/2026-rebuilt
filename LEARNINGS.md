@@ -45,6 +45,8 @@ Legend: [ ] not yet · [~] seen, still shaky · [x] understood
 - [ ] C38 · Heading lock and auto-aim
 - [ ] C39 · Lookup tables and interpolation
 - [ ] C40 · Shoot on the move
+- [ ] C47 · Trigonometry for aiming
+- [ ] C48 · Choosing a shot: shooting vs. passing
 - [~] C41 · Simulation (2026-10-07, Phase 0 step 3)
 - [~] C42 · NetworkTables and dashboards (2026-10-07, Phase 0 step 5)
 - [ ] C43 · Fault detection and alerts
