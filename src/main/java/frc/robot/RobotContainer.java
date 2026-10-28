@@ -170,6 +170,9 @@ public class RobotContainer {
     // Switch to X pattern when X button is pressed
     controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
+    // Reset heading: point the robot away from you and press Back
+    controller.back().onTrue(DriveCommands.resetHeading(drive));
+
     // Intake roller: stop by default, intake on left trigger, outtake on left bumper
     intakeRoller.setDefaultCommand(intakeRoller.stop());
     controller.leftTrigger().whileTrue(intakeRoller.intake());

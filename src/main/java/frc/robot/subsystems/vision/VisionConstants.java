@@ -26,11 +26,12 @@ public class VisionConstants {
   // AprilTag layout
   public static AprilTagFieldLayout aprilTagLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
 
-  // Camera names, must match names configured on coprocessor
-  public static String cameraFrontRight = "camera_frontright";
-  public static String cameraBackRight = "camera_backright";
-  public static String cameraFrontLeft = "camera_frontleft";
-  public static String cameraBackLeft = "camera_backleft";
+  // Camera names, must match names configured on coprocessor (PhotonVision).
+  // These match what's on the new robot's coprocessors (checked 2026-10-24).
+  public static String cameraFrontRight = "front right";
+  public static String cameraBackRight = "back right";
+  public static String cameraFrontLeft = "front left";
+  public static String cameraBackLeft = "back left";
 
   // Robot to camera transforms
   // New robot = the 2026 robot's camera spots, but every camera is 2.5 in lower

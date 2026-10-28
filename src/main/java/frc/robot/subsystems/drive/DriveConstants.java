@@ -114,11 +114,12 @@ public class DriveConstants {
 
   // Kraken (TalonFX) drive configuration -- used by ModuleIOKraken only.
   // Positive voltage must drive the robot forward; verify on-robot and flip if needed.
-  // On the real robot, the right-side wheels drove backwards, so they're inverted.
-  public static final boolean frontLeftDriveInverted = false;
-  public static final boolean frontRightDriveInverted = true;
-  public static final boolean backLeftDriveInverted = false;
-  public static final boolean backRightDriveInverted = true;
+  // On the real robot, flipping the right side made everything drive backwards,
+  // so it's the left side that needs to be inverted.
+  public static final boolean frontLeftDriveInverted = true;
+  public static final boolean frontRightDriveInverted = false;
+  public static final boolean backLeftDriveInverted = true;
+  public static final boolean backRightDriveInverted = false;
   // Supply current limit (stator limit reuses driveMotorCurrentLimit above).
   public static final int driveSupplyCurrentLimit = 60;
   // Slot0 gains in TalonFX NATIVE units. Because Feedback.SensorToMechanismRatio =

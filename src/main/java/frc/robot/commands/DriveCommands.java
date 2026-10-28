@@ -62,6 +62,26 @@ public class DriveCommands {
   }
 
   /**
+   * Resets which way is "forward" to the way the robot is facing right now. Point
+   * the robot
+   * straight away from your driver station, then press the button. Keeps the
+   * robot's x and y.
+   */
+  public static Command resetHeading(Drive drive) {
+    return Commands.runOnce(
+        () -> {
+          // The field's 0° always points from the blue wall toward the red wall, so
+          // "away from me" is 0° on blue and 180° on red.
+          boolean isRed = DriverStation.getAlliance().isPresent()
+              && DriverStation.getAlliance().get() == Alliance.Red;
+          double degrees = isRed ? 180.0 : 0.0;
+          Pose2d pose = drive.getPose();
+          drive.setPose(new Pose2d(pose.getX(), pose.getY(), Rotation2d.fromDegrees(degrees)));
+        },
+        drive);
+  }
+
+  /**
    * Field relative drive command using two joysticks (controlling linear and
    * angular velocities).
    */
@@ -170,7 +190,8 @@ public class DriveCommands {
               SmartDashboard.putBoolean("aimLocked", false);
             })
 
-        // Commands may be cancelled before another drive command gets a chance to publish.
+        // Commands may be cancelled before another drive command gets a chance to
+        // publish.
         .finallyDo(() -> SmartDashboard.putBoolean("aimLocked", false));
   }
 
