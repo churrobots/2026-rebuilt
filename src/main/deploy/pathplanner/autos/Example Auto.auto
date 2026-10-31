@@ -7,13 +7,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "!"
+            "pathName": "1"
           }
         },
         {
           "type": "path",
           "data": {
             "pathName": "2"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ShootFullHopper"
           }
         }
       ]

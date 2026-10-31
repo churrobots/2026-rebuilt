@@ -64,12 +64,12 @@
     },
     {
       "anchor": {
-        "x": 2.6656795428240745,
-        "y": 7.165081669560185
+        "x": 2.1381418829449155,
+        "y": 6.911059487552966
       },
       "prevControl": {
-        "x": 3.7619659288194445,
-        "y": 7.482636646412037
+        "x": 2.913007150423729,
+        "y": 7.56902238921257
       },
       "nextControl": null,
       "isLocked": false,
@@ -99,6 +99,17 @@
           "name": "RunIntake"
         }
       }
+    },
+    {
+      "name": "AimAndPrepShooter",
+      "waypointRelativePos": 3.608621510152285,
+      "endWaypointRelativePos": 3.960302982233502,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "AimAndPrepShooter"
+        }
+      }
     }
   ],
   "globalConstraints": {
@@ -111,7 +122,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -148.58427155779543
+    "rotation": -52.374222433238074
   },
   "reversed": false,
   "folder": null,
