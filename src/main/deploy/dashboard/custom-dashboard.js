@@ -15,7 +15,10 @@ const B_COUNT_TOPIC = "/AdvantageKit/RealOutputs/Tutorial/BPressCount";
 const B_HELD_TOPIC = "/AdvantageKit/RealOutputs/Tutorial/BHeld";
 const ROLLER_VOLTS_TOPIC = "/AdvantageKit/IntakeRoller/AppliedVolts";
 const ROLLER_VELOCITY_TOPIC = "/AdvantageKit/IntakeRoller/VelocityRadPerSec";
-const ROLLER_SPINNING_RPM = 100;
+const ROLLER_SPINNING_RPM = 350;
+// Named commands for PathPlanner autos, from configureNamedCommands() in RobotContainer.
+const NAMED_COMMANDS_PREFIX = "/AdvantageKit/RealOutputs/Auto/NamedCommands/";
+const NAMED_COMMANDS_TOPIC = `${NAMED_COMMANDS_PREFIX}Names`;
 // Where the intake sits on the robot, in meters (from last year's robot drawing in
 // PathPlanner's settings.json on main): centered 0.58 m in front, 0.8 m wide, 0.29 m deep.
 const INTAKE = { centerX: 0.58, width: 0.8, depth: 0.29 };
@@ -88,6 +91,8 @@ export class CustomDashboard extends HTMLElement {
               <output class="field-pose" aria-live="polite">Waiting for pose…</output>
             </div>
             <div class="field-view"><canvas></canvas></div>
+            <p class="eyebrow named-command-heading">Auto commands</p>
+            <ul class="named-command-list"><li class="named-command-empty">Waiting for robot…</li></ul>
           </section>
           <section class="card" aria-labelledby="auto-heading">
             <div class="card-heading">
@@ -186,6 +191,7 @@ export class CustomDashboard extends HTMLElement {
     this.#startCameraCard(core);
     this.#startCopyCard(core);
     this.#startAutoCard(core);
+    this.#startNamedCommandsCard(core);
   }
 
   /**
@@ -490,6 +496,42 @@ export class CustomDashboard extends HTMLElement {
       core.removeEventListener("topic", topicListener);
       clearInterval(timer);
     });
+    render();
+  }
+
+  /** Lists the auto's named commands and lights up each one while it runs. */
+  #startNamedCommandsCard(core) {
+    const root = this.shadowRoot;
+    const list = root.querySelector(".named-command-list");
+    let shownNames = "";
+
+    const render = () => {
+      const names = core.getTopic(NAMED_COMMANDS_TOPIC)?.value;
+      if (Array.isArray(names) && names.join("\n") !== shownNames) {
+        shownNames = names.join("\n");
+        list.replaceChildren(
+          ...names.map((name) => {
+            const row = document.createElement("li");
+            row.dataset.name = name;
+            row.innerHTML = `<span class="dot"></span><span></span>`;
+            row.lastElementChild.textContent = name;
+            return row;
+          }),
+        );
+      }
+
+      list.querySelectorAll("li[data-name]").forEach((row) => {
+        const running = core.getTopic(`${NAMED_COMMANDS_PREFIX}${row.dataset.name}/Running`)?.value === true;
+        row.classList.toggle("on", running);
+      });
+    };
+
+    /** @param {CustomEvent<DashboardTopic>} event */
+    const topicListener = ({ detail: topic }) => {
+      if (topic.name.startsWith(NAMED_COMMANDS_PREFIX)) render();
+    };
+    core.addEventListener("topic", topicListener);
+    this.#cleanup.push(() => core.removeEventListener("topic", topicListener));
     render();
   }
 

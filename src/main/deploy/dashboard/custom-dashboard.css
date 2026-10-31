@@ -317,3 +317,36 @@ h2 {
   margin-top: 8px;
   font-weight: 800;
 }
+
+/* The auto commands list sits under the field view, in the Field card. */
+.named-command-heading {
+  margin-top: 16px;
+}
+.named-command-list {
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.named-command-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  color: #93a0b4;
+  font-weight: 800;
+}
+/* Gray dot while idle, green row while the command is running. */
+.named-command-list .dot {
+  background: #2a3240;
+}
+.named-command-list li.on {
+  background: #14532d;
+  color: #fff;
+}
+.named-command-list li.on .dot {
+  background: #4ade80;
+}
+.named-command-empty {
+  color: #8f9bad;
+}
