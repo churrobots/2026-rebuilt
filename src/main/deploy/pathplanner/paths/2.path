@@ -102,7 +102,7 @@
     },
     {
       "name": "AimAndPrepShooter",
-      "waypointRelativePos": 3.608621510152285,
+      "waypointRelativePos": 3.5122541243654815,
       "endWaypointRelativePos": 3.960302982233502,
       "command": {
         "type": "named",
