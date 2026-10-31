@@ -21,14 +21,14 @@ public class IntakeRoller extends SubsystemBase {
     Logger.processInputs("IntakeRoller", inputs);
   }
 
-  /** Spins the roller inward to grab game pieces. */
+  /** Spins the roller inward to grab game pieces. Stops it when the command ends. */
   public Command intake() {
-    return run(() -> io.setVoltage(rollerIntakeVolts));
+    return runEnd(() -> io.setVoltage(rollerIntakeVolts), () -> io.setVoltage(0.0));
   }
 
-  /** Spins the roller outward to spit game pieces out. */
+  /** Spins the roller outward to spit game pieces out. Stops it when the command ends. */
   public Command outtake() {
-    return run(() -> io.setVoltage(rollerOuttakeVolts));
+    return runEnd(() -> io.setVoltage(rollerOuttakeVolts), () -> io.setVoltage(0.0));
   }
 
   /** Stops the roller. */
