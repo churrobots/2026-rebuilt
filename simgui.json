@@ -80,6 +80,10 @@
       "/SmartDashboard/ShooterMech/mechanism": "Mechanism2d",
       "/SmartDashboard/ShooterMotor/mechanism": "Mechanism2d",
       "/SmartDashboard/Spindexer/mechanism": "Mechanism2d",
+      "/SmartDashboard/VisionSystemSim-camera_backleft/Sim Field": "Field2d",
+      "/SmartDashboard/VisionSystemSim-camera_backright/Sim Field": "Field2d",
+      "/SmartDashboard/VisionSystemSim-camera_frontleft/Sim Field": "Field2d",
+      "/SmartDashboard/VisionSystemSim-camera_frontright/Sim Field": "Field2d",
       "/SmartDashboard/VisionSystemSim-main/Sim Field": "Field2d"
     },
     "windows": {

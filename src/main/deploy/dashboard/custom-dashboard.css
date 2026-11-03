@@ -73,6 +73,22 @@ h2 {
   height: 100%;
 }
 
+.spindexer-body {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.spindexer-disc {
+  width: 160px;
+  height: 160px;
+}
+.spindexer-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
 .stat-row {
   margin-top: 16px;
   display: flex;

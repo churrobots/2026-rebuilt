@@ -37,7 +37,7 @@ Legend: [ ] not yet · [~] seen, still shaky · [x] understood
 - [ ] C31 · PhotonVision
 - [~] C32 · PathPlanner and named commands (2026-10-20, Phase 5)
 - [ ] C33 · Mechanism state in autonomous
-- [ ] C34 · Rollers and indexers
+- [~] C34 · Rollers and indexers (2026-10-21, Phase 3 step 5)
 - [ ] C35 · Flywheels (velocity control)
 - [ ] C36 · Arms and elevators (position control)
 - [ ] C37 · Superstructure coordination
@@ -113,6 +113,14 @@ Legend: [ ] not yet · [~] seen, still shaky · [x] understood
 - 2026-10-21: Asked "how do CAN IDs work, explain it simply." Re-explained with a classroom analogy (one teacher, students answer only to their own number). Skipped the check question again.
 ### C15 · Motors and motor controllers (inversion)
 - 2026-10-21 (Phase 3, real robot): The right-side drive wheels spun backwards. The student asked Claude to flip only the right drive motors and show where in the code. Asked a sharp follow-up: "does it work by taking the forward direction and adding 180 if the inverse flag is found?" Explained that inversion flips the sign of output and sensor inside the TalonFX (not an angle). Their 180° idea is exactly swerve module optimization (turn 180° + reverse speed), so it was connected to `optimize` in Module.java. Good intuition.
+### C34 · Rollers (spindexer design) / C17 · Gear ratios
+- 2026-10-21 (Phase 3 step 5): Checked the spindexer gearing with mechanical on their own. Was briefly confused about whether "1:1" meant motor-to-spindexer or belt-only. A diagram (motor → gearbox → belt → spindexer) plus the "blender at 5,600 RPM" sanity check helped, and they concluded "gearbox is 15:1 and the drive train is 1:1." The design-on-paper question ("what's the same/different") confused them at first. Turning it into a table of the 4 intake files worked: IO = same, Sim = different, TalonFX IO = different, subsystem = same. Mostly right. The sim is really the same shape with different numbers.
+### C04 / C25 · Field coordinates and reset heading
+- 2026-10-24 (Phase 3 step 10): Asked for "reset pose like last year." For the "which file owns it" question, they answered "drive command," a good choice that was explained as Drive owning the pose and DriveCommands building commands. For "how do you get the current x and y," they answered "rotation 2d" (mixed up the heading part with the position part). Asked whether joystickDrive "is a file or function or boolean," so they're still building vocabulary for file vs. method vs. variable. Then asked Claude to write it. Didn't answer why red uses 180°.
+### C12 · IO layers: SpindexerIO (Phase 3 step 5)
+- 2026-10-28: Wrote SpindexerIO mostly on their own by copying IntakeRollerIO and adding `positionRad`. Java naming rules were the main stumbling block: package path must match folders exactly (typed `subsystem` instead of `subsystems`, made the folder `Spindexer` with a capital S), the type name must match the file name (`spindexerIO`), and VS Code's auto-generated stub class was left above the paste. They fixed all 5 after one review. Claude finished the last 2 (missing braces, leftover comment) when asked.
+### C16 · Current limits / C15 · Brake vs. coast (Phase 3 step 5)
+- 2026-10-28: While reading the SpindexerIOSpark code Claude wrote, they asked "what is amp cap" and "what is coast." Explained amps as water through a hose (a stalled motor gulps 100+ A → heat, brownout, tripped breaker) and coast vs. brake as stopping pedaling vs. squeezing bike brakes, with a table of drive (brake) vs. intake/spindexer (coast). They asked for "just tell us what to do" on the REV SPARK MAX plug, so Claude gave the full file.
 
 ## Tutorial feedback
 - 2026-10-07 (Phase 0): Student wanted to move fast through setup ("skip this," "its already running"). The setup steps could be shorter for students who already have the sim running.
@@ -123,3 +131,5 @@ Legend: [ ] not yet · [~] seen, still shaky · [x] understood
 - 2026-10-10 (Phase 2 step 7): Students asked Claude to "humanize" and "code switch": "we are not pros so we dont understand everything." Claude's messages had gotten too long and full of jargon (tables, line numbers, terms like stator/open-loop without explanation). Switched to a shorter, casual, plain-English style.
 - 2026-10-10: Even a one-line exercise with all the pieces given got "write it for us." The students may need a stronger nudge, or a coach's expectation, to type code themselves. Consider asking them to type Claude's line by hand, or to predict before Claude writes.
 - 2026-10-10 (Phase 5): A real debugging session. Students noticed the auto restarting. Claude's hypothesis (heartbeat timeout disables the robot) was tested with a dashboard counter before changing any code, and confirmed (19 restarts). This was a good live example of "measure first, then fix." Next: change one variable at a time (camera streams off). → A coach found the real cause: a second open dashboard was sending "disabled." Claude's guess about *why* was wrong. Worth telling students: the counter proved *what* happened, and the *why* still needed more digging.
+- 2026-10-21 (Phase 3 step 5): The abstract "what's the same, what's different?" design prompt didn't land. A concrete table of the files they already wrote, with "same or different?" for each, worked right away. Consider phrasing the plan's design-on-paper steps that way.
+- 2026-11-03: Returned after about a week. Gave a recap and offered the 3-question warm-up quiz (Q1 was C01, "two motors with the same CAN ID"). The student skipped it. C01's check question is still unanswered.

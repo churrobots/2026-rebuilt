@@ -27,6 +27,10 @@ import frc.robot.subsystems.intake.IntakeRoller;
 import frc.robot.subsystems.intake.IntakeRollerIO;
 import frc.robot.subsystems.intake.IntakeRollerIOSim;
 import frc.robot.subsystems.intake.IntakeRollerIOTalonFX;
+import frc.robot.subsystems.spindexer.Spindexer;
+import frc.robot.subsystems.spindexer.SpindexerIO;
+import frc.robot.subsystems.spindexer.SpindexerIOSim;
+import frc.robot.subsystems.spindexer.SpindexerIOSpark;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
@@ -47,6 +51,7 @@ public class RobotContainer {
   // Subsystems
   private final Drive drive;
   private final IntakeRoller intakeRoller;
+  private final Spindexer spindexer;
   private final Vision vision;
 
   // Tutorial: how many times B has been pressed
@@ -75,6 +80,7 @@ public class RobotContainer {
             new ModuleIOKraken(2, "BackLeft"),
             new ModuleIOKraken(3, "BackRight"));
         intakeRoller = new IntakeRoller(new IntakeRollerIOTalonFX());
+        spindexer = new Spindexer(new SpindexerIOSpark());
         vision = new Vision(
             drive::addVisionMeasurement,
             new VisionIOPhotonVision(cameraFrontRight, robotToCameraFrontRight),
@@ -93,6 +99,7 @@ public class RobotContainer {
             new ModuleIOSim(),
             new ModuleIOSim());
         intakeRoller = new IntakeRoller(new IntakeRollerIOSim());
+        spindexer = new Spindexer(new SpindexerIOSim());
         vision = new Vision(
             drive::addVisionMeasurement,
             new VisionIOPhotonVisionSim(cameraFrontRight, robotToCameraFrontRight, drive::getPose),
@@ -115,6 +122,7 @@ public class RobotContainer {
             new ModuleIO() {
             });
         intakeRoller = new IntakeRoller(new IntakeRollerIO() {});
+        spindexer = new Spindexer(new SpindexerIO() {});
         vision = new Vision(
             drive::addVisionMeasurement,
             new VisionIO() {},
@@ -179,6 +187,11 @@ public class RobotContainer {
     controller.leftBumper().whileTrue(intakeRoller.outtake());
     // Panic button: tap Y to spit for 1 second
     controller.y().onTrue(intakeRoller.outtake().withTimeout(1.0));
+
+    // Spindexer: stop by default, feed on right bumper, backwards on D-pad up
+    spindexer.setDefaultCommand(spindexer.stop());
+    controller.rightBumper().whileTrue(spindexer.feed());
+    controller.povUp().whileTrue(spindexer.unjam());
     
 
     // Tutorial: count B presses (onTrue runs once per press)

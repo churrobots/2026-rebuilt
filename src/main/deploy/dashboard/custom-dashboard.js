@@ -16,6 +16,11 @@ const B_HELD_TOPIC = "/AdvantageKit/RealOutputs/Tutorial/BHeld";
 const ROLLER_VOLTS_TOPIC = "/AdvantageKit/IntakeRoller/AppliedVolts";
 const ROLLER_VELOCITY_TOPIC = "/AdvantageKit/IntakeRoller/VelocityRadPerSec";
 const ROLLER_SPINNING_RPM = 100;
+// Spindexer inputs from Spindexer.periodic() (Logger.processInputs("Spindexer", ...)).
+const SPINDEXER_POSITION_TOPIC = "/AdvantageKit/Spindexer/PositionRad";
+const SPINDEXER_VELOCITY_TOPIC = "/AdvantageKit/Spindexer/VelocityRadPerSec";
+const SPINDEXER_VOLTS_TOPIC = "/AdvantageKit/Spindexer/AppliedVolts";
+const SPINDEXER_SPINNING_RPM = 2; // it's geared 125:1, so even "fast" is slow
 // Where the intake sits on the robot, in meters (from last year's robot drawing in
 // PathPlanner's settings.json on main): centered 0.58 m in front, 0.8 m wide, 0.29 m deep.
 const INTAKE = { centerX: 0.58, width: 0.8, depth: 0.29 };
@@ -23,10 +28,10 @@ const INTAKE = { centerX: 0.58, width: 0.8, depth: 0.29 };
 // Copied from robotToCamera* in VisionConstants.java, so keep them in sync.
 // All 4 are mounted upside down (roll 180°) and tilted up (negative pitch).
 const CAMERAS = [
-  { name: "Front right", ntName: "camera_frontright", x: -0.003, y: -0.330, z: 0.365, rollDeg: 180, pitchDeg: -15, yawDeg: -43 },
-  { name: "Back right", ntName: "camera_backright", x: -0.302, y: -0.276, z: 0.362, rollDeg: 180, pitchDeg: -15, yawDeg: -150 },
-  { name: "Front left", ntName: "camera_frontleft", x: -0.003, y: 0.330, z: 0.365, rollDeg: 180, pitchDeg: -15, yawDeg: 43 },
-  { name: "Back left", ntName: "camera_backleft", x: -0.302, y: 0.308, z: 0.191, rollDeg: 180, pitchDeg: -18, yawDeg: 150 },
+  { name: "Front right", ntName: "front right", x: -0.003, y: -0.330, z: 0.365, rollDeg: 180, pitchDeg: -15, yawDeg: -43 },
+  { name: "Back right", ntName: "back right", x: -0.302, y: -0.276, z: 0.362, rollDeg: 180, pitchDeg: -15, yawDeg: -150 },
+  { name: "Front left", ntName: "front left", x: -0.003, y: 0.330, z: 0.365, rollDeg: 180, pitchDeg: -15, yawDeg: 43 },
+  { name: "Back left", ntName: "back left", x: -0.302, y: 0.308, z: 0.191, rollDeg: 180, pitchDeg: -18, yawDeg: 150 },
 ];
 // Sim camera image: 960x720 with an 80° diagonal view (VisionIOPhotonVisionSim.java).
 const CAMERA_IMAGE = { width: 960, height: 720, diagonalFovDeg: 80 };
@@ -100,6 +105,19 @@ export class CustomDashboard extends HTMLElement {
             <div class="stat-row">
               <div><p class="eyebrow">Robot will run</p><output class="auto-active">—</output></div>
               <div><p class="eyebrow">Auto timer</p><output class="big-number auto-timer">0.0</output></div>
+            </div>
+          </section>
+          <section class="card" aria-labelledby="spindexer-heading">
+            <div class="card-heading">
+              <div><p class="eyebrow">Mechanism</p><h1 id="spindexer-heading">Spindexer</h1></div>
+            </div>
+            <div class="spindexer-body">
+              <canvas class="spindexer-disc" width="320" height="320" aria-label="Spindexer seen from above"></canvas>
+              <div class="spindexer-stats">
+                <div><p class="eyebrow">Volts</p><output class="big-number spindexer-volts">0.0</output></div>
+                <div><p class="eyebrow">Spindexer RPM</p><output class="big-number spindexer-rpm">0.0</output></div>
+                <output class="status-light spindexer-state">STOPPED</output>
+              </div>
             </div>
           </section>
           <section class="card" aria-labelledby="intake-heading">
@@ -182,6 +200,7 @@ export class CustomDashboard extends HTMLElement {
     this.#startFieldCard(core);
     this.#startButtonCard(core);
     this.#startIntakeCard(core);
+    this.#startSpindexerCard(core);
     this.#startVisionCard(core);
     this.#startCameraCard(core);
     this.#startCopyCard(core);
@@ -494,6 +513,49 @@ export class CustomDashboard extends HTMLElement {
   }
 
   /** Shows the intake roller's volts, RPM, and whether it's spinning. */
+  /**
+   * Shows the spindexer from above: a disc that turns with its MEASURED position
+   * (so it lags or stops if the motor does), plus volts, RPM, and what it's doing.
+   */
+  #startSpindexerCard(core) {
+    const root = this.shadowRoot;
+    const canvas = root.querySelector(".spindexer-disc");
+    const voltsText = root.querySelector(".spindexer-volts");
+    const rpmText = root.querySelector(".spindexer-rpm");
+    const stateLight = root.querySelector(".spindexer-state");
+    let frame = 0;
+
+    const render = () => {
+      frame = 0;
+      const angle = Number(core.getTopic(SPINDEXER_POSITION_TOPIC)?.value) || 0;
+      const radPerSec = Number(core.getTopic(SPINDEXER_VELOCITY_TOPIC)?.value) || 0;
+      const volts = Number(core.getTopic(SPINDEXER_VOLTS_TOPIC)?.value) || 0;
+      const rpm = (radPerSec * 60) / (2 * Math.PI);
+      const spinning = Math.abs(rpm) > SPINDEXER_SPINNING_RPM;
+      const state = !spinning ? "STOPPED" : rpm > 0 ? "FEEDING" : "UNJAMMING";
+      voltsText.textContent = volts.toFixed(1);
+      rpmText.textContent = rpm.toFixed(1);
+      stateLight.textContent = state;
+      stateLight.classList.toggle("on", spinning);
+      drawSpindexer(canvas, angle, state);
+    };
+    const scheduleRender = () => {
+      if (!frame) frame = requestAnimationFrame(render);
+    };
+
+    /** @param {CustomEvent<DashboardTopic>} event */
+    const topicListener = ({ detail: topic }) => {
+      if ([SPINDEXER_POSITION_TOPIC, SPINDEXER_VELOCITY_TOPIC, SPINDEXER_VOLTS_TOPIC].includes(topic.name))
+        scheduleRender();
+    };
+    core.addEventListener("topic", topicListener);
+    this.#cleanup.push(() => {
+      core.removeEventListener("topic", topicListener);
+      cancelAnimationFrame(frame);
+    });
+    render();
+  }
+
   #startIntakeCard(core) {
     const root = this.shadowRoot;
     const voltsText = root.querySelector(".roller-volts");
@@ -1041,7 +1103,7 @@ function streamUrl(value) {
   }
 }
 
-/** "camera_frontright-processed" -> "frontright" */
+/** "front right-processed" -> "front right" (older names like "camera_frontright" also work) */
 function cameraLabel(name) {
   return name.replace(/^camera_/, "").replace(/-processed$/, "");
 }
@@ -1087,6 +1149,82 @@ async function copyText(text) {
 }
 
 /** Reads the intake roller: its RPM, and whether it's STOPPED, INTAKING, or OUTTAKING. */
+/**
+ * Draws the spindexer seen from above: a round floor with paddles, turned to its
+ * measured angle. Positive angle (feeding) turns counter-clockwise, like math angles.
+ */
+function drawSpindexer(canvas, angle, state) {
+  const context = canvas.getContext("2d");
+  const size = canvas.width;
+  const center = size / 2;
+  const radius = size * 0.42;
+  const color = state === "FEEDING" ? "#4ade80" : state === "UNJAMMING" ? "#fb923c" : "#93a0b4";
+  context.clearRect(0, 0, size, size);
+
+  // The floor of the hopper.
+  context.beginPath();
+  context.arc(center, center, radius, 0, Math.PI * 2);
+  context.fillStyle = "#0c1017";
+  context.fill();
+  context.lineWidth = 6;
+  context.strokeStyle = color;
+  context.stroke();
+
+  // Paddles that turn with the measured position. Screen y points down, so flip the
+  // angle to make positive (counter-clockwise) look counter-clockwise.
+  context.save();
+  context.translate(center, center);
+  context.rotate(-angle);
+  context.strokeStyle = "#d6dde8";
+  context.lineWidth = 8;
+  context.lineCap = "round";
+  for (let i = 0; i < 6; i++) {
+    const a = (i * Math.PI * 2) / 6;
+    context.beginPath();
+    context.moveTo(Math.cos(a) * radius * 0.18, Math.sin(a) * radius * 0.18);
+    context.lineTo(Math.cos(a) * radius * 0.9, Math.sin(a) * radius * 0.9);
+    context.stroke();
+  }
+  // One colored paddle so you can count turns.
+  context.strokeStyle = color;
+  context.beginPath();
+  context.moveTo(radius * 0.18, 0);
+  context.lineTo(radius * 0.9, 0);
+  context.stroke();
+  context.restore();
+
+  // Hub in the middle.
+  context.beginPath();
+  context.arc(center, center, radius * 0.16, 0, Math.PI * 2);
+  context.fillStyle = color;
+  context.fill();
+
+  // Direction arrow around the edge while spinning.
+  if (state !== "STOPPED") {
+    const ccw = state === "FEEDING";
+    const start = -Math.PI * 0.75;
+    const end = -Math.PI * 0.25;
+    const arrowRadius = radius + 14;
+    context.strokeStyle = color;
+    context.lineWidth = 4;
+    context.beginPath();
+    context.arc(center, center, arrowRadius, start, end);
+    context.stroke();
+    const tip = ccw ? start : end;
+    const tx = center + Math.cos(tip) * arrowRadius;
+    const ty = center + Math.sin(tip) * arrowRadius;
+    const dir = ccw ? -1 : 1; // which way along the circle the arrow points
+    const tangent = tip + (dir * Math.PI) / 2;
+    context.beginPath();
+    context.moveTo(tx, ty);
+    context.lineTo(tx - Math.cos(tangent - 0.5) * 14, ty - Math.sin(tangent - 0.5) * 14);
+    context.lineTo(tx - Math.cos(tangent + 0.5) * 14, ty - Math.sin(tangent + 0.5) * 14);
+    context.closePath();
+    context.fillStyle = color;
+    context.fill();
+  }
+}
+
 function readRoller(core) {
   const radPerSec = Number(core.getTopic(ROLLER_VELOCITY_TOPIC)?.value) || 0;
   const rpm = (radPerSec * 60) / (2 * Math.PI);
