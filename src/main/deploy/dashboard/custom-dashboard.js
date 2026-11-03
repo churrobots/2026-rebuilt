@@ -16,11 +16,24 @@ const B_HELD_TOPIC = "/AdvantageKit/RealOutputs/Tutorial/BHeld";
 const ROLLER_VOLTS_TOPIC = "/AdvantageKit/IntakeRoller/AppliedVolts";
 const ROLLER_VELOCITY_TOPIC = "/AdvantageKit/IntakeRoller/VelocityRadPerSec";
 const ROLLER_SPINNING_RPM = 100;
+// Intake arm, from IntakeArm.periodic(). Angles in radians: 0 = stowed, bigger = lower.
+const ARM_MEASURED_TOPIC = "/AdvantageKit/RealOutputs/Tutorial/Arm/MeasuredRad";
+const ARM_TARGET_TOPIC = "/AdvantageKit/RealOutputs/Tutorial/Arm/TargetRad";
+const ARM_AT_TARGET_TOPIC = "/AdvantageKit/RealOutputs/Tutorial/Arm/AtTarget";
+const ARM_LEVEL_TOPIC = "/AdvantageKit/RealOutputs/Tutorial/Arm/LevelRad";
 // Spindexer inputs from Spindexer.periodic() (Logger.processInputs("Spindexer", ...)).
 const SPINDEXER_POSITION_TOPIC = "/AdvantageKit/Spindexer/PositionRad";
 const SPINDEXER_VELOCITY_TOPIC = "/AdvantageKit/Spindexer/VelocityRadPerSec";
 const SPINDEXER_VOLTS_TOPIC = "/AdvantageKit/Spindexer/AppliedVolts";
 const SPINDEXER_SPINNING_RPM = 2; // it's geared 125:1, so even "fast" is slow
+// Shooter + feeder, from Shooter.periodic() and Feeder.periodic().
+const SHOOTER_TARGET_TOPIC = "/AdvantageKit/RealOutputs/Tutorial/Shooter/TargetRPM";
+const SHOOTER_MEASURED_TOPIC = "/AdvantageKit/RealOutputs/Tutorial/Shooter/MeasuredRPM";
+const SHOOTER_READY_TOPIC = "/AdvantageKit/RealOutputs/Tutorial/Shooter/Ready";
+const FEEDER_VELOCITY_TOPIC = "/AdvantageKit/Feeder/VelocityRadPerSec";
+const SHOOTER_GAUGE_MAX_RPM = 6000; // a Kraken tops out around here
+// Real wheels spin way too fast to see, so the drawing spins them slowed down.
+const SHOOTER_DRAW_SLOWDOWN = 0.002; // drawn rad/sec per RPM
 // Where the intake sits on the robot, in meters (from last year's robot drawing in
 // PathPlanner's settings.json on main): centered 0.58 m in front, 0.8 m wide, 0.29 m deep.
 const INTAKE = { centerX: 0.58, width: 0.8, depth: 0.29 };
@@ -107,6 +120,19 @@ export class CustomDashboard extends HTMLElement {
               <div><p class="eyebrow">Auto timer</p><output class="big-number auto-timer">0.0</output></div>
             </div>
           </section>
+          <section class="card" aria-labelledby="shooter-heading">
+            <div class="card-heading">
+              <div><p class="eyebrow">Mechanism</p><h1 id="shooter-heading">Shooter</h1></div>
+              <output class="status-light shooter-ready">NOT READY</output>
+            </div>
+            <canvas class="shooter-view" width="360" height="220" aria-label="Feeder and flywheel seen from the side"></canvas>
+            <div class="shooter-stats">
+              <div><p class="eyebrow">Flywheel RPM</p><output class="big-number shooter-rpm">0</output></div>
+              <div><p class="eyebrow">Target RPM</p><output class="big-number shooter-target">0</output></div>
+              <div><p class="eyebrow">Feeder RPM</p><output class="big-number feeder-rpm">0</output></div>
+            </div>
+            <p class="shooter-note">Wheels in the drawing spin slowed down so you can see them.</p>
+          </section>
           <section class="card" aria-labelledby="spindexer-heading">
             <div class="card-heading">
               <div><p class="eyebrow">Mechanism</p><h1 id="spindexer-heading">Spindexer</h1></div>
@@ -129,6 +155,14 @@ export class CustomDashboard extends HTMLElement {
               <div><p class="eyebrow">Roller RPM</p><output class="big-number roller-rpm">0</output></div>
             </div>
             <output class="status-light roller-spinning">STOPPED</output>
+            <div class="arm-body">
+              <canvas class="arm-view" width="320" height="220" aria-label="Intake arm seen from the side"></canvas>
+              <div class="arm-stats">
+                <div><p class="eyebrow">Arm (rad)</p><output class="big-number arm-measured">—</output></div>
+                <div><p class="eyebrow">Target (rad)</p><output class="big-number arm-target">—</output></div>
+                <output class="status-light arm-at-target">NO TARGET</output>
+              </div>
+            </div>
           </section>
           <section class="card" aria-labelledby="vision-heading">
             <div class="card-heading">
@@ -201,6 +235,7 @@ export class CustomDashboard extends HTMLElement {
     this.#startButtonCard(core);
     this.#startIntakeCard(core);
     this.#startSpindexerCard(core);
+    this.#startShooterCard(core);
     this.#startVisionCard(core);
     this.#startCameraCard(core);
     this.#startCopyCard(core);
@@ -514,6 +549,48 @@ export class CustomDashboard extends HTMLElement {
 
   /** Shows the intake roller's volts, RPM, and whether it's spinning. */
   /**
+   * Shows the feeder and flywheel from the side, an RPM gauge with the target and the
+   * "close enough" zone, and a big READY light. The wheels keep animating, so this card
+   * redraws every screen refresh while it's open.
+   */
+  #startShooterCard(core) {
+    const root = this.shadowRoot;
+    const canvas = root.querySelector(".shooter-view");
+    const readyLight = root.querySelector(".shooter-ready");
+    const rpmText = root.querySelector(".shooter-rpm");
+    const targetText = root.querySelector(".shooter-target");
+    const feederText = root.querySelector(".feeder-rpm");
+    const wheel = { flywheel: 0, feeder: 0 }; // drawn angles, built up from speed
+    let lastMs = performance.now();
+    let frame = 0;
+
+    const render = () => {
+      const now = performance.now();
+      const seconds = Math.min(0.1, (now - lastMs) / 1000);
+      lastMs = now;
+
+      const measured = Number(core.getTopic(SHOOTER_MEASURED_TOPIC)?.value) || 0;
+      const target = Number(core.getTopic(SHOOTER_TARGET_TOPIC)?.value) || 0;
+      const ready = core.getTopic(SHOOTER_READY_TOPIC)?.value === true;
+      const feederRadPerSec = Number(core.getTopic(FEEDER_VELOCITY_TOPIC)?.value) || 0;
+      const feederRpm = (feederRadPerSec * 60) / (2 * Math.PI);
+
+      wheel.flywheel += measured * SHOOTER_DRAW_SLOWDOWN * seconds;
+      wheel.feeder += feederRpm * SHOOTER_DRAW_SLOWDOWN * seconds;
+
+      rpmText.textContent = String(Math.round(measured));
+      targetText.textContent = String(Math.round(target));
+      feederText.textContent = String(Math.round(feederRpm));
+      readyLight.textContent = ready ? "READY" : "NOT READY";
+      readyLight.classList.toggle("on", ready);
+      drawShooter(canvas, { measured, target, ready, feederRpm, wheel });
+      frame = requestAnimationFrame(render);
+    };
+    frame = requestAnimationFrame(render);
+    this.#cleanup.push(() => cancelAnimationFrame(frame));
+  }
+
+  /**
    * Shows the spindexer from above: a disc that turns with its MEASURED position
    * (so it lags or stops if the motor does), plus volts, RPM, and what it's doing.
    */
@@ -561,22 +638,55 @@ export class CustomDashboard extends HTMLElement {
     const voltsText = root.querySelector(".roller-volts");
     const rpmText = root.querySelector(".roller-rpm");
     const spinningLight = root.querySelector(".roller-spinning");
+    const armCanvas = root.querySelector(".arm-view");
+    const armMeasuredText = root.querySelector(".arm-measured");
+    const armTargetText = root.querySelector(".arm-target");
+    const armLight = root.querySelector(".arm-at-target");
+    let frame = 0;
 
     const render = () => {
+      frame = 0;
+      // Roller
       const volts = Number(core.getTopic(ROLLER_VOLTS_TOPIC)?.value) || 0;
       const { rpm, state } = readRoller(core);
       voltsText.textContent = volts.toFixed(1);
       rpmText.textContent = String(Math.round(rpm));
       spinningLight.textContent = state;
       spinningLight.classList.toggle("on", state !== "STOPPED");
+
+      // Arm
+      const measured = Number(core.getTopic(ARM_MEASURED_TOPIC)?.value);
+      const target = Number(core.getTopic(ARM_TARGET_TOPIC)?.value);
+      const level = Number(core.getTopic(ARM_LEVEL_TOPIC)?.value);
+      const atTarget = core.getTopic(ARM_AT_TARGET_TOPIC)?.value === true;
+      const hasTarget = Number.isFinite(target);
+      armMeasuredText.textContent = Number.isFinite(measured) ? measured.toFixed(2) : "—";
+      armTargetText.textContent = hasTarget ? target.toFixed(2) : "—";
+      armLight.textContent = !hasTarget ? "NO TARGET" : atTarget ? "AT TARGET" : "MOVING";
+      armLight.classList.toggle("on", atTarget);
+      drawArm(armCanvas, measured, target, Number.isFinite(level) ? level : 0);
+    };
+    const scheduleRender = () => {
+      if (!frame) frame = requestAnimationFrame(render);
     };
 
+    const topics = [
+      ROLLER_VOLTS_TOPIC,
+      ROLLER_VELOCITY_TOPIC,
+      ARM_MEASURED_TOPIC,
+      ARM_TARGET_TOPIC,
+      ARM_AT_TARGET_TOPIC,
+      ARM_LEVEL_TOPIC,
+    ];
     /** @param {CustomEvent<DashboardTopic>} event */
     const topicListener = ({ detail: topic }) => {
-      if ([ROLLER_VOLTS_TOPIC, ROLLER_VELOCITY_TOPIC].includes(topic.name)) render();
+      if (topics.includes(topic.name)) scheduleRender();
     };
     core.addEventListener("topic", topicListener);
-    this.#cleanup.push(() => core.removeEventListener("topic", topicListener));
+    this.#cleanup.push(() => {
+      core.removeEventListener("topic", topicListener);
+      cancelAnimationFrame(frame);
+    });
     render();
   }
 
@@ -1149,6 +1259,161 @@ async function copyText(text) {
 }
 
 /** Reads the intake roller: its RPM, and whether it's STOPPED, INTAKING, or OUTTAKING. */
+/**
+ * Draws the intake arm from the side, with the robot's front to the RIGHT. A solid line
+ * shows where the arm IS; a faint dashed "ghost" shows where it's TRYING to go.
+ * Our angles: 0 = stowed, bigger = lower. "level" is our angle when the arm is flat.
+ */
+function drawArm(canvas, measured, target, level) {
+  const context = canvas.getContext("2d");
+  const { width, height } = canvas;
+  const pivot = { x: width * 0.35, y: height * 0.42 };
+  const length = width * 0.5;
+  context.clearRect(0, 0, width, height);
+
+  // Floor and a hint of the robot body behind the pivot.
+  const floorY = height * 0.88;
+  context.strokeStyle = "#7c8798";
+  context.lineWidth = 2;
+  context.beginPath();
+  context.moveTo(0, floorY);
+  context.lineTo(width, floorY);
+  context.stroke();
+  context.fillStyle = "#2a3240";
+  context.fillRect(pivot.x - width * 0.3, pivot.y, width * 0.3, floorY - pivot.y - 4);
+  context.fillStyle = "#93a0b4";
+  context.font = "700 11px system-ui, sans-serif";
+  context.textAlign = "center";
+  context.fillText("ROBOT", pivot.x - width * 0.15, (pivot.y + floorY) / 2 + 4);
+  context.textAlign = "right";
+  context.fillText("FRONT →", width - 6, floorY - 6);
+
+  // Our angle → a point on screen. Angle from level (up = positive) = level - ours.
+  const tip = (angle) => {
+    const fromLevel = level - angle;
+    return { x: pivot.x + Math.cos(fromLevel) * length, y: pivot.y - Math.sin(fromLevel) * length };
+  };
+  const drawLine = (angle, style) => {
+    const end = tip(angle);
+    context.strokeStyle = style.color;
+    context.lineWidth = style.width;
+    context.setLineDash(style.dash ?? []);
+    context.lineCap = "round";
+    context.beginPath();
+    context.moveTo(pivot.x, pivot.y);
+    context.lineTo(end.x, end.y);
+    context.stroke();
+    context.setLineDash([]);
+  };
+
+  if (Number.isFinite(target)) drawLine(target, { color: "#93a0b466", width: 10, dash: [8, 8] });
+  if (Number.isFinite(measured)) drawLine(measured, { color: "#4ade80", width: 10 });
+
+  // Pivot point.
+  context.beginPath();
+  context.arc(pivot.x, pivot.y, 7, 0, Math.PI * 2);
+  context.fillStyle = "#edf2f7";
+  context.fill();
+}
+
+/**
+ * Draws the shooter from the side: the feeder roller on the left pushing a game piece
+ * into the big flywheel on the right, and an RPM gauge underneath with a target marker
+ * and the "close enough to shoot" zone.
+ */
+function drawShooter(canvas, { measured, target, ready, feederRpm, wheel }) {
+  const context = canvas.getContext("2d");
+  const { width, height } = canvas;
+  context.clearRect(0, 0, width, height);
+
+  const feeding = Math.abs(feederRpm) > 100;
+  const flyColor = ready ? "#4ade80" : Math.abs(measured) > 100 ? "#facc15" : "#93a0b4";
+  const feedColor = feeding ? "#4ade80" : "#93a0b4";
+
+  // Spoked wheel, turned to a drawn angle.
+  const drawWheel = (x, y, r, angle, color, spokes) => {
+    context.beginPath();
+    context.arc(x, y, r, 0, Math.PI * 2);
+    context.fillStyle = "#0c1017";
+    context.fill();
+    context.lineWidth = 5;
+    context.strokeStyle = color;
+    context.stroke();
+    context.save();
+    context.translate(x, y);
+    context.rotate(-angle); // positive = counter-clockwise on screen
+    context.lineWidth = 3;
+    for (let i = 0; i < spokes; i++) {
+      const a = (i * Math.PI * 2) / spokes;
+      context.beginPath();
+      context.moveTo(0, 0);
+      context.lineTo(Math.cos(a) * r * 0.85, Math.sin(a) * r * 0.85);
+      context.strokeStyle = i === 0 ? color : "#d6dde8";
+      context.stroke();
+    }
+    context.restore();
+    context.beginPath();
+    context.arc(x, y, r * 0.15, 0, Math.PI * 2);
+    context.fillStyle = color;
+    context.fill();
+  };
+
+  const feeder = { x: width * 0.2, y: height * 0.38, r: 26 };
+  const flywheel = { x: width * 0.62, y: height * 0.34, r: 52 };
+
+  // Path the game piece takes: in from the left, past the feeder, out of the flywheel.
+  context.setLineDash([6, 6]);
+  context.strokeStyle = "#7c8798";
+  context.lineWidth = 2;
+  context.beginPath();
+  context.moveTo(8, feeder.y + feeder.r + 8);
+  context.lineTo(flywheel.x - 10, flywheel.y + flywheel.r + 8);
+  context.quadraticCurveTo(width - 20, flywheel.y + flywheel.r, width - 12, 12);
+  context.stroke();
+  context.setLineDash([]);
+
+  drawWheel(feeder.x, feeder.y, feeder.r, wheel.feeder, feedColor, 4);
+  drawWheel(flywheel.x, flywheel.y, flywheel.r, wheel.flywheel, flyColor, 6);
+
+  context.fillStyle = "#93a0b4";
+  context.font = "700 11px system-ui, sans-serif";
+  context.textAlign = "center";
+  context.fillText("FEEDER", feeder.x, feeder.y - feeder.r - 8);
+  context.fillText("FLYWHEEL", flywheel.x, flywheel.y - flywheel.r - 8);
+
+  // A game piece riding along while the feeder runs.
+  if (feeding) {
+    const t = (performance.now() / 600) % 1;
+    const px = 8 + (flywheel.x - 18) * t;
+    const py = feeder.y + feeder.r + 8 + (flywheel.y + flywheel.r - feeder.y - feeder.r) * t;
+    context.beginPath();
+    context.arc(px, py - 9, 9, 0, Math.PI * 2);
+    context.fillStyle = "#fbbf24";
+    context.fill();
+  }
+
+  // RPM gauge: bar = flywheel speed, line = target, shaded = "close enough" zone.
+  const gauge = { x: 16, y: height - 34, w: width - 32, h: 14 };
+  const toX = (rpm) => gauge.x + (Math.max(0, Math.min(SHOOTER_GAUGE_MAX_RPM, rpm)) / SHOOTER_GAUGE_MAX_RPM) * gauge.w;
+  context.fillStyle = "#2a3240";
+  context.fillRect(gauge.x, gauge.y, gauge.w, gauge.h);
+  if (target > 0) {
+    context.fillStyle = "#4ade8033";
+    context.fillRect(toX(target - 100), gauge.y - 4, toX(target + 100) - toX(target - 100), gauge.h + 8);
+  }
+  context.fillStyle = flyColor;
+  context.fillRect(gauge.x, gauge.y, toX(measured) - gauge.x, gauge.h);
+  if (target > 0) {
+    context.fillStyle = "#edf2f7";
+    context.fillRect(toX(target) - 1.5, gauge.y - 6, 3, gauge.h + 12);
+  }
+  context.fillStyle = "#93a0b4";
+  context.textAlign = "left";
+  context.fillText("0", gauge.x, gauge.y + gauge.h + 14);
+  context.textAlign = "right";
+  context.fillText(`${SHOOTER_GAUGE_MAX_RPM} RPM`, gauge.x + gauge.w, gauge.y + gauge.h + 14);
+}
+
 /**
  * Draws the spindexer seen from above: a round floor with paddles, turned to its
  * measured angle. Positive angle (feeding) turns counter-clockwise, like math angles.

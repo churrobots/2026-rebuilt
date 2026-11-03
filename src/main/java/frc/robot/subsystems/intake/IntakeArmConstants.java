@@ -1,0 +1,52 @@
+package frc.robot.subsystems.intake;
+
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.util.Units;
+
+/**
+ * Intake arm numbers. All angles are in RADIANS, measured the way our encoder reads them:
+ * 0 = stowed (tucked in), and the angle gets BIGGER as the arm swings DOWN toward the floor.
+ */
+public class IntakeArmConstants {
+  // NEO on a SPARK MAX (checked 2026-11-03). Same gearing as 2026: a 25:1 gearbox
+  // then 80:24 pulleys. Written with ".0" so Java doesn't chop 80/24 down to 3.
+  public static final DCMotor armGearbox = DCMotor.getNEO(1);
+  public static final double armMotorReduction = 25.0 * 80.0 / 24.0; // about 83.3
+  public static final int armCanId = 12;
+
+  // TODO: verify on the robot (values from the 2026 robot on main).
+  // The motor must be set up so POSITIVE volts make the angle BIGGER (arm goes down).
+  public static final boolean armInverted = false;
+  public static final boolean armEncoderInverted = false;
+  public static final int armCurrentLimit = 40; // amps
+  // Absolute encoder reading (radians) when the arm is stowed, so stowed reads 0.
+  public static final double armEncoderOffsetRad = 0.0; // TODO: measure
+
+  // Positions (students, 2026-11-03).
+  public static final double stowedRad = 0.0; // tucked in
+  public static final double retractedRad = 1.538; // resting spot
+  public static final double extendedRad = 2.376; // down on the floor
+
+  // Our angle when the arm is exactly level (flat, pointing straight out). Gravity pulls
+  // hardest here, and the gravity math needs it. Level = extended (students, 2026-11-03).
+  public static final double armLevelRad = extendedRad;
+
+  // Soft limits (targets get clamped here) sit inside the hard stops (sim only).
+  public static final double softMinRad = -0.05;
+  public static final double softMaxRad = 2.45;
+  public static final double hardMinRad = -0.1;
+  public static final double hardMaxRad = 2.5;
+
+  // Arm size, only used by the sim. TODO: measure the real arm (2026 sim used 1 ft, 15 lb).
+  public static final double armLengthMeters = Units.feetToMeters(1.0);
+  public static final double armMassKg = Units.lbsToKilograms(15.0);
+
+  // Gains: all 0 on purpose! Tuning lesson: kG first (stop the droop), then kP, then kD.
+  public static final double kS = 0.0; // volts to get it moving
+  public static final double kG = 0.5; // volts to hold it level against gravity
+  public static final double kV = 0.0; // volts per rad/sec
+  public static final double kP = 6.0; // volts per radian of error
+  public static final double kD = 0.0; // volts per rad/sec of error change
+
+  public static final double atTargetToleranceRad = 0.05; // about 3 degrees
+}

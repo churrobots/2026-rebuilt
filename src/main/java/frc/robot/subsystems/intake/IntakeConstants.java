@@ -7,8 +7,9 @@ public class IntakeConstants {
   public static final DCMotor rollerGearbox = DCMotor.getFalcon500(1);
   public static final double rollerMotorReduction = 1.0;
 
+  public static final int rollerCanId = 13; // new robot (students, 2026-11-03)
+
   // TODO: verify on the new robot in Phase 3 (values from the 2026 robot on main)
-  public static final int rollerCanId = 20;
   public static final boolean rollerInverted = true; // positive volts = intake
   public static final int rollerCurrentLimit = 60; // stator amps
 

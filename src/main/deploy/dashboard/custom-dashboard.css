@@ -73,6 +73,47 @@ h2 {
   height: 100%;
 }
 
+.arm-body {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.arm-view {
+  width: 240px;
+  height: 165px;
+  background: #0c1017;
+  border-radius: 8px;
+}
+.arm-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.shooter-view {
+  display: block;
+  width: 100%;
+  max-width: 360px;
+  margin-top: 12px;
+  aspect-ratio: 360 / 220;
+  background: #0c1017;
+  border-radius: 8px;
+}
+.shooter-stats {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+.shooter-stats .big-number {
+  font-size: 1.8rem;
+}
+.shooter-note {
+  margin: 8px 0 0;
+  color: #6b7686;
+  font-size: 0.7rem;
+}
 .spindexer-body {
   margin-top: 16px;
   display: flex;

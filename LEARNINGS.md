@@ -22,8 +22,8 @@ Legend: [ ] not yet · [~] seen, still shaky · [x] understood
 - [~] C16 · Current limits and safety (2026-10-10, Phase 2 step 4)
 - [ ] C17 · Encoders, gear ratios, and zero offsets
 - [~] C18 · Open-loop vs. closed-loop control (2026-10-10, Phase 2 step 7)
-- [ ] C19 · PID feedback control
-- [ ] C20 · Feedforward
+- [~] C19 · PID feedback control (2026-11-03, Phase 6)
+- [~] C20 · Feedforward (2026-11-03, Phase 6)
 - [ ] C21 · Tuning a mechanism
 - [ ] C22 · System identification (SysId)
 - [ ] C23 · Motion profiles
@@ -39,7 +39,7 @@ Legend: [ ] not yet · [~] seen, still shaky · [x] understood
 - [ ] C33 · Mechanism state in autonomous
 - [~] C34 · Rollers and indexers (2026-10-21, Phase 3 step 5)
 - [ ] C35 · Flywheels (velocity control)
-- [ ] C36 · Arms and elevators (position control)
+- [~] C36 · Arms and elevators (position control) (2026-11-03, Phase 6)
 - [ ] C37 · Superstructure coordination
 - [ ] C46 · Turrets
 - [ ] C38 · Heading lock and auto-aim
@@ -121,6 +121,10 @@ Legend: [ ] not yet · [~] seen, still shaky · [x] understood
 - 2026-10-28: Wrote SpindexerIO mostly on their own by copying IntakeRollerIO and adding `positionRad`. Java naming rules were the main stumbling block: package path must match folders exactly (typed `subsystem` instead of `subsystems`, made the folder `Spindexer` with a capital S), the type name must match the file name (`spindexerIO`), and VS Code's auto-generated stub class was left above the paste. They fixed all 5 after one review. Claude finished the last 2 (missing braces, leftover comment) when asked.
 ### C16 · Current limits / C15 · Brake vs. coast (Phase 3 step 5)
 - 2026-10-28: While reading the SpindexerIOSpark code Claude wrote, they asked "what is amp cap" and "what is coast." Explained amps as water through a hose (a stalled motor gulps 100+ A → heat, brownout, tripped breaker) and coast vs. brake as stopping pedaling vs. squeezing bike brakes, with a table of drive (brake) vs. intake/spindexer (coast). They asked for "just tell us what to do" on the REV SPARK MAX plug, so Claude gave the full file.
+### C36 · Arms / C19 · PID / C20 · Feedforward (Phase 6)
+- 2026-11-03: Supplied the real arm facts themselves (NEO/SPARK MAX, CAN 12, 2026 gearing, absolute encoder) and measured angles in radians (stowed 0, retracted 1.538, extended 2.376; "level is extended"). Asked whether to use the SPARK MAX's built-in PID, a good instinct; the trade-off was explained. Predicted that with all gains at 0 "nothing will move because we haven't set the gains." Correct: no volts. Clarified that gravity still acts, so an arm off its hard stop would droop. Claude wrote the arm code ("for the sake of time"); the student is to write the bindings.
+- 2026-11-03: The student wrote the arm bindings their own way, ahead of plan: left trigger = `intakeRoller.intake().alongWith(intakeArm.extend())`, default `retract()` (C10). Tuning step 1: set kP = 2 and observed "it went too low" (the arm sagged below the target with P only). Used this to introduce kG: P only pushes when there's error, so gravity wins until the error gets big enough.
+- 2026-11-03: After adding kG, the arm reached the target but was "too slow for our liking." Next: raise kP for speed and watch for overshoot/wobble (then kD).
 
 ## Tutorial feedback
 - 2026-10-07 (Phase 0): Student wanted to move fast through setup ("skip this," "its already running"). The setup steps could be shorter for students who already have the sim running.

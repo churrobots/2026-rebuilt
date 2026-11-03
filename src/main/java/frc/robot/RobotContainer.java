@@ -27,10 +27,22 @@ import frc.robot.subsystems.intake.IntakeRoller;
 import frc.robot.subsystems.intake.IntakeRollerIO;
 import frc.robot.subsystems.intake.IntakeRollerIOSim;
 import frc.robot.subsystems.intake.IntakeRollerIOTalonFX;
+import frc.robot.subsystems.intake.IntakeArm;
+import frc.robot.subsystems.intake.IntakeArmIO;
+import frc.robot.subsystems.intake.IntakeArmIOSim;
+import frc.robot.subsystems.intake.IntakeArmIOSpark;
 import frc.robot.subsystems.spindexer.Spindexer;
 import frc.robot.subsystems.spindexer.SpindexerIO;
 import frc.robot.subsystems.spindexer.SpindexerIOSim;
 import frc.robot.subsystems.spindexer.SpindexerIOSpark;
+import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.shooter.ShooterIO;
+import frc.robot.subsystems.shooter.ShooterIOSim;
+import frc.robot.subsystems.shooter.ShooterIOTalonFX;
+import frc.robot.subsystems.feeder.Feeder;
+import frc.robot.subsystems.feeder.FeederIO;
+import frc.robot.subsystems.feeder.FeederIOSim;
+import frc.robot.subsystems.feeder.FeederIOTalonFX;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
@@ -51,7 +63,10 @@ public class RobotContainer {
   // Subsystems
   private final Drive drive;
   private final IntakeRoller intakeRoller;
+  private final IntakeArm intakeArm;
   private final Spindexer spindexer;
+  private final Shooter shooter;
+  private final Feeder feeder;
   private final Vision vision;
 
   // Tutorial: how many times B has been pressed
@@ -80,7 +95,10 @@ public class RobotContainer {
             new ModuleIOKraken(2, "BackLeft"),
             new ModuleIOKraken(3, "BackRight"));
         intakeRoller = new IntakeRoller(new IntakeRollerIOTalonFX());
+        intakeArm = new IntakeArm(new IntakeArmIOSpark());
         spindexer = new Spindexer(new SpindexerIOSpark());
+        shooter = new Shooter(new ShooterIOTalonFX());
+        feeder = new Feeder(new FeederIOTalonFX());
         vision = new Vision(
             drive::addVisionMeasurement,
             new VisionIOPhotonVision(cameraFrontRight, robotToCameraFrontRight),
@@ -99,7 +117,10 @@ public class RobotContainer {
             new ModuleIOSim(),
             new ModuleIOSim());
         intakeRoller = new IntakeRoller(new IntakeRollerIOSim());
+        intakeArm = new IntakeArm(new IntakeArmIOSim());
         spindexer = new Spindexer(new SpindexerIOSim());
+        shooter = new Shooter(new ShooterIOSim());
+        feeder = new Feeder(new FeederIOSim());
         vision = new Vision(
             drive::addVisionMeasurement,
             new VisionIOPhotonVisionSim(cameraFrontRight, robotToCameraFrontRight, drive::getPose),
@@ -121,14 +142,24 @@ public class RobotContainer {
             },
             new ModuleIO() {
             });
-        intakeRoller = new IntakeRoller(new IntakeRollerIO() {});
-        spindexer = new Spindexer(new SpindexerIO() {});
+        intakeRoller = new IntakeRoller(new IntakeRollerIO() {
+        });
+        intakeArm = new IntakeArm(new IntakeArmIO() {
+        });
+        spindexer = new Spindexer(new SpindexerIO() {
+        });
+        shooter = new Shooter(new ShooterIO() {});
+        feeder = new Feeder(new FeederIO() {});
         vision = new Vision(
             drive::addVisionMeasurement,
-            new VisionIO() {},
-            new VisionIO() {},
-            new VisionIO() {},
-            new VisionIO() {});
+            new VisionIO() {
+            },
+            new VisionIO() {
+            },
+            new VisionIO() {
+            },
+            new VisionIO() {
+            });
         break;
     }
 
@@ -164,16 +195,17 @@ public class RobotContainer {
             () -> -controller.getLeftX(),
             () -> -controller.getRightX()));
 
-    // Lock to 0° when A button is held
+    // Hold A: face 0° AND spin up the flywheel, both at once
     controller
         .a()
         .whileTrue(
             DriveCommands.joystickDriveAtAngle(
-                drive,
-                () -> -controller.getLeftY(),
-                () -> -controller.getLeftX(),
-                () -> Rotation2d.kZero,
-                () -> false));
+                    drive,
+                    () -> -controller.getLeftY(),
+                    () -> -controller.getLeftX(),
+                    () -> Rotation2d.kZero,
+                    () -> false)
+                .alongWith(shooter.shoot()));
 
     // Switch to X pattern when X button is pressed
     controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
@@ -181,9 +213,15 @@ public class RobotContainer {
     // Reset heading: point the robot away from you and press Back
     controller.back().onTrue(DriveCommands.resetHeading(drive));
 
-    // Intake roller: stop by default, intake on left trigger, outtake on left bumper
+    // Intake roller: stop by default, intake on left trigger, outtake on left
+    // bumper
     intakeRoller.setDefaultCommand(intakeRoller.stop());
-    controller.leftTrigger().whileTrue(intakeRoller.intake());
+
+    Command runIntake = intakeRoller.intake().alongWith(intakeArm.extend());
+    
+    intakeArm.setDefaultCommand(intakeArm.retract());
+
+    controller.leftTrigger().whileTrue(runIntake);
     controller.leftBumper().whileTrue(intakeRoller.outtake());
     // Panic button: tap Y to spit for 1 second
     controller.y().onTrue(intakeRoller.outtake().withTimeout(1.0));
@@ -192,7 +230,18 @@ public class RobotContainer {
     spindexer.setDefaultCommand(spindexer.stop());
     controller.rightBumper().whileTrue(spindexer.feed());
     controller.povUp().whileTrue(spindexer.unjam());
-    
+
+    // Shooter idles by default (quicker to spin up); feeder stops by default.
+    // Hold right trigger: the feeder pushes pieces into the flywheel.
+    shooter.setDefaultCommand(shooter.idle());
+    feeder.setDefaultCommand(feeder.stop());
+    controller.rightTrigger().whileTrue(feeder.feed().alongWith(spindexer.feed()));
+
+    // Intake arm
+    // 👉 YOUR TURN: give the arm a default command (retract) and bind extend /
+    // retract /
+    // stow to buttons (free: D-pad down, left, right). Delete this comment when
+    // done.
 
     // Tutorial: count B presses (onTrue runs once per press)
     controller
