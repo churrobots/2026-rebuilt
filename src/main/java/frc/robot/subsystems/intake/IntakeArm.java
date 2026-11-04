@@ -5,6 +5,7 @@ import static frc.robot.subsystems.intake.IntakeArmConstants.*;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
@@ -76,5 +77,30 @@ public class IntakeArm extends SubsystemBase {
   /** Tucks the intake all the way in. */
   public Command stow() {
     return goToAngle(stowedRad);
+  }
+
+  /**
+   * Swings the arm back and forth between near-extended and near-stowed while it runs, pushing
+   * leftover balls up into the spindexer (like the 2026 robot did while shooting).
+   *
+   * <p>The start time is saved when the command STARTS. (The 2026 version saved it when the
+   * command was created at robot boot, so its "elapsed time" was already huge on the first shot.)
+   */
+  public Command pulse() {
+    double[] startTime = {0.0};
+    return startRun(
+        () -> startTime[0] = Timer.getFPGATimestamp(),
+        () -> targetRad = pulseAngle(Timer.getFPGATimestamp() - startTime[0]));
+  }
+
+  /**
+   * Where the pulse should be, this many seconds in. A sine wave goes smoothly out and back;
+   * stretching it a little and then clamping it makes short flat spots at each end.
+   */
+  private static double pulseAngle(double seconds) {
+    double wave = (Math.sin(2 * Math.PI * seconds / pulsePeriodSeconds) + 1) / 2; // 0 to 1
+    double stretched = (wave - 0.5) * (1 + pulseFlatPercent) + 0.5;
+    double fraction = MathUtil.clamp(stretched, 0.0, 1.0);
+    return pulseInRad + (pulseOutRad - pulseInRad) * fraction;
   }
 }

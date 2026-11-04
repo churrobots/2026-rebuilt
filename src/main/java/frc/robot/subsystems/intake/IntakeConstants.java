@@ -17,4 +17,6 @@ public class IntakeConstants {
   // 0.113 V per rot/s, that's about 48 rot/s x 0.113 = 5.5 V. Tune in sim.
   public static final double rollerIntakeVolts = 6.0;
   public static final double rollerOuttakeVolts = -6.0;
+  // While shooting: a gentle inward spin so balls in the intake don't roll back out (2026).
+  public static final double rollerKeepInsideVolts = 1.5;
 }

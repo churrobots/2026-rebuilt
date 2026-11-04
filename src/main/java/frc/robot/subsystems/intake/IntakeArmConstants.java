@@ -49,4 +49,13 @@ public class IntakeArmConstants {
   public static final double kD = 0.0; // volts per rad/sec of error change
 
   public static final double atTargetToleranceRad = 0.05; // about 3 degrees
+
+  // "Pulse" while shooting (like 2026): the arm swings back and forth between almost-extended
+  // and almost-stowed, which pushes the balls left in the intake up into the spindexer.
+  // These match 2026's sweep (19% to 91% of the way from extended to stowed). TODO: tune.
+  public static final double pulseOutRad = 1.93; // the "out" end, near extended
+  public static final double pulseInRad = 0.22; // the "in" end, near stowed
+  public static final double pulsePeriodSeconds = 1.0; // one full out-and-back
+  // Hold still for a moment at each end, so the gears don't slam back and forth.
+  public static final double pulseFlatPercent = 0.1;
 }

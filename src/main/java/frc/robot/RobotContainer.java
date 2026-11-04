@@ -10,9 +10,10 @@ package frc.robot;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
@@ -47,7 +48,7 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
-import org.littletonrobotics.junction.Logger;
+import frc.robot.util.AimHelper;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -69,8 +70,9 @@ public class RobotContainer {
   private final Feeder feeder;
   private final Vision vision;
 
-  // Tutorial: how many times B has been pressed
-  private int bPressCount = 0;
+  // True while the right trigger (shoot) is held, so aiming can x-lock the
+  // wheels.
+  private boolean shootHeld = false;
 
   // Sim-only walls around the field and hubs
   private final FieldBoundaries fieldBoundaries = new FieldBoundaries();
@@ -148,8 +150,10 @@ public class RobotContainer {
         });
         spindexer = new Spindexer(new SpindexerIO() {
         });
-        shooter = new Shooter(new ShooterIO() {});
-        feeder = new Feeder(new FeederIO() {});
+        shooter = new Shooter(new ShooterIO() {
+        });
+        feeder = new Feeder(new FeederIO() {
+        });
         vision = new Vision(
             drive::addVisionMeasurement,
             new VisionIO() {
@@ -195,77 +199,95 @@ public class RobotContainer {
             () -> -controller.getLeftX(),
             () -> -controller.getRightX()));
 
-    // Hold A: face 0° AND spin up the flywheel, both at once
+    // ===== Same controls as the 2026 robot =====
+    // (Our shooter faces the BACK, so every aim turns the robot's back to the
+    // target.)
+
+    // A (hold): auto-aim. Turn to the hub and spin up for that distance (SHOOT), or
+    // turn to
+    // our wall from the neutral zone (PASS). You can still drive with the left
+    // stick.
     controller
         .a()
         .whileTrue(
-            DriveCommands.joystickDriveAtAngle(
-                    drive,
-                    () -> -controller.getLeftY(),
-                    () -> -controller.getLeftX(),
-                    () -> Rotation2d.kZero,
-                    () -> false)
-                .alongWith(shooter.shoot()));
+            DriveCommands.autoAim(
+                drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> shootHeld)
+                .alongWith(shooter.spinAt(() -> AimHelper.aimRpm(drive.getPose(), alliance()))));
 
-    // Auto-aim: hold right bumper to keep driving while the robot turns its back to our hub
+    // Y / X / B (hold): preset shots for when vision is off. Face a set angle and
+    // spin up for
+    // a set distance. Angles are the 2026 ones (blue, red); AimHelper turns them
+    // 180°.
+    controller.y().whileTrue(presetShot(0, 180, 10.5)); // tower
+    controller.x().whileTrue(presetShot(-90, 90, 11.5)); // left trench
+    controller.b().whileTrue(presetShot(100, -100, 11.5)); // right trench
+
+    // Right bumper (hold): turn to the closest diagonal to drive over the bump.
     controller
         .rightBumper()
         .whileTrue(
-            DriveCommands.aimAtHub(
-                drive, () -> -controller.getLeftY(), () -> -controller.getLeftX()));
+            DriveCommands.joystickDriveAtAngle(
+                drive,
+                () -> -controller.getLeftY(),
+                () -> -controller.getLeftX(),
+                () -> AimHelper.bumpHeading(drive.getRotation()),
+                () -> false));
 
-    // Switch to X pattern when X button is pressed
-    controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
-
-    // Reset heading: point the robot away from you and press Back
+    // Back: reset heading. Point the robot away from you and press it.
     controller.back().onTrue(DriveCommands.resetHeading(drive));
 
-    // Intake roller: stop by default, intake on left trigger, outtake on left
-    // bumper
+    // Left trigger (hold): intake. Arm out + roller in.
+    // Left bumper (hold): outtake. Arm out + roller out.
+    // D-pad down (tap): stow the intake on/off.
     intakeRoller.setDefaultCommand(intakeRoller.stop());
-
-    Command runIntake = intakeRoller.intake().alongWith(intakeArm.extend());
-    
     intakeArm.setDefaultCommand(intakeArm.retract());
+    controller.leftTrigger().whileTrue(intakeRoller.intake().alongWith(intakeArm.extend()));
+    controller.leftBumper().whileTrue(intakeRoller.outtake().alongWith(intakeArm.extend()));
+    controller.povDown().toggleOnTrue(intakeArm.stow().alongWith(intakeRoller.stop()));
 
-    controller.leftTrigger().whileTrue(runIntake);
-    controller.leftBumper().whileTrue(intakeRoller.outtake());
-    // Panic button: tap Y to spit for 1 second
-    controller.y().onTrue(intakeRoller.outtake().withTimeout(1.0));
-
-    // Spindexer: stop by default, backwards on D-pad up (it feeds with the feeder on right trigger)
-    spindexer.setDefaultCommand(spindexer.stop());
-    controller.povUp().whileTrue(spindexer.unjam());
-
-    // Shooter idles by default (quicker to spin up); feeder stops by default.
-    // Hold right trigger: the feeder pushes pieces into the flywheel.
+    // Right trigger (hold): shoot (like 2026). Feeder + spindexer push pieces into
+    // the
+    // flywheel, the intake arm pulses between out and stowed to push leftover balls
+    // up into
+    // the spindexer, and the roller gently keeps them in. While it's held, aiming
+    // x-locks the
+    // wheels once it's on target.
     shooter.setDefaultCommand(shooter.idle());
     feeder.setDefaultCommand(feeder.stop());
-    controller.rightTrigger().whileTrue(feeder.feed().alongWith(spindexer.feed()));
-
-    // Intake arm
-    // 👉 YOUR TURN: give the arm a default command (retract) and bind extend /
-    // retract /
-    // stow to buttons (free: D-pad down, left, right). Delete this comment when
-    // done.
-
-    // Tutorial: count B presses (onTrue runs once per press)
+    spindexer.setDefaultCommand(spindexer.stop());
     controller
-        .b()
-        .onTrue(
-            Commands.runOnce(
-                () -> {
-                  bPressCount++;
-                  Logger.recordOutput("Tutorial/BPressCount", bPressCount);
-                }));
-
-    // Tutorial: show whether B is held (whileTrue runs until release)
-    controller
-        .b()
+        .rightTrigger()
         .whileTrue(
-            Commands.startEnd(
-                () -> Logger.recordOutput("Tutorial/BHeld", true),
-                () -> Logger.recordOutput("Tutorial/BHeld", false)));
+            feeder
+                .feed()
+                .alongWith(spindexer.feed(), intakeArm.pulse(), intakeRoller.keepInside())
+                .beforeStarting(() -> shootHeld = true)
+                .finallyDo(() -> shootHeld = false));
+
+    // Extra (2026 didn't have this): D-pad up (hold) runs the spindexer backwards
+    // to unjam.
+    controller.povUp().whileTrue(spindexer.unjam());
+  }
+
+  /** Our alliance, or blue if the Driver Station hasn't told us yet. */
+  private Alliance alliance() {
+    return DriverStation.getAlliance().orElse(Alliance.Blue);
+  }
+
+  /**
+   * A preset shot: face a set heading (from the 2026 robot's blue/red angles) and
+   * spin the
+   * flywheel for a set distance, while still driving with the left stick.
+   */
+  private Command presetShot(double heading2026BlueDeg, double heading2026RedDeg, double feet) {
+    double rpm = AimHelper.shooterRpmForDistance(Units.feetToMeters(feet));
+    return DriveCommands.joystickDriveAtAngle(
+        drive,
+        () -> -controller.getLeftY(),
+        () -> -controller.getLeftX(),
+        () -> AimHelper.presetHeading(heading2026BlueDeg, heading2026RedDeg, alliance()),
+        () -> shootHeld)
+        .alongWith(shooter.spinAt(rpm));
   }
 
   /** Called every loop, only in simulation. */

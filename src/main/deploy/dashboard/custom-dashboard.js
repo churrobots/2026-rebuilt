@@ -34,13 +34,14 @@ const FEEDER_VELOCITY_TOPIC = "/AdvantageKit/Feeder/VelocityRadPerSec";
 const SHOOTER_GAUGE_MAX_RPM = 6000; // a Kraken tops out around here
 // Real wheels spin way too fast to see, so the drawing spins them slowed down.
 const SHOOTER_DRAW_SLOWDOWN = 0.002; // drawn rad/sec per RPM
-// Auto-aim (DriveCommands.aimAtHub / joystickDriveAtAngle).
+// Auto-aim (DriveCommands.autoAim / joystickDriveAtAngle).
 const AIM_ACTIVE_TOPIC = "/AdvantageKit/RealOutputs/Aim/Active";
 const AIM_LOCKED_TOPIC = "/AdvantageKit/RealOutputs/Aim/Locked";
 const AIM_DISTANCE_TOPIC = "/AdvantageKit/RealOutputs/Aim/DistanceMeters";
+const AIM_MODE_TOPIC = "/AdvantageKit/RealOutputs/Aim/Mode"; // "SHOOT" or "PASS"
 const AIM_TARGET_TOPIC = "/AdvantageKit/RealOutputs/Aim/TargetHeadingDeg";
 const AIM_ACTUAL_TOPIC = "/AdvantageKit/RealOutputs/Aim/ActualHeadingDeg";
-const AIM_TOPICS = [AIM_ACTIVE_TOPIC, AIM_LOCKED_TOPIC, AIM_DISTANCE_TOPIC, AIM_TARGET_TOPIC, AIM_ACTUAL_TOPIC];
+const AIM_TOPICS = [AIM_ACTIVE_TOPIC, AIM_LOCKED_TOPIC, AIM_DISTANCE_TOPIC, AIM_TARGET_TOPIC, AIM_ACTUAL_TOPIC, AIM_MODE_TOPIC];
 // Where the intake sits on the robot, in meters (from last year's robot drawing in
 // PathPlanner's settings.json on main): centered 0.58 m in front, 0.8 m wide, 0.29 m deep.
 const INTAKE = { centerX: 0.58, width: 0.8, depth: 0.29 };
@@ -216,7 +217,8 @@ export class CustomDashboard extends HTMLElement {
             </div>
             <output class="status-light aim-active">NOT AIMING</output>
             <div class="stat-row">
-              <div><p class="eyebrow">Distance to hub (m)</p><output class="big-number aim-distance">—</output></div>
+              <div><p class="eyebrow">Mode</p><output class="big-number aim-mode">—</output></div>
+              <div><p class="eyebrow aim-distance-label">Distance (m)</p><output class="big-number aim-distance">—</output></div>
             </div>
             <div class="stat-row">
               <div><p class="eyebrow">Target heading</p><output class="big-number aim-target">—</output></div>
@@ -736,6 +738,8 @@ export class CustomDashboard extends HTMLElement {
     const targetText = root.querySelector(".aim-target");
     const actualText = root.querySelector(".aim-actual");
     const lockedLight = root.querySelector(".aim-locked");
+    const modeText = root.querySelector(".aim-mode");
+    const distanceLabel = root.querySelector(".aim-distance-label");
 
     const render = () => {
       const active = core.getTopic(AIM_ACTIVE_TOPIC)?.value === true;
@@ -749,6 +753,10 @@ export class CustomDashboard extends HTMLElement {
       distanceText.textContent = active && Number.isFinite(distance) ? distance.toFixed(2) : "—";
       targetText.textContent = active && Number.isFinite(target) ? `${target.toFixed(1)}°` : "—";
       actualText.textContent = active && Number.isFinite(actual) ? `${actual.toFixed(1)}°` : "—";
+      // SHOOT = aiming at our hub; PASS = aiming at our wall from the neutral zone.
+      const mode = core.getTopic(AIM_MODE_TOPIC)?.value;
+      modeText.textContent = active && typeof mode === "string" ? mode : "—";
+      distanceLabel.textContent = active && mode === "PASS" ? "To our wall (m)" : "To our hub (m)";
       lockedLight.textContent = locked ? "AIM LOCKED" : "NOT LOCKED";
       lockedLight.classList.toggle("on", locked);
     };

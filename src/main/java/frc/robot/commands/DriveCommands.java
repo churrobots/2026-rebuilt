@@ -29,6 +29,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
@@ -205,9 +206,14 @@ public class DriveCommands {
 
   /**
    * Hold-to-aim: the driver still drives with the left stick, and the robot turns its back
-   * (the shooter) toward our hub. The math lives in AimHelper.
+   * (the shooter) toward the target. In our alliance zone the target is our hub (SHOOT).
+   * Anywhere else it's our wall (PASS). The math and the decision live in AimHelper.
+   *
+   * <p>While {@code shooting} is true and we're aimed at the hub, the wheels x-lock so nobody
+   * can push us off target (like 2026). Passes don't x-lock.
    */
-  public static Command aimAtHub(Drive drive, DoubleSupplier xSupplier, DoubleSupplier ySupplier) {
+  public static Command autoAim(
+      Drive drive, DoubleSupplier xSupplier, DoubleSupplier ySupplier, BooleanSupplier shooting) {
     return joystickDriveAtAngle(
             drive,
             xSupplier,
@@ -215,10 +221,15 @@ public class DriveCommands {
             () -> {
               Alliance alliance = DriverStation.getAlliance().orElse(Alliance.Blue);
               Pose2d pose = drive.getPose();
-              Logger.recordOutput("Aim/DistanceMeters", AimHelper.distanceToHub(pose, alliance));
-              return AimHelper.shootHeading(pose, alliance);
+              Logger.recordOutput("Aim/Mode", AimHelper.aimMode(pose, alliance).name());
+              Logger.recordOutput("Aim/DistanceMeters", AimHelper.aimDistance(pose, alliance));
+              return AimHelper.aimHeading(pose, alliance);
             },
-            () -> false)
+            () ->
+                shooting.getAsBoolean()
+                    && AimHelper.aimMode(
+                            drive.getPose(), DriverStation.getAlliance().orElse(Alliance.Blue))
+                        == AimHelper.AimMode.SHOOT)
         .beforeStarting(() -> Logger.recordOutput("Aim/Active", true))
         .finallyDo(() -> Logger.recordOutput("Aim/Active", false));
   }

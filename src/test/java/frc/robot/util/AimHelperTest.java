@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import org.junit.jupiter.api.Test;
 
@@ -50,5 +51,55 @@ class AimHelperTest {
     assertEquals(2.062, AimHelper.distanceToHub(robot, Alliance.Red), 0.01);
     assertSameHeading(180, AimHelper.angleToHub(robot, Alliance.Red)); // hub is toward −x
     assertSameHeading(0, AimHelper.shootHeading(robot, Alliance.Red)); // back faces the hub
+  }
+
+  @Test
+  void rpmTableUsesTheRowsAndFillsTheGaps() {
+    // Right on a row: 159" → 3400 RPM.
+    assertEquals(3400, AimHelper.shooterRpmForDistance(Units.inchesToMeters(159)), 1);
+    // Halfway between 135" (3100) and 159" (3400) → halfway between: 3250.
+    assertEquals(3250, AimHelper.shooterRpmForDistance(Units.inchesToMeters(147)), 1);
+  }
+
+  @Test
+  void rpmTableHoldsItsEndsOutsideTheRange() {
+    // Closer than the first row or farther than the last: use the end value.
+    assertEquals(2800, AimHelper.shooterRpmForDistance(Units.inchesToMeters(40)), 1);
+    assertEquals(3800, AimHelper.shooterRpmForDistance(Units.inchesToMeters(300)), 1);
+  }
+
+  @Test
+  void inOurZoneWeShootAtTheHub() {
+    // Blue robot at x = 2 m (zone line is 170" ≈ 4.32 m): SHOOT, same heading as before.
+    Pose2d robot = new Pose2d(2.0, 6.0, Rotation2d.kZero);
+    assertEquals(AimHelper.AimMode.SHOOT, AimHelper.aimMode(robot, Alliance.Blue));
+    assertSameHeading(
+        AimHelper.shootHeading(robot, Alliance.Blue).getDegrees(),
+        AimHelper.aimHeading(robot, Alliance.Blue));
+  }
+
+  @Test
+  void inTheNeutralZoneWePassToOurWall() {
+    // Blue robot at mid-field: PASS, back to the blue wall means the front faces 0°.
+    Pose2d blue = new Pose2d(8.0, 2.0, Rotation2d.kZero);
+    assertEquals(AimHelper.AimMode.PASS, AimHelper.aimMode(blue, Alliance.Blue));
+    assertSameHeading(0, AimHelper.aimHeading(blue, Alliance.Blue));
+    // Red robot at mid-field: back to the red wall means the front faces 180°.
+    Pose2d red = new Pose2d(8.0, 2.0, Rotation2d.kZero);
+    assertEquals(AimHelper.AimMode.PASS, AimHelper.aimMode(red, Alliance.Red));
+    assertSameHeading(180, AimHelper.aimHeading(red, Alliance.Red));
+  }
+
+  @Test
+  void presetShotsTurnTheBackToThe2026Direction() {
+    // 2026 tower shot faced 0° on blue with its FRONT shooter; our back faces there instead.
+    assertSameHeading(180, AimHelper.presetHeading(0, 180, Alliance.Blue));
+    assertSameHeading(0, AimHelper.presetHeading(0, 180, Alliance.Red));
+  }
+
+  @Test
+  void bumpHeadingPicksTheClosestDiagonal() {
+    assertSameHeading(45, AimHelper.bumpHeading(Rotation2d.fromDegrees(10)));
+    assertSameHeading(-135, AimHelper.bumpHeading(Rotation2d.fromDegrees(-170)));
   }
 }
