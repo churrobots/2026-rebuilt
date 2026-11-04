@@ -34,6 +34,13 @@ const FEEDER_VELOCITY_TOPIC = "/AdvantageKit/Feeder/VelocityRadPerSec";
 const SHOOTER_GAUGE_MAX_RPM = 6000; // a Kraken tops out around here
 // Real wheels spin way too fast to see, so the drawing spins them slowed down.
 const SHOOTER_DRAW_SLOWDOWN = 0.002; // drawn rad/sec per RPM
+// Auto-aim (DriveCommands.aimAtHub / joystickDriveAtAngle).
+const AIM_ACTIVE_TOPIC = "/AdvantageKit/RealOutputs/Aim/Active";
+const AIM_LOCKED_TOPIC = "/AdvantageKit/RealOutputs/Aim/Locked";
+const AIM_DISTANCE_TOPIC = "/AdvantageKit/RealOutputs/Aim/DistanceMeters";
+const AIM_TARGET_TOPIC = "/AdvantageKit/RealOutputs/Aim/TargetHeadingDeg";
+const AIM_ACTUAL_TOPIC = "/AdvantageKit/RealOutputs/Aim/ActualHeadingDeg";
+const AIM_TOPICS = [AIM_ACTIVE_TOPIC, AIM_LOCKED_TOPIC, AIM_DISTANCE_TOPIC, AIM_TARGET_TOPIC, AIM_ACTUAL_TOPIC];
 // Where the intake sits on the robot, in meters (from last year's robot drawing in
 // PathPlanner's settings.json on main): centered 0.58 m in front, 0.8 m wide, 0.29 m deep.
 const INTAKE = { centerX: 0.58, width: 0.8, depth: 0.29 };
@@ -203,6 +210,35 @@ export class CustomDashboard extends HTMLElement {
               <div><p class="eyebrow">Held (whileTrue)</p><output class="status-light b-held">NOT HELD</output></div>
             </div>
           </section>
+          <section class="card" aria-labelledby="aim-heading">
+            <div class="card-heading">
+              <div><p class="eyebrow">Drivetrain</p><h1 id="aim-heading">Aim</h1></div>
+            </div>
+            <output class="status-light aim-active">NOT AIMING</output>
+            <div class="stat-row">
+              <div><p class="eyebrow">Distance to hub (m)</p><output class="big-number aim-distance">—</output></div>
+            </div>
+            <div class="stat-row">
+              <div><p class="eyebrow">Target heading</p><output class="big-number aim-target">—</output></div>
+              <div><p class="eyebrow">Actual heading</p><output class="big-number aim-actual">—</output></div>
+            </div>
+            <output class="status-light aim-locked">NOT LOCKED</output>
+          </section>
+          <section class="card" aria-labelledby="aim-math-heading">
+            <div class="card-heading">
+              <div><p class="eyebrow">Debug</p><h1 id="aim-math-heading">Debug: Aim math</h1></div>
+            </div>
+            <p class="eyebrow">Robot → blue hub</p>
+            <output class="aim-math-positions">Waiting for pose…</output>
+            <div class="stat-row">
+              <div><p class="eyebrow">dx (m)</p><output class="big-number aim-math-dx">—</output></div>
+              <div><p class="eyebrow">dy (m)</p><output class="big-number aim-math-dy">—</output></div>
+            </div>
+            <div class="stat-row">
+              <div><p class="eyebrow">Distance (m)</p><output class="big-number aim-math-distance">—</output></div>
+              <div><p class="eyebrow">atan2 angle</p><output class="big-number aim-math-angle">—</output></div>
+            </div>
+          </section>
         </main>`;
     }
     if (this.#core && !this.#started) this.#start(this.#core);
@@ -240,6 +276,8 @@ export class CustomDashboard extends HTMLElement {
     this.#startCameraCard(core);
     this.#startCopyCard(core);
     this.#startAutoCard(core);
+    this.#startAimCard(core);
+    this.#startAimMathCard(core);
   }
 
   /**
@@ -690,6 +728,83 @@ export class CustomDashboard extends HTMLElement {
     render();
   }
 
+  /** Shows auto-aim: is it on, how far the hub is, target vs. actual heading, and AIM LOCKED. */
+  #startAimCard(core) {
+    const root = this.shadowRoot;
+    const activeLight = root.querySelector(".aim-active");
+    const distanceText = root.querySelector(".aim-distance");
+    const targetText = root.querySelector(".aim-target");
+    const actualText = root.querySelector(".aim-actual");
+    const lockedLight = root.querySelector(".aim-locked");
+
+    const render = () => {
+      const active = core.getTopic(AIM_ACTIVE_TOPIC)?.value === true;
+      const locked = active && core.getTopic(AIM_LOCKED_TOPIC)?.value === true;
+      const distance = Number(core.getTopic(AIM_DISTANCE_TOPIC)?.value);
+      const target = Number(core.getTopic(AIM_TARGET_TOPIC)?.value);
+      const actual = Number(core.getTopic(AIM_ACTUAL_TOPIC)?.value);
+      activeLight.textContent = active ? "AIMING" : "NOT AIMING";
+      activeLight.classList.toggle("on", active);
+      // The numbers only mean something while the aim button is held.
+      distanceText.textContent = active && Number.isFinite(distance) ? distance.toFixed(2) : "—";
+      targetText.textContent = active && Number.isFinite(target) ? `${target.toFixed(1)}°` : "—";
+      actualText.textContent = active && Number.isFinite(actual) ? `${actual.toFixed(1)}°` : "—";
+      lockedLight.textContent = locked ? "AIM LOCKED" : "NOT LOCKED";
+      lockedLight.classList.toggle("on", locked);
+    };
+
+    /** @param {CustomEvent<DashboardTopic>} event */
+    const topicListener = ({ detail: topic }) => {
+      if (AIM_TOPICS.includes(topic.name)) render();
+    };
+    core.addEventListener("topic", topicListener);
+    this.#cleanup.push(() => core.removeEventListener("topic", topicListener));
+    render();
+  }
+
+  /**
+   * Debug (temporary, auto-aim side track step 2): the trig from the robot to the blue hub,
+   * worked out here from the pose so the student can check their paper predictions.
+   * Remove once AimHelper logs these numbers from the robot (step 5).
+   */
+  #startAimMathCard(core) {
+    const root = this.shadowRoot;
+    const positionsText = root.querySelector(".aim-math-positions");
+    const dxText = root.querySelector(".aim-math-dx");
+    const dyText = root.querySelector(".aim-math-dy");
+    const distanceText = root.querySelector(".aim-math-distance");
+    const angleText = root.querySelector(".aim-math-angle");
+
+    const render = () => {
+      const pose = decodePose2d(core.getTopic(POSE_TOPIC)?.value);
+      // The blue hub is the first box in Field/Hubs: [minX, minY, maxX, maxY].
+      const hubBox = toNumbers(core.getTopic(HUBS_TOPIC)?.value);
+      if (!pose || hubBox.length < 4) return;
+      const hubX = (hubBox[0] + hubBox[2]) / 2;
+      const hubY = (hubBox[1] + hubBox[3]) / 2;
+      const dx = hubX - pose.x;
+      const dy = hubY - pose.y;
+      const angleDeg = (Math.atan2(dy, dx) * 180) / Math.PI;
+      positionsText.textContent =
+        `Robot (${pose.x.toFixed(2)}, ${pose.y.toFixed(2)})  →  hub (${hubX.toFixed(2)}, ${hubY.toFixed(2)})`;
+      dxText.textContent = dx.toFixed(2);
+      dyText.textContent = dy.toFixed(2);
+      distanceText.textContent = Math.hypot(dx, dy).toFixed(2);
+      angleText.textContent = `${angleDeg.toFixed(1)}°`;
+    };
+
+    /** @param {CustomEvent<DashboardTopic>} event */
+    const topicListener = ({ detail: topic }) => {
+      if ([POSE_TOPIC, HUBS_TOPIC].includes(topic.name)) render();
+    };
+    core.addEventListener("topic", topicListener);
+    this.#cleanup.push(() => {
+      core.removeEventListener("topic", topicListener);
+      cancelAnimationFrame(frame);
+    });
+    render();
+  }
+
   /** Shows the B press counter and whether B is held right now. */
   #startButtonCard(core) {
     const root = this.shadowRoot;
@@ -742,6 +857,8 @@ export class CustomDashboard extends HTMLElement {
         hubs: toNumbers(core.getTopic(HUBS_TOPIC)?.value),
         cameraStates: this.#cameraStates,
         intakeState: readRoller(core).state,
+        aiming: core.getTopic(AIM_ACTIVE_TOPIC)?.value === true,
+        aimLocked: core.getTopic(AIM_LOCKED_TOPIC)?.value === true,
       });
       const speedText = Number.isFinite(speed) ? ` · ${speed.toFixed(2)} m/s` : "";
       poseText.textContent = pose
@@ -756,7 +873,7 @@ export class CustomDashboard extends HTMLElement {
 
     /** @param {CustomEvent<DashboardTopic>} event */
     const topicListener = ({ detail: topic }) => {
-      if ([POSE_TOPIC, ALLIANCE_TOPIC, STATION_TOPIC, SPEED_TOPIC, HUBS_TOPIC, FIELD_SIZE_TOPIC, ROBOT_SIZE_TOPIC, ROLLER_VELOCITY_TOPIC, MAX_DISTANCE_TOPIC].includes(topic.name))
+      if ([POSE_TOPIC, ALLIANCE_TOPIC, STATION_TOPIC, SPEED_TOPIC, HUBS_TOPIC, FIELD_SIZE_TOPIC, ROBOT_SIZE_TOPIC, ROLLER_VELOCITY_TOPIC, MAX_DISTANCE_TOPIC, AIM_ACTIVE_TOPIC, AIM_LOCKED_TOPIC].includes(topic.name))
         scheduleRender();
     };
     core.addEventListener("topic", topicListener);
@@ -777,7 +894,7 @@ export class CustomDashboard extends HTMLElement {
  * @param {DOMRect} bounds
  * @param {{ isRed: boolean, station: number, pose: { x: number, y: number, heading: number } | null }} state
  */
-function drawField(canvas, bounds, { isRed, station, pose, hubs, cameraStates, intakeState }) {
+function drawField(canvas, bounds, { isRed, station, pose, hubs, cameraStates, intakeState, aiming, aimLocked }) {
   const ratio = window.devicePixelRatio || 1;
   const width = Math.max(1, Math.round(bounds.width * ratio));
   const height = Math.max(1, Math.round(bounds.height * ratio));
@@ -847,7 +964,34 @@ function drawField(canvas, bounds, { isRed, station, pose, hubs, cameraStates, i
   );
 
   if (pose) drawCameraViews(context, pose, cameraStates, { isRed, left, top, scale });
+  if (pose && aiming) drawAimLine(context, pose, hubs, aimLocked, { isRed, left, top, scale });
   if (pose) drawRobot(context, pose, intakeState, { isRed, left, top, scale });
+}
+
+/**
+ * While aiming, draws a line from the robot's back (where the shooter is) to our hub.
+ * Yellow while turning, green once AIM LOCKED.
+ */
+function drawAimLine(context, pose, hubs, locked, view) {
+  // Our hub: blue is the first box in Field/Hubs, red the second.
+  const box = hubs.slice(view.isRed ? 4 : 0, view.isRed ? 8 : 4);
+  if (box.length < 4) return;
+  const hub = fieldToScreen((box[0] + box[2]) / 2, (box[1] + box[3]) / 2, view);
+  const half = robotSizeMeters / 2;
+  const back = fieldToScreen(
+    pose.x - Math.cos(pose.heading) * half,
+    pose.y - Math.sin(pose.heading) * half,
+    view,
+  );
+  context.strokeStyle = locked ? "#4ade80" : "#facc15";
+  context.lineWidth = 2;
+  context.setLineDash(locked ? [] : [6, 4]);
+  context.beginPath();
+  context.moveTo(back.x, back.y);
+  context.lineTo(hub.x, hub.y);
+  context.stroke();
+  context.setLineDash([]);
+  context.lineWidth = 1;
 }
 
 /** Draws each hub (goal) as a square: blue hub first, then red. */
@@ -978,6 +1122,9 @@ function drawRobot(context, pose, intakeState, view) {
   context.fillStyle = "#ffffff";
   context.fill();
   context.shadowBlur = 0;
+  // The shooter faces out the back: a yellow bar on the back edge.
+  context.fillStyle = "#facc15";
+  context.fillRect(-size / 2, -size / 4, Math.max(3, size * 0.1), size / 2);
   drawIntake(context, intakeState, view.scale);
   context.restore();
 }

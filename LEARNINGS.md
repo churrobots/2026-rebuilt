@@ -7,7 +7,7 @@ Legend: [ ] not yet · [~] seen, still shaky · [x] understood
 - [~] C01 · The FRC control system (2026-10-20, Phase 3 step 2)
 - [~] C02 · Robot modes and the 20 ms loop (2026-10-07, Phase 1 step 3)
 - [ ] C03 · Java you'll see in robot code
-- [ ] C04 · Units and coordinates
+- [~] C04 · Units and coordinates (2026-10-28, side track step 3)
 - [~] C05 · Git and branches (2026-10-07, Phase 0 step 8)
 - [ ] C06 · Subsystems
 - [~] C07 · Commands and requirements (2026-10-07, Phase 1 step 1)
@@ -42,9 +42,11 @@ Legend: [ ] not yet · [~] seen, still shaky · [x] understood
 - [~] C36 · Arms and elevators (position control) (2026-11-03, Phase 6)
 - [ ] C37 · Superstructure coordination
 - [ ] C46 · Turrets
-- [ ] C38 · Heading lock and auto-aim
+- [~] C38 · Heading lock and auto-aim (2026-10-28, side track step 1)
 - [ ] C39 · Lookup tables and interpolation
 - [ ] C40 · Shoot on the move
+- [x] C47 · Trigonometry for aiming (2026-10-28, side track step 2)
+- [ ] C48 · Choosing a shot: shooting vs. passing
 - [~] C41 · Simulation (2026-10-07, Phase 0 step 3)
 - [~] C42 · NetworkTables and dashboards (2026-10-07, Phase 0 step 5)
 - [ ] C43 · Fault detection and alerts
@@ -113,6 +115,15 @@ Legend: [ ] not yet · [~] seen, still shaky · [x] understood
 - 2026-10-21: Asked "how do CAN IDs work, explain it simply." Re-explained with a classroom analogy (one teacher, students answer only to their own number). Skipped the check question again.
 ### C15 · Motors and motor controllers (inversion)
 - 2026-10-21 (Phase 3, real robot): The right-side drive wheels spun backwards. The student asked Claude to flip only the right drive motors and show where in the code. Asked a sharp follow-up: "does it work by taking the forward direction and adding 180 if the inverse flag is found?" Explained that inversion flips the sign of output and sensor inside the TalonFX (not an angle). Their 180° idea is exactly swerve module optimization (turn 180° + reverse speed), so it was connected to `optimize` in Module.java. Good intuition.
+
+### C38 · Heading lock and auto-aim
+- 2026-10-28 (Auto-aim side track step 1): Seen. Asked what the driver gives up with heading lock vs. a turret. Student answered right away: "independent mobility and the ability to dodge attacks." The rear-shooter +180° part isn't covered yet (step 4).
+
+### C47 · Trigonometry for aiming
+- 2026-10-28 (Auto-aim side track step 2, on paper): Robot (2, 6) → hub (4.60, 4.035): got the distance right on their own ("about 3.26"). Predicted the angle as "-45 about ish" (correct sign, real answer −37°). For the robot-past-the-hub case (7, 6), they got "around 26" from atan(dy/dx) instead of 39°, probably a calculator slip; after the walk-through they explained the atan trap in their own words: "it's not accurate for |theta|>90, it will return 180 at fault." Counts as understood. Then predicted 3 spots before driving: A (2.0, 4.035) → 0°, B (4.6, 7.0) → −90°, C (1.0, 1.0) → 40°. All correct (C is really 40.1°). Drove to all three in sim and the Debug: Aim math card matched ("its correct").
+
+### C04 · Units and coordinates
+- 2026-10-28 (Auto-aim side track step 3): Seen. Explained that the origin is always at the blue wall, so the red hub's x = fieldLength − blueHubX. Student skipped the question ("next step?"), so understanding isn't checked yet. Come back to it in step 5 (red-alliance JUnit case).
 ### C34 · Rollers (spindexer design) / C17 · Gear ratios
 - 2026-10-21 (Phase 3 step 5): Checked the spindexer gearing with mechanical on their own. Was briefly confused about whether "1:1" meant motor-to-spindexer or belt-only. A diagram (motor → gearbox → belt → spindexer) plus the "blender at 5,600 RPM" sanity check helped, and they concluded "gearbox is 15:1 and the drive train is 1:1." The design-on-paper question ("what's the same/different") confused them at first. Turning it into a table of the 4 intake files worked: IO = same, Sim = different, TalonFX IO = different, subsystem = same. Mostly right. The sim is really the same shape with different numbers.
 ### C04 / C25 · Field coordinates and reset heading
@@ -135,5 +146,6 @@ Legend: [ ] not yet · [~] seen, still shaky · [x] understood
 - 2026-10-10 (Phase 2 step 7): Students asked Claude to "humanize" and "code switch": "we are not pros so we dont understand everything." Claude's messages had gotten too long and full of jargon (tables, line numbers, terms like stator/open-loop without explanation). Switched to a shorter, casual, plain-English style.
 - 2026-10-10: Even a one-line exercise with all the pieces given got "write it for us." The students may need a stronger nudge, or a coach's expectation, to type code themselves. Consider asking them to type Claude's line by hand, or to predict before Claude writes.
 - 2026-10-10 (Phase 5): A real debugging session. Students noticed the auto restarting. Claude's hypothesis (heartbeat timeout disables the robot) was tested with a dashboard counter before changing any code, and confirmed (19 restarts). This was a good live example of "measure first, then fix." Next: change one variable at a time (camera streams off). → A coach found the real cause: a second open dashboard was sending "disabled." Claude's guess about *why* was wrong. Worth telling students: the counter proved *what* happened, and the *why* still needed more digging.
+- 2026-10-28 (Auto-aim side track step 4): A coach asked Claude to "ask less questions and get into implementation." Steps 1–4 had a lot of back-and-forth before any code, and the student had started skipping questions ("next step?"). Consider trimming the ask-don't-tell questions in steps 3–4 to one each, and reaching code (AimHelper) sooner.
 - 2026-10-21 (Phase 3 step 5): The abstract "what's the same, what's different?" design prompt didn't land. A concrete table of the files they already wrote, with "same or different?" for each, worked right away. Consider phrasing the plan's design-on-paper steps that way.
 - 2026-11-03: Returned after about a week. Gave a recap and offered the 3-question warm-up quiz (Q1 was C01, "two motors with the same CAN ID"). The student skipped it. C01's check question is still unanswered.

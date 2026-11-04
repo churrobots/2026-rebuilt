@@ -207,6 +207,13 @@ public class RobotContainer {
                     () -> false)
                 .alongWith(shooter.shoot()));
 
+    // Auto-aim: hold right bumper to keep driving while the robot turns its back to our hub
+    controller
+        .rightBumper()
+        .whileTrue(
+            DriveCommands.aimAtHub(
+                drive, () -> -controller.getLeftY(), () -> -controller.getLeftX()));
+
     // Switch to X pattern when X button is pressed
     controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
@@ -226,9 +233,8 @@ public class RobotContainer {
     // Panic button: tap Y to spit for 1 second
     controller.y().onTrue(intakeRoller.outtake().withTimeout(1.0));
 
-    // Spindexer: stop by default, feed on right bumper, backwards on D-pad up
+    // Spindexer: stop by default, backwards on D-pad up (it feeds with the feeder on right trigger)
     spindexer.setDefaultCommand(spindexer.stop());
-    controller.rightBumper().whileTrue(spindexer.feed());
     controller.povUp().whileTrue(spindexer.unjam());
 
     // Shooter idles by default (quicker to spin up); feeder stops by default.

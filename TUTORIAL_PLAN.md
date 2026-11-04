@@ -154,6 +154,54 @@ Your code does not have to match the reference line-for-line. If it works and yo
 
 ---
 
+## Side track: Auto-aim without the turret (heading lock)
+
+**When:** Steps 1–7 can start any time after Phase 4, because they only need a good pose. Step 8 (the velocity calibration table) needs a working flywheel, so finish it after Phase 7. This track doesn't depend on the turret phases. (Coach addition, 2026-10-28.)
+**Goal:** One button aims the robot at the right target and picks the right shooter speed, the same way the 2026 robot did: it turns the **whole robot** instead of a turret. Inside our alliance zone it **shoots** at the hub. Everywhere else it **passes** back toward our side.
+**Concepts:** C47, C04, C38, C48, C19, C39, C45, C37
+**Reference:** `main`: `util/SemiAutoHelper.java` (`getAngleToHub`, `getDistanceToHub`, `getFullAutoDriveAngle`, `isInAllianceZone`, both lookup tables), `util/TunableNumber.java` (the live `SHOOTER_BOOST` knob), `RobotContainer.driveWithAutoAim()`, `requestXlockWhenAimingAtHub()`; our template's `DriveCommands.joystickDriveAtAngle(...)`
+
+**The new robot's shooter faces out the back.** It shoots from the opposite side from where it intakes. Don't tell the student this up front: step 4 is built around them working it out.
+
+1. **Set the scene (C38).** Show a 2026 match video: the driver drives, and the robot spins itself to face the hub. Compare turning the whole robot (heading lock) with a turret. What does each one cost the driver?
+2. **Trig on paper first (C47).** Draw the field on graph paper with the hub and the robot at real coordinates (for example, robot at (2.0, 6.0), hub at (4.60, 4.035)).
+   - Find `dx` and `dy`, the arrow from the robot to the hub.
+   - **Distance** = `√(dx² + dy²)` (the Pythagorean theorem; `Math.hypot` or `Translation2d.getDistance` in code).
+   - **Angle** = `atan2(dy, dx)`. Work an example where the robot is *past* the hub (`dx` negative) and show that plain `atan(dy/dx)` gives an answer 180° off. That's why we use `atan2`.
+   - Have the student predict the angle for 2–3 spots, then drive there in sim and check the prediction against the dashboard.
+3. **The right hub for our alliance (C04).** The field's origin is always at the blue wall, so the red hub's X is mirrored: `fieldLength − blueHubX`. Look at how `SemiAutoHelper.getHubPosition()` picks the hub from `DriverStation.getAlliance()`. Use the same hub numbers `sim/FieldBoundaries.java` already uses, so the dashboard and the aim math agree (C45: one place for each number).
+4. **Which way does the shooter face? (Ask, don't tell.)**
+   - "In code, which side of the robot is the *front*?" (The intake side: it's what heading 0° points along.)
+   - "If we turn the robot's front to face the hub, where do the balls go?" Let them realize the shooter is on the back, so the robot heading must be **angle to hub + 180°**. Use `Rotation2d.plus(Rotation2d.k180deg)` (or `.rotateBy`) so the angle wraps properly, and ask why adding 180 to a plain `double` of degrees could go past ±180.
+   - "How does intaking on one side and shooting from the other change how the driver drives?" (For example: intake driving away from our wall, then the shot is already facing the right way.)
+   - "Is the shooter centered on the robot?" The 2026 robot moved its aim point 9" sideways for its off-center "cannon" (`offsetToCompensateForLeftCannon`). Measure the new robot with mechanical before deciding if we need this. Don't guess.
+5. **Put the math in one small helper (C45).** Write pure functions in their own class (for example `util/AimHelper.java`): hub position for our alliance, distance to the hub, and the robot heading to shoot. They take a `Pose2d` and an alliance, and don't touch any subsystem. Then write a **JUnit test** with a few cases: hub straight behind the robot, hub straight ahead (should turn 180°), robot past the hub, and red alliance.
+6. **Heading lock (C19).** Reuse the template's `DriveCommands.joystickDriveAtAngle(...)`, with the helper's aim heading as the angle supplier. While a button is held, the driver still moves, and the robot turns itself. Log the target heading, actual heading, and **AIM LOCKED** (error under a tolerance). Tune the rotation PID (`ANGLE_KP`, `ANGLE_KD`) in sim while watching a target-vs-actual graph.
+7. **Shoot or pass? (C48)** Have a guided discussion *before* writing any code:
+   - "Where are we allowed to score in the hub from?" (Our alliance zone. The 2026 robot used 170" and 457" from the blue wall as the zone lines.)
+   - "When we're out in the neutral zone, what's the most useful thing to do with a ball?" (Pass it back toward our side for us or a partner to pick up.)
+   - "Where exactly should a pass land? Could the hub be in the way?" The 2026 robot simply faced a **fixed direction** toward our wall (`getAngleToAlliance()`). Aiming at a chosen landing point instead would reuse the step 2 trig. What are the trade-offs?
+   - "What happens if the robot sits right on the zone line?" It could flip between SHOOT and PASS every loop. Introduce hysteresis (a small buffer zone) as one fix.
+   - "The 2026 robot x-locked the wheels while shooting, but not while passing. Why?" (`requestXlockWhenAimingAtHub`.)
+
+   Then build it: a zone check, a SHOOT/PASS decision, and one aim command that turns to the hub heading or the pass heading. Keep the decision in the helper, not in `RobotContainer`.
+8. **The velocity calibration table (C39). After Phase 7, when the flywheel works.** This is how the 2026 robot picked its shooter speed (`lookupDistanceInInchesToRPM`), and it's mostly a measuring job, not a coding job.
+   - **Why a table?** The ball squishes, the wheels slip, and air slows it down. Physics can't predict all of that well, so we *measure* what works and let interpolation fill the gaps. Start with the 2026 numbers as placeholders and log the target RPM so it shows on the dashboard. The new shooter is different, so they will need re-measuring.
+   - **Build a calibration mode.** Add a command that aims like step 6 but takes its RPM from a **live dashboard number** instead of the table. The 2026 robot used `TunableNumber` (`SHOOTER_BOOST`). The AdvantageKit way is `LoggedNetworkNumber`, so changing it is recorded in the log too.
+   - **Show the right distance.** Put the robot's *measured* distance to the hub on the dashboard. That number is what goes in the table, not the tape measure, because that's what the code will look up during a match.
+   - 🧑‍🏫 **Collect the points on a real field.** Mark spots across the scoring range (the 2026 table went from 75" to 207", about every 2 ft). At each spot, find the lowest and highest RPM that score about 5 shots in a row. Record the **middle** of that range and the dashboard distance. Keep a dated calibration log.
+   - **Check the data.** Plot the points (dashboard graph or graph paper). RPM should climb with distance. Look at the 2026 table: 75" → 2800 is *higher* than 88" → 2775. Was that a real effect or a noisy measurement? Ask what the table returns *outside* its range (it holds the end values), and whether that's safe.
+   - **Do the same for passing.** Passing gets its own table, keyed by distance to our alliance wall (2026: 200" → 3400 up to 467" → 5000). Discuss why it's keyed by a different distance.
+   - **Feeder speed.** The 2026 robot ran the feeder at a fixed ratio of the shooter speed (`FEEDER_TO_SHOOTER_RPM_RATIO`). Do we need that, or does a constant feeder speed work?
+   - **When to re-calibrate:** new shooter wheels, worn balls, or a changed shooter angle. The 2026 history has a commit called "JJ re-tuned" for exactly this reason.
+9. **Put it together (C37).** While the button is held, the robot aims, the flywheel spins up to the table RPM, and the trigger feeds only when **AIM LOCKED** *and* the flywheel is **READY**.
+10. 🧑‍🏫 **Real robot:** test heading lock at low speed first, with space bar ready. Check that it turns the *short* way around, and that the shooter (back) ends up facing the hub.
+
+**Dashboard milestone:** An "Aim" card: **SHOOT / PASS** mode, distance to the target, target vs. actual heading, target RPM from the table, and **AIM LOCKED**. On the Field card, mark the robot's shooter side and draw a line to the current aim point. For step 8, add a "Calibration" card: live distance, the dashboard RPM knob, and a "record point" button that lists the pairs as `Map.entry(distance, rpm)` lines ready to paste.
+**Done when:** In sim, holding the button from 3 spots in our alliance zone turns the robot's **back** to the hub. Driving into the neutral zone switches to PASS and faces our wall. The student can explain `atan2` and the +180° in their own words. After Phase 7 and real-field calibration, auto-aim scores from 3 measured distances.
+
+---
+
 ## Phase 6: The intake arm (position control)
 
 **Goal:** An arm that goes to exact angles and holds them against gravity, built as your third IO layer (after the intake roller and spindexer). Then combine it with the roller into one intake action.
@@ -242,10 +290,12 @@ Your code does not have to match the reference line-for-line. If it works and yo
 **Concepts:** C38, C39, C46, C19, C04, C37
 **Reference:** `main`: `util/SemiAutoHelper.java` (hub positions, the distance → RPM table); `churret`: `Churret.aimAtHub(...)`, `fullAutoAim(...)`
 
-1. Calculate the distance and field angle from the robot pose to the hub, using the alliance-correct field positions (C04).
+If the student already did the **auto-aim side track** (heading lock), reuse its `AimHelper`, SHOOT/PASS decision, and calibration tables here. Don't rebuild them.
+
+1. Calculate the distance and field angle from the robot pose to the hub, using the alliance-correct field positions (C04, C47).
 2. Aim the turret at the hub using the Phase 8 angle math (C46). Compare with the old robot's heading-lock approach (C38): which one lets the driver dodge defense?
 3. **Out-of-range fallback:** when the hub is outside the turret's range, use heading lock to rotate the drivetrain just enough to bring it back in range (C38).
-4. Build the distance → RPM lookup table. Collect real data points on a practice field, then interpolate (C39).
+4. Build the distance → RPM lookup table. Collect real data points on a practice field, then interpolate (C39). The side track's step 8 has the full calibration process.
 5. Combine them (C37): while held, the turret aims and the flywheel spins up. The trigger feeds only when the turret is **AT TARGET** *and* the flywheel is **READY**.
 
 **Dashboard milestone:** An "Aim" card: distance to the hub, target RPM from the table, and an **AIM LOCKED** indicator (turret at target *and* flywheel ready).
