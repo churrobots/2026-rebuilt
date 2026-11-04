@@ -129,9 +129,9 @@ public class DriveCommands {
               ySupplier.getAsDouble());
 
           // Calculate angular speed
+          Rotation2d targetRotation = rotationSupplier.get();
           double omega = angleController.calculate(
-              drive.getRotation().getRadians(), rotationSupplier.get().getRadians());
-          SmartDashboard.putBoolean("aimLocked", angleController.atGoal());
+              drive.getRotation().getRadians(), targetRotation.getRadians());
 
           // Convert to field relative speeds & send command
           ChassisSpeeds speeds = new ChassisSpeeds(
@@ -148,11 +148,18 @@ public class DriveCommands {
           boolean wantsXLock = xLockRequested.get() == true;
           double error = angleController.getPositionError();
           boolean closeEnough = Math.abs(error) < ALLOWABLE_ERROR_MARGIN_FOR_AIMING;
+          // The dashboard's aim pop-up shows this, but only while Aim/Active is true
+          // (see RobotContainer.withAimStatus), so the bump angle doesn't trigger it.
+          // Compare against the real target, not the profile's in-between setpoint,
+          // so it doesn't say "locked" halfway through a turn.
+          double errorToTarget = targetRotation.minus(drive.getRotation()).getRadians();
+          // Drives the pop-up's rev-light bar: fewer degrees off means more lights.
+          SmartDashboard.putNumber("Aim/ErrorDegrees", Math.toDegrees(Math.abs(errorToTarget)));
+          SmartDashboard.putBoolean(
+              "Aim/Locked", Math.abs(errorToTarget) < ALLOWABLE_ERROR_MARGIN_FOR_AIMING);
           if (wantsXLock && closeEnough) {
-            SmartDashboard.putBoolean("AIM_LOCK", true);
             drive.stopWithX();
           } else {
-            SmartDashboard.putBoolean("AIM_LOCK", false);
             drive.runVelocity(
                 ChassisSpeeds.fromFieldRelativeSpeeds(
                     speeds,

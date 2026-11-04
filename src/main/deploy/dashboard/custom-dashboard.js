@@ -3,6 +3,21 @@
 
 const POSE_TOPIC = "/AdvantageKit/RealOutputs/Odometry/Robot";
 const ALLIANCE_TOPIC = "/FMSInfo/IsRedAlliance";
+
+// RobotContainer.withAimStatus publishes Active; DriveCommands publishes Locked.
+const AIM_ACTIVE_TOPIC = "/SmartDashboard/Aim/Active";
+const AIM_LOCKED_TOPIC = "/SmartDashboard/Aim/Locked";
+const AIM_ERROR_TOPIC = "/SmartDashboard/Aim/ErrorDegrees";
+// Rev-light bar: this many degrees off (or more) lights nothing; on target lights them all.
+const AIM_LIGHTS_START_DEGREES = 45;
+// Left to right, like real shift lights: green, amber, red, and purple at the end. At the
+// shift point (LOCKED) they all turn purple and flash; that's in custom-dashboard.css.
+const AIM_LIGHT_COLORS = [
+  ...Array(4).fill("#22e36b"),
+  ...Array(4).fill("#ffb000"),
+  ...Array(4).fill("#ff3b3b"),
+  ...Array(3).fill("#b14dff"),
+];
 const STATION_TOPIC = "/FMSInfo/StationNumber";
 
 // LoggedDashboardChooser in RobotContainer publishes these. The robot reads "selected".
@@ -96,6 +111,11 @@ export class CustomDashboard extends HTMLElement {
             </div>
             <div class="hardware-groups"></div>
           </section>
+          <div class="aim-popup" data-state="hidden" role="status" aria-live="assertive">
+            <span class="aim-popup-label">Aim</span>
+            <div class="aim-lights"></div>
+            <span class="aim-popup-value"></span>
+          </div>
           </div>
           <section class="card field-card" aria-labelledby="field-heading">
             <div class="card-heading">
@@ -134,6 +154,58 @@ export class CustomDashboard extends HTMLElement {
     this.#startFieldCard(core);
     this.#startAutoCard(core);
     this.#startHardwareCard(core);
+    this.#startAimPopup(core);
+  }
+
+  /**
+   * Race-car style pop-up in the empty space under the cards: AIMING with a rev-light bar
+   * that fills to the right as the robot turns onto target, then LOCKED once it's there.
+   */
+  #startAimPopup(core) {
+    const popup = this.shadowRoot.querySelector(".aim-popup");
+    const value = popup.querySelector(".aim-popup-value");
+    const lights = AIM_LIGHT_COLORS.map((color) => {
+      const light = document.createElement("span");
+      light.className = "aim-light";
+      light.style.setProperty("--light-color", color);
+      return light;
+    });
+    popup.querySelector(".aim-lights").append(...lights);
+
+    const render = () => {
+      const active =
+        core.connection?.connected === true &&
+        core.getTopic(AIM_ACTIVE_TOPIC)?.value === true;
+      const locked = core.getTopic(AIM_LOCKED_TOPIC)?.value === true;
+      const error = Number(core.getTopic(AIM_ERROR_TOPIC)?.value);
+      const state = !active ? "hidden" : locked ? "locked" : "aiming";
+      // Keep the old lights and word while it fades out, so it doesn't go blank mid-animation.
+      if (state === "hidden") {
+        popup.dataset.state = state;
+        return;
+      }
+      const closeness = Number.isFinite(error)
+        ? 1 - Math.min(Math.max(error / AIM_LIGHTS_START_DEGREES, 0), 1)
+        : 0;
+      const lit = locked ? lights.length : Math.floor(closeness * lights.length);
+      lights.forEach((light, index) => light.toggleAttribute("data-lit", index < lit));
+      popup.dataset.state = state;
+      value.textContent = locked ? "Locked" : "Aiming";
+    };
+
+    const aimTopics = [AIM_ACTIVE_TOPIC, AIM_LOCKED_TOPIC, AIM_ERROR_TOPIC];
+    /** @param {CustomEvent<DashboardTopic>} event */
+    const topicListener = ({ detail: topic }) => {
+      if (aimTopics.includes(topic.name)) render();
+    };
+    // Hide it if the robot disconnects, so a stale "LOCKED" never sticks around.
+    core.addEventListener("topic", topicListener);
+    core.addEventListener("connection", render);
+    this.#cleanup.push(() => {
+      core.removeEventListener("topic", topicListener);
+      core.removeEventListener("connection", render);
+    });
+    render();
   }
 
   /** Lets the drive team pick which auto the robot runs. */

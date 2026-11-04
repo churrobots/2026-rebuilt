@@ -29,6 +29,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -146,6 +147,9 @@ public class RobotContainer {
         });
         break;
     }
+
+    // Publish the aim topics right away so the dashboard knows we're not aiming yet.
+    publishAimStatus(false);
 
     intakeArm = new IntakeArm(drive);
     intakeRoller = new IntakeRoller(drive);
@@ -335,11 +339,11 @@ public class RobotContainer {
         intakeRoller.keepFuelInside(),
         feeder.setVelocity(SemiAutoHelper.getFeederVelocityForHubDistance(drive)),
         spindexer.spinToShooter());
-    return autonomousAutoAimPrep.withTimeout(0.3)
+    return withAimStatus(autonomousAutoAimPrep.withTimeout(0.3)
         // disable autonomous state periodic, so trigger can pulse the intakeArm
         .andThen(disableAutonomousStateSafeties())
         .andThen(Commands.parallel(autonomousAutoAimHold, pullShootingTrigger))
-        .withTimeout(howLongInSeconds)
+        .withTimeout(howLongInSeconds))
         // send intake back to normal so it stops pulsing
         .andThen(stopIntakeWithSafety());
   }
@@ -366,47 +370,47 @@ public class RobotContainer {
   }
 
   public Command driveWithAutoAim() {
-    return Commands.parallel(
+    return withAimStatus(Commands.parallel(
         shooter.setVelocity(() -> SemiAutoHelper.getFullAutoShooterVelocity(drive)),
         DriveCommands.joystickDriveAtAngle(
             drive,
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
             () -> SemiAutoHelper.getFullAutoDriveAngle(drive),
-            () -> isRequestingXLock));
+            () -> isRequestingXLock)));
   }
 
   public Command driveWithLeftTrenchManualAim() {
-    return Commands.parallel(
+    return withAimStatus(Commands.parallel(
         shooter.setVelocity(() -> SemiAutoHelper.getShooterVelocity(Feet.of(11.5))),
         DriveCommands.joystickDriveAtAngle(
             drive,
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
             () -> Rotation2d.fromDegrees(isRedAlliance() ? 90 : -90),
-            () -> isRequestingXLock));
+            () -> isRequestingXLock)));
   }
 
   public Command driveWithRightTrenchManualAim() {
-    return Commands.parallel(
+    return withAimStatus(Commands.parallel(
         shooter.setVelocity(() -> SemiAutoHelper.getShooterVelocity(Feet.of(11.5))),
         DriveCommands.joystickDriveAtAngle(
             drive,
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
             () -> Rotation2d.fromDegrees(isRedAlliance() ? -100 : 100),
-            () -> isRequestingXLock));
+            () -> isRequestingXLock)));
   }
 
   public Command driveWithTowerManualAim() {
-    return Commands.parallel(
+    return withAimStatus(Commands.parallel(
         shooter.setVelocity(() -> SemiAutoHelper.getShooterVelocity(Feet.of(10.5))),
         DriveCommands.joystickDriveAtAngle(
             drive,
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
             () -> Rotation2d.fromDegrees(isRedAlliance() ? 180 : 0),
-            () -> isRequestingXLock));
+            () -> isRequestingXLock)));
   }
 
   public Command resetPoseFacingAway() {
@@ -462,6 +466,24 @@ public class RobotContainer {
         intakeRoller.keepFuelInside(),
         feeder.setVelocity(SemiAutoHelper.getFeederVelocityForHubDistance(drive)),
         spindexer.spinToShooter());
+  }
+
+  // Helpers for the dashboard's aim pop-up
+  private void publishAimStatus(boolean active) {
+    SmartDashboard.putBoolean("Aim/Active", active);
+    SmartDashboard.putBoolean("Aim/Locked", false);
+    // Start the rev-light bar empty instead of showing the last aim's value.
+    SmartDashboard.putNumber("Aim/ErrorDegrees", 180);
+  }
+
+  /**
+   * Tells the dashboard we're aiming while this command runs, and that we've stopped
+   * when it ends. DriveCommands.joystickDriveAtAngle publishes Aim/Locked.
+   */
+  private Command withAimStatus(Command aimCommand) {
+    return aimCommand
+        .beforeStarting(() -> publishAimStatus(true))
+        .finallyDo(() -> publishAimStatus(false));
   }
 
   // Helpers for xlocking
