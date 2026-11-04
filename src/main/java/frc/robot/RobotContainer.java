@@ -29,6 +29,7 @@ import frc.robot.subsystems.intake.IntakeRollerIO;
 import frc.robot.subsystems.intake.IntakeRollerIOSim;
 import frc.robot.subsystems.intake.IntakeRollerIOTalonFX;
 import frc.robot.subsystems.intake.IntakeArm;
+import frc.robot.subsystems.intake.IntakeArmConstants;
 import frc.robot.subsystems.intake.IntakeArmIO;
 import frc.robot.subsystems.intake.IntakeArmIOSim;
 import frc.robot.subsystems.intake.IntakeArmIOSpark;
@@ -240,7 +241,9 @@ public class RobotContainer {
     // Left bumper (hold): outtake. Arm out + roller out.
     // D-pad down (tap): stow the intake on/off.
     intakeRoller.setDefaultCommand(intakeRoller.stop());
-    intakeArm.setDefaultCommand(intakeArm.retract());
+    // Off during arm bring-up so enabling doesn't move the arm. Turn back on once the
+    // direction, zero, and gains are checked on the real robot (coach, 2026-11-04).
+    // intakeArm.setDefaultCommand(intakeArm.retract());
     controller.leftTrigger().whileTrue(intakeRoller.intake().alongWith(intakeArm.extend()));
     controller.leftBumper().whileTrue(intakeRoller.outtake().alongWith(intakeArm.extend()));
     controller.povDown().toggleOnTrue(intakeArm.stow().alongWith(intakeRoller.stop()));
@@ -267,6 +270,11 @@ public class RobotContainer {
     // Extra (2026 didn't have this): D-pad up (hold) runs the spindexer backwards
     // to unjam.
     controller.povUp().whileTrue(spindexer.unjam());
+
+    // Arm bring-up test (hold): D-pad right = small push +, D-pad left = small push -.
+    // Positive should move the arm DOWN. Remove once the arm is tuned.
+    controller.povRight().whileTrue(intakeArm.testVolts(IntakeArmConstants.testVolts));
+    controller.povLeft().whileTrue(intakeArm.testVolts(-IntakeArmConstants.testVolts));
   }
 
   /** Our alliance, or blue if the Driver Station hasn't told us yet. */

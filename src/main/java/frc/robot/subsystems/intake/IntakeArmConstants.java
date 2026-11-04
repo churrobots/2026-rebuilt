@@ -14,10 +14,11 @@ public class IntakeArmConstants {
   public static final double armMotorReduction = 25.0 * 80.0 / 24.0; // about 83.3
   public static final int armCanId = 12;
 
-  // TODO: verify on the robot (values from the 2026 robot on main).
   // The motor must be set up so POSITIVE volts make the angle BIGGER (arm goes down).
-  public static final boolean armInverted = false;
-  public static final boolean armEncoderInverted = false;
+  // Flipped 2026-11-04: on the robot, +1 V lifted the arm and -1 V lowered it (backwards).
+  public static final boolean armInverted = true;
+  // Flipped 2026-11-04: turning the arm by hand read backwards (got smaller going down).
+  public static final boolean armEncoderInverted = true;
   public static final int armCurrentLimit = 40; // amps
   // Absolute encoder reading (radians) when the arm is stowed, so stowed reads 0.
   public static final double armEncoderOffsetRad = 0.0; // TODO: measure
@@ -49,6 +50,16 @@ public class IntakeArmConstants {
   public static final double kD = 0.0; // volts per rad/sec of error change
 
   public static final double atTargetToleranceRad = 0.05; // about 3 degrees
+
+  // Safety for real-robot bring-up (coach, 2026-11-04). The first real run slammed the arm
+  // into the robot, so: never send more than maxVolts, and send 0 V if the reading is
+  // outside safeMin..safeMax (bad offset, wrong direction, or the encoder wrapped around).
+  // Raise maxVolts slowly, only after the arm moves the right way at low power.
+  public static final double maxVolts = 3.0;
+  public static final double safeMinRad = hardMinRad - 0.2;
+  public static final double safeMaxRad = hardMaxRad + 0.2;
+  // Small push for the hold-to-test buttons (checks which way positive volts move the arm).
+  public static final double testVolts = 1.0;
 
   // "Pulse" while shooting (like 2026): the arm swings back and forth between almost-extended
   // and almost-stowed, which pushes the balls left in the intake up into the spindexer.
