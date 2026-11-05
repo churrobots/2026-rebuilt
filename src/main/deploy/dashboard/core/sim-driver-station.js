@@ -15,6 +15,9 @@ const TIE_MS = 500;
 // Whether this tab was the one driving, so it reclaims right away instead of waiting for
 // the idle timer and showing "Another dashboard is driving".
 const DRIVING_KEY = "sim-ds-driving";
+// The last mode picked (Teleop, Autonomous, or Test). Enable is not remembered.
+const MODE_KEY = "sim-ds-mode";
+const MODES = ["teleop", "auto", "test"];
 // Set by prepareForReload() when the dashboard reloads itself for new code during teleop.
 const RESUME_TELEOP_KEY = "resume-teleop-after-dashboard-reload";
 
@@ -28,7 +31,9 @@ function takeSessionFlag(key) {
 /** A Shadow-DOM simulated Driver Station and `/SimSupervisor/*` publisher. */
 export class SimDriverStation extends HTMLElement {
   /** @type {DashboardCore | undefined} */ #core;
-  /** @type {"teleop" | "auto" | "test"} */ #mode = "teleop";
+  /** @type {"teleop" | "auto" | "test"} */ #mode = MODES.includes(sessionStorage.getItem(MODE_KEY))
+    ? sessionStorage.getItem(MODE_KEY)
+    : "teleop";
   /** @type {"red" | "blue"} */ #alliance =
     localStorage.getItem("sim-alliance") === "red" ? "red" : "blue";
   /** @type {boolean} */ #driving = sessionStorage.getItem(DRIVING_KEY) === "true";
@@ -71,6 +76,7 @@ export class SimDriverStation extends HTMLElement {
         (b.onclick = () => {
           this.#claim();
           this.#mode = b.dataset.mode;
+          sessionStorage.setItem(MODE_KEY, this.#mode);
           this.#enabled = false;
           this.#render();
         }),

@@ -10,6 +10,7 @@ package frc.robot;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -48,6 +49,8 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
+import java.util.ArrayList;
+import java.util.List;
 import frc.robot.util.AimHelper;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -82,6 +85,9 @@ public class RobotContainer {
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
+
+  // Names of the commands PathPlanner autos can use (see configureNamedCommands)
+  private final List<String> namedCommandNames = new ArrayList<>();
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -167,7 +173,8 @@ public class RobotContainer {
         break;
     }
 
-    // Set up auto routines
+    // Set up auto routines (named commands must be registered before building autos)
+    configureNamedCommands();
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
     // Set up SysId routines
@@ -187,6 +194,35 @@ public class RobotContainer {
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
     configureButtonBindings();
+  }
+
+  /** Gives commands names that PathPlanner autos can use. Names must match exactly. */
+  private void configureNamedCommands() {
+    // Never ends on its own: use it in an event marker zone, not as an auto step.
+    // The auto owns the intake the whole time, so intake() stops the roller itself
+    // when the zone ends (the default command can't run until auto is over).
+    registerNamedCommand("RunIntake", intakeRoller.intake());
+
+    // Placeholders until the shooter exists. They just wait about as long as
+    // last season's robot took (2026 robot on main), so auto timing feels real.
+    registerNamedCommand("AimAndPrepShooter", Commands.waitSeconds(0.3));
+    registerNamedCommand("ShootPartialHopper", Commands.waitSeconds(2.0));
+    registerNamedCommand("ShootFullHopper", Commands.waitSeconds(6.5));
+
+    // The dashboard reads this list to know which commands to show
+    Logger.recordOutput("Auto/NamedCommands/Names", namedCommandNames.toArray(new String[0]));
+  }
+
+  /** Registers a named command, logging whether it's running. */
+  private void registerNamedCommand(String name, Command command) {
+    String key = "Auto/NamedCommands/" + name + "/Running";
+    Logger.recordOutput(key, false);
+    namedCommandNames.add(name);
+    NamedCommands.registerCommand(
+        name,
+        command
+            .beforeStarting(() -> Logger.recordOutput(key, true))
+            .finallyDo(() -> Logger.recordOutput(key, false)));
   }
 
   /** Use this method to define your button->command mappings. */
