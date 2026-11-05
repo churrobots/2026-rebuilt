@@ -407,3 +407,111 @@ h2 {
 .named-command-empty {
   color: #8f9bad;
 }
+
+/* Hardware health card: one light per device HardwareMonitor checks. */
+.hardware-summary {
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+.hardware-summary[data-state="ok"] {
+  color: var(--green, #38d977);
+}
+.hardware-summary[data-state="fault"] {
+  color: var(--red, #ff5364);
+}
+.hardware-summary[data-state="missing"] {
+  color: #8f9bad;
+}
+.hardware-groups h2 {
+  margin: 14px 0 6px;
+  color: #93a0b4;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.robot {
+  margin-top: 14px;
+  padding: 8px;
+  display: grid;
+  gap: 8px;
+  border: 2px solid var(--line, #303a4b);
+  border-top-color: var(--blue, #57a6ff);
+  border-radius: 12px;
+}
+.robot-front {
+  margin-bottom: -2px;
+  color: var(--blue, #57a6ff);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-align: center;
+  text-transform: uppercase;
+}
+/* Left corners | gyro | right corners. The gyro sits in the middle of the robot. */
+.corners {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  gap: 8px;
+}
+.corner:nth-child(1),
+.corner:nth-child(3) {
+  grid-column: 1;
+}
+.corner:nth-child(2),
+.corner:nth-child(4) {
+  grid-column: 3;
+}
+.corner:nth-child(1),
+.corner:nth-child(2) {
+  grid-row: 1;
+}
+.corner:nth-child(3),
+.corner:nth-child(4) {
+  grid-row: 2;
+}
+.corners .gyro {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+}
+.corner {
+  padding: 8px;
+  display: grid;
+  gap: 5px;
+  background: #0c1017;
+  border-radius: 8px;
+}
+.corner b {
+  color: #93a0b4;
+  font-size: 0.75rem;
+}
+
+.hardware-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 6px;
+}
+.light {
+  padding: 6px 8px;
+  overflow: hidden;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-align: center;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.light[data-state="ok"] {
+  color: #062b14;
+  background: var(--green, #38d977);
+}
+.light[data-state="fault"] {
+  color: #ffffff;
+  background: var(--red, #ff5364);
+}
+.light[data-state="missing"] {
+  color: #8f9bad;
+  background: #232b38;
+}

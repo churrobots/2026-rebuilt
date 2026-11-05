@@ -11,6 +11,7 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.filter.Debouncer;
+import frc.robot.util.HardwareMonitor;
 import java.util.function.DoubleSupplier;
 
 /** Spindexer IO implementation for a NEO on a SPARK MAX. */
@@ -35,6 +36,9 @@ public class SpindexerIOSpark implements SpindexerIO {
         spark,
         5,
         () -> spark.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
+
+    // Report this motor's health on the dashboard (see HardwareMonitor).
+    HardwareMonitor.registerHardware("spindexerMotor", spark);
   }
 
   @Override

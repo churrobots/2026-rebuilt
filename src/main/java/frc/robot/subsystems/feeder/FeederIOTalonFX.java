@@ -16,6 +16,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.util.PhoenixUtil;
+import frc.robot.util.HardwareMonitor;
 
 /** Feeder IO for a Kraken X60 on a TalonFX. The TalonFX runs the speed control itself. */
 public class FeederIOTalonFX implements FeederIO {
@@ -52,6 +53,9 @@ public class FeederIOTalonFX implements FeederIO {
     current = talon.getStatorCurrent();
     BaseStatusSignal.setUpdateFrequencyForAll(50.0, velocity, appliedVolts, current);
     talon.optimizeBusUtilization();
+
+    // Report this motor's health on the dashboard (see HardwareMonitor).
+    HardwareMonitor.registerHardware("feederMotor", talon);
   }
 
   @Override

@@ -38,6 +38,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.util.PhoenixUtil;
+import frc.robot.util.HardwareMonitor;
 
 import java.util.Queue;
 import java.util.function.DoubleSupplier;
@@ -183,6 +184,10 @@ public class ModuleIOKraken implements ModuleIO {
     drivePositionQueue = SparkOdometryThread.getInstance()
         .registerSignal(() -> Units.rotationsToRadians(drivePositionClone.refresh().getValueAsDouble()));
     turnPositionQueue = SparkOdometryThread.getInstance().registerSignal(turnSpark, turnEncoder::getPosition);
+
+    // Report both motors' health on the dashboard (see HardwareMonitor).
+    HardwareMonitor.registerHardware(name + "Drive", driveTalon);
+    HardwareMonitor.registerHardware(name + "Turn", turnSpark);
   }
 
   @Override

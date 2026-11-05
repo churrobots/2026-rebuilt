@@ -89,6 +89,53 @@ const FIELD_SIZE_TOPIC = "/AdvantageKit/RealOutputs/Field/Size";
 const ROBOT_SIZE_TOPIC = "/AdvantageKit/RealOutputs/Field/RobotSizeMeters";
 let robotSizeMeters = 0.9;
 
+// HardwareMonitor publishes true when a device is healthy, false when it's faulted.
+const HARDWARE_TABLE = "/SmartDashboard/HardwareMonitor/FaultStatus";
+// Swerve corners, in the order they sit on the robot with the front at the top.
+const ROBOT_CORNERS = [
+  {
+    name: "FL",
+    devices: [
+      ["FrontLeftDrive", "Drive"],
+      ["FrontLeftTurn", "Turn"],
+      ["front left", "Camera"],
+    ],
+  },
+  {
+    name: "FR",
+    devices: [
+      ["FrontRightDrive", "Drive"],
+      ["FrontRightTurn", "Turn"],
+      ["front right", "Camera"],
+    ],
+  },
+  {
+    name: "BL",
+    devices: [
+      ["BackLeftDrive", "Drive"],
+      ["BackLeftTurn", "Turn"],
+      ["back left", "Camera"],
+    ],
+  },
+  {
+    name: "BR",
+    devices: [
+      ["BackRightDrive", "Drive"],
+      ["BackRightTurn", "Turn"],
+      ["back right", "Camera"],
+    ],
+  },
+];
+// Drawn in the middle of the robot, where the gyro usually sits.
+const GYRO = ["Pigeon2 gyro", "Gyro"];
+const OTHER_HARDWARE = [
+  ["shooterMotor", "Shooter"],
+  ["feederMotor", "Feeder"],
+  ["spindexerMotor", "Spindexer"],
+  ["intakeRollerMotor", "Intake roller"],
+  ["intakeArmMotor", "Intake arm"],
+];
+
 /** A fresh, editable dashboard. Add a card here for everything you want to see. */
 export class CustomDashboard extends HTMLElement {
   /** @type {DashboardCore | undefined} */
@@ -132,6 +179,13 @@ export class CustomDashboard extends HTMLElement {
               <div><p class="eyebrow">Robot will run</p><output class="auto-active">—</output></div>
               <div><p class="eyebrow">Auto timer</p><output class="big-number auto-timer">0.0</output></div>
             </div>
+          </section>
+          <section class="card" aria-labelledby="hardware-heading">
+            <div class="card-heading">
+              <div><p class="eyebrow">Hardware</p><h1 id="hardware-heading">Health</h1></div>
+              <output class="hardware-summary" aria-live="polite"></output>
+            </div>
+            <div class="hardware-groups"></div>
           </section>
           <section class="card" aria-labelledby="shooter-heading">
             <div class="card-heading">
@@ -283,6 +337,7 @@ export class CustomDashboard extends HTMLElement {
     this.#startCameraCard(core);
     this.#startCopyCard(core);
     this.#startAutoCard(core);
+    this.#startHardwareCard(core);
     this.#startNamedCommandsCard(core);
     this.#startAimCard(core);
     this.#startAimMathCard(core);
@@ -339,6 +394,86 @@ export class CustomDashboard extends HTMLElement {
       main.style.transform = "";
     });
     schedule();
+  }
+
+  /** Shows a light for every device HardwareMonitor checks: green is OK, red is faulted. */
+  #startHardwareCard(core) {
+    const root = this.shadowRoot;
+    const summary = root.querySelector(".hardware-summary");
+    const groups = root.querySelector(".hardware-groups");
+    /** @type {Map<string, HTMLElement>} */
+    const lights = new Map();
+
+    /** @param {string} device @param {string} label */
+    const makeLight = (device, label) => {
+      const light = document.createElement("span");
+      light.className = "light";
+      light.textContent = label;
+      light.title = device;
+      lights.set(`${HARDWARE_TABLE}/${device}`, light);
+      return light;
+    };
+
+    // The drivetrain as a top-down robot: front at the top, one box per swerve corner.
+    const robot = document.createElement("div");
+    robot.className = "robot";
+    const front = document.createElement("div");
+    front.className = "robot-front";
+    front.textContent = "▲ Front";
+    const corners = document.createElement("div");
+    corners.className = "corners";
+    for (const corner of ROBOT_CORNERS) {
+      const box = document.createElement("div");
+      box.className = "corner";
+      const name = document.createElement("b");
+      name.textContent = corner.name;
+      box.append(name, ...corner.devices.map(([device, label]) => makeLight(device, label)));
+      corners.append(box);
+    }
+    const gyro = makeLight(...GYRO);
+    gyro.classList.add("gyro");
+    corners.append(gyro);
+    robot.append(front, corners);
+
+    const otherHeading = document.createElement("h2");
+    otherHeading.textContent = "Mechanisms";
+    const other = document.createElement("div");
+    other.className = "hardware-grid";
+    other.append(...OTHER_HARDWARE.map(([device, label]) => makeLight(device, label)));
+    groups.append(robot, otherHeading, other);
+
+    const render = () => {
+      let faults = 0;
+      let missing = 0;
+      for (const [topicName, light] of lights) {
+        const value = core.getTopic(topicName)?.value;
+        light.dataset.state =
+          value === true ? "ok" : value === false ? "fault" : "missing";
+        if (value === false) faults++;
+        if (typeof value !== "boolean") missing++;
+      }
+      summary.dataset.state = faults ? "fault" : missing ? "missing" : "ok";
+      summary.textContent = faults
+        ? `${faults} faulted`
+        : missing === lights.size
+          ? "No data"
+          : missing
+            ? `${missing} not reporting`
+            : "All OK";
+    };
+
+    /** @param {CustomEvent<DashboardTopic>} event */
+    const topicListener = ({ detail: topic }) => {
+      if (lights.has(topic.name)) render();
+    };
+    // Values are cleared when switching robots, so redraw on connection changes too.
+    core.addEventListener("topic", topicListener);
+    core.addEventListener("connection", render);
+    this.#cleanup.push(() => {
+      core.removeEventListener("topic", topicListener);
+      core.removeEventListener("connection", render);
+    });
+    render();
   }
 
   /** Picks the auto to run, shows which one the robot will run, and times auto. */

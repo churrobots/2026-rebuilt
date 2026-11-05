@@ -18,6 +18,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
+import frc.robot.util.HardwareMonitor;
 
 import java.util.Queue;
 
@@ -35,6 +36,7 @@ public class GyroIOPigeon2 implements GyroIO {
     yaw.setUpdateFrequency(odometryFrequency);
     yawVelocity.setUpdateFrequency(50.0);
     pigeon.optimizeBusUtilization();
+    HardwareMonitor.registerHardware("Pigeon2 gyro", pigeon);
     yawTimestampQueue = SparkOdometryThread.getInstance().makeTimestampQueue();
     var yawClone = yaw.clone(); // Status signals are not thread-safe
     yawPositionQueue = SparkOdometryThread.getInstance()
