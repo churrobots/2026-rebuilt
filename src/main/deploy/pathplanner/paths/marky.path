@@ -1,0 +1,54 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 3.463212780278955,
+        "y": 4.014435635151836
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 3.0106032066560737,
+        "y": 3.4527623477224574
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 2.3169792770127122,
+        "y": 2.8491861427436436
+      },
+      "prevControl": {
+        "x": 2.8450721663135594,
+        "y": 3.321053639212571
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "markito"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -147.9797629039608
+  },
+  "reversed": false,
+  "folder": null,
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 179.53351885300867
+  },
+  "useDefaultConstraints": true
+}
