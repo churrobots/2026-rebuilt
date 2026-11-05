@@ -1,0 +1,122 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 7.73704564525463,
+        "y": 5.441755425347222
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 7.970750361689815,
+        "y": 3.558929976851852
+      },
+      "isLocked": false,
+      "linkedName": "dude"
+    },
+    {
+      "anchor": {
+        "x": 6.176302300347222,
+        "y": 5.07814185474537
+      },
+      "prevControl": {
+        "x": 5.801601739757999,
+        "y": 3.9345752862796055
+      },
+      "nextControl": {
+        "x": 6.929251798640537,
+        "y": 7.376104453566385
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 4.454028072033898,
+        "y": 7.419071879413842
+      },
+      "prevControl": {
+        "x": 4.9253741368487125,
+        "y": 7.419531153140695
+      },
+      "nextControl": {
+        "x": 3.415829521126655,
+        "y": 7.418060271694414
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 2.600134620949074,
+        "y": 6.624188440393518
+      },
+      "prevControl": {
+        "x": 2.8166493778935187,
+        "y": 7.269861689814815
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "Griz"
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.7624280427631585,
+      "rotationDegrees": 112.5525616148188
+    },
+    {
+      "waypointRelativePos": 1.2625719572368426,
+      "rotationDegrees": 117.03496220196678
+    },
+    {
+      "waypointRelativePos": 1.983490953947369,
+      "rotationDegrees": -179.31521788957602
+    }
+  ],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [
+    {
+      "name": "RunIntake",
+      "waypointRelativePos": 0.0,
+      "endWaypointRelativePos": 1.3939958756345177,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "RunIntake"
+        }
+      }
+    },
+    {
+      "name": "AimAndPrepShooter",
+      "waypointRelativePos": 2.4652979651162807,
+      "endWaypointRelativePos": 3.0,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "AimAndPrepShooter"
+        }
+      }
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 126.33924699326987
+  },
+  "reversed": false,
+  "folder": null,
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": -91.03688637609199
+  },
+  "useDefaultConstraints": true
+}
