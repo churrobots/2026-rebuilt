@@ -407,3 +407,55 @@ h2 {
 .named-command-empty {
   color: #8f9bad;
 }
+
+/* Calibration card: RPM knob with step buttons */
+.cal-label {
+  margin-top: 16px;
+}
+.cal-row {
+  display: flex;
+  gap: 6px;
+  margin: 6px 0 12px;
+}
+.cal-rpm {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 10px;
+  color: inherit;
+  background: #0c1017;
+  border: 1px solid var(--line, #303a4b);
+  border-radius: 8px;
+  font: inherit;
+  font-size: 1.4rem;
+  font-weight: 800;
+  text-align: center;
+}
+.cal-step {
+  padding: 8px 10px;
+  color: #fff;
+  background: #2879cf;
+  border: 0;
+  border-radius: 8px;
+  font: inherit;
+  cursor: pointer;
+}
+.cal-step:hover {
+  background: #3287df;
+}
+
+.cal-spin {
+  width: 100%;
+  margin-bottom: 12px;
+  padding: 10px;
+  color: #93a0b4;
+  background: #2a3240;
+  border: 0;
+  border-radius: 8px;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+.cal-spin.on {
+  color: #fff;
+  background: #1f9d55;
+}

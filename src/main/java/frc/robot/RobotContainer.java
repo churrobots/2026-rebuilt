@@ -12,11 +12,15 @@ import static frc.robot.subsystems.vision.VisionConstants.*;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.BooleanSubscriber;
+import edu.wpi.first.networktables.DoubleSubscriber;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.sim.FieldBoundaries;
@@ -87,6 +91,17 @@ public class RobotContainer {
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
+
+  // Shot calibration: the flywheel speed typed in on the dashboard's Calibration card.
+  // Hold Start to aim and shoot at this speed instead of the table's (side track step 8).
+  // The robot only LISTENS here and never writes. If it wrote its own starting value, that
+  // value would always count as "newer" than the dashboard's, and the dashboard's changes
+  // would be ignored. The value in use is logged as Calibration/ShooterRPM.
+  private final DoubleSubscriber calibrationRpm =
+      NetworkTableInstance.getDefault().getDoubleTopic("/Tuning/ShooterRPM").subscribe(3000.0);
+  // The Calibration card's SPIN button: spins the flywheel at that RPM, no controller needed.
+  private final BooleanSubscriber calibrationSpin =
+      NetworkTableInstance.getDefault().getBooleanTopic("/Tuning/SpinFlywheel").subscribe(false);
 
   // Names of the commands PathPlanner autos can use (see configureNamedCommands)
   private final List<String> namedCommandNames = new ArrayList<>();
@@ -256,6 +271,18 @@ public class RobotContainer {
     // spin up for
     // a set distance. Angles are the 2026 ones (blue, red); AimHelper turns them
     // 180°.
+    // Start (hold): CALIBRATION. Aims exactly like A, but the flywheel spins at the RPM set
+    // on the dashboard's Calibration card instead of the table's. Used to measure the table.
+    controller
+        .start()
+        .whileTrue(
+            DriveCommands.autoAim(
+                drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> shootHeld)
+                .alongWith(shooter.spinAt(calibrationRpm::get)));
+
+    // Calibration card SPIN button (on the dashboard): flywheel at the card's RPM.
+    new Trigger(calibrationSpin::get).whileTrue(shooter.spinAt(calibrationRpm::get));
+
     controller.y().whileTrue(presetShot(0, 180, 10.5)); // tower
     controller.x().whileTrue(presetShot(-90, 90, 11.5)); // left trench
     controller.b().whileTrue(presetShot(100, -100, 11.5)); // right trench
@@ -326,6 +353,20 @@ public class RobotContainer {
         () -> AimHelper.presetHeading(heading2026BlueDeg, heading2026RedDeg, alliance()),
         () -> shootHeld)
         .alongWith(shooter.spinAt(rpm));
+  }
+
+  /** Called every loop, in every mode (from Robot.robotPeriodic). */
+  public void periodic() {
+    // The robot's own distances, for the Calibration card. These (not a tape measure) are
+    // what go in the RPM tables, because they're what the code looks up during a match.
+    Logger.recordOutput(
+        "Calibration/HubDistanceInches",
+        Units.metersToInches(AimHelper.distanceToHub(drive.getPose(), alliance())));
+    Logger.recordOutput(
+        "Calibration/WallDistanceInches",
+        Units.metersToInches(AimHelper.distanceToOurWall(drive.getPose(), alliance())));
+    Logger.recordOutput("Calibration/ShooterRPM", calibrationRpm.get());
+    Logger.recordOutput("Calibration/Spin", calibrationSpin.get());
   }
 
   /** Called every loop, only in simulation. */

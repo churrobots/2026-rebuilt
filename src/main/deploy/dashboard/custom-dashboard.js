@@ -44,6 +44,16 @@ const AIM_DISTANCE_TOPIC = "/AdvantageKit/RealOutputs/Aim/DistanceMeters";
 const AIM_MODE_TOPIC = "/AdvantageKit/RealOutputs/Aim/Mode"; // "SHOOT" or "PASS"
 const AIM_TARGET_TOPIC = "/AdvantageKit/RealOutputs/Aim/TargetHeadingDeg";
 const AIM_ACTUAL_TOPIC = "/AdvantageKit/RealOutputs/Aim/ActualHeadingDeg";
+// Shot calibration (side track step 8). The robot logs its own distances every loop, and
+// reads the RPM knob from /Tuning/ShooterRPM. It logs the RPM it's actually using as
+// Calibration/ShooterRPM, which is what the box shows (so it proves the robot got it).
+const CAL_HUB_DISTANCE_TOPIC = "/AdvantageKit/RealOutputs/Calibration/HubDistanceInches";
+const CAL_WALL_DISTANCE_TOPIC = "/AdvantageKit/RealOutputs/Calibration/WallDistanceInches";
+const CAL_RPM_TOPIC = "/Tuning/ShooterRPM";
+const CAL_RPM_IN_USE_TOPIC = "/AdvantageKit/RealOutputs/Calibration/ShooterRPM";
+// The SPIN button: the dashboard sets /Tuning/SpinFlywheel, the robot logs what it sees.
+const CAL_SPIN_TOPIC = "/Tuning/SpinFlywheel";
+const CAL_SPIN_IN_USE_TOPIC = "/AdvantageKit/RealOutputs/Calibration/Spin";
 const AIM_TOPICS = [AIM_ACTIVE_TOPIC, AIM_LOCKED_TOPIC, AIM_DISTANCE_TOPIC, AIM_TARGET_TOPIC, AIM_ACTUAL_TOPIC, AIM_MODE_TOPIC];
 // Where the intake sits on the robot, in meters (from last year's robot drawing in
 // PathPlanner's settings.json on main): centered 0.58 m in front, 0.8 m wide, 0.29 m deep.
@@ -231,6 +241,29 @@ export class CustomDashboard extends HTMLElement {
             </div>
             <output class="status-light aim-locked">NOT LOCKED</output>
           </section>
+          <section class="card" aria-labelledby="calibration-heading">
+            <div class="card-heading">
+              <div><p class="eyebrow">Shooter tuning</p><h1 id="calibration-heading">Calibration</h1></div>
+              <output class="status-light cal-ready">NOT READY</output>
+            </div>
+            <div class="stat-row">
+              <div><p class="eyebrow">To hub (in)</p><output class="big-number cal-hub">—</output></div>
+              <div><p class="eyebrow">To our wall (in)</p><output class="big-number cal-wall">—</output></div>
+            </div>
+            <p class="eyebrow cal-label">Shooter RPM (SPIN to test it, or hold Start to aim + spin)</p>
+            <div class="cal-row">
+              <button class="cal-step" type="button" data-step="-100">−100</button>
+              <button class="cal-step" type="button" data-step="-25">−25</button>
+              <input class="cal-rpm" type="number" step="25" min="0" max="6000" aria-label="Shooter RPM to test">
+              <button class="cal-step" type="button" data-step="25">+25</button>
+              <button class="cal-step" type="button" data-step="100">+100</button>
+            </div>
+            <button class="cal-spin" type="button">SPIN: OFF</button>
+            <div class="stat-row">
+              <div><p class="eyebrow">Flywheel RPM</p><output class="big-number cal-measured">0</output></div>
+              <div><p class="eyebrow">Target RPM</p><output class="big-number cal-target">0</output></div>
+            </div>
+          </section>
           <section class="card" aria-labelledby="aim-math-heading">
             <div class="card-heading">
               <div><p class="eyebrow">Debug</p><h1 id="aim-math-heading">Debug: Aim math</h1></div>
@@ -286,6 +319,84 @@ export class CustomDashboard extends HTMLElement {
     this.#startNamedCommandsCard(core);
     this.#startAimCard(core);
     this.#startAimMathCard(core);
+    this.#startCalibrationCard(core);
+  }
+
+  /**
+   * Shot calibration: shows how far the robot thinks it is from the hub and our wall, and
+   * sets the RPM that Start (hold) spins the flywheel to.
+   */
+  #startCalibrationCard(core) {
+    const root = this.shadowRoot;
+    const hubText = root.querySelector(".cal-hub");
+    const wallText = root.querySelector(".cal-wall");
+    const rpmInput = root.querySelector(".cal-rpm");
+    const measuredText = root.querySelector(".cal-measured");
+    const targetText = root.querySelector(".cal-target");
+    const readyLight = root.querySelector(".cal-ready");
+    const stepButtons = [...root.querySelectorAll(".cal-step")];
+    const spinButton = root.querySelector(".cal-spin");
+
+    const showNumber = (output, value, digits) => {
+      output.textContent = Number.isFinite(value) ? value.toFixed(digits) : "—";
+    };
+
+    const render = () => {
+      showNumber(hubText, Number(core.getTopic(CAL_HUB_DISTANCE_TOPIC)?.value), 0);
+      showNumber(wallText, Number(core.getTopic(CAL_WALL_DISTANCE_TOPIC)?.value), 0);
+      showNumber(measuredText, Number(core.getTopic(SHOOTER_MEASURED_TOPIC)?.value), 0);
+      showNumber(targetText, Number(core.getTopic(SHOOTER_TARGET_TOPIC)?.value), 0);
+      const ready = core.getTopic(SHOOTER_READY_TOPIC)?.value === true;
+      readyLight.textContent = ready ? "READY" : "NOT READY";
+      readyLight.classList.toggle("on", ready);
+      // The robot's answer, so the button only says ON once the robot really got it.
+      const spinning = core.getTopic(CAL_SPIN_IN_USE_TOPIC)?.value === true;
+      spinButton.textContent = spinning ? "SPIN: ON" : "SPIN: OFF";
+      spinButton.classList.toggle("on", spinning);
+    };
+
+    /**
+     * Copies the RPM the robot is using into the box, but only when it changes. The robot
+     * logs it every loop, so copying it every time would undo what you're typing.
+     */
+    let lastRobotRpm = NaN;
+    const showRobotRpm = () => {
+      const rpm = Number(core.getTopic(CAL_RPM_IN_USE_TOPIC)?.value);
+      if (!Number.isFinite(rpm) || rpm === lastRobotRpm) return;
+      lastRobotRpm = rpm;
+      if (root.activeElement !== rpmInput) rpmInput.value = String(Math.round(rpm));
+    };
+
+    /** Sends a new RPM to the robot (kept between 0 and 6000). */
+    const sendRpm = (rpm) => {
+      if (!Number.isFinite(rpm)) return;
+      const clamped = Math.min(6000, Math.max(0, Math.round(rpm)));
+      rpmInput.value = String(clamped);
+      core.publish(CAL_RPM_TOPIC, "double", clamped);
+    };
+    const onInput = () => sendRpm(Number(rpmInput.value));
+    const onStep = (event) => sendRpm(Number(rpmInput.value || 0) + Number(event.currentTarget.dataset.step));
+    const onSpin = () =>
+      core.publish(CAL_SPIN_TOPIC, "boolean", core.getTopic(CAL_SPIN_IN_USE_TOPIC)?.value !== true);
+    spinButton.addEventListener("click", onSpin);
+    rpmInput.addEventListener("change", onInput);
+    stepButtons.forEach((button) => button.addEventListener("click", onStep));
+
+    const topics = [CAL_HUB_DISTANCE_TOPIC, CAL_WALL_DISTANCE_TOPIC, CAL_SPIN_IN_USE_TOPIC, SHOOTER_MEASURED_TOPIC, SHOOTER_TARGET_TOPIC, SHOOTER_READY_TOPIC];
+    /** @param {CustomEvent<DashboardTopic>} event */
+    const topicListener = ({ detail: topic }) => {
+      if (topic.name === CAL_RPM_IN_USE_TOPIC) showRobotRpm();
+      if (topics.includes(topic.name)) render();
+    };
+    core.addEventListener("topic", topicListener);
+    this.#cleanup.push(() => {
+      core.removeEventListener("topic", topicListener);
+      rpmInput.removeEventListener("change", onInput);
+      spinButton.removeEventListener("click", onSpin);
+      stepButtons.forEach((button) => button.removeEventListener("click", onStep));
+    });
+    showRobotRpm();
+    render();
   }
 
   /**
