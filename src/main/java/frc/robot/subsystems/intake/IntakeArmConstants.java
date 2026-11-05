@@ -51,15 +51,13 @@ public class IntakeArmConstants {
 
   public static final double atTargetToleranceRad = 0.05; // about 3 degrees
 
-  // Safety for real-robot bring-up (coach, 2026-11-04). The first real run slammed the arm
-  // into the robot, so: never send more than maxVolts, and send 0 V if the reading is
-  // outside safeMin..safeMax (bad offset, wrong direction, or the encoder wrapped around).
-  // Raise maxVolts slowly, only after the arm moves the right way at low power.
-  public static final double maxVolts = 3.0;
+  // Safety (coach, 2026-11-04). The first real run slammed the arm into the robot, so:
+  // never send more than maxVolts, and send 0 V if the reading is outside safeMin..safeMax
+  // (bad offset, wrong direction, or the encoder wrapped around).
+  // Raise maxVolts slowly, watching for overshoot. 3 V and 6 V both stopped cleanly.
+  public static final double maxVolts = 6.0;
   public static final double safeMinRad = hardMinRad - 0.2;
   public static final double safeMaxRad = hardMaxRad + 0.2;
-  // Small push for the hold-to-test buttons (checks which way positive volts move the arm).
-  public static final double testVolts = 1.0;
 
   // "Pulse" while shooting (like 2026): the arm swings back and forth between almost-extended
   // and almost-stowed, which pushes the balls left in the intake up into the spindexer.

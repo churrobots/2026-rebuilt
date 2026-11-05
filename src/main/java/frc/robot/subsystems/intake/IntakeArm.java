@@ -24,8 +24,6 @@ public class IntakeArm extends SubsystemBase {
 
   // Where we're trying to go, in radians. null = no target yet, so don't push.
   private Double targetRad = null;
-  // A fixed test voltage while a test button is held. null = not testing.
-  private Double manualVolts = null;
 
   public IntakeArm(IntakeArmIO io) {
     this.io = io;
@@ -37,9 +35,7 @@ public class IntakeArm extends SubsystemBase {
     Logger.processInputs("IntakeArm", inputs);
 
     double volts = 0.0;
-    if (manualVolts != null) {
-      volts = manualVolts;
-    } else if (targetRad != null) {
+    if (targetRad != null) {
       // Feedforward holds the arm up against gravity; PID fixes whatever error is left.
       // ArmFeedforward wants "angle from level, up = bigger," and pushes UP with positive
       // volts. Ours is the other way around, so flip the angle and the volts.
@@ -48,10 +44,10 @@ public class IntakeArm extends SubsystemBase {
       volts = gravityVolts + pidVolts;
     }
 
-    // Safety: stop if the encoder is gone, or (unless we're testing by hand) the reading
-    // doesn't make sense. A bad reading must never turn into full power.
+    // Safety: stop if the encoder is gone or the reading doesn't make sense.
+    // A bad reading must never turn into full power.
     boolean readingOk = inputs.positionRad >= safeMinRad && inputs.positionRad <= safeMaxRad;
-    boolean safetyStop = !inputs.connected || (manualVolts == null && !readingOk);
+    boolean safetyStop = !inputs.connected || !readingOk;
     if (safetyStop) {
       volts = 0.0;
     }
@@ -77,19 +73,6 @@ public class IntakeArm extends SubsystemBase {
   public Command goToAngle(double radians) {
     double clamped = MathUtil.clamp(radians, softMinRad, softMaxRad);
     return run(() -> targetRad = clamped);
-  }
-
-  /**
-   * Bring-up test: pushes with a fixed voltage only while held, then lets go (0 V, no target).
-   * Positive volts should make the angle BIGGER (arm goes down). If not, flip armInverted.
-   */
-  public Command testVolts(double volts) {
-    return startEnd(
-        () -> {
-          targetRad = null;
-          manualVolts = volts;
-        },
-        () -> manualVolts = null);
   }
 
   /** Swings the intake down onto the floor. */
