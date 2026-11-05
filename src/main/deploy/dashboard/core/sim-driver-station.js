@@ -194,7 +194,12 @@ export class SimDriverStation extends HTMLElement {
       this.#core?.connection.connected &&
       this.#core.getTopic("/SimSupervisor/Available")?.value === true;
     this.shadowRoot.querySelector(".ds").hidden = !available;
-    this.shadowRoot.querySelector(".offline").hidden = available;
+    const offline = this.shadowRoot.querySelector(".offline");
+    offline.hidden = available;
+    // Connected but no sim means a real robot: this space is for the real Driver Station.
+    offline.textContent = this.#core?.connection.connected
+      ? "Space for the Driver Station"
+      : "Sim Driver Station will appear here";
     if (!available) {
       this.#wasConnected = false;
       return;
