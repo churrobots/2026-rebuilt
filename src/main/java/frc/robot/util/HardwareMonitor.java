@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.function.Supplier;
 
 import org.photonvision.PhotonCamera;
 
@@ -23,6 +24,8 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
+import org.littletonrobotics.junction.Logger;
 
 /**
  * Useful for monitoring high-level status of motors and other hardware devices
@@ -81,6 +84,14 @@ public class HardwareMonitor {
     }
   }
 
+  // Flags that only mean "this feature is doing its job right now" (like a current limit
+  // kicking in while the robot speeds up). They're published as "info", but they don't turn
+  // the Health light red or print to the console.
+  private static final Set<String> INFO_ONLY = Set.of(
+      "StatorCurrLimit", "SupplyCurrLimit",
+      "ForwardHardLimit", "ReverseHardLimit", "ForwardSoftLimit", "ReverseSoftLimit",
+      "StaticBrakeDisabled", "Overcurrent", "Stall");
+
   public static void dumpHardwareStatusToNetworkTables() {
     // Only run every 10th tick to reduce load
     tickCounter++;
@@ -88,12 +99,15 @@ public class HardwareMonitor {
     if (tickCounter != 0) {
       return;
     }
+    double start = Timer.getFPGATimestamp();
     _publishDeviceStatus();
+    // How long this took, so we can see if it causes loop overruns (should be well under 20 ms).
+    Logger.recordOutput("HardwareMonitor/UpdateMS", (Timer.getFPGATimestamp() - start) * 1000.0);
   }
 
   /** One device's status, published under HardwareMonitor/Devices/<name>/. */
   private record DeviceStatus(String name, String type, int canId, boolean connected,
-      List<String> faults, List<String> warnings, String firmware) {
+      List<String> faults, List<String> warnings, List<String> info, String firmware) {
   }
 
   /**
@@ -105,22 +119,22 @@ public class HardwareMonitor {
     Map<String, DeviceStatus> devices = new TreeMap<>();
     for (String name : nullHardware) {
       devices.put(name, new DeviceStatus(name, "unknown", -1, false,
-          List.of("NotCreated"), List.of(), ""));
+          List.of("NotCreated"), List.of(), List.of(), ""));
     }
     for (var talon : talonMap.entrySet()) {
       devices.put(talon.getKey(), _ctreStatus(talon.getKey(), "TalonFX", talon.getValue(),
-          _talonFaults(talon.getValue()), talon.getValue().getVersion()));
+          _talonFaults(talon.getValue()), talon.getValue()::getVersion));
     }
     for (var pigeon : pigeonMap.entrySet()) {
       devices.put(pigeon.getKey(), _ctreStatus(pigeon.getKey(), "Pigeon2", pigeon.getValue(),
-          _pigeonFaults(pigeon.getValue()), pigeon.getValue().getVersion()));
+          _pigeonFaults(pigeon.getValue()), pigeon.getValue()::getVersion));
     }
     for (var spark : sparkMap.entrySet()) {
       devices.put(spark.getKey(), _sparkStatus(spark.getKey(), spark.getValue()));
     }
     for (var camera : cameraMap.entrySet()) {
       devices.put(camera.getKey(), new DeviceStatus(camera.getKey(), "PhotonCamera", -1,
-          camera.getValue().isConnected(), List.of(), List.of(), ""));
+          camera.getValue().isConnected(), List.of(), List.of(), List.of(), ""));
     }
 
     for (DeviceStatus device : devices.values()) {
@@ -130,6 +144,7 @@ public class HardwareMonitor {
       SmartDashboard.putBoolean(prefix + "connected", device.connected());
       SmartDashboard.putStringArray(prefix + "faults", device.faults().toArray(String[]::new));
       SmartDashboard.putStringArray(prefix + "warnings", device.warnings().toArray(String[]::new));
+      SmartDashboard.putStringArray(prefix + "info", device.info().toArray(String[]::new));
       SmartDashboard.putString(prefix + "firmware", device.firmware());
       // The light is green only when the device is connected with no faults or warnings.
       SmartDashboard.putBoolean("HardwareMonitor/FaultStatus/" + device.name(),
@@ -208,15 +223,22 @@ public class HardwareMonitor {
   }
 
   private static DeviceStatus _ctreStatus(String name, String type, ParentDevice device,
-      List<String> faults, StatusSignal<Integer> versionSignal) {
+      List<String> allFlags, Supplier<StatusSignal<Integer>> versionSignal) {
     boolean connected = device.isConnected();
+    List<String> faults = new ArrayList<>();
+    List<String> info = new ArrayList<>();
+    for (String flag : allFlags) {
+      (INFO_ONLY.contains(flag) ? info : faults).add(flag);
+    }
+    // Firmware never changes, so only ask the device for it once.
     if (connected && !firmwareCache.containsKey(name)) {
-      int version = versionSignal.getValue();
+      int version = versionSignal.get().getValue();
       firmwareCache.put(name, ((version >> 24) & 0xff) + "." + ((version >> 16) & 0xff) + "."
           + ((version >> 8) & 0xff) + "." + (version & 0xff));
     }
     return new DeviceStatus(name, type, device.getDeviceID(), connected,
-        connected ? faults : List.of(), List.of(), firmwareCache.getOrDefault(name, ""));
+        connected ? faults : List.of(), List.of(), connected ? info : List.of(),
+        firmwareCache.getOrDefault(name, ""));
   }
 
   private static DeviceStatus _sparkStatus(String name, SparkBase device) {
@@ -248,8 +270,11 @@ public class HardwareMonitor {
         firmwareCache.put(name, device.getFirmwareString());
       }
     }
+    List<String> info = new ArrayList<>(warnings);
+    info.retainAll(INFO_ONLY);
+    warnings.removeAll(INFO_ONLY);
     String type = device.getClass().getSimpleName();
-    return new DeviceStatus(name, type, device.getDeviceId(), connected, faults, warnings,
+    return new DeviceStatus(name, type, device.getDeviceId(), connected, faults, warnings, info,
         firmwareCache.getOrDefault(name, ""));
   }
 
@@ -261,6 +286,12 @@ public class HardwareMonitor {
 
   /** Names of the active faults in a list of (name, signal) pairs. */
   private static List<String> _activeFaults(Object... namesAndSignals) {
+    // One CAN read for all of this device's flags (the getters below don't refresh on their own).
+    BaseStatusSignal[] signals = new BaseStatusSignal[namesAndSignals.length / 2];
+    for (int i = 0; i < signals.length; i++) {
+      signals[i] = (BaseStatusSignal) namesAndSignals[i * 2 + 1];
+    }
+    BaseStatusSignal.refreshAll(signals);
     List<String> active = new ArrayList<>();
     for (int i = 0; i < namesAndSignals.length; i += 2) {
       if (Boolean.TRUE.equals(((StatusSignal<?>) namesAndSignals[i + 1]).getValue())) {
@@ -303,19 +334,19 @@ public class HardwareMonitor {
 
   private static Object[] _pigeonFaultSignals(Pigeon2 device) {
     return new Object[] {
-        "Hardware", device.getFault_Hardware(),
-        "Undervoltage", device.getFault_Undervoltage(),
-        "BootDuringEnable", device.getFault_BootDuringEnable(),
-        "UnlicensedFeatureInUse", device.getFault_UnlicensedFeatureInUse(),
-        "BootupAccelerometer", device.getFault_BootupAccelerometer(),
-        "BootupGyroscope", device.getFault_BootupGyroscope(),
-        "BootupMagnetometer", device.getFault_BootupMagnetometer(),
-        "BootIntoMotion", device.getFault_BootIntoMotion(),
-        "DataAcquiredLate", device.getFault_DataAcquiredLate(),
-        "LoopTimeSlow", device.getFault_LoopTimeSlow(),
-        "SaturatedMagnetometer", device.getFault_SaturatedMagnetometer(),
-        "SaturatedAccelerometer", device.getFault_SaturatedAccelerometer(),
-        "SaturatedGyroscope", device.getFault_SaturatedGyroscope() };
+        "Hardware", device.getFault_Hardware(false),
+        "Undervoltage", device.getFault_Undervoltage(false),
+        "BootDuringEnable", device.getFault_BootDuringEnable(false),
+        "UnlicensedFeatureInUse", device.getFault_UnlicensedFeatureInUse(false),
+        "BootupAccelerometer", device.getFault_BootupAccelerometer(false),
+        "BootupGyroscope", device.getFault_BootupGyroscope(false),
+        "BootupMagnetometer", device.getFault_BootupMagnetometer(false),
+        "BootIntoMotion", device.getFault_BootIntoMotion(false),
+        "DataAcquiredLate", device.getFault_DataAcquiredLate(false),
+        "LoopTimeSlow", device.getFault_LoopTimeSlow(false),
+        "SaturatedMagnetometer", device.getFault_SaturatedMagnetometer(false),
+        "SaturatedAccelerometer", device.getFault_SaturatedAccelerometer(false),
+        "SaturatedGyroscope", device.getFault_SaturatedGyroscope(false) };
   }
 
   private static List<String> _talonFaults(TalonFX device) {
@@ -324,30 +355,30 @@ public class HardwareMonitor {
 
   private static Object[] _talonFaultSignals(TalonFX device) {
     return new Object[] {
-        "Hardware", device.getFault_Hardware(),
-        "ProcTemp", device.getFault_ProcTemp(),
-        "DeviceTemp", device.getFault_DeviceTemp(),
-        "Undervoltage", device.getFault_Undervoltage(),
-        "BootDuringEnable", device.getFault_BootDuringEnable(),
-        "UnlicensedFeatureInUse", device.getFault_UnlicensedFeatureInUse(),
-        "BridgeBrownout", device.getFault_BridgeBrownout(),
-        "RemoteSensorReset", device.getFault_RemoteSensorReset(),
-        "MissingDifferentialFX", device.getFault_MissingDifferentialFX(),
-        "RemoteSensorPosOverflow", device.getFault_RemoteSensorPosOverflow(),
-        "OverSupplyV", device.getFault_OverSupplyV(),
-        "UnstableSupplyV", device.getFault_UnstableSupplyV(),
-        "ReverseHardLimit", device.getFault_ReverseHardLimit(),
-        "ForwardHardLimit", device.getFault_ForwardHardLimit(),
-        "ReverseSoftLimit", device.getFault_ReverseSoftLimit(),
-        "ForwardSoftLimit", device.getFault_ForwardSoftLimit(),
-        "MissingSoftLimitRemote", device.getFault_MissingSoftLimitRemote(),
-        "MissingHardLimitRemote", device.getFault_MissingHardLimitRemote(),
-        "RemoteSensorDataInvalid", device.getFault_RemoteSensorDataInvalid(),
-        "FusedSensorOutOfSync", device.getFault_FusedSensorOutOfSync(),
-        "StatorCurrLimit", device.getFault_StatorCurrLimit(),
-        "SupplyCurrLimit", device.getFault_SupplyCurrLimit(),
-        "UsingFusedCANcoderWhileUnlicensed", device.getFault_UsingFusedCANcoderWhileUnlicensed(),
-        "StaticBrakeDisabled", device.getFault_StaticBrakeDisabled() };
+        "Hardware", device.getFault_Hardware(false),
+        "ProcTemp", device.getFault_ProcTemp(false),
+        "DeviceTemp", device.getFault_DeviceTemp(false),
+        "Undervoltage", device.getFault_Undervoltage(false),
+        "BootDuringEnable", device.getFault_BootDuringEnable(false),
+        "UnlicensedFeatureInUse", device.getFault_UnlicensedFeatureInUse(false),
+        "BridgeBrownout", device.getFault_BridgeBrownout(false),
+        "RemoteSensorReset", device.getFault_RemoteSensorReset(false),
+        "MissingDifferentialFX", device.getFault_MissingDifferentialFX(false),
+        "RemoteSensorPosOverflow", device.getFault_RemoteSensorPosOverflow(false),
+        "OverSupplyV", device.getFault_OverSupplyV(false),
+        "UnstableSupplyV", device.getFault_UnstableSupplyV(false),
+        "ReverseHardLimit", device.getFault_ReverseHardLimit(false),
+        "ForwardHardLimit", device.getFault_ForwardHardLimit(false),
+        "ReverseSoftLimit", device.getFault_ReverseSoftLimit(false),
+        "ForwardSoftLimit", device.getFault_ForwardSoftLimit(false),
+        "MissingSoftLimitRemote", device.getFault_MissingSoftLimitRemote(false),
+        "MissingHardLimitRemote", device.getFault_MissingHardLimitRemote(false),
+        "RemoteSensorDataInvalid", device.getFault_RemoteSensorDataInvalid(false),
+        "FusedSensorOutOfSync", device.getFault_FusedSensorOutOfSync(false),
+        "StatorCurrLimit", device.getFault_StatorCurrLimit(false),
+        "SupplyCurrLimit", device.getFault_SupplyCurrLimit(false),
+        "UsingFusedCANcoderWhileUnlicensed", device.getFault_UsingFusedCANcoderWhileUnlicensed(false),
+        "StaticBrakeDisabled", device.getFault_StaticBrakeDisabled(false) };
   }
 
 }
