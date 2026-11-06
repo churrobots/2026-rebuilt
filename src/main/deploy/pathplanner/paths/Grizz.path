@@ -118,17 +118,6 @@
           "name": "AimAndPrepShooter"
         }
       }
-    },
-    {
-      "name": "ShootFullHopper",
-      "waypointRelativePos": 4.0,
-      "endWaypointRelativePos": 4.0,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": "ShootFullHopper"
-        }
-      }
     }
   ],
   "globalConstraints": {

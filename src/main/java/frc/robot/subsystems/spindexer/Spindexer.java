@@ -23,12 +23,12 @@ public class Spindexer extends SubsystemBase {
 
   /** Spins the spindexer toward the shooter. */
   public Command feed() {
-    return run(() -> io.setVoltage(spindexerFeedVolts));
+    return runEnd(() -> io.setVoltage(spindexerFeedVolts), () -> io.setVoltage(0.0));
   }
 
   /** Spins the spindexer backwards to free a stuck piece. */
   public Command unjam() {
-    return run(() -> io.setVoltage(spindexerUnjamVolts));
+    return runEnd(() -> io.setVoltage(spindexerUnjamVolts), () -> io.setVoltage(0.0));
   }
 
   /** Stops the spindexer. */

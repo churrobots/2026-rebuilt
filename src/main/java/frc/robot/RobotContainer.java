@@ -206,16 +206,27 @@ public class RobotContainer {
 
   /** Gives commands names that PathPlanner autos can use. Names must match exactly. */
   private void configureNamedCommands() {
-    // Never ends on its own: use it in an event marker zone, not as an auto step.
-    // The auto owns the intake the whole time, so intake() stops the roller itself
-    // when the zone ends (the default command can't run until auto is over).
-    registerNamedCommand("RunIntake", intakeRoller.intake());
+    // NOTE: during an auto, PathPlanner owns every subsystem its named commands use, so those
+    // subsystems' default commands don't run until auto ends. That's why each command below
+    // sets everything it needs itself, and the feeder/spindexer/roller stop when it ends.
 
-    // Placeholders until the shooter exists. They just wait about as long as
-    // last season's robot took (2026 robot on main), so auto timing feels real.
-    registerNamedCommand("AimAndPrepShooter", Commands.waitSeconds(0.3));
-    registerNamedCommand("ShootPartialHopper", Commands.waitSeconds(2.0));
-    registerNamedCommand("ShootFullHopper", Commands.waitSeconds(6.5));
+    // Event marker zone: drop the intake and run the roller while driving over balls.
+    // Never ends on its own, so use it as a zone, not as an auto step.
+    registerNamedCommand("RunIntake", intakeRoller.intake().alongWith(intakeArm.extend()));
+
+    // Event marker near the end of a path: spin the flywheel up early, while still driving,
+    // so it's at speed when the robot stops. Doesn't use the drive, so it's safe as a marker.
+    registerNamedCommand("AimAndPrepShooter", shooter.spinAt(this::hubRpm));
+
+    // Auto step right before a shot: stand still and turn our back to the hub until aimed
+    // (max 1 s). Uses the drive, so it must be its own step, never a marker.
+    registerNamedCommand("AimAtHub", DriveCommands.aimAtHubInPlace(drive, 1.0));
+
+    // Auto steps: keep the flywheel at speed, wait until READY, then feed + spindexer + arm
+    // pulse + roller keep-inside (like the right trigger), for this many seconds in total.
+    // Doesn't use the drive, so it also works as a marker during a path.
+    registerNamedCommand("ShootPartialHopper", shootFor(2.0));
+    registerNamedCommand("ShootFullHopper", shootFor(6.5));
 
     // The dashboard reads this list to know which commands to show
     Logger.recordOutput("Auto/NamedCommands/Names", namedCommandNames.toArray(new String[0]));
@@ -284,7 +295,9 @@ public class RobotContainer {
     // Left bumper (hold): outtake. Arm out + roller out.
     // D-pad down (tap): stow the intake on/off.
     intakeRoller.setDefaultCommand(intakeRoller.stop());
-    intakeArm.setDefaultCommand(intakeArm.retract());
+    // When nothing else is using the arm: dropped (extended) during auto so the robot can
+    // pick up balls along its paths, and retracted the rest of the time.
+    intakeArm.setDefaultCommand(intakeArm.extendWhile(DriverStation::isAutonomousEnabled));
     controller.leftTrigger().whileTrue(intakeRoller.intake().alongWith(intakeArm.extend()));
     controller.leftBumper().whileTrue(intakeRoller.outtake().alongWith(intakeArm.extend()));
     controller.povDown().toggleOnTrue(intakeArm.stow().alongWith(intakeRoller.stop()));
@@ -311,6 +324,28 @@ public class RobotContainer {
     // Extra (2026 didn't have this): D-pad up (hold) runs the spindexer backwards
     // to unjam.
     controller.povUp().whileTrue(spindexer.unjam());
+  }
+
+  /** Flywheel speed for a shot at our hub from where the robot is now (from the RPM table). */
+  private double hubRpm() {
+    return AimHelper.shooterRpmForHub(drive.getPose(), alliance());
+  }
+
+  /**
+   * Shoot for a while (for autos): hold the flywheel at the hub speed, wait until it's READY,
+   * then feed. Once feeding starts it keeps going, because each shot dips the speed a little.
+   */
+  private Command shootFor(double seconds) {
+    return Commands.parallel(
+            shooter.spinAt(this::hubRpm),
+            Commands.waitUntil(shooter::isReady)
+                .andThen(
+                    Commands.parallel(
+                        feeder.feed(),
+                        spindexer.feed(),
+                        intakeArm.pulse(),
+                        intakeRoller.keepInside())))
+        .withTimeout(seconds);
   }
 
   /** Our alliance, or blue if the Driver Station hasn't told us yet. */

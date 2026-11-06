@@ -151,6 +151,12 @@
           "name": "RunIntake"
         }
       }
+    },
+    {
+      "name": "AimAndPrepShooter",
+      "waypointRelativePos": 5.621490323604068,
+      "endWaypointRelativePos": 6.0,
+      "command": null
     }
   ],
   "globalConstraints": {
