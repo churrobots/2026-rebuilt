@@ -11,6 +11,7 @@ import com.ctre.phoenix6.SignalLogger;
 import com.revrobotics.util.StatusLogger;
 
 import edu.wpi.first.net.WebServer;
+import com.pathplanner.lib.commands.FollowPathCommand;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -112,6 +113,10 @@ public class Robot extends LoggedRobot {
     // Instantiate our RobotContainer. This will perform all our button bindings,
     // and put our autonomous chooser on the dashboard.
     robotContainer = new RobotContainer();
+
+    // Warm up PathPlanner while the robot is disabled, so the first auto doesn't stutter
+    // (Java runs code slowly the first time; PathPlanner's docs recommend this).
+    CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
   }
 
   /** This function is called periodically during all modes. */
