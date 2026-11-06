@@ -45,10 +45,10 @@ const INTAKE = { centerX: 0.58, width: 0.8, depth: 0.29 };
 // Copied from robotToCamera* in VisionConstants.java, so keep them in sync.
 // All 4 are mounted upside down (roll 180°) and tilted up (negative pitch).
 const CAMERAS = [
-  { name: "Front right", ntName: "front right", x: -0.003, y: -0.330, z: 0.365, rollDeg: 180, pitchDeg: -15, yawDeg: -43 },
-  { name: "Back right", ntName: "back right", x: -0.302, y: -0.276, z: 0.362, rollDeg: 180, pitchDeg: -15, yawDeg: -150 },
-  { name: "Front left", ntName: "front left", x: -0.003, y: 0.330, z: 0.365, rollDeg: 180, pitchDeg: -15, yawDeg: 43 },
-  { name: "Back left", ntName: "back left", x: -0.302, y: 0.308, z: 0.191, rollDeg: 180, pitchDeg: -18, yawDeg: 150 },
+  { name: "Front right", ntName: "front right", x: -0.003, y: -0.330, z: 0.365, rollDeg: 180, pitchDeg: -15, yawDeg: -30 },
+  { name: "Back right", ntName: "back right", x: -0.302, y: -0.276, z: 0.362, rollDeg: 180, pitchDeg: -7.5, yawDeg: -142 },
+  { name: "Front left", ntName: "front left", x: -0.003, y: 0.330, z: 0.365, rollDeg: 180, pitchDeg: -15, yawDeg: 30 },
+  { name: "Back left", ntName: "back left", x: -0.302, y: 0.276, z: 0.362, rollDeg: 180, pitchDeg: -7.5, yawDeg: 142 },
 ];
 // The cards shrink to fit the window. Below this they'd be too small to read, so the page
 // scrolls instead.

@@ -39,7 +39,9 @@ public class VisionConstants {
   // Written as "2026 value - change" so you can see both.
   // TODO: verify on the new robot with a tape measure (Phase 4 step 3).
   private static final double CAMERA_LOWER_INCHES = 2.5;
-  private static final double FRONT_CAMERA_BACK_INCHES = 1.0;
+  // Front cameras measured about 0.5 in behind the robot's center (2026-11-05), so
+  // 0.875 - 1.375 = -0.5 in.
+  private static final double FRONT_CAMERA_BACK_INCHES = 1.375;
   // (Not used by Limelight, configure in web UI instead)
   public static Transform3d robotToCameraFrontRight = new Transform3d(
       Units.inchesToMeters(0.875 - FRONT_CAMERA_BACK_INCHES), Units.inchesToMeters(-13),
@@ -47,7 +49,9 @@ public class VisionConstants {
       new Rotation3d(
           Math.PI,
           Units.degreesToRadians(-15),
-          Units.degreesToRadians(-43) // NOTE: CAD says 45deg but this works better
+          // Was -43 (2026 robot). On 2026-11-05 front right read the heading 11° and 14°
+          // too high vs. the (already corrected) back cameras, which works out to about -30°.
+          Units.degreesToRadians(-30)
       ));
 
   public static Transform3d robotToCameraBackRight = new Transform3d(
@@ -55,8 +59,10 @@ public class VisionConstants {
       Units.inchesToMeters(16.75 - CAMERA_LOWER_INCHES),
       new Rotation3d(
           Math.PI, // camera is upside down
-          Units.degreesToRadians(-15), // pitched back
-          Units.degreesToRadians(-150) // facing out and back
+          Units.degreesToRadians(-7.5), // tilted up 7.5° (measured on the new robot 2026-11-05)
+          // facing out and back. Was -150 (2026); -142 from a 3-tag reading at a known
+          // heading of 0° on 2026-11-05 (vision said 7.7° when the robot was at 0°).
+          Units.degreesToRadians(-142)
       ));
 
   public static Transform3d robotToCameraFrontLeft = new Transform3d(
@@ -65,16 +71,22 @@ public class VisionConstants {
       new Rotation3d(
           Math.PI,
           Units.degreesToRadians(-15),
-          Units.degreesToRadians(43) // NOTE: CAD says 45deg but this works better
+          // Mirror of front right (students: the front cameras are mirror images).
+          Units.degreesToRadians(30)
       ));
 
+  // Back left is an exact mirror of back right on the new robot (students, 2026-11-05).
+  // The 2026 code had it at y 12.125 in, z 10 in, which looks like it was missed when
+  // back right was re-measured on 2026-04-09.
   public static Transform3d robotToCameraBackLeft = new Transform3d(
-      Units.inchesToMeters(-11.875), Units.inchesToMeters(12.125),
-      Units.inchesToMeters(10 - CAMERA_LOWER_INCHES),
+      Units.inchesToMeters(-11.875), Units.inchesToMeters(10.875),
+      Units.inchesToMeters(16.75 - CAMERA_LOWER_INCHES),
       new Rotation3d(
           Math.PI, // camera is upside down
-          Units.degreesToRadians(-18), // pitched back
-          Units.degreesToRadians(150) // facing out and back
+          Units.degreesToRadians(-7.5), // tilted up 7.5° (measured on the new robot 2026-11-05)
+          // facing out and back. Mirror of back right (students say the rear cameras are
+          // mirror images), so 142 instead of 150. Not yet checked with a reading.
+          Units.degreesToRadians(142)
       ));
 
   // Sim only: send each camera's view as a video stream for the dashboard. Drawing
