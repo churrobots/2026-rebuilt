@@ -26,7 +26,7 @@ public class IntakeArmConstants {
   // Positions (students, 2026-11-03).
   public static final double stowedRad = 0.0; // tucked in
   public static final double retractedRad = 1.538; // resting spot
-  public static final double extendedRad = 2.376; // down on the floor
+  public static final double extendedRad = 2.400; // down on the floor
 
   // Our angle when the arm is exactly level (flat, pointing straight out). Gravity pulls
   // hardest here, and the gravity math needs it. Level = extended (students, 2026-11-03).
