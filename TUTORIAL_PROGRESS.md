@@ -104,6 +104,8 @@ Student: (not given yet)   Current phase: 7 – Flywheel and indexing   Current 
 
 - 2026-11-05: Startup loop overruns: steady state is healthy (full loop 7.2 ms, HardwareMonitor 5 ms). Startup ones are JIT warm-up, devices still booting, and several AdvantageScope/dashboard clients connecting. Added PathPlanner's `FollowPathCommand.warmupCommand()` at the end of `Robot` constructor so the first auto doesn't stutter.
 
+- 2026-11-05: Auto list cleanup: characterization/SysId routines hidden behind `SHOW_CHARACTERIZATION_AUTOS = false` in RobotContainer (flip to true to re-measure, e.g. wheel radius). Auto dropdown on the dashboard made bigger (56 px tall, larger bold text, blue border on hover).
+
 ## Backlog
 - **Feed only when READY (Phase 7 step 4, backlogged by coach 2026-11-04).** Right trigger should wait for `shooter.isReady()` before feeding. Open choice: RT alone (no aim) either does nothing, or spins to the default shot RPM then feeds (Claude's pick). Combines with side track step 9 (AIM LOCKED + READY).
 - **Far tags spoil multi-tag poses.** Student's idea: drop just the far tags. Options: (1) a PhotonVision pipeline filter (min tag area or distance), if our version has one; mirror it in sim with `PhotonCameraSim.setMaxSightRange` / `setMinTargetAreaPixels` and save the PhotonVision settings in the repo; or (2) in `VisionIOPhotonVision`, filter targets by distance and re-solve with `VisionEstimation.estimateCamPosePNP` (API not verified offline). Check PhotonVision settings with a coach first.
