@@ -27,8 +27,9 @@ import edu.wpi.first.units.measure.MomentOfInertia;
 import frc.robot.Constants;
 
 public class DriveConstants {
-  // Theoretical max is 4.92 m/s, we measured closer to 4.7 or 4.8
-  public static final double maxSpeedMetersPerSec = 4.8;
+  // Kraken X60 + our gearing: (12 V - kS) / kV = about 113 wheel rad/s x 1.483 in wheel
+  // = about 4.25 m/s. (The old Vortex robot used 4.8.) TODO: check with a full-speed run.
+  public static final double maxSpeedMetersPerSec = 4.25;
   public static final double odometryFrequency = 100.0; // Hz
   public static final double trackWidth = Units.inchesToMeters(24);
   public static final double wheelBase = Units.inchesToMeters(24);
@@ -97,15 +98,18 @@ public class DriveConstants {
   // Drive PID configuration
   public static final double driveKp = 0.0;
   public static final double driveKd = 0.0;
+  // kS (volts) and kV (volts per wheel rad/s). COMP/default = the new Kraken robot, measured
+  // 2026-11-05 with "Drive Simple FF Characterization" on carpet (average of 2 runs:
+  // kS 0.15231 / 0.15613, kV 0.10564 / 0.10463). ALPHA is still the old Vortex robot's.
   public static final double driveKs = switch (Constants.robotName) {
     case Constants.ROBOT_ALPHA -> 0.14945;
-    case Constants.ROBOT_COMP -> 0.15226;
-    default -> 0.15226;
+    case Constants.ROBOT_COMP -> 0.15422;
+    default -> 0.15422;
   };
   public static final double driveKv = switch (Constants.robotName) {
     case Constants.ROBOT_ALPHA -> 0.06761;
-    case Constants.ROBOT_COMP -> 0.06481;
-    default -> 0.06481;
+    case Constants.ROBOT_COMP -> 0.10514;
+    default -> 0.10514;
   };
   public static final double driveSimP = 0.05;
   public static final double driveSimD = 0.0;
@@ -125,8 +129,8 @@ public class DriveConstants {
   // Slot0 gains in TalonFX NATIVE units. Because Feedback.SensorToMechanismRatio =
   // driveMotorReduction, the closed loop runs in WHEEL rotations:
   //   kV is volts per (wheel rotation / sec), kS is volts, kP/kD act on rotation error.
-  // These are seeded from the old rad-based Vortex gains (kVnative = kVrad * 2*pi) and
-  // MUST be re-tuned for the Kraken. kP starts at 0 like the previous drive config.
+  // kS/kV come from the measured rad-based gains above (kVnative = kVrad * 2*pi).
+  // kP is still a starting guess; tune it if the robot is slow to recover speed.
   public static final double driveKrakenKp = 0.5;
   public static final double driveKrakenKd = 0.0;
   public static final double driveKrakenKs = driveKs;
