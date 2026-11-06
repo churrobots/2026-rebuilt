@@ -22,9 +22,11 @@ public class Feeder extends SubsystemBase {
     Logger.processInputs("Feeder", inputs);
   }
 
-  /** Pushes game pieces into the flywheel. */
+  /** Pushes game pieces into the flywheel. Stops the feeder when the command ends. */
   public Command feed() {
-    return run(() -> io.setVelocity(Units.rotationsPerMinuteToRadiansPerSecond(feedRpm)));
+    return runEnd(
+        () -> io.setVelocity(Units.rotationsPerMinuteToRadiansPerSecond(feedRpm)),
+        () -> io.setVoltage(0.0));
   }
 
   /** Stops the feeder. */

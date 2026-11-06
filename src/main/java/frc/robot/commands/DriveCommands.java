@@ -205,6 +205,24 @@ public class DriveCommands {
   }
 
   /**
+   * For autos: stand still and turn the robot's back (the shooter) to our hub. Ends once it's
+   * aimed (AIM LOCKED), or after {@code timeoutSeconds} so a bad aim can't freeze the auto.
+   * Uses the drive, so put it as its own auto step, never as an event marker during a path.
+   */
+  public static Command aimAtHubInPlace(Drive drive, double timeoutSeconds) {
+    Supplier<Rotation2d> hubHeading =
+        () ->
+            AimHelper.shootHeading(
+                drive.getPose(), DriverStation.getAlliance().orElse(Alliance.Blue));
+    return joystickDriveAtAngle(drive, () -> 0.0, () -> 0.0, hubHeading, () -> false)
+        .until(
+            () ->
+                Math.abs(hubHeading.get().minus(drive.getRotation()).getRadians())
+                    < ALLOWABLE_ERROR_MARGIN_FOR_AIMING)
+        .withTimeout(timeoutSeconds);
+  }
+
+  /**
    * Hold-to-aim: the driver still drives with the left stick, and the robot turns its back
    * (the shooter) toward the target. In our alliance zone the target is our hub (SHOOT).
    * Anywhere else it's our wall (PASS). The math and the decision live in AimHelper.

@@ -8,6 +8,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -73,6 +74,15 @@ public class IntakeArm extends SubsystemBase {
   public Command goToAngle(double radians) {
     double clamped = MathUtil.clamp(radians, softMinRad, softMaxRad);
     return run(() -> targetRad = clamped);
+  }
+
+  /**
+   * Holds the intake down (extended) while {@code dropped} is true, and at the resting spot
+   * (retracted) otherwise. It checks every loop, so it switches by itself. Good as a default
+   * command, for example "dropped during auto."
+   */
+  public Command extendWhile(BooleanSupplier dropped) {
+    return run(() -> targetRad = dropped.getAsBoolean() ? extendedRad : retractedRad);
   }
 
   /** Swings the intake down onto the floor. */

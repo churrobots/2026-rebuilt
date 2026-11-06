@@ -31,9 +31,12 @@ public class IntakeRoller extends SubsystemBase {
     return runEnd(() -> io.setVoltage(rollerOuttakeVolts), () -> io.setVoltage(0.0));
   }
 
-  /** A gentle inward spin while shooting, so balls in the intake don't roll back out. */
+  /**
+   * A gentle inward spin while shooting, so balls in the intake don't roll back out. Stops the
+   * roller when the command ends.
+   */
   public Command keepInside() {
-    return run(() -> io.setVoltage(rollerKeepInsideVolts));
+    return runEnd(() -> io.setVoltage(rollerKeepInsideVolts), () -> io.setVoltage(0.0));
   }
 
   /** Stops the roller. */
