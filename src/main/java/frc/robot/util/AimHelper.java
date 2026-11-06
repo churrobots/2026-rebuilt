@@ -21,19 +21,16 @@ public final class AimHelper {
    * Distance to the hub (inches) → flywheel speed (RPM). Between two rows, the table fills in
    * the gap with a straight line. Past either end, it uses the end value.
    *
-   * <p>TODO: these are the 2026 robot's numbers (SemiAutoHelper on main). Our new shooter is
-   * different, so re-measure them on a real field (side track step 8).
+   * <p>Measured by the students on 2026-11-05 with the Calibration card (branch
+   * madtown-shooter-calibration): the robot's own distance, and the middle RPM that scored.
+   * Re-measure after new shooter wheels, worn balls, or a changed shooter angle.
    */
   private static final InterpolatingDoubleTreeMap distanceInchesToRpm =
       InterpolatingDoubleTreeMap.ofEntries(
-          Map.entry(75.0, 2800.0),
-          Map.entry(88.0, 2775.0),
-          Map.entry(99.0, 2850.0),
-          Map.entry(111.0, 2900.0),
-          Map.entry(135.0, 3100.0),
-          Map.entry(159.0, 3400.0),
-          Map.entry(183.0, 3700.0),
-          Map.entry(207.0, 3800.0));
+          Map.entry(79.0, 3025.0),
+          Map.entry(119.0, 3200.0),
+          Map.entry(144.0, 3525.0),
+          Map.entry(199.0, 4050.0));
 
   /** The flywheel speed (RPM) for a shot from this far away (meters), from the table. */
   public static double shooterRpmForDistance(double distanceMeters) {

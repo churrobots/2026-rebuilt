@@ -43,7 +43,7 @@ Legend: [ ] not yet · [~] seen, still shaky · [x] understood
 - [ ] C37 · Superstructure coordination
 - [ ] C46 · Turrets
 - [~] C38 · Heading lock and auto-aim (2026-10-28, side track step 1)
-- [ ] C39 · Lookup tables and interpolation
+- [~] C39 · Lookup tables and interpolation (2026-11-05, side track step 8)
 - [ ] C40 · Shoot on the move
 - [x] C47 · Trigonometry for aiming (2026-10-28, side track step 2)
 - [ ] C48 · Choosing a shot: shooting vs. passing
@@ -136,6 +136,9 @@ Legend: [ ] not yet · [~] seen, still shaky · [x] understood
 - 2026-11-03: Supplied the real arm facts themselves (NEO/SPARK MAX, CAN 12, 2026 gearing, absolute encoder) and measured angles in radians (stowed 0, retracted 1.538, extended 2.376; "level is extended"). Asked whether to use the SPARK MAX's built-in PID, a good instinct; the trade-off was explained. Predicted that with all gains at 0 "nothing will move because we haven't set the gains." Correct: no volts. Clarified that gravity still acts, so an arm off its hard stop would droop. Claude wrote the arm code ("for the sake of time"); the student is to write the bindings.
 - 2026-11-03: The student wrote the arm bindings their own way, ahead of plan: left trigger = `intakeRoller.intake().alongWith(intakeArm.extend())`, default `retract()` (C10). Tuning step 1: set kP = 2 and observed "it went too low" (the arm sagged below the target with P only). Used this to introduce kG: P only pushes when there's error, so gravity wins until the error gets big enough.
 - 2026-11-03: After adding kG, the arm reached the target but was "too slow for our liking." Next: raise kP for speed and watch for overshoot/wobble (then kD).
+
+### C39 · Lookup tables and interpolation
+- 2026-11-04/05 (side track step 8): Seen. Students measured 4 shot points on a real field with the Calibration card and reported them as "optimized RPM" per distance (79→3025, 119→3200, 144→3525, 199→4050). The RPM goes up with distance at every row, so the data looks clean. Check-yourself question (100"→2900, 120"→3100, what at 110"?) was asked but not answered yet.
 
 ## Tutorial feedback
 - 2026-10-07 (Phase 0): Student wanted to move fast through setup ("skip this," "its already running"). The setup steps could be shorter for students who already have the sim running.

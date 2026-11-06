@@ -55,17 +55,17 @@ class AimHelperTest {
 
   @Test
   void rpmTableUsesTheRowsAndFillsTheGaps() {
-    // Right on a row: 159" → 3400 RPM.
-    assertEquals(3400, AimHelper.shooterRpmForDistance(Units.inchesToMeters(159)), 1);
-    // Halfway between 135" (3100) and 159" (3400) → halfway between: 3250.
-    assertEquals(3250, AimHelper.shooterRpmForDistance(Units.inchesToMeters(147)), 1);
+    // Right on a row: 144" → 3525 RPM.
+    assertEquals(3525, AimHelper.shooterRpmForDistance(Units.inchesToMeters(144)), 1);
+    // Halfway between 119" (3200) and 144" (3525) → halfway between: 3362.5.
+    assertEquals(3362.5, AimHelper.shooterRpmForDistance(Units.inchesToMeters(131.5)), 1);
   }
 
   @Test
   void rpmTableHoldsItsEndsOutsideTheRange() {
     // Closer than the first row or farther than the last: use the end value.
-    assertEquals(2800, AimHelper.shooterRpmForDistance(Units.inchesToMeters(40)), 1);
-    assertEquals(3800, AimHelper.shooterRpmForDistance(Units.inchesToMeters(300)), 1);
+    assertEquals(3025, AimHelper.shooterRpmForDistance(Units.inchesToMeters(40)), 1);
+    assertEquals(4050, AimHelper.shooterRpmForDistance(Units.inchesToMeters(300)), 1);
   }
 
   @Test
