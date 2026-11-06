@@ -92,6 +92,11 @@ public class VisionConstants {
   public static double linearStdDevBaseline = 0.02; // Meters
   public static double angularStdDevBaseline = 0.06; // Radians
 
+  // Single-tag readings: how much LESS to trust their position (bigger = trust less).
+  // Their heading is never used (see Vision.java). Added 2026-11-05 after one far tag
+  // pulled the pose ~40 cm while 2-tag readings were within ~10 cm.
+  public static double singleTagStdDevFactor = 3.0;
+
   // Standard deviation multipliers for each camera
   // (Adjust to trust some cameras more than others)
   public static double[] cameraStdDevFactors = new double[] {
