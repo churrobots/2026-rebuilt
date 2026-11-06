@@ -132,6 +132,12 @@ public class Vision extends SubsystemBase {
           linearStdDev *= cameraStdDevFactors[cameraIndex];
           angularStdDev *= cameraStdDevFactors[cameraIndex];
         }
+        // One tag is a much weaker reading than two or more, especially far away.
+        // Trust its position less, and never let it change the heading (the gyro is better).
+        if (observation.tagCount() == 1) {
+          linearStdDev *= singleTagStdDevFactor;
+          angularStdDev = Double.POSITIVE_INFINITY;
+        }
 
         // Send vision observation
         consumer.accept(
