@@ -86,6 +86,8 @@ Student: (not given yet)   Current phase: 7 – Flywheel and indexing   Current 
 
 - 2026-11-05: Students sent their measured shot table (inches → RPM): 79→3025, 119→3200, 144→3525, 199→4050. Claude replaced the 2026 table in `AimHelper.java` and updated the 2 table tests in `AimHelperTest`. The pass table is still 2026's (no pass measurements yet). Presets now get new RPMs too (Y 126" ≈ 3291, X/B 138" ≈ 3447).
 
+- 2026-11-05: Dashboard cleanup (students asked). Kept Field, Auto, Health, Shooter, Spindexer, Intake, Copy NetworkTables. Removed the B Button, Aim, Debug: Aim math, Vision, and Camera Views cards plus their code and CSS. The Field card still draws camera view cones: the old Vision card's tracking code stays as `#trackVision` (no card). Robot code unchanged (it still logs the B/aim/vision values). Smoke-tested in Node with a fake robot: no errors.
+
 ## Backlog
 - **Feed only when READY (Phase 7 step 4, backlogged by coach 2026-11-04).** Right trigger should wait for `shooter.isReady()` before feeding. Open choice: RT alone (no aim) either does nothing, or spins to the default shot RPM then feeds (Claude's pick). Combines with side track step 9 (AIM LOCKED + READY).
 - **Far tags spoil multi-tag poses.** Student's idea: drop just the far tags. Options: (1) a PhotonVision pipeline filter (min tag area or distance), if our version has one; mirror it in sim with `PhotonCameraSim.setMaxSightRange` / `setMinTargetAreaPixels` and save the PhotonVision settings in the repo; or (2) in `VisionIOPhotonVision`, filter targets by distance and re-solve with `VisionEstimation.estimateCamPosePNP` (API not verified offline). Check PhotonVision settings with a coach first.

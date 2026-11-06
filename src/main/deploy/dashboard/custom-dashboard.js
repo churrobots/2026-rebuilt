@@ -11,8 +11,6 @@ const ENABLED_TOPIC = "/AdvantageKit/DriverStation/Enabled";
 const AUTONOMOUS_TOPIC = "/AdvantageKit/DriverStation/Autonomous";
 const ALLIANCE_TOPIC = "/FMSInfo/IsRedAlliance";
 const STATION_TOPIC = "/FMSInfo/StationNumber";
-const B_COUNT_TOPIC = "/AdvantageKit/RealOutputs/Tutorial/BPressCount";
-const B_HELD_TOPIC = "/AdvantageKit/RealOutputs/Tutorial/BHeld";
 const ROLLER_VOLTS_TOPIC = "/AdvantageKit/IntakeRoller/AppliedVolts";
 const ROLLER_VELOCITY_TOPIC = "/AdvantageKit/IntakeRoller/VelocityRadPerSec";
 const ROLLER_SPINNING_RPM = 350;
@@ -37,14 +35,9 @@ const FEEDER_VELOCITY_TOPIC = "/AdvantageKit/Feeder/VelocityRadPerSec";
 const SHOOTER_GAUGE_MAX_RPM = 6000; // a Kraken tops out around here
 // Real wheels spin way too fast to see, so the drawing spins them slowed down.
 const SHOOTER_DRAW_SLOWDOWN = 0.002; // drawn rad/sec per RPM
-// Auto-aim (DriveCommands.autoAim / joystickDriveAtAngle).
+// Auto-aim (DriveCommands.autoAim): the Field card draws the aim line from these.
 const AIM_ACTIVE_TOPIC = "/AdvantageKit/RealOutputs/Aim/Active";
 const AIM_LOCKED_TOPIC = "/AdvantageKit/RealOutputs/Aim/Locked";
-const AIM_DISTANCE_TOPIC = "/AdvantageKit/RealOutputs/Aim/DistanceMeters";
-const AIM_MODE_TOPIC = "/AdvantageKit/RealOutputs/Aim/Mode"; // "SHOOT" or "PASS"
-const AIM_TARGET_TOPIC = "/AdvantageKit/RealOutputs/Aim/TargetHeadingDeg";
-const AIM_ACTUAL_TOPIC = "/AdvantageKit/RealOutputs/Aim/ActualHeadingDeg";
-const AIM_TOPICS = [AIM_ACTIVE_TOPIC, AIM_LOCKED_TOPIC, AIM_DISTANCE_TOPIC, AIM_TARGET_TOPIC, AIM_ACTUAL_TOPIC, AIM_MODE_TOPIC];
 // Where the intake sits on the robot, in meters (from last year's robot drawing in
 // PathPlanner's settings.json on main): centered 0.58 m in front, 0.8 m wide, 0.29 m deep.
 const INTAKE = { centerX: 0.58, width: 0.8, depth: 0.29 };
@@ -57,21 +50,9 @@ const CAMERAS = [
   { name: "Front left", ntName: "front left", x: -0.003, y: 0.330, z: 0.365, rollDeg: 180, pitchDeg: -15, yawDeg: 43 },
   { name: "Back left", ntName: "back left", x: -0.302, y: 0.308, z: 0.191, rollDeg: 180, pitchDeg: -18, yawDeg: 150 },
 ];
-// Sim camera image: 960x720 with an 80° diagonal view (VisionIOPhotonVisionSim.java).
-const CAMERA_IMAGE = { width: 960, height: 720, diagonalFovDeg: 80 };
-const CAMERA_FOCAL_PX =
-  Math.hypot(CAMERA_IMAGE.width, CAMERA_IMAGE.height) / 2 /
-  Math.tan(((CAMERA_IMAGE.diagonalFovDeg / 2) * Math.PI) / 180);
-const HUB_HEIGHT_METERS = 1.829; // 72 in, game manual (FuelPhysicsSim on main)
-// Highlight colors in the camera views. Cyan and magenta, so they don't get mixed up
-// with the green and red boxes PhotonVision draws around tags.
-const TAG_USED_COLOR = "#22d3ee";
-const TAG_REJECTED_COLOR = "#e879f9";
 // The cards shrink to fit the window. Below this they'd be too small to read, so the page
 // scrolls instead.
 const MIN_FIT_SCALE = 0.4;
-const TAG_SIZE_METERS = 0.1651; // 6.5 in tag; the highlight is drawn a bit bigger
-const CAMERA_NAMES = CAMERAS.map((camera) => camera.name);
 // Sim cameras are 960x720 with an 80° diagonal view, which is about 68° side to side.
 const CAMERA_FOV_DEG = 68;
 // How far we trust a tag: maxDistance in VisionConstants.java. The robot sends it
@@ -148,8 +129,6 @@ export class CustomDashboard extends HTMLElement {
   #cameraStates = CAMERAS.map(() => ({ lastTags: 0, lastPose: "—", lastSeenMs: 0, tagPoints: [] }));
   /** Asks the Field card to redraw. */
   #redrawField = () => {};
-  /** Asks the Camera Views card to redraw. */
-  #redrawCameras = () => {};
 
   connectedCallback() {
     const root = this.shadowRoot ?? this.attachShadow({ mode: "open" });
@@ -231,25 +210,6 @@ export class CustomDashboard extends HTMLElement {
               </div>
             </div>
           </section>
-          <section class="card" aria-labelledby="vision-heading">
-            <div class="card-heading">
-              <div><p class="eyebrow">Sensors</p><h1 id="vision-heading">Vision</h1></div>
-            </div>
-            <table class="vision-table">
-              <thead><tr><th>Camera</th><th>Connected</th><th>Tags</th><th>Last pose</th></tr></thead>
-              <tbody>${CAMERA_NAMES.map((name, i) => `<tr data-camera="${i}"><td>${name}</td><td><span class="dot"></span></td><td class="tags">0</td><td class="last-pose"><span class="pose-badge">N/A</span><span class="pose-reason"></span></td></tr>`).join("")}</tbody>
-            </table>
-          </section>
-          <section class="card camera-card" aria-labelledby="cameras-heading">
-            <div class="card-heading">
-              <div><p class="eyebrow">Sensors</p><h1 id="cameras-heading">Camera Views</h1></div>
-            </div>
-            <div class="camera-grid"><p class="camera-empty">Waiting for camera streams…</p></div>
-            <p class="camera-legend">
-              <span class="swatch used"></span>Tag used for position
-              <span class="swatch rejected"></span>Tag seen, but pose rejected
-            </p>
-          </section>
           <section class="card" aria-labelledby="copy-nt-heading">
             <div class="card-heading">
               <div><p class="eyebrow">Debug</p><h1 id="copy-nt-heading">Copy NetworkTables</h1></div>
@@ -260,45 +220,6 @@ export class CustomDashboard extends HTMLElement {
               <button class="copy-button" type="button">Copy</button>
             </div>
             <output class="copy-status" aria-live="polite"></output>
-          </section>
-          <section class="card" aria-labelledby="buttons-heading">
-            <div class="card-heading">
-              <div><p class="eyebrow">Tutorial</p><h1 id="buttons-heading">B Button</h1></div>
-            </div>
-            <div class="stat-row">
-              <div><p class="eyebrow">Presses (onTrue)</p><output class="big-number b-count">0</output></div>
-              <div><p class="eyebrow">Held (whileTrue)</p><output class="status-light b-held">NOT HELD</output></div>
-            </div>
-          </section>
-          <section class="card" aria-labelledby="aim-heading">
-            <div class="card-heading">
-              <div><p class="eyebrow">Drivetrain</p><h1 id="aim-heading">Aim</h1></div>
-            </div>
-            <output class="status-light aim-active">NOT AIMING</output>
-            <div class="stat-row">
-              <div><p class="eyebrow">Mode</p><output class="big-number aim-mode">—</output></div>
-              <div><p class="eyebrow aim-distance-label">Distance (m)</p><output class="big-number aim-distance">—</output></div>
-            </div>
-            <div class="stat-row">
-              <div><p class="eyebrow">Target heading</p><output class="big-number aim-target">—</output></div>
-              <div><p class="eyebrow">Actual heading</p><output class="big-number aim-actual">—</output></div>
-            </div>
-            <output class="status-light aim-locked">NOT LOCKED</output>
-          </section>
-          <section class="card" aria-labelledby="aim-math-heading">
-            <div class="card-heading">
-              <div><p class="eyebrow">Debug</p><h1 id="aim-math-heading">Debug: Aim math</h1></div>
-            </div>
-            <p class="eyebrow">Robot → blue hub</p>
-            <output class="aim-math-positions">Waiting for pose…</output>
-            <div class="stat-row">
-              <div><p class="eyebrow">dx (m)</p><output class="big-number aim-math-dx">—</output></div>
-              <div><p class="eyebrow">dy (m)</p><output class="big-number aim-math-dy">—</output></div>
-            </div>
-            <div class="stat-row">
-              <div><p class="eyebrow">Distance (m)</p><output class="big-number aim-math-distance">—</output></div>
-              <div><p class="eyebrow">atan2 angle</p><output class="big-number aim-math-angle">—</output></div>
-            </div>
           </section>
         </main>`;
     }
@@ -329,18 +250,14 @@ export class CustomDashboard extends HTMLElement {
     this.#started = true;
     this.#startFitToWindow();
     this.#startFieldCard(core);
-    this.#startButtonCard(core);
     this.#startIntakeCard(core);
     this.#startSpindexerCard(core);
     this.#startShooterCard(core);
-    this.#startVisionCard(core);
-    this.#startCameraCard(core);
+    this.#trackVision(core);
     this.#startCopyCard(core);
     this.#startAutoCard(core);
     this.#startHardwareCard(core);
     this.#startNamedCommandsCard(core);
-    this.#startAimCard(core);
-    this.#startAimMathCard(core);
   }
 
   /**
@@ -558,114 +475,16 @@ export class CustomDashboard extends HTMLElement {
   }
 
   /**
-   * Shows each camera's video. In sim, PhotonVision draws what each camera sees and
-   * publishes the stream's address under /CameraPublisher/<name>-processed/streams.
+   * Keeps track of what each camera saw most recently (no card of its own anymore), so the
+   * Field card can draw each camera's view cone and the rays to the tags it sees.
    */
-  #startCameraCard(core) {
-    const grid = this.shadowRoot.querySelector(".camera-grid");
-    /** @type {Map<string, string>} camera name -> stream URL */
-    const shown = new Map();
-    /** @type {Array<{ canvas: HTMLCanvasElement, overlay: HTMLCanvasElement, camera: typeof CAMERAS[number], state: object }>} */
-    let views = [];
-    let frame = 0;
-
-    // Draw our own 3D field behind each video, from that camera's point of view.
-    const drawScenes = () => {
-      frame = 0;
-      const pose = decodePose2d(core.getTopic(POSE_TOPIC)?.value);
-      const hubs = toNumbers(core.getTopic(HUBS_TOPIC)?.value);
-      for (const view of views) {
-        drawCameraScene(view.canvas, view.camera, pose, hubs);
-        drawTagHighlights(view.overlay, view.camera, pose, view.state);
-      }
-    };
-    const scheduleScenes = () => {
-      if (!frame) frame = requestAnimationFrame(drawScenes);
-    };
-    this.#redrawCameras = scheduleScenes;
-
-    const render = () => {
-      const streams = new Map();
-      for (const topic of core.getTopics()) {
-        const match = /^\/CameraPublisher\/(.+-processed)\/streams$/.exec(topic.name);
-        const url = match && streamUrl(topic.value);
-        if (url) streams.set(match[1], url);
-      }
-      const same =
-        streams.size === shown.size && [...streams].every(([name, url]) => shown.get(name) === url);
-      if (same) return;
-      shown.clear();
-      streams.forEach((url, name) => shown.set(name, url));
-      views = [];
-      if (shown.size === 0) {
-        grid.innerHTML = `<p class="camera-empty">Waiting for camera streams…</p>`;
-        return;
-      }
-      grid.replaceChildren(
-        ...[...shown].sort(([a], [b]) => a.localeCompare(b)).map(([name, url]) => {
-          const figure = document.createElement("figure");
-          const stack = document.createElement("div");
-          stack.className = "camera-view";
-          const canvas = document.createElement("canvas");
-          canvas.width = CAMERA_IMAGE.width;
-          canvas.height = CAMERA_IMAGE.height;
-          const img = document.createElement("img");
-          img.src = url;
-          img.alt = `${cameraLabel(name)} camera view`;
-          // Highlights go on top of the video, so they aren't washed out by it.
-          const overlay = document.createElement("canvas");
-          overlay.className = "camera-overlay";
-          overlay.width = CAMERA_IMAGE.width;
-          overlay.height = CAMERA_IMAGE.height;
-          stack.append(canvas, img, overlay);
-          const caption = document.createElement("figcaption");
-          caption.textContent = cameraLabel(name);
-          figure.append(stack, caption);
-          const index = CAMERAS.findIndex((c) => `${c.ntName}-processed` === name);
-          const camera = CAMERAS[index];
-          if (camera) views.push({ canvas, overlay, camera, state: this.#cameraStates[index] });
-          // Upside-down cameras give upside-down pictures. Turn the picture right side up
-          // here on the dashboard only; the robot code still uses the real, flipped image.
-          stack.classList.toggle("flipped", Math.abs(camera?.rollDeg ?? 0) === 180);
-          return figure;
-        }),
-      );
-      scheduleScenes();
-    };
-
-    /** @param {CustomEvent<DashboardTopic>} event */
-    const topicListener = ({ detail: topic }) => {
-      if (topic.name.startsWith("/CameraPublisher/")) render();
-      if (topic.name === POSE_TOPIC || topic.name === HUBS_TOPIC) scheduleScenes();
-    };
-    core.addEventListener("topic", topicListener);
-    this.#cleanup.push(() => {
-      core.removeEventListener("topic", topicListener);
-      cancelAnimationFrame(frame);
-      // Stop downloading the video when the dashboard closes.
-      grid.querySelectorAll("img").forEach((img) => img.removeAttribute("src"));
-    });
-    render();
-  }
-
-
-  /** Shows, per camera: connected, how many tags it sees, and whether its last pose was accepted. */
-  #startVisionCard(core) {
-    const root = this.shadowRoot;
-    const cameras = CAMERA_NAMES.map((_, i) => {
-      const row = root.querySelector(`tr[data-camera="${i}"]`);
+  #trackVision(core) {
+    const cameras = CAMERAS.map((_, i) => {
       return {
-        connectedTopic: `/AdvantageKit/Vision/Camera${i}/Connected`,
         tagsTopic: `/AdvantageKit/Vision/Camera${i}/TagIds`,
         acceptedTopic: `/AdvantageKit/RealOutputs/Vision/Camera${i}/RobotPosesAccepted`,
         rejectedTopic: `/AdvantageKit/RealOutputs/Vision/Camera${i}/RobotPosesRejected`,
-        dot: row.querySelector(".dot"),
-        tagsText: row.querySelector(".tags"),
-        poseCell: row.querySelector(".last-pose"),
-        poseBadge: row.querySelector(".pose-badge"),
-        poseReason: row.querySelector(".pose-reason"),
         tagPosesTopic: `/AdvantageKit/RealOutputs/Vision/Camera${i}/TagPoses`,
-        lastResultTopic: `/AdvantageKit/RealOutputs/Vision/Camera${i}/LastResult`,
         // Cameras only report on loops with a new frame, so remember the last sighting.
         state: this.#cameraStates[i],
       };
@@ -674,7 +493,6 @@ export class CustomDashboard extends HTMLElement {
     const render = () => {
       const now = performance.now();
       for (const camera of cameras) {
-        const connected = core.getTopic(camera.connectedTopic)?.value === true;
         const tags = core.getTopic(camera.tagsTopic)?.value;
         const accepted = countPoses(core.getTopic(camera.acceptedTopic)?.value);
         const rejected = countPoses(core.getTopic(camera.rejectedTopic)?.value);
@@ -686,40 +504,17 @@ export class CustomDashboard extends HTMLElement {
         }
         if (accepted > 0) state.lastPose = "ACCEPTED";
         else if (rejected > 0) state.lastPose = "REJECTED";
-        const fresh = now - state.lastSeenMs < VISION_HOLD_MS;
-        camera.dot.classList.toggle("on", connected);
-        camera.tagsText.textContent = String(fresh ? state.lastTags : 0);
-        // A small colored badge (ACCEPTED / REJECTED / N/A), with the robot's reason
-        // underneath in small text, like "height off (z = 1.20 m)".
-        // If the camera sees no tags right now, there's nothing to judge, so show N/A.
-        const lastResult = core.getTopic(camera.lastResultTopic)?.value;
-        const reason =
-          fresh && typeof lastResult === "string" && lastResult.startsWith("REJECTED: ")
-            ? lastResult.slice("REJECTED: ".length)
-            : "";
-        camera.poseBadge.textContent = fresh ? state.lastPose : "N/A";
-        camera.poseReason.textContent = reason;
-        camera.poseReason.title = reason;
-        camera.poseCell.dataset.state = fresh ? state.lastPose : "NA";
       }
       this.#redrawField();
-      this.#redrawCameras();
     };
 
-    const topicNames = cameras.flatMap((c) => [
-      c.connectedTopic,
-      c.tagsTopic,
-      c.acceptedTopic,
-      c.rejectedTopic,
-      c.tagPosesTopic,
-      c.lastResultTopic,
-    ]);
+    const topicNames = cameras.flatMap((c) => [c.tagsTopic, c.acceptedTopic, c.rejectedTopic, c.tagPosesTopic]);
     /** @param {CustomEvent<DashboardTopic>} event */
     const topicListener = ({ detail: topic }) => {
       if (topicNames.includes(topic.name)) render();
     };
     core.addEventListener("topic", topicListener);
-    // Also tick a few times a second so the tag count drops to 0 when a camera stops seeing tags.
+    // Also tick a few times a second so a cone goes gray when its camera stops seeing tags.
     const timer = setInterval(render, 250);
     this.#cleanup.push(() => {
       core.removeEventListener("topic", topicListener);
@@ -904,112 +699,6 @@ export class CustomDashboard extends HTMLElement {
       core.removeEventListener("topic", topicListener);
       cancelAnimationFrame(frame);
     });
-    render();
-  }
-
-  /** Shows auto-aim: is it on, how far the hub is, target vs. actual heading, and AIM LOCKED. */
-  #startAimCard(core) {
-    const root = this.shadowRoot;
-    const activeLight = root.querySelector(".aim-active");
-    const distanceText = root.querySelector(".aim-distance");
-    const targetText = root.querySelector(".aim-target");
-    const actualText = root.querySelector(".aim-actual");
-    const lockedLight = root.querySelector(".aim-locked");
-    const modeText = root.querySelector(".aim-mode");
-    const distanceLabel = root.querySelector(".aim-distance-label");
-
-    const render = () => {
-      const active = core.getTopic(AIM_ACTIVE_TOPIC)?.value === true;
-      const locked = active && core.getTopic(AIM_LOCKED_TOPIC)?.value === true;
-      const distance = Number(core.getTopic(AIM_DISTANCE_TOPIC)?.value);
-      const target = Number(core.getTopic(AIM_TARGET_TOPIC)?.value);
-      const actual = Number(core.getTopic(AIM_ACTUAL_TOPIC)?.value);
-      activeLight.textContent = active ? "AIMING" : "NOT AIMING";
-      activeLight.classList.toggle("on", active);
-      // The numbers only mean something while the aim button is held.
-      distanceText.textContent = active && Number.isFinite(distance) ? distance.toFixed(2) : "—";
-      targetText.textContent = active && Number.isFinite(target) ? `${target.toFixed(1)}°` : "—";
-      actualText.textContent = active && Number.isFinite(actual) ? `${actual.toFixed(1)}°` : "—";
-      // SHOOT = aiming at our hub; PASS = aiming at our wall from the neutral zone.
-      const mode = core.getTopic(AIM_MODE_TOPIC)?.value;
-      modeText.textContent = active && typeof mode === "string" ? mode : "—";
-      distanceLabel.textContent = active && mode === "PASS" ? "To our wall (m)" : "To our hub (m)";
-      lockedLight.textContent = locked ? "AIM LOCKED" : "NOT LOCKED";
-      lockedLight.classList.toggle("on", locked);
-    };
-
-    /** @param {CustomEvent<DashboardTopic>} event */
-    const topicListener = ({ detail: topic }) => {
-      if (AIM_TOPICS.includes(topic.name)) render();
-    };
-    core.addEventListener("topic", topicListener);
-    this.#cleanup.push(() => core.removeEventListener("topic", topicListener));
-    render();
-  }
-
-  /**
-   * Debug (temporary, auto-aim side track step 2): the trig from the robot to the blue hub,
-   * worked out here from the pose so the student can check their paper predictions.
-   * Remove once AimHelper logs these numbers from the robot (step 5).
-   */
-  #startAimMathCard(core) {
-    const root = this.shadowRoot;
-    const positionsText = root.querySelector(".aim-math-positions");
-    const dxText = root.querySelector(".aim-math-dx");
-    const dyText = root.querySelector(".aim-math-dy");
-    const distanceText = root.querySelector(".aim-math-distance");
-    const angleText = root.querySelector(".aim-math-angle");
-
-    const render = () => {
-      const pose = decodePose2d(core.getTopic(POSE_TOPIC)?.value);
-      // The blue hub is the first box in Field/Hubs: [minX, minY, maxX, maxY].
-      const hubBox = toNumbers(core.getTopic(HUBS_TOPIC)?.value);
-      if (!pose || hubBox.length < 4) return;
-      const hubX = (hubBox[0] + hubBox[2]) / 2;
-      const hubY = (hubBox[1] + hubBox[3]) / 2;
-      const dx = hubX - pose.x;
-      const dy = hubY - pose.y;
-      const angleDeg = (Math.atan2(dy, dx) * 180) / Math.PI;
-      positionsText.textContent =
-        `Robot (${pose.x.toFixed(2)}, ${pose.y.toFixed(2)})  →  hub (${hubX.toFixed(2)}, ${hubY.toFixed(2)})`;
-      dxText.textContent = dx.toFixed(2);
-      dyText.textContent = dy.toFixed(2);
-      distanceText.textContent = Math.hypot(dx, dy).toFixed(2);
-      angleText.textContent = `${angleDeg.toFixed(1)}°`;
-    };
-
-    /** @param {CustomEvent<DashboardTopic>} event */
-    const topicListener = ({ detail: topic }) => {
-      if ([POSE_TOPIC, HUBS_TOPIC].includes(topic.name)) render();
-    };
-    core.addEventListener("topic", topicListener);
-    this.#cleanup.push(() => {
-      core.removeEventListener("topic", topicListener);
-      cancelAnimationFrame(frame);
-    });
-    render();
-  }
-
-  /** Shows the B press counter and whether B is held right now. */
-  #startButtonCard(core) {
-    const root = this.shadowRoot;
-    const countText = root.querySelector(".b-count");
-    const heldLight = root.querySelector(".b-held");
-
-    const render = () => {
-      const count = Number(core.getTopic(B_COUNT_TOPIC)?.value);
-      const held = core.getTopic(B_HELD_TOPIC)?.value === true;
-      countText.textContent = Number.isFinite(count) ? String(count) : "0";
-      heldLight.textContent = held ? "HELD" : "NOT HELD";
-      heldLight.classList.toggle("on", held);
-    };
-
-    /** @param {CustomEvent<DashboardTopic>} event */
-    const topicListener = ({ detail: topic }) => {
-      if ([B_COUNT_TOPIC, B_HELD_TOPIC].includes(topic.name)) render();
-    };
-    core.addEventListener("topic", topicListener);
-    this.#cleanup.push(() => core.removeEventListener("topic", topicListener));
     render();
   }
 
@@ -1372,182 +1061,6 @@ function decodePose2d(value) {
     heading: bytes.getFloat64(16, true),
   };
   return Object.values(pose).every(Number.isFinite) ? pose : null;
-}
-
-/**
- * Draws the field in 3D from one camera's point of view: a floor grid, the field edge,
- * the center line, and the hubs as tall boxes. It uses the same camera math as the
- * PhotonVision sim, so it lines up with the tags in the video drawn on top.
- */
-function drawCameraScene(canvas, camera, pose, hubs) {
-  const context = canvas.getContext("2d");
-  context.fillStyle = "#0c1017";
-  context.fillRect(0, 0, canvas.width, canvas.height);
-  if (!pose) return;
-
-  const view = cameraView(camera, pose, canvas);
-  const line = (a, b, color, width = 2) => {
-    const segment = view.segment(a, b);
-    if (!segment) return;
-    context.strokeStyle = color;
-    context.lineWidth = width;
-    context.beginPath();
-    context.moveTo(segment[0], segment[1]);
-    context.lineTo(segment[2], segment[3]);
-    context.stroke();
-  };
-
-  // Floor grid every meter, so you can tell how far away things are.
-  for (let x = 1; x < FIELD.length; x++) line([x, 0, 0], [x, FIELD.width, 0], "#2a3446", 1);
-  for (let y = 1; y < FIELD.width; y++) line([0, y, 0], [FIELD.length, y, 0], "#2a3446", 1);
-  // Center line and field edge.
-  line([FIELD.length / 2, 0, 0], [FIELD.length / 2, FIELD.width, 0], "#7c8798", 2);
-  const corners = [[0, 0], [FIELD.length, 0], [FIELD.length, FIELD.width], [0, FIELD.width]];
-  corners.forEach(([x, y], i) => {
-    const [nx, ny] = corners[(i + 1) % 4];
-    line([x, y, 0], [nx, ny, 0], "#d6dde8", 3);
-  });
-
-  // Hubs as boxes: blue first, then red.
-  for (let i = 0; i + 3 < hubs.length; i += 4) {
-    const [minX, minY, maxX, maxY] = hubs.slice(i, i + 4);
-    const color = i === 0 ? "#63b2ff" : "#ff6877";
-    const base = [[minX, minY], [maxX, minY], [maxX, maxY], [minX, maxY]];
-    base.forEach(([x, y], k) => {
-      const [nx, ny] = base[(k + 1) % 4];
-      line([x, y, 0], [nx, ny, 0], color, 3);
-      line([x, y, HUB_HEIGHT_METERS], [nx, ny, HUB_HEIGHT_METERS], color, 3);
-      line([x, y, 0], [x, y, HUB_HEIGHT_METERS], color, 3);
-    });
-  }
-}
-
-/**
- * The camera math: where a camera is and which way it's turned, turned into a
- * function that finds where a field point lands in its picture.
- */
-function cameraView(camera, pose, canvas) {
-  const toRad = (deg) => (deg * Math.PI) / 180;
-  const robotTurn = rotationZ(pose.heading);
-  const mount = multiply(
-    rotationZ(toRad(camera.yawDeg)),
-    multiply(rotationY(toRad(camera.pitchDeg)), rotationX(toRad(camera.rollDeg))),
-  );
-  const turn = multiply(robotTurn, mount);
-  const offset = apply(robotTurn, [camera.x, camera.y, camera.z]);
-  const eye = [pose.x + offset[0], pose.y + offset[1], offset[2]];
-
-  // Field point -> camera point (x forward, y left, z up) -> pixel.
-  const toCamera = (p) => {
-    const d = [p[0] - eye[0], p[1] - eye[1], p[2] - eye[2]];
-    return [0, 1, 2].map((col) => turn[0][col] * d[0] + turn[1][col] * d[1] + turn[2][col] * d[2]);
-  };
-  const toPixel = ([x, y, z]) => [
-    canvas.width / 2 - (CAMERA_FOCAL_PX * y) / x,
-    canvas.height / 2 - (CAMERA_FOCAL_PX * z) / x,
-  ];
-  const near = 0.05; // skip what's behind the camera
-
-  return {
-    /** A field line as [ax, ay, bx, by] in pixels, or null if it's behind the camera. */
-    segment(a, b) {
-      let ca = toCamera(a);
-      let cb = toCamera(b);
-      if (ca[0] < near && cb[0] < near) return null;
-      if (ca[0] < near || cb[0] < near) {
-        const t = (near - ca[0]) / (cb[0] - ca[0]);
-        const cut = ca.map((v, i) => v + (cb[i] - v) * t);
-        if (ca[0] < near) ca = cut;
-        else cb = cut;
-      }
-      return [...toPixel(ca), ...toPixel(cb)];
-    },
-    /** A field point in pixels, or null if it's behind the camera. */
-    point(p) {
-      const c = toCamera(p);
-      return c[0] < near ? null : toPixel(c);
-    },
-  };
-}
-
-/** Outlines each tag this camera sees: cyan if its pose was used, magenta if rejected. */
-function drawTagHighlights(canvas, camera, pose, state) {
-  const context = canvas.getContext("2d");
-  context.clearRect(0, 0, canvas.width, canvas.height);
-  const seeing = state && performance.now() - state.lastSeenMs < VISION_HOLD_MS;
-  if (!pose || !seeing) return;
-
-  const view = cameraView(camera, pose, canvas);
-  const color = state.lastPose === "REJECTED" ? TAG_REJECTED_COLOR : TAG_USED_COLOR;
-  const half = (TAG_SIZE_METERS / 2) * 1.6; // a bit bigger than the tag itself
-  context.strokeStyle = color;
-  context.fillStyle = color + "26";
-  context.lineWidth = 5;
-  context.lineJoin = "round";
-  for (const tag of state.tagPoints) {
-    // A tag faces out along its own x axis, so its corners are at y/z = ±half.
-    const rotate = quaternionMatrix(tag);
-    const corners = [[0, -half, -half], [0, half, -half], [0, half, half], [0, -half, half]].map((c) => {
-      const r = apply(rotate, c);
-      return view.point([tag.x + r[0], tag.y + r[1], tag.z + r[2]]);
-    });
-    if (corners.some((c) => !c)) continue;
-    context.beginPath();
-    corners.forEach(([x, y], i) => (i === 0 ? context.moveTo(x, y) : context.lineTo(x, y)));
-    context.closePath();
-    context.fill();
-    context.stroke();
-  }
-}
-
-/** Rotation matrix from a quaternion (w, x, y, z). */
-function quaternionMatrix({ qw: w, qx: x, qy: y, qz: z }) {
-  return [
-    [1 - 2 * (y * y + z * z), 2 * (x * y - z * w), 2 * (x * z + y * w)],
-    [2 * (x * y + z * w), 1 - 2 * (x * x + z * z), 2 * (y * z - x * w)],
-    [2 * (x * z - y * w), 2 * (y * z + x * w), 1 - 2 * (x * x + y * y)],
-  ];
-}
-
-/** 3x3 rotation matrices (WPILib: x forward, y left, z up). */
-function rotationX(a) {
-  const c = Math.cos(a), s = Math.sin(a);
-  return [[1, 0, 0], [0, c, -s], [0, s, c]];
-}
-function rotationY(a) {
-  const c = Math.cos(a), s = Math.sin(a);
-  return [[c, 0, s], [0, 1, 0], [-s, 0, c]];
-}
-function rotationZ(a) {
-  const c = Math.cos(a), s = Math.sin(a);
-  return [[c, -s, 0], [s, c, 0], [0, 0, 1]];
-}
-function multiply(a, b) {
-  return a.map((row) => [0, 1, 2].map((col) => row[0] * b[0][col] + row[1] * b[1][col] + row[2] * b[2][col]));
-}
-function apply(m, v) {
-  return m.map((row) => row[0] * v[0] + row[1] * v[1] + row[2] * v[2]);
-}
-
-/**
- * Turns a CameraPublisher "streams" list (like "mjpg:http://10.0.0.5:1181/?action=stream")
- * into a URL this browser can open, using the same computer the dashboard came from.
- */
-function streamUrl(value) {
-  const first = Array.isArray(value) ? value.find((entry) => String(entry).startsWith("mjpg:")) : null;
-  if (!first) return null;
-  try {
-    const url = new URL(String(first).slice("mjpg:".length));
-    if (location.hostname) url.hostname = location.hostname;
-    return url.toString();
-  } catch {
-    return null;
-  }
-}
-
-/** "front right-processed" -> "front right" (older names like "camera_frontright" also work) */
-function cameraLabel(name) {
-  return name.replace(/^camera_/, "").replace(/-processed$/, "");
 }
 
 /**
