@@ -42,6 +42,7 @@ import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterIO;
 import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.shooter.ShooterIOTalonFX;
+import frc.robot.subsystems.shooter.ShooterConstants;
 import frc.robot.subsystems.feeder.Feeder;
 import frc.robot.subsystems.feeder.FeederIO;
 import frc.robot.subsystems.feeder.FeederIOSim;
@@ -53,6 +54,7 @@ import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import java.util.ArrayList;
 import java.util.List;
 import frc.robot.util.AimHelper;
+import frc.robot.util.DashboardNumber;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -78,6 +80,11 @@ public class RobotContainer {
   // True while the right trigger (shoot) is held, so aiming can x-lock the
   // wheels.
   private boolean shootHeld = false;
+
+  // Live shot trim (RPM) from the Shooter card on the dashboard. Starts at the value in
+  // ShooterConstants and resets to it when the robot restarts.
+  private final DashboardNumber shotTrimRpm =
+      new DashboardNumber("/Tuning/ShotTrimRpm", "Tuning/ShotTrimRpm", ShooterConstants.shotRpmTrim);
 
   // Sim-only walls around the field and hubs
   private final FieldBoundaries fieldBoundaries = new FieldBoundaries();
@@ -267,7 +274,9 @@ public class RobotContainer {
         .whileTrue(
             DriveCommands.autoAim(
                 drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> shootHeld)
-                .alongWith(shooter.spinAt(() -> AimHelper.aimRpm(drive.getPose(), alliance()))));
+                .alongWith(
+                    shooter.spinAt(
+                        () -> AimHelper.aimRpm(drive.getPose(), alliance(), shotTrimRpm.get()))));
 
     // Y / X / B (hold): preset shots for when vision is off. Face a set angle and
     // spin up for
@@ -328,7 +337,7 @@ public class RobotContainer {
 
   /** Flywheel speed for a shot at our hub from where the robot is now (from the RPM table). */
   private double hubRpm() {
-    return AimHelper.shooterRpmForHub(drive.getPose(), alliance());
+    return AimHelper.shooterRpmForHub(drive.getPose(), alliance(), shotTrimRpm.get());
   }
 
   /**
@@ -359,14 +368,23 @@ public class RobotContainer {
    * flywheel for a set distance, while still driving with the left stick.
    */
   private Command presetShot(double heading2026BlueDeg, double heading2026RedDeg, double feet) {
-    double rpm = AimHelper.shooterRpmForDistance(Units.feetToMeters(feet));
+    double distanceMeters = Units.feetToMeters(feet);
     return DriveCommands.joystickDriveAtAngle(
         drive,
         () -> -controller.getLeftY(),
         () -> -controller.getLeftX(),
         () -> AimHelper.presetHeading(heading2026BlueDeg, heading2026RedDeg, alliance()),
         () -> shootHeld)
-        .alongWith(shooter.spinAt(rpm));
+        .alongWith(
+            shooter.spinAt(
+                () -> AimHelper.shooterRpmForDistance(distanceMeters, shotTrimRpm.get())));
+  }
+
+  /** Called every loop, before the commands run. */
+  public void robotPeriodic() {
+    // Read (and log) the dashboard's shot trim every loop, so the dashboard can always see
+    // what the robot is using, even when nobody is aiming or shooting.
+    shotTrimRpm.get();
   }
 
   /** Called every loop, only in simulation. */

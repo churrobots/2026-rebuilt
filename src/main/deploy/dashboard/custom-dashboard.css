@@ -109,6 +109,196 @@ h2 {
 .shooter-stats .big-number {
   font-size: 1.8rem;
 }
+/* Shot trim, inside the Shooter card. Big, plain buttons so it's quick to use at the field. */
+.trim {
+  margin-top: 14px;
+  padding: 12px;
+  background: #0c1017;
+  border: 1px solid var(--line, #303a4b);
+  border-radius: 10px;
+}
+.trim-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.trim-head .eyebrow {
+  margin: 0;
+}
+.trim-value {
+  font-size: 1.6rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+/* The trim slider: a track from -600 to +600 with a white line at 0, yellow caution zones past
+   ±300, a small tick where the code's value is, and the fill from 0 out to the current trim. */
+.trim-slider {
+  position: relative;
+  height: 28px;
+  margin-top: 10px;
+}
+.trim-slider::before {
+  /* the track, with the yellow caution zones built in */
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 11px;
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(
+    to right,
+    #facc1566 0 var(--caution-low),
+    #2a3240 var(--caution-low) var(--caution-high),
+    #facc1566 var(--caution-high) 100%
+  );
+}
+.trim-slider::after {
+  /* the fill from 0 to the current trim */
+  content: "";
+  position: absolute;
+  top: 11px;
+  height: 6px;
+  left: min(50%, var(--trim, 50%));
+  right: calc(100% - max(50%, var(--trim, 50%)));
+  background: #63b2ff;
+  border-radius: 3px;
+}
+.trim-caution {
+  /* bright yellow lines where "caution" starts */
+  position: absolute;
+  top: 4px;
+  width: 3px;
+  height: 20px;
+  margin-left: -1.5px;
+  background: #facc15;
+  border-radius: 2px;
+}
+.trim-caution-low {
+  left: var(--caution-low);
+}
+.trim-caution-high {
+  left: var(--caution-high);
+}
+.trim-zero {
+  position: absolute;
+  left: 50%;
+  top: 6px;
+  width: 2px;
+  height: 16px;
+  margin-left: -1px;
+  background: #edf2f7;
+}
+.trim-default {
+  position: absolute;
+  top: 22px;
+  width: 0;
+  height: 0;
+  margin-left: -5px;
+  border: 5px solid transparent;
+  border-bottom-color: #93a0b4;
+  transform: translateY(-5px);
+}
+.trim-range {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  margin: 0;
+  background: transparent;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+}
+.trim-range::-webkit-slider-runnable-track {
+  height: 28px;
+  background: transparent;
+}
+.trim-range::-moz-range-track {
+  height: 28px;
+  background: transparent;
+}
+.trim-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  margin-top: 5px;
+  border: 3px solid #0c1017;
+  border-radius: 50%;
+  background: #edf2f7;
+}
+.trim-range::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: 3px solid #0c1017;
+  border-radius: 50%;
+  background: #edf2f7;
+}
+.trim-range:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+.trim-scale {
+  display: flex;
+  justify-content: space-between;
+  color: #6b7686;
+  font-size: 0.68rem;
+  font-variant-numeric: tabular-nums;
+}
+.trim-value.caution {
+  color: #facc15;
+}
+.trim-status {
+  margin: 6px 0 0;
+  color: #4ade80;
+  font-size: 0.72rem;
+}
+.trim-status.caution {
+  color: #facc15;
+}
+.trim-warning {
+  margin: 6px 0 0;
+  color: #facc15;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+.trim-row {
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
+}
+.trim-button,
+.trim-reset {
+  padding: 10px 12px;
+  color: #fff;
+  border: 0;
+  border-radius: 8px;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+.trim-button {
+  flex: 1;
+  background: #2879cf;
+}
+.trim-button:hover:not(:disabled) {
+  background: #3287df;
+}
+.trim-reset {
+  background: #2a3240;
+  color: #c3ccd9;
+}
+.trim-button:disabled,
+.trim-reset:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.trim-help {
+  margin: 8px 0 0;
+  color: #8f9bad;
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
 .shooter-note {
   margin: 8px 0 0;
   color: #6b7686;

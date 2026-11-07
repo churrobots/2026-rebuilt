@@ -33,6 +33,16 @@ const SHOOTER_MEASURED_TOPIC = "/AdvantageKit/RealOutputs/Tutorial/Shooter/Measu
 const SHOOTER_READY_TOPIC = "/AdvantageKit/RealOutputs/Tutorial/Shooter/Ready";
 const FEEDER_VELOCITY_TOPIC = "/AdvantageKit/Feeder/VelocityRadPerSec";
 const SHOOTER_GAUGE_MAX_RPM = 6000; // a Kraken tops out around here
+// Live shot trim (RPM), read by RobotContainer as a LoggedNetworkNumber. Negative = slower = shorter.
+const SHOT_TRIM_TOPIC = "/Tuning/ShotTrimRpm";
+// NetworkTables doesn't send our own changes back to us, so to know what the robot is really
+// using, read the value it logs as an AdvantageKit input (DashboardNumber in RobotContainer).
+const SHOT_TRIM_ROBOT_TOPIC = "/AdvantageKit/Tuning/ShotTrimRpm/Value";
+const SHOT_TRIM_STEP_RPM = 50;
+const SHOT_TRIM_LIMIT_RPM = 600; // the slider goes from -600 to +600
+// Past this much trim (either way), the table is probably wrong, not just a little off:
+// the slider shows a yellow "caution" zone and suggests re-measuring the table instead.
+const SHOT_TRIM_CAUTION_RPM = 300;
 // Real wheels spin way too fast to see, so the drawing spins them slowed down.
 const SHOOTER_DRAW_SLOWDOWN = 0.002; // drawn rad/sec per RPM
 // Auto-aim (DriveCommands.autoAim): the Field card draws the aim line from these.
@@ -176,6 +186,28 @@ export class CustomDashboard extends HTMLElement {
               <div><p class="eyebrow">Flywheel RPM</p><output class="big-number shooter-rpm">0</output></div>
               <div><p class="eyebrow">Target RPM</p><output class="big-number shooter-target">0</output></div>
               <div><p class="eyebrow">Feeder RPM</p><output class="big-number feeder-rpm">0</output></div>
+            </div>
+            <div class="trim">
+              <div class="trim-head">
+                <p class="eyebrow">Shot trim</p>
+                <output class="trim-value">—</output>
+              </div>
+              <div class="trim-slider">
+                <div class="trim-caution trim-caution-low"></div>
+                <div class="trim-caution trim-caution-high"></div>
+                <div class="trim-zero"></div>
+                <div class="trim-default" title="Value in the code"></div>
+                <input class="trim-range" type="range" aria-label="Shot trim in RPM">
+              </div>
+              <div class="trim-scale"><span class="trim-min"></span><span>0</span><span class="trim-max"></span></div>
+              <p class="trim-status"></p>
+              <p class="trim-warning" hidden>That's a big trim! The RPM table is probably off. Think about re-measuring it.</p>
+              <div class="trim-row">
+                <button class="trim-button" type="button" data-step="-1">Slower −50</button>
+                <button class="trim-button" type="button" data-step="1">Faster +50</button>
+                <button class="trim-reset" type="button">Reset</button>
+              </div>
+              <p class="trim-help">Added to every shot's RPM. Shots landing long? Tap Slower. Short? Tap Faster. Resets when the robot restarts, so copy a good number into <code>ShooterConstants.shotRpmTrim</code>.</p>
             </div>
             <p class="shooter-note">Wheels in the drawing spin slowed down so you can see them.</p>
           </section>
@@ -600,6 +632,114 @@ export class CustomDashboard extends HTMLElement {
     };
     frame = requestAnimationFrame(render);
     this.#cleanup.push(() => cancelAnimationFrame(frame));
+    this.#startShotTrim(core);
+  }
+
+  /**
+   * The Shot trim buttons on the Shooter card. They publish a new trim to the robot, which adds
+   * it to every table shot's RPM (negative = slower = shorter).
+   */
+  #startShotTrim(core) {
+    const root = this.shadowRoot;
+    const valueText = root.querySelector(".trim-value");
+    const buttons = [...root.querySelectorAll(".trim-button")];
+    const resetButton = root.querySelector(".trim-reset");
+    const slider = root.querySelector(".trim-range");
+    const sliderBox = root.querySelector(".trim-slider");
+    const defaultMark = root.querySelector(".trim-default");
+    const warning = root.querySelector(".trim-warning");
+    const status = root.querySelector(".trim-status");
+    let codeDefault = null; // the first value we see is the robot's ShooterConstants value
+    let pending = null; // a value we sent that the robot hasn't confirmed yet
+    let pendingSince = 0;
+    let dragging = false; // don't move the slider out from under the user's finger
+
+    // Set up the slider's range and where the yellow caution zones start.
+    slider.min = String(-SHOT_TRIM_LIMIT_RPM);
+    slider.max = String(SHOT_TRIM_LIMIT_RPM);
+    slider.step = String(SHOT_TRIM_STEP_RPM);
+    root.querySelector(".trim-min").textContent = String(-SHOT_TRIM_LIMIT_RPM);
+    root.querySelector(".trim-max").textContent = `+${SHOT_TRIM_LIMIT_RPM}`;
+    /** Where a trim value sits along the slider, as a percent from the left. */
+    const percent = (rpm) => ((rpm + SHOT_TRIM_LIMIT_RPM) / (2 * SHOT_TRIM_LIMIT_RPM)) * 100;
+    sliderBox.style.setProperty("--caution-low", `${percent(-SHOT_TRIM_CAUTION_RPM)}%`);
+    sliderBox.style.setProperty("--caution-high", `${percent(SHOT_TRIM_CAUTION_RPM)}%`);
+
+    /** What the robot says it's using. */
+    const robotValue = () => Number(core.getTopic(SHOT_TRIM_ROBOT_TOPIC)?.value);
+    // Show what we just sent right away, until the robot confirms it.
+    const current = () => (pending !== null ? pending : robotValue());
+    const render = () => {
+      const robot = robotValue();
+      if (pending !== null && robot === pending) pending = null; // the robot has it
+      const trim = current();
+      const known = Number.isFinite(trim);
+      const slow = pending !== null && performance.now() - pendingSince > 1500;
+      status.textContent = !known
+        ? "Waiting for the robot…"
+        : pending === null
+          ? "✓ Robot is using this"
+          : slow
+            ? "⚠ Robot hasn't picked this up yet. Is it connected and running the latest code?"
+            : "Sending…";
+      status.classList.toggle("caution", slow);
+      if (known && codeDefault === null) codeDefault = trim;
+      const caution = known && Math.abs(trim) > SHOT_TRIM_CAUTION_RPM;
+      valueText.textContent = known ? `${trim > 0 ? "+" : ""}${Math.round(trim)} RPM` : "—";
+      valueText.classList.toggle("caution", caution);
+      warning.hidden = !caution;
+      if (known && !dragging) slider.value = String(trim);
+      slider.disabled = !known;
+      sliderBox.style.setProperty("--trim", `${percent(known ? trim : 0)}%`);
+      if (codeDefault !== null) defaultMark.style.left = `${percent(codeDefault)}%`;
+      defaultMark.hidden = codeDefault === null;
+      for (const button of [...buttons, resetButton]) button.disabled = !known;
+      resetButton.disabled = !known || trim === codeDefault;
+    };
+    const send = (trim) => {
+      const clamped = Math.max(-SHOT_TRIM_LIMIT_RPM, Math.min(SHOT_TRIM_LIMIT_RPM, trim));
+      core.publish(SHOT_TRIM_TOPIC, "double", clamped);
+      pending = clamped;
+      pendingSince = performance.now();
+      render();
+    };
+
+    const handlers = buttons.map((button) => {
+      const onClick = () => send(current() + Number(button.dataset.step) * SHOT_TRIM_STEP_RPM);
+      button.addEventListener("click", onClick);
+      return () => button.removeEventListener("click", onClick);
+    });
+    const onReset = () => codeDefault !== null && send(codeDefault);
+    resetButton.addEventListener("click", onReset);
+
+    // Dragging the slider sends each new value right away, so the RPM changes live.
+    const onSlide = () => {
+      dragging = true;
+      send(Number(slider.value));
+    };
+    const onRelease = () => {
+      dragging = false;
+      render();
+    };
+    slider.addEventListener("input", onSlide);
+    slider.addEventListener("change", onRelease);
+
+    /** @param {CustomEvent<DashboardTopic>} event */
+    const topicListener = ({ detail: topic }) => {
+      if (topic.name === SHOT_TRIM_TOPIC || topic.name === SHOT_TRIM_ROBOT_TOPIC) render();
+    };
+    core.addEventListener("topic", topicListener);
+    // Re-check now and then, so "hasn't picked this up" shows even if nothing new arrives.
+    const timer = setInterval(() => pending !== null && render(), 500);
+    this.#cleanup.push(() => {
+      clearInterval(timer);
+      core.removeEventListener("topic", topicListener);
+      resetButton.removeEventListener("click", onReset);
+      slider.removeEventListener("input", onSlide);
+      slider.removeEventListener("change", onRelease);
+      handlers.forEach((remove) => remove());
+    });
+    render();
   }
 
   /**

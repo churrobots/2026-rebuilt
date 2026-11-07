@@ -7,6 +7,7 @@ import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.FieldConstants;
+import frc.robot.subsystems.shooter.ShooterConstants;
 import java.util.Map;
 
 /**
@@ -34,12 +35,29 @@ public final class AimHelper {
 
   /** The flywheel speed (RPM) for a shot from this far away (meters), from the table. */
   public static double shooterRpmForDistance(double distanceMeters) {
-    return distanceInchesToRpm.get(Units.metersToInches(distanceMeters));
+    return shooterRpmForDistance(distanceMeters, ShooterConstants.shotRpmTrim);
   }
 
-  /** The flywheel speed (RPM) for a shot at our hub from where the robot is now. */
+  /**
+   * Same, with a shot trim (RPM) added on top of the table: -150 means "every shot 150 RPM
+   * slower." The robot passes the live trim from the dashboard.
+   */
+  public static double shooterRpmForDistance(double distanceMeters, double trimRpm) {
+    return distanceInchesToRpm.get(Units.metersToInches(distanceMeters)) + trimRpm;
+  }
+
+  /**
+   * The flywheel speed (RPM) for a shot at our hub from where the robot is now. Uses the
+   * distance from the robot's CENTER on purpose: that's the distance the table was measured
+   * with, so the numbers line up.
+   */
   public static double shooterRpmForHub(Pose2d robotPose, Alliance alliance) {
-    return shooterRpmForDistance(distanceToHub(robotPose, alliance));
+    return shooterRpmForHub(robotPose, alliance, ShooterConstants.shotRpmTrim);
+  }
+
+  /** Same, with a shot trim (RPM). */
+  public static double shooterRpmForHub(Pose2d robotPose, Alliance alliance, double trimRpm) {
+    return shooterRpmForDistance(distanceToHub(robotPose, alliance), trimRpm);
   }
 
   /**
@@ -122,8 +140,13 @@ public final class AimHelper {
 
   /** The flywheel speed (RPM) for right now: the shot table or the pass table. */
   public static double aimRpm(Pose2d robotPose, Alliance alliance) {
+    return aimRpm(robotPose, alliance, ShooterConstants.shotRpmTrim);
+  }
+
+  /** Same, with a shot trim (RPM) for shots at the hub. Passes don't use the trim. */
+  public static double aimRpm(Pose2d robotPose, Alliance alliance, double trimRpm) {
     return aimMode(robotPose, alliance) == AimMode.SHOOT
-        ? shooterRpmForHub(robotPose, alliance)
+        ? shooterRpmForHub(robotPose, alliance, trimRpm)
         : passDistanceInchesToRpm.get(Units.metersToInches(distanceToOurWall(robotPose, alliance)));
   }
 
@@ -145,13 +168,28 @@ public final class AimHelper {
 
   /**
    * The heading the robot should turn to so it can shoot. The shooter faces out the back, so the
-   * robot's front has to point the opposite way from the hub: angle to hub + 180°. Rotation2d
-   * wraps the answer to ±180° for us.
-   *
-   * <p>TODO: measure whether the new shooter is centered. The 2026 robot's shooter was 9" off
-   * center and needed an offset here.
+   * robot's back has to point at the hub. The ball also leaves 5.5" left and 6" back of the
+   * robot's center (ShooterConstants.shooterExitOffset), so we aim from where the BALL starts,
+   * not from the center.
    */
   public static Rotation2d shootHeading(Pose2d robotPose, Alliance alliance) {
-    return angleToHub(robotPose, alliance).plus(Rotation2d.k180deg);
+    return shootHeading(robotPose, alliance, ShooterConstants.shooterExitOffset);
+  }
+
+  /**
+   * Same as above, with the exit point given. Where the ball starts depends on which way the
+   * robot faces, and which way it faces depends on where the ball starts. So we guess (aim
+   * from the center), find where the ball would start, aim from there, and repeat. Each round
+   * gets closer, and a few rounds is plenty. With no offset, the first guess is already exact.
+   */
+  public static Rotation2d shootHeading(
+      Pose2d robotPose, Alliance alliance, Translation2d exitOffset) {
+    Translation2d hub = hubPosition(alliance);
+    Rotation2d heading = angleToHub(robotPose, alliance).plus(Rotation2d.k180deg);
+    for (int i = 0; i < 4; i++) {
+      Translation2d ballStart = robotPose.getTranslation().plus(exitOffset.rotateBy(heading));
+      heading = hub.minus(ballStart).getAngle().plus(Rotation2d.k180deg);
+    }
+    return heading;
   }
 }

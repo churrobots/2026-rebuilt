@@ -1,5 +1,6 @@
 package frc.robot.subsystems.shooter;
 
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 
@@ -23,6 +24,20 @@ public class ShooterConstants {
   public static final double shotRpm = 4550.0;
   public static final double idleRpm = 400.0; // keep it rolling so it spins up faster
   public static final double readyToleranceRpm = 100.0; // "close enough" to shoot
+
+  // Where the ball leaves the shooter, measured from the robot's center, in the robot's own
+  // directions: x = forward (+) / backward (-), y = left (+) / right (-). Students measured it
+  // from the spindexer on 2026-11-07: 6" backward and 5.5" left.
+  // TODO: verify the spindexer is centered on the robot (we assumed it is).
+  public static final Translation2d shooterExitOffset =
+      new Translation2d(Units.inchesToMeters(-6.0), Units.inchesToMeters(5.5));
+
+  // Shot trim: added to every RPM from the table. Negative = slower = shorter shots.
+  // Auto-aim was landing about a foot too far (students, 2026-11-07); -150 RPM is roughly a
+  // foot at mid range. This is the starting value. The Shooter card's trim buttons change it
+  // live, but that resets when the robot restarts: once a number works, copy it here.
+  // TODO: tune on the field. If shots still go long, make it more negative; short, less.
+  public static final double shotRpmTrim = -150.0;
 
   // Gains, in TalonFX units: volts per (rotation per second). The Kraken runs these
   // itself, 1000 times a second. Starting values from the 2026 robot. TODO: tune.
