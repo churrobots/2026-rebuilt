@@ -25,7 +25,7 @@
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "markito"
+      "linkedName": "kaleb"
     }
   ],
   "rotationTargets": [],
@@ -49,7 +49,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -147.9797629039608
+    "rotation": -143.53441044780485
   },
   "reversed": false,
   "folder": null,

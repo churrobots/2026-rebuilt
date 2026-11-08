@@ -1,0 +1,66 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 3.446567741437147,
+        "y": 4.000548640536723
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 2.952200410487288,
+        "y": 3.3653275070621462
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 2.62113832980226,
+        "y": 1.8556128067620055
+      },
+      "prevControl": {
+        "x": 2.4655271585242615,
+        "y": 2.6301353457326218
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "gek1"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [
+    {
+      "name": "AimAndPrepShooter",
+      "waypointRelativePos": 0.8257455583756348,
+      "endWaypointRelativePos": 1.0,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "AimAndPrepShooter"
+        }
+      }
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -125.15025690451698
+  },
+  "reversed": false,
+  "folder": null,
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": -179.81764612967794
+  },
+  "useDefaultConstraints": true
+}
