@@ -206,6 +206,9 @@ public class RobotContainer {
           "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
       autoChooser.addOption(
           "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+      // Best on blocks: turns each wheel exactly 1 rotation. Tape-mark a wheel to check it.
+      autoChooser.addOption(
+          "Test: Turn wheels exactly 1 rotation", DriveCommands.wheelOneRotationTest(drive));
     }
 
     configureButtonBindings();

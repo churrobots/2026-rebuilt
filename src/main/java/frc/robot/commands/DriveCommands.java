@@ -253,6 +253,47 @@ public class DriveCommands {
   }
 
   /**
+   * Test auto (best with the robot on blocks): drive all four wheels straight forward slowly
+   * until the encoders say each wheel turned exactly ONE full rotation, then stop.
+   *
+   * <p>Put a tape mark on a wheel first. If the wheel stops right back where it started, the
+   * gear ratio in DriveConstants is right. If it turns MORE than once, the real gearing is
+   * faster than the code thinks (real turns = 5.5 / real gear ratio, with our 5.5:1 code).
+   */
+  public static Command wheelOneRotationTest(Drive drive) {
+    double[] start = new double[4];
+    DoubleSupplier averageWheelRadians =
+        () -> {
+          double[] now = drive.getWheelRadiusCharacterizationPositions();
+          double total = 0.0;
+          for (int i = 0; i < 4; i++) {
+            total += Math.abs(now[i] - start[i]);
+          }
+          return total / 4.0;
+        };
+    // Slow, so it stops close to exactly one turn: 0.2 m/s at the wheel edge.
+    double speedMetersPerSec = 0.05;
+    return Commands.run(
+            () -> {
+              drive.runVelocity(new ChassisSpeeds(speedMetersPerSec, 0.0, 0.0));
+              Logger.recordOutput(
+                  "Test/WheelTurns", averageWheelRadians.getAsDouble() / (2.0 * Math.PI));
+            },
+            drive)
+        .beforeStarting(
+            () ->
+                System.arraycopy(drive.getWheelRadiusCharacterizationPositions(), 0, start, 0, 4))
+        .until(() -> averageWheelRadians.getAsDouble() >= 2.0 * Math.PI)
+        .finallyDo(
+            () -> {
+              drive.stop();
+              System.out.printf(
+                  "Wheel turn test: encoders say %.3f turns. Check the tape mark on the wheel.%n",
+                  averageWheelRadians.getAsDouble() / (2.0 * Math.PI));
+            });
+  }
+
+  /**
    * Measures the velocity feedforward constants for the drive motors.
    *
    * <p>

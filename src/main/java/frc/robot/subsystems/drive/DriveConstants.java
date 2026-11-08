@@ -27,9 +27,10 @@ import edu.wpi.first.units.measure.MomentOfInertia;
 import frc.robot.Constants;
 
 public class DriveConstants {
-  // Kraken X60 + our gearing: (12 V - kS) / kV = about 113 wheel rad/s x 1.483 in wheel
-  // = about 4.25 m/s. (The old Vortex robot used 4.8.) TODO: check with a full-speed run.
-  public static final double maxSpeedMetersPerSec = 4.25;
+  // Kraken X60 + our 4:1 gearing: (12 V - kS) / kV = about 155 wheel rad/s x 1.483 in
+  // wheel = about 5.8 m/s. (It was 4.25 when the code wrongly thought we had 5.5:1 gearing.)
+  // TODO: re-check after re-running the characterization autos.
+  public static final double maxSpeedMetersPerSec = 5.8;
   public static final double odometryFrequency = 100.0; // Hz
   public static final double trackWidth = Units.inchesToMeters(24);
   public static final double wheelBase = Units.inchesToMeters(24);
@@ -77,12 +78,21 @@ public class DriveConstants {
     case Constants.ROBOT_COMP -> Units.inchesToMeters(1.483);
     default -> Units.inchesToMeters(1.483);
   };
-  // MAXSwerve with 12 pinion teeth and 22 spur teeth
-  // We think the 15 teeth is the bevel drive shaft, and the 45 is the wheel bevel
-  // NOTE: this must CHANGE if you change our gear kit. Today we use Low gear
-  // https://www.revrobotics.com/rev-21-3005/
-  public static final double pinionTeeth = 12.0;
-  public static final double spurTeeth = 22.0;
+  // MAXSwerve gearing: the motor's pinion drives the spur gear, then a 15:45 bevel to the wheel,
+  // so the reduction is 3 x spur / pinion.
+  //   COMP (new Kraken robot): 15T pinion, 20T spur = 4:1 (mechanical team, 2026-11-07).
+  //     The code used to say 12T/22T = 5.5:1, and the wheel-turn test went about 1 3/8 turns
+  //     (5.5 / 4 = 1.375). We tried 16T/20T = 3.75:1 next, and it came up a bit short of 1 turn.
+  //   ALPHA (old Vortex robot): Low gear = 12T pinion, 22T spur = 5.5:1.
+  // NOTE: this must CHANGE if you change the gear kit. https://www.revrobotics.com/rev-21-3005/
+  public static final double pinionTeeth = switch (Constants.robotName) {
+    case Constants.ROBOT_ALPHA -> 12.0;
+    default -> 15.0;
+  };
+  public static final double spurTeeth = switch (Constants.robotName) {
+    case Constants.ROBOT_ALPHA -> 22.0;
+    default -> 20.0;
+  };
   public static final double driveMotorReduction = (45.0 * spurTeeth) / (pinionTeeth * 15.0);
   // Drive motor is a Kraken X60 on a TalonFX (was a NEO Vortex on a SparkFlex). Used by
   // ModuleIOSim and the PathPlanner ppConfig to model the real motor.
@@ -106,10 +116,14 @@ public class DriveConstants {
     case Constants.ROBOT_COMP -> 0.15422;
     default -> 0.15422;
   };
+  // COMP kV: measured as 0.10514 on 2026-11-05, but back then the code thought the gearing was
+  // 5.5:1, so its "wheel speed" was wrong. Converted for the real 4:1: 0.10514 x 4 / 5.5.
+  // kS (just volts to get moving) doesn't depend on gearing.
+  // TODO: re-run "Drive Simple FF Characterization" to measure kV for real.
   public static final double driveKv = switch (Constants.robotName) {
     case Constants.ROBOT_ALPHA -> 0.06761;
-    case Constants.ROBOT_COMP -> 0.10514;
-    default -> 0.10514;
+    case Constants.ROBOT_COMP -> 0.07647;
+    default -> 0.07647;
   };
   public static final double driveSimP = 0.05;
   public static final double driveSimD = 0.0;
