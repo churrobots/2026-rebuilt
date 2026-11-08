@@ -37,7 +37,7 @@ public class ShooterConstants {
   // foot at mid range. This is the starting value. The Shooter card's trim buttons change it
   // live, but that resets when the robot restarts: once a number works, copy it here.
   // TODO: tune on the field. If shots still go long, make it more negative; short, less.
-  public static final double shotRpmTrim = -150.0;
+  public static final double shotRpmTrim = -50.0;
 
   // Gains, in TalonFX units: volts per (rotation per second). The Kraken runs these
   // itself, 1000 times a second. Starting values from the 2026 robot. TODO: tune.
