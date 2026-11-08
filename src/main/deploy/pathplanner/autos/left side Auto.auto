@@ -19,6 +19,12 @@
         {
           "type": "named",
           "data": {
+            "name": "AimAtHub"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
             "name": "ShootFullHopper"
           }
         },
@@ -26,6 +32,12 @@
           "type": "path",
           "data": {
             "pathName": "Grizz"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AimAtHub"
           }
         },
         {

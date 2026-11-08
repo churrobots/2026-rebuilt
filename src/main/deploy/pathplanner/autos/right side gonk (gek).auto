@@ -1,0 +1,67 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "gek1"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AimAtHub"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ShootFullHopper"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "keg1.756676438"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AimAtHub"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ShootFullHopper"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "keg2"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AimAtHub"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ShootFullHopper"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}

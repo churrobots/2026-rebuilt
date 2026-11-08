@@ -41,7 +41,7 @@
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "keg"
     }
   ],
   "rotationTargets": [
@@ -70,10 +70,15 @@
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "",
-      "waypointRelativePos": 0,
-      "endWaypointRelativePos": null,
-      "command": null
+      "name": "RunIntake",
+      "waypointRelativePos": 0.6266611295681067,
+      "endWaypointRelativePos": 1.323790490033224,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "RunIntake"
+        }
+      }
     }
   ],
   "globalConstraints": {

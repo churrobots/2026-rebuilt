@@ -13,6 +13,12 @@
         {
           "type": "named",
           "data": {
+            "name": "AimAtHub"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
             "name": "ShootFullHopper"
           }
         },
@@ -20,6 +26,12 @@
           "type": "path",
           "data": {
             "pathName": "zude"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AimAtHub"
           }
         },
         {
