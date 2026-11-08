@@ -14,6 +14,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -77,10 +78,6 @@ public class RobotContainer {
   private final Feeder feeder;
   private final Vision vision;
 
-  // True while the right trigger (shoot) is held, so aiming can x-lock the
-  // wheels.
-  private boolean shootHeld = false;
-
   // Live shot trim (RPM) from the Shooter card on the dashboard. Starts at the value in
   // ShooterConstants and resets to it when the robot restarts.
   private final DashboardNumber shotTrimRpm =
@@ -91,6 +88,12 @@ public class RobotContainer {
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
+  // True while the right trigger (shoot) is held, so aiming can x-lock the wheels once it's on
+  // target. Pushing the left stick still breaks the x-lock (see joystickDriveAtAngle).
+  private boolean shootHeld = false;
+  // Aim-lock buzz: strength from 0 (off) to 1 (full), and how long it lasts.
+  private static final double AIM_LOCK_RUMBLE_STRENGTH = 0.8;
+  private static final double AIM_LOCK_RUMBLE_SECONDS = 0.5;
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -300,6 +303,18 @@ public class RobotContainer {
                 () -> AimHelper.bumpHeading(drive.getRotation()),
                 () -> false));
 
+    // Buzz the controller for half a second the moment aiming (A, Y, X, or B held)
+    // locks on, like the buzz when an Xbox controller turns on. Teleop only. Knocked
+    // off target and locked again? It buzzes again.
+    controller
+        .a()
+        .or(controller.y())
+        .or(controller.x())
+        .or(controller.b())
+        .and(drive::isAimLocked)
+        .and(DriverStation::isTeleopEnabled)
+        .onTrue(rumble(AIM_LOCK_RUMBLE_STRENGTH, AIM_LOCK_RUMBLE_SECONDS));
+
     // Back: reset heading. Point the robot away from you and press it.
     controller.back().onTrue(DriveCommands.resetHeading(drive));
 
@@ -319,8 +334,7 @@ public class RobotContainer {
     // flywheel, the intake arm pulses between out and stowed to push leftover balls
     // up into
     // the spindexer, and the roller gently keeps them in. While it's held, aiming
-    // x-locks the
-    // wheels once it's on target.
+    // x-locks the wheels once on target. Push the left stick to break out.
     shooter.setDefaultCommand(shooter.idle());
     feeder.setDefaultCommand(feeder.stop());
     spindexer.setDefaultCommand(spindexer.stop());
@@ -366,6 +380,27 @@ public class RobotContainer {
   }
 
   /**
+   * Buzzes the driver's controller for a moment. It doesn't use any subsystem, so it never
+   * interrupts driving or shooting. The buzz always turns off at the end, even if cut short.
+   *
+   * <p>It also logs the strength to "Controller/Rumble". In sim nothing carries the buzz back to
+   * the controller, so the dashboard reads this and buzzes it from the browser instead.
+   */
+  private Command rumble(double strength, double seconds) {
+    return Commands.startEnd(
+            () -> {
+              controller.getHID().setRumble(RumbleType.kBothRumble, strength);
+              Logger.recordOutput("Controller/Rumble", strength);
+            },
+            () -> {
+              controller.getHID().setRumble(RumbleType.kBothRumble, 0.0);
+              Logger.recordOutput("Controller/Rumble", 0.0);
+            })
+        .withTimeout(seconds)
+        .ignoringDisable(true);
+  }
+
+  /**
    * A preset shot: face a set heading (from the 2026 robot's blue/red angles) and
    * spin the
    * flywheel for a set distance, while still driving with the left stick.
@@ -377,10 +412,18 @@ public class RobotContainer {
         () -> -controller.getLeftY(),
         () -> -controller.getLeftX(),
         () -> AimHelper.presetHeading(heading2026BlueDeg, heading2026RedDeg, alliance()),
-        () -> shootHeld)
+        () -> shootHeld) // x-lock while shooting; the left stick breaks it
         .alongWith(
             shooter.spinAt(
-                () -> AimHelper.shooterRpmForDistance(distanceMeters, shotTrimRpm.get())));
+                () -> AimHelper.shooterRpmForDistance(distanceMeters, shotTrimRpm.get())))
+        // Lights up the dashboard's Aim card too.
+        .beforeStarting(
+            () -> {
+              Logger.recordOutput("Aim/Active", true);
+              Logger.recordOutput("Aim/Mode", "PRESET");
+              Logger.recordOutput("Aim/DistanceMeters", distanceMeters);
+            })
+        .finallyDo(() -> Logger.recordOutput("Aim/Active", false));
   }
 
   /** Called every loop, before the commands run. */

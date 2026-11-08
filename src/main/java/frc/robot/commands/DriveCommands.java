@@ -159,8 +159,14 @@ public class DriveCommands {
           double headingError = targetHeading.minus(drive.getRotation()).getRadians();
           Logger.recordOutput("Aim/TargetHeadingDeg", targetHeading.getDegrees());
           Logger.recordOutput("Aim/ActualHeadingDeg", drive.getRotation().getDegrees());
+          boolean locked = Math.abs(headingError) < ALLOWABLE_ERROR_MARGIN_FOR_AIMING;
+          Logger.recordOutput("Aim/Locked", locked);
+          drive.setAimLocked(locked);
+          // For the dashboard's Aim card: how far off we are (+ = target is to the left,
+          // counter-clockwise) and how close counts as locked.
+          Logger.recordOutput("Aim/ErrorDeg", Math.toDegrees(headingError));
           Logger.recordOutput(
-              "Aim/Locked", Math.abs(headingError) < ALLOWABLE_ERROR_MARGIN_FOR_AIMING);
+              "Aim/LockToleranceDeg", Math.toDegrees(ALLOWABLE_ERROR_MARGIN_FOR_AIMING));
 
           // Convert to field relative speeds & send command
           ChassisSpeeds speeds = new ChassisSpeeds(
@@ -173,11 +179,13 @@ public class DriveCommands {
           // Handle x-lock in a smart way, so that the robot doesn't
           // undershoot its goal angle before x-locking (resulting
           // in inaccurate aiming for example). Only xlock when we're
-          // fully aimed.
+          // fully aimed. The driver can always break out: pushing the left stick
+          // (past the dead zone) skips the x-lock, so a defender can't pin us.
           boolean wantsXLock = xLockRequested.get() == true;
           double error = angleController.getPositionError();
           boolean closeEnough = Math.abs(error) < ALLOWABLE_ERROR_MARGIN_FOR_AIMING;
-          if (wantsXLock && closeEnough) {
+          boolean driverMoving = linearVelocity.getNorm() > 0.0; // 0 inside the dead zone
+          if (wantsXLock && closeEnough && !driverMoving) {
             Logger.recordOutput("Aim/XLocked", true);
             drive.stopWithX();
           } else {
@@ -197,11 +205,17 @@ public class DriveCommands {
             () -> {
               angleController.reset(drive.getRotation().getRadians());
               Logger.recordOutput("Aim/Locked", false);
+              drive.setAimLocked(false);
             })
 
         // Commands may be cancelled before another drive command gets a chance to
         // publish.
-        .finallyDo(() -> Logger.recordOutput("Aim/Locked", false));
+        .finallyDo(
+            () -> {
+              Logger.recordOutput("Aim/Locked", false);
+              Logger.recordOutput("Aim/XLocked", false);
+              drive.setAimLocked(false);
+            });
   }
 
   /**
@@ -227,8 +241,9 @@ public class DriveCommands {
    * (the shooter) toward the target. In our alliance zone the target is our hub (SHOOT).
    * Anywhere else it's our wall (PASS). The math and the decision live in AimHelper.
    *
-   * <p>While {@code shooting} is true and we're aimed at the hub, the wheels x-lock so nobody
-   * can push us off target (like 2026). Passes don't x-lock.
+   * <p>While {@code shooting} is true and we're aimed at the hub, the wheels x-lock so we're hard
+   * to push off target (like 2026). Passes don't x-lock. Pushing the left stick always breaks
+   * the x-lock, so the driver can escape a defender.
    */
   public static Command autoAim(
       Drive drive, DoubleSupplier xSupplier, DoubleSupplier ySupplier, BooleanSupplier shooting) {
@@ -243,6 +258,7 @@ public class DriveCommands {
               Logger.recordOutput("Aim/DistanceMeters", AimHelper.aimDistance(pose, alliance));
               return AimHelper.aimHeading(pose, alliance);
             },
+            // X-lock only while shooting at the hub (not while passing).
             () ->
                 shooting.getAsBoolean()
                     && AimHelper.aimMode(

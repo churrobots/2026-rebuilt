@@ -229,6 +229,20 @@ public class Drive extends SubsystemBase {
     runVelocity(new ChassisSpeeds());
   }
 
+  // True while an aiming command has the robot facing its target. Set by
+  // DriveCommands.joystickDriveAtAngle; used to buzz the controller when we lock on.
+  private boolean aimLocked = false;
+
+  /** Aiming commands call this every loop with whether we're on target. */
+  public void setAimLocked(boolean locked) {
+    aimLocked = locked;
+  }
+
+  /** True while an aiming command has the robot facing its target. */
+  public boolean isAimLocked() {
+    return aimLocked;
+  }
+
   /**
    * Stops the drive and turns the modules to an X arrangement to resist movement.
    * The modules will

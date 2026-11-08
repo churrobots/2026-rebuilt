@@ -48,6 +48,29 @@ const SHOOTER_DRAW_SLOWDOWN = 0.002; // drawn rad/sec per RPM
 // Auto-aim (DriveCommands.autoAim): the Field card draws the aim line from these.
 const AIM_ACTIVE_TOPIC = "/AdvantageKit/RealOutputs/Aim/Active";
 const AIM_LOCKED_TOPIC = "/AdvantageKit/RealOutputs/Aim/Locked";
+// The Aim card (lock-on display) also uses these, from DriveCommands.joystickDriveAtAngle.
+const AIM_ERROR_TOPIC = "/AdvantageKit/RealOutputs/Aim/ErrorDeg"; // + = target is to the left
+const AIM_TOLERANCE_TOPIC = "/AdvantageKit/RealOutputs/Aim/LockToleranceDeg";
+const AIM_MODE_TOPIC = "/AdvantageKit/RealOutputs/Aim/Mode"; // SHOOT, PASS, or PRESET
+const AIM_DISTANCE_TOPIC = "/AdvantageKit/RealOutputs/Aim/DistanceMeters";
+// True while the wheels are in an X (aimed + shooting, and the left stick isn't pushed).
+const AIM_XLOCK_TOPIC = "/AdvantageKit/RealOutputs/Aim/XLocked";
+// How hard the robot is buzzing the driver's controller (0 = off, 1 = full), from rumble() in
+// RobotContainer. In sim, nothing sends the buzz back to the controller, so the Aim card buzzes
+// it from the browser (Chrome can buzz Xbox controllers) and flashes a BUZZ badge.
+const RUMBLE_TOPIC = "/AdvantageKit/RealOutputs/Controller/Rumble";
+// Longest a browser buzz can last if the "stop" message never arrives.
+const RUMBLE_MAX_MS = 1500;
+// The Aim card's "Test buzz" button: same feel as the aim-lock buzz.
+const AIM_TEST_BUZZ_STRENGTH = 0.8;
+const AIM_TEST_BUZZ_MS = 500;
+// How quickly the shift lights follow the real value (bigger = snappier). Smooths out jitter.
+const AIM_SMOOTHING_PER_SEC = 14;
+// The Aim card's "shift lights" (like an F1 steering wheel): this many lights, filling in from
+// both ends toward the middle as the aim gets closer. Use an odd number so there's a middle one.
+const SHIFT_LIGHT_COUNT = 15;
+// Degrees off where the lights are about half full. Smaller = lights fill in later.
+const SHIFT_LIGHT_HALF_DEG = 15;
 // Where the intake sits on the robot, in meters (from last year's robot drawing in
 // PathPlanner's settings.json on main): centered 0.58 m in front, 0.8 m wide, 0.29 m deep.
 const INTAKE = { centerX: 0.58, width: 0.8, depth: 0.29 };
@@ -211,6 +234,28 @@ export class CustomDashboard extends HTMLElement {
             </div>
             <p class="shooter-note">Wheels in the drawing spin slowed down so you can see them.</p>
           </section>
+          <section class="card" aria-labelledby="aim-heading">
+            <div class="card-heading">
+              <div><p class="eyebrow">Driver assist</p><h1 id="aim-heading">Aim</h1></div>
+              <div class="aim-lights">
+                <output class="status-light aim-buzz" hidden>📳 BUZZ</output>
+                <output class="status-light aim-xlock" hidden title="Wheels locked in an X. Push the left stick to break out.">✕ X-LOCK</output>
+                <output class="status-light aim-state">STANDBY</output>
+              </div>
+            </div>
+            <div class="shift-lights" data-state="STANDBY" aria-hidden="true">${'<span class="shift-light"></span>'.repeat(SHIFT_LIGHT_COUNT)}</div>
+            <output class="aim-word" data-state="STANDBY">STANDBY</output>
+            <div class="aim-stats">
+              <div><p class="eyebrow">Off by</p><output class="big-number aim-error">—</output></div>
+              <div><p class="eyebrow">Distance</p><output class="big-number aim-distance">—</output></div>
+              <div><p class="eyebrow">Mode</p><output class="big-number aim-mode">—</output></div>
+            </div>
+            <div class="buzz-test">
+              <button class="buzz-test-button" type="button">Test buzz</button>
+              <p class="buzz-info"></p>
+            </div>
+            <p class="aim-help">Hold A (or Y/X/B) to aim. The lights fill in toward the middle as you get closer. All green = locked. Flashing green (and the whole screen edge) = flywheel ready too, so SHOOT! While shooting (RT), the wheels X-LOCK once aimed. Push the left stick to break out.</p>
+          </section>
           <section class="card" aria-labelledby="spindexer-heading">
             <div class="card-heading">
               <div><p class="eyebrow">Mechanism</p><h1 id="spindexer-heading">Spindexer</h1></div>
@@ -253,7 +298,8 @@ export class CustomDashboard extends HTMLElement {
             </div>
             <output class="copy-status" aria-live="polite"></output>
           </section>
-        </main>`;
+        </main>
+        <div class="aim-glow" data-state="STANDBY" aria-hidden="true"></div>`;
     }
     if (this.#core && !this.#started) this.#start(this.#core);
   }
@@ -285,6 +331,7 @@ export class CustomDashboard extends HTMLElement {
     this.#startIntakeCard(core);
     this.#startSpindexerCard(core);
     this.#startShooterCard(core);
+    this.#startAimCard(core);
     this.#trackVision(core);
     this.#startCopyCard(core);
     this.#startAutoCard(core);
@@ -746,6 +793,90 @@ export class CustomDashboard extends HTMLElement {
    * Shows the spindexer from above: a disc that turns with its MEASURED position
    * (so it lags or stops if the motor does), plus volts, RPM, and what it's doing.
    */
+  /**
+   * The Aim card: F1-style "shift lights" that fill in as the aim gets closer, plus a glow
+   * around the whole screen so the driver can see it out of the corner of their eye. Only shows
+   * things; aiming itself is done by DriveCommands on the robot.
+   */
+  #startAimCard(core) {
+    const root = this.shadowRoot;
+    const lightsBar = root.querySelector(".shift-lights");
+    const lights = [...root.querySelectorAll(".shift-light")];
+    const word = root.querySelector(".aim-word");
+    const glow = root.querySelector(".aim-glow");
+    const stateLight = root.querySelector(".aim-state");
+    const errorText = root.querySelector(".aim-error");
+    const distanceText = root.querySelector(".aim-distance");
+    const modeText = root.querySelector(".aim-mode");
+    const buzzBadge = root.querySelector(".aim-buzz");
+    const xLockBadge = root.querySelector(".aim-xlock");
+    const buzzInfo = root.querySelector(".buzz-info");
+    const buzzButton = root.querySelector(".buzz-test-button");
+    // Test buzz: skips the robot completely, so it shows whether the BROWSER can buzz.
+    const onBuzzTest = () => buzzController(AIM_TEST_BUZZ_STRENGTH, AIM_TEST_BUZZ_MS);
+    buzzButton.addEventListener("click", onBuzzTest);
+    const shown = { errorDeg: 0 }; // smoothed, so the lights don't flicker
+    let lastMs = performance.now();
+    let frame = 0;
+
+    const render = () => {
+      const now = performance.now();
+      const seconds = Math.min(0.1, (now - lastMs) / 1000);
+      lastMs = now;
+
+      const active = core.getTopic(AIM_ACTIVE_TOPIC)?.value === true;
+      const locked = active && core.getTopic(AIM_LOCKED_TOPIC)?.value === true;
+      const ready = core.getTopic(SHOOTER_READY_TOPIC)?.value === true;
+      const errorDeg = Number(core.getTopic(AIM_ERROR_TOPIC)?.value);
+      const toleranceDeg = Number(core.getTopic(AIM_TOLERANCE_TOPIC)?.value) || 3.4;
+      const distance = Number(core.getTopic(AIM_DISTANCE_TOPIC)?.value);
+      const mode = String(core.getTopic(AIM_MODE_TOPIC)?.value ?? "");
+
+      // Ease toward the real value so the lights look smooth. Start far off (90°) when idle.
+      const goal = active && Number.isFinite(errorDeg) ? Math.abs(errorDeg) : 90;
+      shown.errorDeg += (goal - shown.errorDeg) * Math.min(1, AIM_SMOOTHING_PER_SEC * seconds);
+
+      const state = !active ? "STANDBY" : !locked ? "TRACKING" : ready ? "FIRE" : "LOCKED";
+      stateLight.textContent = state === "FIRE" ? "LOCKED · FIRE" : state;
+      stateLight.classList.toggle("on", locked);
+      stateLight.classList.toggle("tracking", state === "TRACKING");
+      errorText.textContent = active && Number.isFinite(errorDeg) ? `${Math.abs(errorDeg).toFixed(1)}°` : "—";
+      distanceText.textContent = active && Number.isFinite(distance) ? `${(distance * 3.28084).toFixed(1)} ft` : "—";
+      modeText.textContent = active && mode ? mode : "—";
+      buzzBadge.hidden = !(Number(core.getTopic(RUMBLE_TOPIC)?.value) > 0);
+      xLockBadge.hidden = !(active && core.getTopic(AIM_XLOCK_TOPIC)?.value === true);
+      const info = `${describeBuzzSupport()}${buzzStatus ? ` · ${buzzStatus}` : ""}`;
+      if (buzzInfo.textContent !== info) buzzInfo.textContent = info;
+
+      // The CSS picks colors and flashing from data-state (see .shift-lights and .aim-glow).
+      const lit = shiftLightsLit(state, shown.errorDeg, toleranceDeg);
+      lights.forEach((light, i) => {
+        const fromEnd = Math.min(i, SHIFT_LIGHT_COUNT - 1 - i); // 0 = outermost
+        light.classList.toggle("lit", fromEnd < lit);
+        light.dataset.zone = shiftLightZone(fromEnd);
+      });
+      for (const element of [lightsBar, word, glow]) {
+        if (element.dataset.state !== state) element.dataset.state = state;
+      }
+      const wordText = { STANDBY: "STANDBY", TRACKING: "TRACKING", LOCKED: "LOCKED", FIRE: "FIRE!" }[state];
+      if (word.textContent !== wordText) word.textContent = wordText;
+      frame = requestAnimationFrame(render);
+    };
+    frame = requestAnimationFrame(render);
+
+    /** @param {CustomEvent<DashboardTopic>} event */
+    const rumbleListener = ({ detail: topic }) => {
+      if (topic.name === RUMBLE_TOPIC) buzzController(Number(topic.value) || 0);
+    };
+    core.addEventListener("topic", rumbleListener);
+    this.#cleanup.push(() => {
+      cancelAnimationFrame(frame);
+      core.removeEventListener("topic", rumbleListener);
+      buzzButton.removeEventListener("click", onBuzzTest);
+      buzzController(0);
+    });
+  }
+
   #startSpindexerCard(core) {
     const root = this.shadowRoot;
     const canvas = root.querySelector(".spindexer-disc");
@@ -1397,6 +1528,101 @@ function drawShooter(canvas, { measured, target, ready, feederRpm, wheel }) {
   context.fillText("0", gauge.x, gauge.y + gauge.h + 14);
   context.textAlign = "right";
   context.fillText(`${SHOOTER_GAUGE_MAX_RPM} RPM`, gauge.x + gauge.w, gauge.y + gauge.h + 14);
+}
+
+/**
+ * How many shift lights to light on EACH side. Far off = just the outer one; closer = more,
+ * filling toward the middle; locked = all of them. Uses the same squished scale as before
+ * (SHIFT_LIGHT_HALF_DEG off is about half full) so small misses still show progress.
+ */
+function shiftLightsLit(state, errorDeg, toleranceDeg) {
+  const perSide = Math.ceil(SHIFT_LIGHT_COUNT / 2); // includes the middle light
+  if (state === "STANDBY") return 0;
+  if (state === "LOCKED" || state === "FIRE") return perSide;
+  const closeness = 1 - (2 / Math.PI) * Math.atan(Math.max(0, errorDeg - toleranceDeg) / SHIFT_LIGHT_HALF_DEG);
+  // Never light the middle one until we're really locked.
+  return Math.max(1, Math.min(perSide - 1, Math.round(closeness * (perSide - 1))));
+}
+
+/** Color zone by how far a light is from the end: red outside, then yellow, then green inside. */
+function shiftLightZone(fromEnd) {
+  const perSide = Math.ceil(SHIFT_LIGHT_COUNT / 2);
+  const fraction = fromEnd / (perSide - 1); // 0 = outermost, 1 = middle
+  return fraction < 0.35 ? "red" : fraction < 0.75 ? "yellow" : "green";
+}
+
+/** What happened the last time we tried to buzz, shown on the Aim card. */
+let buzzStatus = "";
+
+/**
+ * Buzzes the first plugged-in controller (the one the Sim Driver Station uses as port 0) from
+ * the browser, or stops it when strength is 0. Browsers do this differently, so it tries:
+ *   1. vibrationActuator.playEffect("dual-rumble") — Chrome and Edge, and newer Safari
+ *   2. vibrationActuator.playEffect("trigger-rumble") — if that's the only effect listed
+ *   3. hapticActuators[0].pulse() — older Firefox
+ * The result goes in buzzStatus so the Aim card can show it.
+ */
+function buzzController(strength, durationMs = RUMBLE_MAX_MS) {
+  const pad = [...(navigator.getGamepads?.() ?? [])].find((gamepad) => gamepad?.connected);
+  if (!pad) {
+    buzzStatus = "No controller found. Press a button on it first.";
+    return;
+  }
+  const magnitude = Math.max(0, Math.min(1, strength));
+  const actuator = pad.vibrationActuator;
+  const haptic = pad.hapticActuators?.[0];
+  try {
+    if (actuator?.playEffect) {
+      if (magnitude === 0) {
+        actuator.reset?.()?.catch?.(() => {});
+        return;
+      }
+      // Newer Chrome lists the effects this controller can do.
+      const effects = Array.isArray(actuator.effects) ? actuator.effects : [];
+      const effect =
+        effects.length && !effects.includes("dual-rumble") && effects.includes("trigger-rumble")
+          ? "trigger-rumble"
+          : "dual-rumble";
+      const params =
+        effect === "trigger-rumble"
+          ? { duration: durationMs, leftTrigger: magnitude, rightTrigger: magnitude }
+          : { duration: durationMs, strongMagnitude: magnitude, weakMagnitude: magnitude };
+      buzzStatus = `Buzzing (${effect})…`;
+      Promise.resolve(actuator.playEffect(effect, params))
+        .then((result) => {
+          buzzStatus =
+            result === "complete" || result === "preempted"
+              ? `✓ Buzz worked (${effect})`
+              : `Browser said "${result}" (${effect})`;
+        })
+        .catch((error) => {
+          buzzStatus = `✗ Browser refused to buzz: ${error?.message ?? error}`;
+        });
+      return;
+    }
+    if (haptic?.pulse) {
+      if (magnitude > 0) haptic.pulse(magnitude, durationMs);
+      buzzStatus = "Buzzing (hapticActuators)…";
+      return;
+    }
+    buzzStatus = "✗ This browser can't buzz controllers. Try Chrome or Edge.";
+  } catch (error) {
+    buzzStatus = `✗ Buzz failed: ${error?.message ?? error}`;
+  }
+}
+
+/** One line about the controller: its name, and whether this browser can buzz it. */
+function describeBuzzSupport() {
+  const pad = [...(navigator.getGamepads?.() ?? [])].find((gamepad) => gamepad?.connected);
+  if (!pad) return "No controller found. Plug it in and press a button.";
+  const name = pad.id.length > 40 ? `${pad.id.slice(0, 40)}…` : pad.id;
+  const actuator = pad.vibrationActuator;
+  if (actuator?.playEffect) {
+    const effects = Array.isArray(actuator.effects) ? ` [${actuator.effects.join(", ")}]` : "";
+    return `${name}: can buzz${effects}`;
+  }
+  if (pad.hapticActuators?.length) return `${name}: can buzz (hapticActuators)`;
+  return `${name}: this browser can't buzz it. Try Chrome or Edge.`;
 }
 
 /**

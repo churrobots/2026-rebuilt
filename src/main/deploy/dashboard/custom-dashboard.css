@@ -299,6 +299,162 @@ h2 {
   font-size: 0.72rem;
   line-height: 1.35;
 }
+/* Aim card: F1-style shift lights. The JS sets data-state to STANDBY, TRACKING, LOCKED, or FIRE. */
+.shift-lights {
+  margin-top: 14px;
+  padding: 10px;
+  display: flex;
+  gap: 5px;
+  background: #07090d;
+  border-radius: 10px;
+}
+.shift-light {
+  flex: 1;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #1c222c;
+  transition: background 0.08s;
+}
+.shift-light.lit[data-zone="red"] {
+  background: #ef4444;
+  box-shadow: 0 0 8px #ef4444;
+}
+.shift-light.lit[data-zone="yellow"] {
+  background: #facc15;
+  box-shadow: 0 0 8px #facc15;
+}
+.shift-light.lit[data-zone="green"] {
+  background: #4ade80;
+  box-shadow: 0 0 8px #4ade80;
+}
+/* Locked: every light green, no matter its zone. */
+.shift-lights[data-state="LOCKED"] .shift-light.lit,
+.shift-lights[data-state="FIRE"] .shift-light.lit {
+  background: #4ade80;
+  box-shadow: 0 0 10px #4ade80;
+}
+/* FIRE: the whole bar flashes, like shift lights telling you to shift NOW. */
+.shift-lights[data-state="FIRE"] {
+  animation: aim-flash 0.24s steps(1) infinite;
+}
+@keyframes aim-flash {
+  50% {
+    opacity: 0.15;
+  }
+}
+.aim-word {
+  display: block;
+  margin-top: 10px;
+  text-align: center;
+  font-size: 2.4rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  color: #4b5563;
+}
+.aim-word[data-state="TRACKING"] {
+  color: #facc15;
+}
+.aim-word[data-state="LOCKED"] {
+  color: #4ade80;
+}
+.aim-word[data-state="FIRE"] {
+  color: #4ade80;
+  animation: aim-flash 0.24s steps(1) infinite;
+}
+/* A glow around the whole screen, for the driver's peripheral vision. It sits outside <main>
+   so the fit-to-window scaling doesn't shrink it, and it never blocks clicks. */
+.aim-glow {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  pointer-events: none;
+  transition: box-shadow 0.15s;
+}
+.aim-glow[data-state="TRACKING"] {
+  box-shadow: inset 0 0 0 6px #facc15aa;
+}
+.aim-glow[data-state="LOCKED"] {
+  box-shadow:
+    inset 0 0 0 14px #4ade80,
+    inset 0 0 60px 20px #4ade8066;
+}
+.aim-glow[data-state="FIRE"] {
+  box-shadow:
+    inset 0 0 0 18px #4ade80,
+    inset 0 0 90px 30px #4ade8099;
+  animation: aim-flash 0.24s steps(1) infinite;
+  transition: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .shift-lights[data-state="FIRE"],
+  .aim-word[data-state="FIRE"],
+  .aim-glow[data-state="FIRE"] {
+    animation-duration: 0.6s;
+  }
+}
+.aim-stats {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+.aim-stats .big-number {
+  font-size: 1.6rem;
+}
+.buzz-test {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.buzz-test-button {
+  flex: none;
+  padding: 6px 12px;
+  border: 1px solid #a855f7;
+  border-radius: 8px;
+  background: #2a1f3d;
+  color: #edf2f7;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.buzz-info {
+  margin: 0;
+  color: #93a0b4;
+  font-size: 0.7rem;
+  overflow-wrap: anywhere;
+}
+.aim-help {
+  margin: 8px 0 0;
+  color: #6b7686;
+  font-size: 0.7rem;
+}
+.aim-lights {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.status-light.aim-buzz {
+  background: #a855f7;
+  color: #fff;
+  animation: aim-buzz-shake 0.1s linear infinite alternate;
+}
+.status-light.aim-xlock {
+  background: #0ea5e9;
+  color: #fff;
+}
+.status-light.aim-xlock[hidden],
+.status-light.aim-buzz[hidden] {
+  display: none;
+}
+@keyframes aim-buzz-shake {
+  from { transform: translateX(-1.5px); }
+  to { transform: translateX(1.5px); }
+}
+.status-light.tracking {
+  background: #facc15;
+  color: #1a1a1a;
+}
 .shooter-note {
   margin: 8px 0 0;
   color: #6b7686;
