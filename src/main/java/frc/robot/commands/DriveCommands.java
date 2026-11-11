@@ -233,7 +233,10 @@ public class DriveCommands {
             () ->
                 Math.abs(hubHeading.get().minus(drive.getRotation()).getRadians())
                     < ALLOWABLE_ERROR_MARGIN_FOR_AIMING)
-        .withTimeout(timeoutSeconds);
+        .withTimeout(timeoutSeconds)
+        // Stop the wheels when done. In an auto, the auto owns the drive, so the default
+        // command can't stop them, and the robot would keep slowly turning while it shoots.
+        .finallyDo(drive::stop);
   }
 
   /**
